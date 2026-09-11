@@ -14,6 +14,7 @@ class Order extends Model
     protected $fillable = [
         'order_number',
         'user_id',
+        'address_id',
         'customer_type',
         'business_profile_id',
         'status',
@@ -55,6 +56,11 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function address(): BelongsTo
+    {
+        return $this->belongsTo(Address::class);
+    }
+
     public function businessProfile(): BelongsTo
     {
         return $this->belongsTo(BusinessProfile::class);
@@ -69,8 +75,9 @@ class Order extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
     public function inventoryReservations(): HasMany
-{
-    return $this->hasMany(InventoryReservation::class);
-}
+    {
+        return $this->hasMany(InventoryReservation::class);
+    }
 }
