@@ -89,7 +89,13 @@ export default defineConfigWithVueTs(
             'resources/js/wayfinder/**',
         ],
     },
-    prettier, // Turn off all rules that might conflict with Prettier
+    {
+        files: ['resources/js/pages/**/*.vue'],
+        rules: {
+            'import/order': 'off',
+        },
+    },
+    prettier,
     {
         plugins: {
             '@stylistic': stylistic,
