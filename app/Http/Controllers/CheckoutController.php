@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Address;
 use App\Services\CartService;
 use App\Services\CheckoutService;
 use App\Services\OrderService;
@@ -20,20 +21,22 @@ class CheckoutController extends Controller
     ) {
     }
 
-    /**
-     * Show checkout page.
-     */
     public function show(Request $request): Response|RedirectResponse
     {
         $user = $request->user();
-
         abort_unless($user, 401);
 
         $cart = $this->cartService->getCartForUser($user->id);
+        $addresses = $user->addresses()
+            ->orderByDesc('is_default')
+            ->orderBy('id')
+            ->get();
 
         if ($cart->items()->count() === 0) {
             return Inertia::render('Checkout', [
                 'cart' => $cart->load('items.product'),
+                'addresses' => $addresses,
+                'selectedAddressId' => null,
                 'changes' => [],
                 'priceChanges' => [],
                 'availabilityChanges' => [],
@@ -46,9 +49,16 @@ class CheckoutController extends Controller
         }
 
         $result = $this->checkoutService->prepare($cart);
+        $selectedAddressId = old(
+            'address_id',
+            $addresses->firstWhere('is_default', true)?->id
+                ?? $addresses->first()?->id
+        );
 
         return Inertia::render('Checkout', [
             'cart' => $result['cart'],
+            'addresses' => $addresses,
+            'selectedAddressId' => $selectedAddressId,
             'changes' => $result['changes'],
             'priceChanges' => $result['price_changes'],
             'availabilityChanges' => $result['availability_changes'],
@@ -59,21 +69,30 @@ class CheckoutController extends Controller
         ]);
     }
 
-    /**
-     * Confirm checkout changes and create the order.
-     */
     public function confirm(Request $request): RedirectResponse
     {
         $user = $request->user();
-
         abort_unless($user, 401);
+
+        $validated = $request->validate([
+            'address_id' => ['required', 'integer'],
+        ]);
+
+        $address = Address::query()
+            ->where('user_id', $user->id)
+            ->find($validated['address_id']);
+
+        if (! $address) {
+            return redirect()
+                ->route('checkout.show')
+                ->withErrors([
+                    'address_id' => 'لطفاً یکی از آدرس‌های خود را انتخاب کنید.',
+                ]);
+        }
 
         $cart = $this->cartService->getCartForUser($user->id);
 
         try {
-            /*
-             * First confirm the latest price and availability changes.
-             */
             $result = $this->checkoutService->confirmPriceChanges($cart);
         } catch (RuntimeException $e) {
             return redirect()
@@ -81,9 +100,6 @@ class CheckoutController extends Controller
                 ->with('error', $e->getMessage());
         }
 
-        /*
-         * If nothing payable remains, do not create an order.
-         */
         if (! $result['payment_allowed']) {
             return redirect()
                 ->route('checkout.show')
@@ -94,49 +110,29 @@ class CheckoutController extends Controller
                 );
         }
 
-        /*
-         * Reload the cart after the checkout confirmation because
-         * unavailable items may have been removed.
-         */
         $cart = $this->cartService->getCartForUser($user->id);
 
         try {
-            /*
-             * Convert the confirmed cart into a real order and
-             * create inventory reservations.
-             */
-            $order = $this->orderService->createFromCart($cart);
+            $order = $this->orderService->createFromCart($cart, $address);
         } catch (RuntimeException $e) {
             return redirect()
                 ->route('checkout.show')
                 ->with('error', $e->getMessage());
         }
 
-        /*
-         * The order has been created successfully.
-         * Payment will be created from the order page.
-         */
         return redirect()
             ->route('orders.show', [
                 'orderNumber' => $order->order_number,
             ])
-            ->with(
-                'success',
-                'سفارش شما با موفقیت ایجاد شد.'
-            );
+            ->with('success', 'سفارش شما با موفقیت ایجاد شد.');
     }
 
-    /**
-     * Reject checkout changes.
-     */
     public function reject(Request $request): RedirectResponse
     {
         $user = $request->user();
-
         abort_unless($user, 401);
 
         $cart = $this->cartService->getCartForUser($user->id);
-
         $this->checkoutService->rejectPriceChanges($cart);
 
         return redirect()
