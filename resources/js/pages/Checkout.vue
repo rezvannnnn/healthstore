@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
 import { router } from '@inertiajs/vue3'
+import { computed, ref } from 'vue'
 
 interface Product {
     id: number
