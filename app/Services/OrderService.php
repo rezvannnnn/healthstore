@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Address;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -18,16 +19,9 @@ class OrderService
     ) {
     }
 
-    /**
-     * Convert an active cart into an order and reserve inventory.
-     *
-     * Physical inventory is NOT reduced at this stage.
-     * InventoryReservationService is responsible for creating
-     * the reservation records.
-     */
-    public function createFromCart(Cart $cart): Order
+    public function createFromCart(Cart $cart, ?Address $address = null): Order
     {
-        return DB::transaction(function () use ($cart) {
+        return DB::transaction(function () use ($cart, $address) {
             $cart->load('items.product');
 
             if ($cart->items->isEmpty()) {
@@ -42,9 +36,12 @@ class OrderService
                 );
             }
 
-            /*
-             * Validate every cart item before creating the order.
-             */
+            if ($address && (int) $address->user_id !== (int) $cart->user_id) {
+                throw new RuntimeException(
+                    'آدرس انتخاب‌شده متعلق به این کاربر نیست.'
+                );
+            }
+
             foreach ($cart->items as $item) {
                 if (! $item->product) {
                     throw new RuntimeException(
@@ -70,12 +67,10 @@ class OrderService
                 );
             }
 
-            /*
-             * Create the order.
-             */
             $order = Order::create([
                 'order_number' => $this->generateOrderNumber(),
                 'user_id' => $cart->user_id,
+                'address_id' => $address?->id,
                 'customer_type' => 'b2c',
                 'business_profile_id' => null,
                 'status' => 'pending',
@@ -85,12 +80,12 @@ class OrderService
                 'shipping_amount' => 0,
                 'total_amount' => $subtotal,
                 'currency' => 'IRR',
-                'recipient_name' => null,
-                'recipient_phone' => null,
-                'province' => null,
-                'city' => null,
-                'shipping_address' => null,
-                'postal_code' => null,
+                'recipient_name' => $address?->recipient_name,
+                'recipient_phone' => $address?->phone,
+                'province' => $address?->province,
+                'city' => $address?->city,
+                'shipping_address' => $address?->address,
+                'postal_code' => $address?->postal_code,
                 'customer_note' => null,
                 'admin_note' => null,
                 'confirmed_at' => null,
@@ -100,10 +95,6 @@ class OrderService
                 'cancelled_at' => null,
             ]);
 
-            /*
-             * Create order items and delegate all inventory
-             * reservation logic to InventoryReservationService.
-             */
             foreach ($cart->items as $item) {
                 $quantity = (int) $item->quantity;
                 $unitPrice = (float) $item->unit_price;
@@ -120,14 +111,6 @@ class OrderService
                     'total_amount' => $lineTotal,
                 ]);
 
-                /*
-                 * The reservation service handles:
-                 * - inventory row locking
-                 * - existing reservations
-                 * - multi-warehouse allocation
-                 * - expiration
-                 * - rollback on insufficient stock
-                 */
                 $this->reservationService->reserve(
                     $order,
                     $item->product,
@@ -135,9 +118,6 @@ class OrderService
                 );
             }
 
-            /*
-             * Cart has now been converted into an order.
-             */
             $cart->update([
                 'status' => 'converted',
             ]);
@@ -146,16 +126,13 @@ class OrderService
                 'items',
                 'payments',
                 'inventoryReservations',
+                'address',
             ]);
 
             return $order;
         });
     }
 
-    /**
-     * Cancel a customer's own unpaid order and release
-     * all active inventory reservations.
-     */
     public function cancel(Order $order): bool
     {
         return DB::transaction(function () use ($order) {
@@ -165,48 +142,24 @@ class OrderService
                 ->first();
 
             if (! $order) {
-                throw new RuntimeException(
-                    'سفارش پیدا نشد.'
-                );
+                throw new RuntimeException('سفارش پیدا نشد.');
             }
 
-            /*
-             * A paid order must not be cancelled through
-             * the customer cancellation flow.
-             */
             if (
                 $order->status === 'paid'
                 || $order->payment_status === 'paid'
             ) {
-                throw new RuntimeException(
-                    'سفارش پرداخت‌شده قابل لغو نیست.'
-                );
+                throw new RuntimeException('سفارش پرداخت‌شده قابل لغو نیست.');
             }
 
-            /*
-             * A cancelled order cannot be cancelled again.
-             */
             if ($order->status === 'cancelled') {
-                throw new RuntimeException(
-                    'این سفارش قبلاً لغو شده است.'
-                );
+                throw new RuntimeException('این سفارش قبلاً لغو شده است.');
             }
 
-            /*
-             * Only pending orders can be cancelled by the customer.
-             */
             if ($order->status !== 'pending') {
-                throw new RuntimeException(
-                    'این سفارش در وضعیت فعلی قابل لغو نیست.'
-                );
+                throw new RuntimeException('این سفارش در وضعیت فعلی قابل لغو نیست.');
             }
 
-            /*
-             * Release all active reservations.
-             *
-             * Physical inventory does not change because reservation
-             * never reduces physical inventory.
-             */
             $reservations = $order->inventoryReservations()
                 ->where('status', 'active')
                 ->get();
@@ -219,9 +172,6 @@ class OrderService
                 }
             }
 
-            /*
-             * Mark the order as cancelled.
-             */
             $order->update([
                 'status' => 'cancelled',
                 'cancelled_at' => now(),
@@ -231,80 +181,39 @@ class OrderService
         });
     }
 
-    /**
-     * Change order status through the allowed lifecycle.
-     *
-     * Allowed transitions:
-     *
-     * pending    -> cancelled
-     * pending    -> paid
-     * paid       -> processing
-     * processing -> shipped
-     * shipped    -> delivered
-     *
-     * The paid transition normally happens through PaymentService,
-     * but it is included here so the lifecycle has a single definition.
-     */
-    public function setStatus(
-        Order $order,
-        string $newStatus
-    ): bool {
-        return DB::transaction(function () use (
-            $order,
-            $newStatus
-        ) {
+    public function setStatus(Order $order, string $newStatus): bool
+    {
+        return DB::transaction(function () use ($order, $newStatus) {
             $order = Order::query()
                 ->whereKey($order->id)
                 ->lockForUpdate()
                 ->first();
 
             if (! $order) {
-                throw new RuntimeException(
-                    'سفارش پیدا نشد.'
-                );
+                throw new RuntimeException('سفارش پیدا نشد.');
             }
 
             $currentStatus = $order->status;
 
             if ($currentStatus === $newStatus) {
-                throw new RuntimeException(
-                    'سفارش از قبل در همین وضعیت قرار دارد.'
-                );
+                throw new RuntimeException('سفارش از قبل در همین وضعیت قرار دارد.');
             }
 
             $allowedTransitions = [
-                'pending' => [
-                    'paid',
-                    'cancelled',
-                ],
-                'paid' => [
-                    'processing',
-                ],
-                'processing' => [
-                    'shipped',
-                ],
-                'shipped' => [
-                    'delivered',
-                ],
+                'pending' => ['paid', 'cancelled'],
+                'paid' => ['processing'],
+                'processing' => ['shipped'],
+                'shipped' => ['delivered'],
             ];
 
-            $allowedStatuses =
-                $allowedTransitions[$currentStatus] ?? [];
+            $allowedStatuses = $allowedTransitions[$currentStatus] ?? [];
 
-            if (! in_array(
-                $newStatus,
-                $allowedStatuses,
-                true
-            )) {
+            if (! in_array($newStatus, $allowedStatuses, true)) {
                 throw new RuntimeException(
                     "تغییر وضعیت سفارش از «{$currentStatus}» به «{$newStatus}» مجاز نیست."
                 );
             }
 
-            /*
-             * A payment status must exist before an order
-             * enters the processing stage.
-             */
             if (
                 $newStatus === 'processing'
                 && $order->payment_status !== 'paid'
@@ -314,11 +223,6 @@ class OrderService
                 );
             }
 
-            /*
-             * The paid state represents a successfully paid order.
-             * PaymentService remains the primary owner of payment
-             * finalization, so keep payment_status synchronized here.
-             */
             if ($newStatus === 'paid') {
                 if ($order->payment_status !== 'paid') {
                     throw new RuntimeException(
@@ -335,36 +239,20 @@ class OrderService
                 return true;
             }
 
-            $updates = [
-                'status' => $newStatus,
-            ];
+            $updates = ['status' => $newStatus];
 
-            /*
-             * Processing begins after successful payment.
-             */
             if ($newStatus === 'processing') {
-                $updates['confirmed_at'] =
-                    $order->confirmed_at ?? now();
+                $updates['confirmed_at'] = $order->confirmed_at ?? now();
             }
 
-            /*
-             * Record the exact shipping timestamp.
-             */
             if ($newStatus === 'shipped') {
                 $updates['shipped_at'] = now();
             }
 
-            /*
-             * Record the exact delivery timestamp.
-             */
             if ($newStatus === 'delivered') {
                 $updates['delivered_at'] = now();
             }
 
-            /*
-             * Cancellation is handled by cancel().
-             * This guard prevents bypassing its reservation logic.
-             */
             if ($newStatus === 'cancelled') {
                 throw new RuntimeException(
                     'برای لغو سفارش از عملیات لغو سفارش استفاده کنید.'
@@ -377,9 +265,6 @@ class OrderService
         });
     }
 
-    /**
-     * Generate a unique order number.
-     */
     protected function generateOrderNumber(): string
     {
         do {
@@ -388,9 +273,7 @@ class OrderService
                 now()->format('YmdHis') .
                 '-' .
                 strtoupper(Str::random(6));
-        } while (
-            Order::where('order_number', $number)->exists()
-        );
+        } while (Order::where('order_number', $number)->exists());
 
         return $number;
     }
