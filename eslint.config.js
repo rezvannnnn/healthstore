@@ -59,7 +59,9 @@ export default defineConfigWithVueTs(
             ],
             'import/consistent-type-specifier-style': [
                 'error',
-                'prefer-top-level',
+                {
+                    style: 'prefer-top-level',
+                },
             ],
         },
     },
@@ -93,6 +95,7 @@ export default defineConfigWithVueTs(
         files: ['resources/js/pages/**/*.vue'],
         rules: {
             'import/order': 'off',
+            '@stylistic/padding-line-between-statements': 'off',
         },
     },
     prettier,
