@@ -38,16 +38,25 @@ class Product extends Model
         'specifications' => 'array',
     ];
 
+    /**
+     * @return BelongsTo<Brand, $this>
+     */
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
     }
 
+    /**
+     * @return BelongsTo<Category, $this>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
+    /**
+     * @return HasMany<ProductImage, $this>
+     */
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
@@ -61,6 +70,9 @@ class Product extends Model
         return $this->hasMany(ProductPrice::class);
     }
 
+    /**
+     * @return HasMany<Inventory, $this>
+     */
     public function inventories(): HasMany
     {
         return $this->hasMany(Inventory::class);
