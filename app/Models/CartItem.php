@@ -27,6 +27,9 @@ class CartItem extends Model
         return $this->belongsTo(Cart::class);
     }
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

@@ -53,6 +53,9 @@ class Product extends Model
         return $this->hasMany(ProductImage::class);
     }
 
+    /**
+     * @return HasMany<ProductPrice, $this>
+     */
     public function prices(): HasMany
     {
         return $this->hasMany(ProductPrice::class);
