@@ -30,7 +30,7 @@ class CartService
     /**
      * Add a product to the cart.
      *
-     * The current product price is stored in unit_price.
+     * The effective price for the resulting quantity is stored in unit_price.
      */
     public function addItem(
         int $userId,
@@ -59,22 +59,22 @@ class CartService
                 );
             }
 
-            $price = $this->getCurrentPrice($product);
-
-            if (! $price) {
-                throw new RuntimeException(
-                    'برای این محصول قیمت فعالی ثبت نشده است.'
-                );
-            }
-
             $cart = $this->getCartForUser($userId);
-
             $item = $cart->items()
                 ->where('product_id', $productId)
                 ->first();
+            $newQuantity = ($item?->quantity ?? 0) + $quantity;
+
+            $price = $this->getCurrentPrice($product, $newQuantity);
+
+            if (! $price) {
+                throw new RuntimeException(
+                    'برای این محصول و تعداد انتخاب‌شده قیمت فعالی ثبت نشده است.'
+                );
+            }
 
             if ($item) {
-                $item->quantity += $quantity;
+                $item->quantity = $newQuantity;
                 $item->unit_price = $price->price;
                 $item->save();
 
@@ -90,14 +90,18 @@ class CartService
     }
 
     /**
-     * Get the current active price of a product.
+     * Get the current active price for the requested quantity.
      */
-    public function getCurrentPrice(Product $product): ?ProductPrice
-    {
+    public function getCurrentPrice(
+        Product $product,
+        int $quantity = 1
+    ): ?ProductPrice {
         $now = now();
+        $quantity = max(1, $quantity);
 
         return $product->prices()
             ->where('is_active', true)
+            ->where('min_quantity', '<=', $quantity)
             ->where(function ($query) use ($now) {
                 $query->whereNull('starts_at')
                     ->orWhere('starts_at', '<=', $now);
@@ -122,7 +126,7 @@ class CartService
         $changes = [];
 
         foreach ($cart->items as $item) {
-            $currentPrice = $this->getCurrentPrice($item->product);
+            $currentPrice = $this->getCurrentPrice($item->product, $item->quantity);
 
             if (! $currentPrice) {
                 $changes[] = [
@@ -168,7 +172,7 @@ class CartService
             $cart->load('items.product');
 
             foreach ($cart->items as $item) {
-                $currentPrice = $this->getCurrentPrice($item->product);
+                $currentPrice = $this->getCurrentPrice($item->product, $item->quantity);
 
                 if ($currentPrice) {
                     $item->update([
@@ -181,10 +185,6 @@ class CartService
 
     /**
      * Calculate the cart subtotal using the currently loaded items.
-     *
-     * This method intentionally does not reload the items relation,
-     * because Checkout needs the product relation to remain loaded
-     * for the Inertia/Vue response.
      */
     public function calculateSubtotal(Cart $cart): float
     {
