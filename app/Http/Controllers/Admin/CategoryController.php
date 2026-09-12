@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -64,7 +65,7 @@ class CategoryController extends Controller
         return to_route('admin.categories.index')->with('success', 'دسته‌بندی با موفقیت ویرایش شد.');
     }
 
-    protected function parentOptions(?Category $category = null)
+    protected function parentOptions(?Category $category = null): Collection
     {
         $query = Category::query()->where('is_active', true)->orderBy('name');
 
