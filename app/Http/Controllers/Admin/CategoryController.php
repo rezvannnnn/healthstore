@@ -69,7 +69,7 @@ class CategoryController extends Controller
         $query = Category::query()->where('is_active', true)->orderBy('name');
 
         if ($category) {
-            $query->whereKeyNot($category->id);
+            $query->where('id', '!=', $category->id);
         }
 
         return $query->get(['id', 'name']);
