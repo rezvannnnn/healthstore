@@ -1,0 +1,152 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Category;
+use App\Models\Product;
+use App\Services\CartService;
+use App\Services\InventoryService;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class ProductController extends Controller
+{
+    public function __construct(
+        protected CartService $cartService,
+        protected InventoryService $inventoryService
+    ) {}
+
+    public function index(Request $request): Response
+    {
+        $search = trim((string) $request->query('search', ''));
+        $categorySlug = trim((string) $request->query('category', ''));
+
+        $query = Product::query()
+            ->with(['brand', 'category', 'images'])
+            ->where('is_active', true)
+            ->orderByDesc('is_featured')
+            ->orderBy('sort_order')
+            ->orderByDesc('id');
+
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search) {
+                $builder
+                    ->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('barcode', 'like', "%{$search}%")
+                    ->orWhere('short_description', 'like', "%{$search}%");
+            });
+        }
+
+        if ($categorySlug !== '') {
+            $query->whereHas('category', function ($builder) use ($categorySlug) {
+                $builder->where('slug', $categorySlug);
+            });
+        }
+
+        $paginator = $query->paginate(12)->withQueryString();
+
+        $products = collect($paginator->items())->map(function (Product $product) {
+            $price = $this->cartService->getCurrentPrice($product);
+
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'sku' => $product->sku,
+                'short_description' => $product->short_description,
+                'brand' => $product->brand?->name,
+                'category' => $product->category?->name,
+                'image' => $product->main_image ?: $product->images->firstWhere('is_primary', true)?->image_path ?: $product->images->first()?->image_path,
+                'price' => $price?->price !== null ? (float) $price->price : null,
+                'compare_at_price' => $price?->compare_at_price !== null ? (float) $price->compare_at_price : null,
+                'available' => $this->inventoryService->isAvailable($product),
+            ];
+        })->values()->all();
+
+        $categories = Category::query()
+            ->where('is_active', true)
+            ->whereNull('parent_id')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug']);
+
+        return Inertia::render('Product/Index', [
+            'products' => $products,
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'total' => $paginator->total(),
+                'from' => $paginator->firstItem(),
+                'to' => $paginator->lastItem(),
+            ],
+            'categories' => $categories,
+            'filters' => [
+                'search' => $search,
+                'category' => $categorySlug,
+            ],
+        ]);
+    }
+
+    public function show(Product $product): Response
+    {
+        abort_unless($product->is_active, 404);
+
+        $product->load(['brand', 'category', 'images', 'prices']);
+        $price = $this->cartService->getCurrentPrice($product);
+
+        $relatedProducts = Product::query()
+            ->with(['brand', 'images'])
+            ->where('is_active', true)
+            ->when($product->category_id, fn ($query) => $query->where('category_id', $product->category_id))
+            ->whereKeyNot($product->id)
+            ->orderByDesc('is_featured')
+            ->orderBy('sort_order')
+            ->limit(4)
+            ->get()
+            ->map(function (Product $related) {
+                $relatedPrice = $this->cartService->getCurrentPrice($related);
+
+                return [
+                    'id' => $related->id,
+                    'name' => $related->name,
+                    'slug' => $related->slug,
+                    'image' => $related->main_image ?: $related->images->firstWhere('is_primary', true)?->image_path ?: $related->images->first()?->image_path,
+                    'price' => $relatedPrice?->price !== null ? (float) $relatedPrice->price : null,
+                ];
+            })
+            ->values()
+            ->all();
+
+        return Inertia::render('Product/Show', [
+            'product' => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'sku' => $product->sku,
+                'barcode' => $product->barcode,
+                'product_type' => $product->product_type,
+                'unit' => $product->unit,
+                'quantity_per_unit' => $product->quantity_per_unit,
+                'short_description' => $product->short_description,
+                'description' => $product->description,
+                'specifications' => $product->specifications,
+                'brand' => $product->brand?->name,
+                'category' => $product->category?->name,
+                'category_slug' => $product->category?->slug,
+                'image' => $product->main_image,
+                'images' => $product->images->sortBy([['is_primary', 'desc'], ['sort_order', 'asc']])->values()->map(fn ($image) => [
+                    'id' => $image->id,
+                    'path' => $image->image_path,
+                    'alt' => $image->alt_text ?: $product->name,
+                ])->all(),
+                'price' => $price?->price !== null ? (float) $price->price : null,
+                'compare_at_price' => $price?->compare_at_price !== null ? (float) $price->compare_at_price : null,
+                'available_quantity' => $this->inventoryService->getAvailableQuantity($product),
+                'available' => $this->inventoryService->isAvailable($product),
+            ],
+            'relatedProducts' => $relatedProducts,
+        ]);
+    }
+}
