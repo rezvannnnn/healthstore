@@ -13,6 +13,7 @@ use App\Services\CartService;
 use App\Services\CheckoutService;
 use App\Services\InventoryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use RuntimeException;
 use Tests\TestCase;
 
 class CheckoutServiceTest extends TestCase
@@ -67,6 +68,14 @@ class CheckoutServiceTest extends TestCase
         ]);
     }
 
+    private function createCheckoutService(): CheckoutService
+    {
+        return new CheckoutService(
+            new CartService,
+            new InventoryService
+        );
+    }
+
     public function test_prepare_uses_cart_item_quantity_for_tiered_price(): void
     {
         $user = User::factory()->create();
@@ -86,17 +95,42 @@ class CheckoutServiceTest extends TestCase
             'unit_price' => 80000,
         ]);
 
-        $service = new CheckoutService(
-            new CartService,
-            new InventoryService
-        );
-
-        $result = $service->prepare($cart);
+        $result = $this->createCheckoutService()->prepare($cart);
 
         $this->assertSame([], $result['price_changes']);
         $this->assertFalse($result['requires_price_confirmation']);
         $this->assertEquals(80000, (float) $item->fresh()->unit_price);
         $this->assertEquals(800000, $result['subtotal']);
+    }
+
+    public function test_prepare_detects_tiered_price_change_for_cart_quantity(): void
+    {
+        $user = User::factory()->create();
+        $product = $this->createProduct();
+        $this->createTieredPrices($product);
+        $this->createInventory($product);
+
+        $cart = Cart::create([
+            'user_id' => $user->id,
+            'status' => 'active',
+        ]);
+
+        $item = CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'quantity' => 10,
+            'unit_price' => 100000,
+        ]);
+
+        $result = $this->createCheckoutService()->prepare($cart);
+
+        $this->assertCount(1, $result['price_changes']);
+        $this->assertSame('price_changed', $result['price_changes'][0]['type']);
+        $this->assertEquals(100000, $result['price_changes'][0]['old_price']);
+        $this->assertEquals(80000, $result['price_changes'][0]['new_price']);
+        $this->assertTrue($result['requires_price_confirmation']);
+        $this->assertEquals(800000, $result['subtotal']);
+        $this->assertEquals(80000, (float) $item->fresh()->unit_price);
     }
 
     public function test_confirm_uses_cart_item_quantity_for_tiered_price(): void
@@ -118,15 +152,39 @@ class CheckoutServiceTest extends TestCase
             'unit_price' => 80000,
         ]);
 
-        $service = new CheckoutService(
-            new CartService,
-            new InventoryService
-        );
-
-        $result = $service->confirmPriceChanges($cart);
+        $result = $this->createCheckoutService()->confirmPriceChanges($cart);
 
         $this->assertTrue($result['confirmed']);
         $this->assertTrue($result['payment_allowed']);
         $this->assertEquals(800000, $result['subtotal']);
+    }
+
+    public function test_confirm_rejects_price_change_after_cart_quantity_changes(): void
+    {
+        $user = User::factory()->create();
+        $product = $this->createProduct();
+        $this->createTieredPrices($product);
+        $this->createInventory($product);
+
+        $cart = Cart::create([
+            'user_id' => $user->id,
+            'status' => 'active',
+        ]);
+
+        $item = CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'quantity' => 10,
+            'unit_price' => 80000,
+        ]);
+
+        $item->update([
+            'quantity' => 1,
+        ]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('قیمت سبد خرید دوباره تغییر کرده است');
+
+        $this->createCheckoutService()->confirmPriceChanges($cart);
     }
 }
