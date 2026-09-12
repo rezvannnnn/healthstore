@@ -3,7 +3,6 @@
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\DevAuthController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\OrderController;
@@ -98,19 +97,3 @@ Route::middleware('auth')->group(function () {
     Route::put('/account/profile', [ProfileController::class, 'update'])
         ->name('account.profile.update');
 });
-
-/*
-|--------------------------------------------------------------------------
-| Development Authentication
-|--------------------------------------------------------------------------
-|
-| Temporary local-only authentication routes.
-| These will be removed when the real login/register flow is implemented.
-|
-*/
-
-Route::get('/dev/login', [DevAuthController::class, 'login'])
-    ->name('dev.login');
-
-Route::get('/dev/logout', [DevAuthController::class, 'logout'])
-    ->name('dev.logout');
