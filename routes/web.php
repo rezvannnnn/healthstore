@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\LoginController;
@@ -62,6 +63,13 @@ Route::post('/login/send-otp', [LoginController::class, 'sendOtp'])
 
 Route::post('/logout', [LogoutController::class, 'store'])
     ->name('logout');
+
+Route::middleware(['auth', 'admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/', DashboardController::class)->name('dashboard');
+    });
 
 Route::middleware('auth')->group(function () {
     Route::get('/cart', [CartController::class, 'index'])
