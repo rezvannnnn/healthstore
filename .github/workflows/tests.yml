@@ -40,7 +40,7 @@ jobs:
         run: npm run format
 
       - name: Format PHP resources
-        run: composer pint
+        run: composer lint
 
       - name: Commit formatting changes
         run: |
