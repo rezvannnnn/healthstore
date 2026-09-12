@@ -24,6 +24,10 @@ class PaymentService
                 throw new RuntimeException('برای سفارش لغوشده امکان ایجاد پرداخت وجود ندارد.');
             }
 
+            if ($order->status === 'paid' || $order->payment_status === 'paid') {
+                throw new RuntimeException('این سفارش قبلاً پرداخت شده است.');
+            }
+
             $amount = (float) $order->total_amount;
             if ($amount <= 0) {
                 throw new RuntimeException('مبلغ پرداخت باید بیشتر از صفر باشد.');
