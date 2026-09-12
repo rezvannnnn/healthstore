@@ -18,7 +18,7 @@ class CheckoutService
      *
      * Checks:
      * - current product availability
-     * - current product price
+     * - current product price for the item's quantity
      *
      * An unavailable product temporarily gets a zero price.
      * If that product becomes available again later, its current
@@ -36,11 +36,6 @@ class CheckoutService
                 $item->product
             );
 
-            /*
-             * Product is currently unavailable.
-             *
-             * Keep it in the cart temporarily with zero price.
-             */
             if (! $isAvailable) {
                 $oldPrice = (float) $item->unit_price;
 
@@ -63,17 +58,11 @@ class CheckoutService
                 continue;
             }
 
-            /*
-             * Product is available again.
-             */
             $currentPrice = $this->cartService->getCurrentPrice(
-                $item->product
+                $item->product,
+                (int) $item->quantity
             );
 
-            /*
-             * No active price means the product cannot currently
-             * be sold even if inventory exists.
-             */
             if (! $currentPrice) {
                 $oldPrice = (float) $item->unit_price;
 
@@ -99,14 +88,6 @@ class CheckoutService
             $oldPrice = (float) $item->unit_price;
             $newPrice = (float) $currentPrice->price;
 
-            /*
-             * IMPORTANT:
-             *
-             * If the cart price is currently zero, that means the
-             * item was previously marked unavailable.
-             *
-             * Restoring 0 -> current price is NOT a real price change.
-             */
             if ($oldPrice == 0) {
                 $item->update([
                     'unit_price' => $currentPrice->price,
@@ -115,9 +96,6 @@ class CheckoutService
                 continue;
             }
 
-            /*
-             * A non-zero -> non-zero difference is a real price change.
-             */
             if ($oldPrice !== $newPrice) {
                 $item->update([
                     'unit_price' => $currentPrice->price,
@@ -177,9 +155,6 @@ class CheckoutService
                 }
             }
 
-            /*
-             * Check prices only for currently available products.
-             */
             $priceChanges = [];
 
             foreach ($cart->items as $item) {
@@ -190,7 +165,8 @@ class CheckoutService
                 }
 
                 $currentPrice = $this->cartService->getCurrentPrice(
-                    $item->product
+                    $item->product,
+                    (int) $item->quantity
                 );
 
                 if (! $currentPrice) {
@@ -200,11 +176,6 @@ class CheckoutService
                 $oldPrice = (float) $item->unit_price;
                 $newPrice = (float) $currentPrice->price;
 
-                /*
-                 * A zero cart price means the item was previously
-                 * unavailable. Restoring its real price is not a
-                 * customer-facing price change that requires approval.
-                 */
                 if ($oldPrice == 0) {
                     $item->update([
                         'unit_price' => $currentPrice->price,
@@ -225,19 +196,12 @@ class CheckoutService
                 }
             }
 
-            /*
-             * A real price change appeared between prepare()
-             * and confirmation.
-             */
             if (count($priceChanges) > 0) {
                 throw new RuntimeException(
                     'قیمت سبد خرید دوباره تغییر کرده است. لطفاً قیمت‌های جدید را بررسی و تأیید کنید.'
                 );
             }
 
-            /*
-             * Remove unavailable products after confirmation.
-             */
             foreach ($outOfStockItems as $item) {
                 $item->delete();
             }
@@ -247,9 +211,6 @@ class CheckoutService
 
             $subtotal = $this->cartService->calculateSubtotal($cart);
 
-            /*
-             * If nothing payable remains, do not allow payment.
-             */
             if ($subtotal <= 0) {
                 return [
                     'cart' => $cart,
