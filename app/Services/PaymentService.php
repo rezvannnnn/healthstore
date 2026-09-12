@@ -15,28 +15,18 @@ class PaymentService
         protected ?PaymentGatewayInterface $gateway = null
     ) {}
 
-    /**
-     * Create or return the existing pending payment for an order.
-     *
-     * No payment gateway is contacted here.
-     */
     public function create(Order $order): Payment
     {
-        return DB::transaction(function () use ($order) {
+        return DB::transaction(function () use ($order): Payment {
             $order->refresh();
 
             if ($order->status === 'cancelled') {
-                throw new RuntimeException(
-                    'برای سفارش لغوشده امکان ایجاد پرداخت وجود ندارد.'
-                );
+                throw new RuntimeException('برای سفارش لغوشده امکان ایجاد پرداخت وجود ندارد.');
             }
 
             $amount = (float) $order->total_amount;
-
             if ($amount <= 0) {
-                throw new RuntimeException(
-                    'مبلغ پرداخت باید بیشتر از صفر باشد.'
-                );
+                throw new RuntimeException('مبلغ پرداخت باید بیشتر از صفر باشد.');
             }
 
             $existingPayment = $order->payments()
@@ -48,7 +38,8 @@ class PaymentService
                 return $existingPayment;
             }
 
-            return $order->payments()->create([
+            /** @var Payment $payment */
+            $payment = $order->payments()->create([
                 'amount' => $amount,
                 'gateway' => null,
                 'status' => 'pending',
@@ -61,38 +52,23 @@ class PaymentService
                 'paid_at' => null,
                 'refunded_at' => null,
             ]);
+
+            return $payment;
         });
     }
 
-    /**
-     * Send a pending payment to the configured payment gateway.
-     *
-     * Creating a Payment and sending it to the external gateway
-     * are intentionally separate operations.
-     */
     public function requestGatewayPayment(Payment $payment): array
     {
         $payment->refresh();
 
         if ($payment->status !== 'pending') {
-            throw new RuntimeException(
-                'فقط پرداخت‌های در انتظار می‌توانند به درگاه ارسال شوند.'
-            );
+            throw new RuntimeException('فقط پرداخت‌های در انتظار می‌توانند به درگاه ارسال شوند.');
         }
 
-        $gateway = $this->gateway
-            ?? app(PaymentGatewayInterface::class);
-
+        $gateway = $this->gateway ?? app(PaymentGatewayInterface::class);
         $payment->loadMissing('order');
 
-        /*
-         * If this payment already has an authority, do not create
-         * another gateway request.
-         */
-        if (
-            $payment->authority !== null &&
-            $payment->authority !== ''
-        ) {
+        if ($payment->authority !== null && $payment->authority !== '') {
             return [
                 'payment' => $payment,
                 'gateway' => $payment->gateway,
@@ -105,32 +81,17 @@ class PaymentService
         }
 
         $result = $gateway->request($payment);
-
-        $authority = (string) (
-            $result['authority'] ?? ''
-        );
-
-        $paymentUrl = (string) (
-            $result['payment_url'] ?? ''
-        );
+        $authority = (string) ($result['authority'] ?? '');
+        $paymentUrl = (string) ($result['payment_url'] ?? '');
 
         if ($authority === '') {
-            throw new RuntimeException(
-                'درگاه پرداخت Authority معتبری برنگرداند.'
-            );
+            throw new RuntimeException('درگاه پرداخت Authority معتبری برنگرداند.');
         }
 
         if ($paymentUrl === '') {
-            throw new RuntimeException(
-                'درگاه پرداخت URL معتبری برای ادامه پرداخت برنگرداند.'
-            );
+            throw new RuntimeException('درگاه پرداخت URL معتبری برای ادامه پرداخت برنگرداند.');
         }
 
-        /*
-         * Store the gateway information.
-         * The payment remains pending until callback verification
-         * is completed successfully.
-         */
         $payment->update([
             'gateway' => $this->gatewayName($gateway),
             'authority' => $authority,
@@ -148,16 +109,8 @@ class PaymentService
         ];
     }
 
-    /**
-     * Verify a pending payment with the configured gateway.
-     *
-     * Verification does not itself mark the payment as paid.
-     * The caller must use markAsPaid() after successful verification.
-     */
-    public function verifyGatewayPayment(
-        Payment $payment,
-        array $callbackData
-    ): array {
+    public function verifyGatewayPayment(Payment $payment, array $callbackData): array
+    {
         $payment->refresh();
 
         if ($payment->status !== 'pending') {
@@ -169,55 +122,31 @@ class PaymentService
             ];
         }
 
-        $gateway = $this->gateway
-            ?? app(PaymentGatewayInterface::class);
-
+        $gateway = $this->gateway ?? app(PaymentGatewayInterface::class);
         $payment->loadMissing('order');
 
-        $result = $gateway->verify(
-            $payment,
-            $callbackData
-        );
+        $result = $gateway->verify($payment, $callbackData);
 
         if (isset($result['response'])) {
             $payment->update([
                 'gateway_response' => $result['response'],
             ]);
-
             $payment->refresh();
         }
 
         return [
-            'success' => (bool) (
-                $result['success'] ?? false
-            ),
-            'verified' => (bool) (
-                $result['verified'] ?? false
-            ),
+            'success' => (bool) ($result['success'] ?? false),
+            'verified' => (bool) ($result['verified'] ?? false),
             'payment' => $payment,
-            'transaction_id' => $result['transaction_id']
-                ?? null,
-            'reference_number' => $result['reference_number']
-                ?? null,
-            'gateway_response' => $result['response']
-                ?? null,
+            'transaction_id' => $result['transaction_id'] ?? null,
+            'reference_number' => $result['reference_number'] ?? null,
+            'gateway_response' => $result['response'] ?? null,
         ];
     }
 
-    /**
-     * Mark a pending payment as paid and consume its reservations.
-     *
-     * This operation is transactional:
-     * payment, order and reservations must all be updated together.
-     */
-    public function markAsPaid(
-        Payment $payment,
-        ?string $transactionId = null
-    ): bool {
-        return DB::transaction(function () use (
-            $payment,
-            $transactionId
-        ) {
+    public function markAsPaid(Payment $payment, ?string $transactionId = null): bool
+    {
+        return DB::transaction(function () use ($payment, $transactionId) {
             $payment->refresh();
 
             if ($payment->status === 'paid') {
@@ -228,29 +157,21 @@ class PaymentService
                 return false;
             }
 
-            $order = $payment->order()
-                ->lockForUpdate()
-                ->first();
+            $order = $payment->order()->lockForUpdate()->first();
 
             if (! $order) {
-                throw new RuntimeException(
-                    'سفارش مربوط به این پرداخت پیدا نشد.'
-                );
+                throw new RuntimeException('سفارش مربوط به این پرداخت پیدا نشد.');
             }
 
             if ($order->status === 'cancelled') {
                 return false;
             }
 
-            $reservations = $order->inventoryReservations()
-                ->where('status', 'active')
-                ->get();
+            $reservations = $order->inventoryReservations()->where('status', 'active')->get();
 
             foreach ($reservations as $reservation) {
                 if (! $this->reservationService->consume($reservation)) {
-                    throw new RuntimeException(
-                        'مصرف رزرو موجودی سفارش انجام نشد.'
-                    );
+                    throw new RuntimeException('مصرف رزرو موجودی سفارش انجام نشد.');
                 }
             }
 
@@ -271,17 +192,9 @@ class PaymentService
         });
     }
 
-    /**
-     * Mark a pending payment as failed and release its reservations.
-     */
-    public function markAsFailed(
-        Payment $payment,
-        ?string $gatewayResponse = null
-    ): bool {
-        return DB::transaction(function () use (
-            $payment,
-            $gatewayResponse
-        ) {
+    public function markAsFailed(Payment $payment, ?string $gatewayResponse = null): bool
+    {
+        return DB::transaction(function () use ($payment, $gatewayResponse) {
             $payment->refresh();
 
             if ($payment->status === 'paid') {
@@ -292,25 +205,17 @@ class PaymentService
                 return false;
             }
 
-            $order = $payment->order()
-                ->lockForUpdate()
-                ->first();
+            $order = $payment->order()->lockForUpdate()->first();
 
             if (! $order) {
-                throw new RuntimeException(
-                    'سفارش مربوط به این پرداخت پیدا نشد.'
-                );
+                throw new RuntimeException('سفارش مربوط به این پرداخت پیدا نشد.');
             }
 
-            $reservations = $order->inventoryReservations()
-                ->where('status', 'active')
-                ->get();
+            $reservations = $order->inventoryReservations()->where('status', 'active')->get();
 
             foreach ($reservations as $reservation) {
                 if (! $this->reservationService->release($reservation)) {
-                    throw new RuntimeException(
-                        'آزادسازی رزرو موجودی سفارش انجام نشد.'
-                    );
+                    throw new RuntimeException('آزادسازی رزرو موجودی سفارش انجام نشد.');
                 }
             }
 
@@ -323,9 +228,6 @@ class PaymentService
         });
     }
 
-    /**
-     * Cancel a pending payment and release its reservations.
-     */
     public function cancel(Payment $payment): bool
     {
         return DB::transaction(function () use ($payment) {
@@ -339,25 +241,17 @@ class PaymentService
                 return false;
             }
 
-            $order = $payment->order()
-                ->lockForUpdate()
-                ->first();
+            $order = $payment->order()->lockForUpdate()->first();
 
             if (! $order) {
-                throw new RuntimeException(
-                    'سفارش مربوط به این پرداخت پیدا نشد.'
-                );
+                throw new RuntimeException('سفارش مربوط به این پرداخت پیدا نشد.');
             }
 
-            $reservations = $order->inventoryReservations()
-                ->where('status', 'active')
-                ->get();
+            $reservations = $order->inventoryReservations()->where('status', 'active')->get();
 
             foreach ($reservations as $reservation) {
                 if (! $this->reservationService->release($reservation)) {
-                    throw new RuntimeException(
-                        'آزادسازی رزرو موجودی سفارش انجام نشد.'
-                    );
+                    throw new RuntimeException('آزادسازی رزرو موجودی سفارش انجام نشد.');
                 }
             }
 
@@ -369,22 +263,12 @@ class PaymentService
         });
     }
 
-    /**
-     * Get a stable gateway name from the implementation class.
-     */
-    protected function gatewayName(
-        PaymentGatewayInterface $gateway
-    ): string {
-        $class = class_basename(
-            get_class($gateway)
-        );
+    protected function gatewayName(PaymentGatewayInterface $gateway): string
+    {
+        $class = class_basename(get_class($gateway));
 
         if (str_ends_with($class, 'Gateway')) {
-            $class = substr(
-                $class,
-                0,
-                -strlen('Gateway')
-            );
+            $class = substr($class, 0, -strlen('Gateway'));
         }
 
         return strtolower($class);

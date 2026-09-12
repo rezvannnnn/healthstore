@@ -26,32 +26,36 @@ class CheckoutController extends Controller
         abort_unless($user !== null, 401);
 
         $cart = $this->cartService->getCartForUser($user->id);
-        $addresses = $user->addresses()
-            ->orderByDesc('is_default')
-            ->orderBy('id')
-            ->get();
+        $addresses = $user->addresses()->orderByDesc('is_default')->orderBy('id')->get();
 
         if ($cart->items()->count() === 0) {
             return Inertia::render('Checkout', [
-                'cart' => $cart->load('items.product'), 'addresses' => $addresses,
-                'selectedAddressId' => null, 'changes' => [], 'priceChanges' => [],
-                'availabilityChanges' => [], 'requiresPriceConfirmation' => false,
-                'subtotal' => 0, 'canProceedToPayment' => false, 'cartHasPayableItems' => false,
+                'cart' => $cart->load('items.product'),
+                'addresses' => $addresses,
+                'selectedAddressId' => null,
+                'changes' => [],
+                'priceChanges' => [],
+                'availabilityChanges' => [],
+                'requiresPriceConfirmation' => false,
+                'subtotal' => 0,
+                'canProceedToPayment' => false,
+                'cartHasPayableItems' => false,
                 'message' => 'سبد خرید شما خالی است.',
             ]);
         }
 
         $result = $this->checkoutService->prepare($cart);
-        $selectedAddressId = old(
-            'address_id',
-            $addresses->firstWhere('is_default', true)?->id ?? $addresses->first()?->id
-        );
+        $selectedAddressId = $addresses->first()?->id;
 
         return Inertia::render('Checkout', [
-            'cart' => $result['cart'], 'addresses' => $addresses,
-            'selectedAddressId' => $selectedAddressId, 'changes' => $result['changes'],
-            'priceChanges' => $result['price_changes'], 'availabilityChanges' => $result['availability_changes'],
-            'requiresPriceConfirmation' => $result['requires_price_confirmation'], 'subtotal' => $result['subtotal'],
+            'cart' => $result['cart'],
+            'addresses' => $addresses,
+            'selectedAddressId' => $selectedAddressId,
+            'changes' => $result['changes'],
+            'priceChanges' => $result['price_changes'],
+            'availabilityChanges' => $result['availability_changes'],
+            'requiresPriceConfirmation' => $result['requires_price_confirmation'],
+            'subtotal' => $result['subtotal'],
             'canProceedToPayment' => $result['can_proceed_to_payment'],
             'cartHasPayableItems' => $result['cart_has_payable_items'],
         ]);
@@ -62,8 +66,11 @@ class CheckoutController extends Controller
         $user = $request->user();
         abort_unless($user !== null, 401);
 
-        $validated = $request->validate(['address_id' => ['required', 'integer']]);
-        $address = Address::query()->where('user_id', $user->id)->find($validated['address_id']);
+        $validated = $request->validate([
+            'address_id' => ['required', 'integer'],
+        ]);
+        $addressId = (int) $validated['address_id'];
+        $address = Address::query()->where('user_id', $user->id)->find($addressId);
 
         if (! $address) {
             return redirect()->route('checkout.show')->withErrors([

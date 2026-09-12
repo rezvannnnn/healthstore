@@ -40,22 +40,19 @@ class Order extends Model
         return $this->belongsTo(BusinessProfile::class);
     }
 
-    /**
-     * @return HasMany<OrderItem, $this>
-     */
+    /** @return HasMany<OrderItem, $this> */
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
+    /** @return HasMany<Payment, $this> */
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }
 
-    /**
-     * @return HasMany<InventoryReservation, $this>
-     */
+    /** @return HasMany<InventoryReservation, $this> */
     public function inventoryReservations(): HasMany
     {
         return $this->hasMany(InventoryReservation::class);

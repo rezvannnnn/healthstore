@@ -11,21 +11,13 @@ class InventoryReservation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'order_id',
-        'product_id',
-        'inventory_id',
-        'quantity',
-        'status',
-        'expires_at',
-        'released_at',
-        'consumed_at',
+        'order_id', 'product_id', 'inventory_id', 'quantity', 'status',
+        'expires_at', 'released_at', 'consumed_at',
     ];
 
     protected $casts = [
-        'quantity' => 'integer',
-        'expires_at' => 'datetime',
-        'released_at' => 'datetime',
-        'consumed_at' => 'datetime',
+        'quantity' => 'integer', 'expires_at' => 'datetime',
+        'released_at' => 'datetime', 'consumed_at' => 'datetime',
     ];
 
     public function order(): BelongsTo
@@ -38,6 +30,7 @@ class InventoryReservation extends Model
         return $this->belongsTo(Product::class);
     }
 
+    /** @return BelongsTo<Inventory, $this> */
     public function inventory(): BelongsTo
     {
         return $this->belongsTo(Inventory::class);
