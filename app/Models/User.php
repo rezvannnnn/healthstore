@@ -18,6 +18,7 @@ class User extends Authenticatable
         'phone',
         'phone_verified_at',
         'password',
+        'is_admin',
     ];
 
     protected $hidden = [
@@ -29,6 +30,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'phone_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_admin' => 'boolean',
     ];
 
     public function businessProfile(): HasOne
@@ -63,5 +65,13 @@ class User extends Authenticatable
     public function hasVerifiedPhone(): bool
     {
         return $this->phone_verified_at !== null;
+    }
+
+    /**
+     * Determine whether the user can access the administration area.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->is_admin === true;
     }
 }
