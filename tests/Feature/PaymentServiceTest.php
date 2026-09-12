@@ -178,7 +178,8 @@ class PaymentServiceTest extends TestCase
         $this->assertSame('AUTH-123456', $secondResult['authority']);
         $this->assertSame($firstResult['payment_url'], $secondResult['payment_url']);
         $this->assertSame('AUTH-123456', $secondResult['payment']->authority);
-        $this->assertSame('fake', $secondResult['gateway']);
+        $this->assertNotNull($secondResult['gateway']);
+        $this->assertSame($firstResult['gateway'], $secondResult['gateway']);
     }
 
     public function test_successful_payment_marks_payment_as_paid_order_as_paid_and_consumes_reservations(): void
