@@ -63,7 +63,7 @@ class CartService
             $item = $cart->items()
                 ->where('product_id', $productId)
                 ->first();
-            $newQuantity = ($item?->quantity ?? 0) + $quantity;
+            $newQuantity = ($item === null ? 0 : $item->quantity) + $quantity;
 
             $price = $this->getCurrentPrice($product, $newQuantity);
 
