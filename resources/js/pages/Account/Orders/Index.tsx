@@ -93,50 +93,32 @@ export default function Index({ orders }: Props) {
                     <div>
                         <p>هنوز سفارشی ثبت نکرده‌اید.</p>
 
-                        <Link href="/">
-                            بازگشت به فروشگاه
-                        </Link>
+                        <Link href="/">بازگشت به فروشگاه</Link>
                     </div>
                 ) : (
                     <div>
                         {orders.map((order) => (
                             <div key={order.id}>
-                                <h2>
-                                    سفارش {order.order_number}
-                                </h2>
+                                <h2>سفارش {order.order_number}</h2>
 
-                                <p>
-                                    وضعیت سفارش:{' '}
-                                    {statusLabel(order.status)}
-                                </p>
+                                <p>وضعیت سفارش: {statusLabel(order.status)}</p>
 
                                 <p>
                                     وضعیت پرداخت:{' '}
-                                    {paymentStatusLabel(
-                                        order.payment_status
-                                    )}
+                                    {paymentStatusLabel(order.payment_status)}
                                 </p>
 
                                 <p>
-                                    مبلغ:
-                                    {' '}
+                                    مبلغ:{' '}
                                     {formatAmount(
                                         order.total_amount,
-                                        order.currency
+                                        order.currency,
                                     )}
                                 </p>
 
-                                <p>
-                                    تاریخ ثبت:
-                                    {' '}
-                                    {formatDate(
-                                        order.created_at
-                                    )}
-                                </p>
+                                <p>تاریخ ثبت: {formatDate(order.created_at)}</p>
 
-                                <Link
-                                    href={`/orders/${order.order_number}`}
-                                >
+                                <Link href={`/orders/${order.order_number}`}>
                                     مشاهده جزئیات سفارش
                                 </Link>
                             </div>

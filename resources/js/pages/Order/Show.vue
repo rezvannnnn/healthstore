@@ -1,109 +1,109 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3'
-import { computed, ref } from 'vue'
+import { router } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
 
 interface OrderItem {
-    id: number
-    product_id: number | null
-    product_name: string
-    product_sku: string | null
-    quantity: number
-    unit_price: number | string
-    discount_amount: number | string
-    total_amount: number | string
+    id: number;
+    product_id: number | null;
+    product_name: string;
+    product_sku: string | null;
+    quantity: number;
+    unit_price: number | string;
+    discount_amount: number | string;
+    total_amount: number | string;
 }
 
 interface Payment {
-    id: number
-    amount: number | string
-    gateway: string | null
-    status: string
-    authority: string | null
-    transaction_id: string | null
-    reference_number: string | null
-    paid_at: string | null
+    id: number;
+    amount: number | string;
+    gateway: string | null;
+    status: string;
+    authority: string | null;
+    transaction_id: string | null;
+    reference_number: string | null;
+    paid_at: string | null;
 }
 
 interface Order {
-    id: number
-    order_number: string
-    status: string
-    payment_status: string
-    subtotal: number | string
-    discount_amount: number | string
-    shipping_amount: number | string
-    total_amount: number | string
-    currency: string
-    recipient_name: string | null
-    recipient_phone: string | null
-    province: string | null
-    city: string | null
-    shipping_address: string | null
-    postal_code: string | null
-    customer_note: string | null
-    confirmed_at: string | null
-    paid_at: string | null
-    cancelled_at: string | null
-    items: OrderItem[]
-    payments: Payment[]
+    id: number;
+    order_number: string;
+    status: string;
+    payment_status: string;
+    subtotal: number | string;
+    discount_amount: number | string;
+    shipping_amount: number | string;
+    total_amount: number | string;
+    currency: string;
+    recipient_name: string | null;
+    recipient_phone: string | null;
+    province: string | null;
+    city: string | null;
+    shipping_address: string | null;
+    postal_code: string | null;
+    customer_note: string | null;
+    confirmed_at: string | null;
+    paid_at: string | null;
+    cancelled_at: string | null;
+    items: OrderItem[];
+    payments: Payment[];
 }
 
 const props = defineProps<{
-    order: Order
-    success?: string
-    error?: string
-    info?: string
-}>()
+    order: Order;
+    success?: string;
+    error?: string;
+    info?: string;
+}>();
 
-const formatter = new Intl.NumberFormat('fa-IR')
+const formatter = new Intl.NumberFormat('fa-IR');
 
-const isStartingPayment = ref(false)
+const isStartingPayment = ref(false);
 
 function formatPrice(value: number | string): string {
-    return `${formatter.format(Number(value))} تومان`
+    return `${formatter.format(Number(value))} تومان`;
 }
 
 const orderStatusLabel = computed(() => {
     switch (props.order.status) {
         case 'pending':
-            return 'در انتظار پرداخت'
+            return 'در انتظار پرداخت';
         case 'paid':
-            return 'پرداخت شده'
+            return 'پرداخت شده';
         case 'processing':
-            return 'در حال پردازش'
+            return 'در حال پردازش';
         case 'shipped':
-            return 'ارسال شده'
+            return 'ارسال شده';
         case 'delivered':
-            return 'تحویل شده'
+            return 'تحویل شده';
         case 'cancelled':
-            return 'لغو شده'
+            return 'لغو شده';
         case 'expired':
-            return 'منقضی شده'
+            return 'منقضی شده';
         default:
-            return props.order.status
+            return props.order.status;
     }
-})
+});
 
 const paymentStatusLabel = computed(() => {
     switch (props.order.payment_status) {
         case 'pending':
-            return 'در انتظار پرداخت'
+            return 'در انتظار پرداخت';
         case 'paid':
-            return 'پرداخت موفق'
+            return 'پرداخت موفق';
         case 'failed':
-            return 'پرداخت ناموفق'
+            return 'پرداخت ناموفق';
         case 'refunded':
-            return 'مسترد شده'
+            return 'مسترد شده';
         case 'cancelled':
-            return 'لغو شده'
+            return 'لغو شده';
         default:
-            return props.order.payment_status
+            return props.order.payment_status;
     }
-})
+});
 
 const hasPayableAmount = computed(() => {
-    return Number(props.order.total_amount) > 0
-})
+    return Number(props.order.total_amount) > 0;
+});
 
 const canPay = computed(() => {
     return (
@@ -111,29 +111,29 @@ const canPay = computed(() => {
         props.order.status === 'pending' &&
         props.order.payment_status === 'pending' &&
         !isStartingPayment.value
-    )
-})
+    );
+});
 
 function goBackToCheckout(): void {
-    router.get('/checkout')
+    router.get('/checkout');
 }
 
 function startPayment(): void {
     if (!canPay.value) {
-        return
+        return;
     }
 
-    isStartingPayment.value = true
+    isStartingPayment.value = true;
 
     router.post(
         `/orders/${props.order.order_number}/payment`,
         {},
         {
             onFinish: () => {
-                isStartingPayment.value = false
+                isStartingPayment.value = false;
             },
-        }
-    )
+        },
+    );
 }
 </script>
 
@@ -211,9 +211,7 @@ function startPayment(): void {
                             کد کالا: {{ item.product_sku }}
                         </span>
 
-                        <span>
-                            تعداد: {{ item.quantity }}
-                        </span>
+                        <span> تعداد: {{ item.quantity }} </span>
                     </div>
 
                     <div class="item-prices">
@@ -288,14 +286,7 @@ function startPayment(): void {
                         <strong>
                             {{ order.province }}
 
-                            <span
-                                v-if="
-                                    order.province &&
-                                    order.city
-                                "
-                            >
-                                -
-                            </span>
+                            <span v-if="order.province && order.city"> - </span>
 
                             {{ order.city }}
                         </strong>
@@ -343,10 +334,7 @@ function startPayment(): void {
                     این سفارش با موفقیت پرداخت شده است.
                 </div>
 
-                <div
-                    v-else-if="!hasPayableAmount"
-                    class="info-message-box"
-                >
+                <div v-else-if="!hasPayableAmount" class="info-message-box">
                     مبلغ این سفارش قابل پرداخت نیست.
                 </div>
 

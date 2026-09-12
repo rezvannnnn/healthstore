@@ -8,12 +8,9 @@ createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
 
     resolve: (name) => {
-        const pages = import.meta.glob<DefineComponent>(
-            './pages/**/*.vue',
-            {
-                eager: true,
-            },
-        );
+        const pages = import.meta.glob<DefineComponent>('./pages/**/*.vue', {
+            eager: true,
+        });
 
         const page = pages[`./pages/${name}.vue`];
 

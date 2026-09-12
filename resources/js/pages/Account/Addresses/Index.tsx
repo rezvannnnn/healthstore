@@ -38,13 +38,9 @@ export default function Index({ addresses }: Props) {
                                     {address.is_default ? ' (پیش‌فرض)' : ''}
                                 </h2>
 
-                                <p>
-                                    گیرنده: {address.recipient_name}
-                                </p>
+                                <p>گیرنده: {address.recipient_name}</p>
 
-                                <p>
-                                    تلفن: {address.phone}
-                                </p>
+                                <p>تلفن: {address.phone}</p>
 
                                 <p>
                                     {address.province || ''}
@@ -57,9 +53,7 @@ export default function Index({ addresses }: Props) {
                                 <p>{address.address}</p>
 
                                 {address.postal_code && (
-                                    <p>
-                                        کد پستی: {address.postal_code}
-                                    </p>
+                                    <p>کد پستی: {address.postal_code}</p>
                                 )}
                             </div>
                         ))}

@@ -23,20 +23,13 @@ export default function Index({ user }: Props) {
                 <div>
                     <p>نام: {user.name}</p>
 
-                    <p>
-                        ایمیل:{' '}
-                        {user.email || 'ثبت نشده است'}
-                    </p>
+                    <p>ایمیل: {user.email || 'ثبت نشده است'}</p>
 
-                    <p>
-                        شماره موبایل: {user.phone}
-                    </p>
+                    <p>شماره موبایل: {user.phone}</p>
 
                     <p>
                         وضعیت موبایل:{' '}
-                        {user.phone_verified_at
-                            ? 'تأیید شده'
-                            : 'تأیید نشده'}
+                        {user.phone_verified_at ? 'تأیید شده' : 'تأیید نشده'}
                     </p>
                 </div>
             </div>
