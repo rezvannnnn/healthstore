@@ -75,7 +75,9 @@ function removeAddress(id: number): void {
         <div class="mx-auto max-w-5xl space-y-8">
             <header class="flex items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    <h1
+                        class="text-2xl font-bold text-gray-900 dark:text-white"
+                    >
                         آدرس‌های من
                     </h1>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -94,7 +96,9 @@ function removeAddress(id: number): void {
                 class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800"
             >
                 <div class="mb-5 flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h2
+                        class="text-lg font-semibold text-gray-900 dark:text-white"
+                    >
                         {{ editingId ? 'ویرایش آدرس' : 'افزودن آدرس جدید' }}
                     </h2>
                     <button
