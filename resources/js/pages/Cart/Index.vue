@@ -18,6 +18,7 @@ interface CartItem {
 
 const props = defineProps<{
     cart: {
+        id: number;
         items: CartItem[];
         subtotal: number;
     };
@@ -36,7 +37,7 @@ function updateQuantity(item: CartItem, quantity: number): void {
     }
 
     busyItem.value = item.id;
-    router.put(`/cart/${getCartId()}/items/${item.id}`, {
+    router.put(`/cart/${props.cart.id}/items/${item.id}`, {
         quantity,
     }, {
         preserveScroll: true,
@@ -48,18 +49,12 @@ function updateQuantity(item: CartItem, quantity: number): void {
 
 function removeItem(item: CartItem): void {
     busyItem.value = item.id;
-    router.delete(`/cart/${getCartId()}/items/${item.id}`, {
+    router.delete(`/cart/${props.cart.id}/items/${item.id}`, {
         preserveScroll: true,
         onFinish: () => {
             busyItem.value = null;
         },
     });
-}
-
-function getCartId(): number {
-    // The current cart route is user-based; the controller resolves the active cart.
-    // This placeholder is replaced by the cart id returned through shared props later.
-    return 0;
 }
 </script>
 
