@@ -1,18 +1,26 @@
 <?php
 
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DevAuthController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\ZarinPalCallbackController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
+
+Route::get('/products', [ProductController::class, 'index'])
+    ->name('products.index');
+
+Route::get('/products/{product:slug}', [ProductController::class, 'show'])
+    ->name('products.show');
 
 Route::get('/checkout', [CheckoutController::class, 'show'])
     ->name('checkout.show');
@@ -54,6 +62,17 @@ Route::post('/logout', [LogoutController::class, 'store'])
     ->name('logout');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/cart', [CartController::class, 'index'])
+        ->name('cart.index');
+
+    Route::post('/cart/items', [CartController::class, 'store'])
+        ->name('cart.items.store');
+
+    Route::put('/cart/{cart}/items/{item}', [CartController::class, 'update'])
+        ->name('cart.items.update');
+
+    Route::delete('/cart/{cart}/items/{item}', [CartController::class, 'destroy'])
+        ->name('cart.items.destroy');
 
     Route::get('/account/orders', [OrderController::class, 'index'])
         ->name('account.orders.index');
