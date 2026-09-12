@@ -138,6 +138,12 @@ class InventoryController extends Controller
     {
         $inventory->load(['product', 'warehouse']);
 
+        /** @var Product $product */
+        $product = $inventory->product;
+
+        /** @var Warehouse $warehouse */
+        $warehouse = $inventory->warehouse;
+
         $movements = InventoryMovement::query()
             ->with('user:id,name')
             ->where('inventory_id', $inventory->id)
@@ -148,8 +154,8 @@ class InventoryController extends Controller
         return Inertia::render('Admin/Inventory/Movements', [
             'inventory' => [
                 'id' => $inventory->id,
-                'product' => $inventory->product->name,
-                'warehouse' => $inventory->warehouse->name,
+                'product' => $product->name,
+                'warehouse' => $warehouse->name,
                 'quantity' => $inventory->quantity,
             ],
             'movements' => $movements,
