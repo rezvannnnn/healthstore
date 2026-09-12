@@ -136,7 +136,8 @@ class PaymentServiceTest extends TestCase
     {
         $user = User::factory()->create();
         $order = $this->createOrder($user, 360000);
-        $gateway = new class implements PaymentGatewayInterface {
+        $gateway = new class implements PaymentGatewayInterface
+        {
             public int $requestCalls = 0;
 
             public function request(Payment $payment): array
