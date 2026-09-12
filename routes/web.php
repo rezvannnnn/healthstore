@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
 
+Route::inertia('/login', 'Auth/Login')->name('login');
+Route::inertia('/register', 'Auth/Register')->name('register.form');
+
 Route::get('/products', [ProductController::class, 'index'])
     ->name('products.index');
 
@@ -53,7 +56,7 @@ Route::post('/register', [RegistrationController::class, 'store'])
     ->name('register');
 
 Route::post('/login', [LoginController::class, 'store'])
-    ->name('login');
+    ->name('login.store');
 
 Route::post('/login/send-otp', [LoginController::class, 'sendOtp'])
     ->name('login.send-otp');
