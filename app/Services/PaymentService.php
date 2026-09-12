@@ -131,37 +131,46 @@ class PaymentService
 
     public function verifyGatewayPayment(Payment $payment, array $callbackData): array
     {
-        $payment->refresh();
+        return DB::transaction(function () use ($payment, $callbackData): array {
+            $payment = Payment::query()
+                ->whereKey($payment->id)
+                ->lockForUpdate()
+                ->first();
 
-        if ($payment->status !== 'pending') {
+            if (! $payment) {
+                throw new RuntimeException('پرداخت پیدا نشد.');
+            }
+
+            if ($payment->status !== 'pending') {
+                return [
+                    'success' => false,
+                    'verified' => false,
+                    'payment' => $payment,
+                    'message' => 'این پرداخت دیگر در وضعیت pending نیست.',
+                ];
+            }
+
+            $gateway = $this->gateway ?? app(PaymentGatewayInterface::class);
+            $payment->loadMissing('order');
+
+            $result = $gateway->verify($payment, $callbackData);
+
+            if (isset($result['response'])) {
+                $payment->update([
+                    'gateway_response' => $result['response'],
+                ]);
+                $payment->refresh();
+            }
+
             return [
-                'success' => false,
-                'verified' => false,
+                'success' => (bool) ($result['success'] ?? false),
+                'verified' => (bool) ($result['verified'] ?? false),
                 'payment' => $payment,
-                'message' => 'این پرداخت دیگر در وضعیت pending نیست.',
+                'transaction_id' => $result['transaction_id'] ?? null,
+                'reference_number' => $result['reference_number'] ?? null,
+                'gateway_response' => $result['response'] ?? null,
             ];
-        }
-
-        $gateway = $this->gateway ?? app(PaymentGatewayInterface::class);
-        $payment->loadMissing('order');
-
-        $result = $gateway->verify($payment, $callbackData);
-
-        if (isset($result['response'])) {
-            $payment->update([
-                'gateway_response' => $result['response'],
-            ]);
-            $payment->refresh();
-        }
-
-        return [
-            'success' => (bool) ($result['success'] ?? false),
-            'verified' => (bool) ($result['verified'] ?? false),
-            'payment' => $payment,
-            'transaction_id' => $result['transaction_id'] ?? null,
-            'reference_number' => $result['reference_number'] ?? null,
-            'gateway_response' => $result['response'] ?? null,
-        ];
+        });
     }
 
     public function markAsPaid(Payment $payment, ?string $transactionId = null): bool
