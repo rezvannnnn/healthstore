@@ -4,6 +4,7 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\Admin\BrandController as AdminBrandController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
@@ -89,6 +90,11 @@ Route::middleware(['auth', 'admin'])
         Route::post('/brands', [AdminBrandController::class, 'store'])->name('brands.store');
         Route::get('/brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('brands.edit');
         Route::put('/brands/{brand}', [AdminBrandController::class, 'update'])->name('brands.update');
+
+        Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
+        Route::post('/inventory', [AdminInventoryController::class, 'store'])->name('inventory.store');
+        Route::post('/inventory/{inventory}/adjust', [AdminInventoryController::class, 'adjust'])->name('inventory.adjust');
+        Route::get('/inventory/{inventory}/movements', [AdminInventoryController::class, 'movements'])->name('inventory.movements');
     });
 
 Route::middleware('auth')->group(function () {
