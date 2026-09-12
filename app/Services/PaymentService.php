@@ -147,7 +147,14 @@ class PaymentService
     public function markAsPaid(Payment $payment, ?string $transactionId = null): bool
     {
         return DB::transaction(function () use ($payment, $transactionId) {
-            $payment->refresh();
+            $payment = Payment::query()
+                ->whereKey($payment->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $payment) {
+                throw new RuntimeException('پرداخت پیدا نشد.');
+            }
 
             if ($payment->status === 'paid') {
                 return false;
@@ -195,7 +202,14 @@ class PaymentService
     public function markAsFailed(Payment $payment, ?string $gatewayResponse = null): bool
     {
         return DB::transaction(function () use ($payment, $gatewayResponse) {
-            $payment->refresh();
+            $payment = Payment::query()
+                ->whereKey($payment->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $payment) {
+                throw new RuntimeException('پرداخت پیدا نشد.');
+            }
 
             if ($payment->status === 'paid') {
                 return false;
@@ -231,7 +245,14 @@ class PaymentService
     public function cancel(Payment $payment): bool
     {
         return DB::transaction(function () use ($payment) {
-            $payment->refresh();
+            $payment = Payment::query()
+                ->whereKey($payment->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $payment) {
+                throw new RuntimeException('پرداخت پیدا نشد.');
+            }
 
             if ($payment->status === 'paid') {
                 return false;
