@@ -115,8 +115,6 @@ class AtomicPaymentCallbackTest extends TestCase
             'consumed_at' => null,
         ]);
 
-        $inventory->decrement('quantity', 2);
-
         $gateway = new class implements PaymentGatewayInterface
         {
             public int $verifyCalls = 0;
