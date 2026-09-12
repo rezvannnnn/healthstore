@@ -18,22 +18,29 @@ class PaymentService
     public function create(Order $order): Payment
     {
         return DB::transaction(function () use ($order): Payment {
-            $order->refresh();
+            $lockedOrder = Order::query()
+                ->whereKey($order->id)
+                ->lockForUpdate()
+                ->first();
 
-            if ($order->status === 'cancelled') {
+            if (! $lockedOrder) {
+                throw new RuntimeException('سفارش پیدا نشد.');
+            }
+
+            if ($lockedOrder->status === 'cancelled') {
                 throw new RuntimeException('برای سفارش لغوشده امکان ایجاد پرداخت وجود ندارد.');
             }
 
-            if ($order->status === 'paid' || $order->payment_status === 'paid') {
+            if ($lockedOrder->status === 'paid' || $lockedOrder->payment_status === 'paid') {
                 throw new RuntimeException('این سفارش قبلاً پرداخت شده است.');
             }
 
-            $amount = (float) $order->total_amount;
+            $amount = (float) $lockedOrder->total_amount;
             if ($amount <= 0) {
                 throw new RuntimeException('مبلغ پرداخت باید بیشتر از صفر باشد.');
             }
 
-            $existingPayment = $order->payments()
+            $existingPayment = $lockedOrder->payments()
                 ->where('status', 'pending')
                 ->latest('id')
                 ->first();
@@ -43,7 +50,7 @@ class PaymentService
             }
 
             /** @var Payment $payment */
-            $payment = $order->payments()->create([
+            $payment = $lockedOrder->payments()->create([
                 'amount' => $amount,
                 'gateway' => null,
                 'status' => 'pending',
