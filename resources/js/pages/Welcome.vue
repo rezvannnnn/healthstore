@@ -14,7 +14,9 @@ import { Head, Link } from '@inertiajs/vue3';
                     Health<span class="text-emerald-600">Store</span>
                 </Link>
 
-                <nav class="hidden items-center gap-6 text-sm font-medium sm:flex">
+                <nav
+                    class="hidden items-center gap-6 text-sm font-medium sm:flex"
+                >
                     <Link href="/" class="transition hover:text-emerald-600">
                         خانه
                     </Link>
@@ -24,7 +26,10 @@ import { Head, Link } from '@inertiajs/vue3';
                     >
                         محصولات
                     </Link>
-                    <Link href="/cart" class="transition hover:text-emerald-600">
+                    <Link
+                        href="/cart"
+                        class="transition hover:text-emerald-600"
+                    >
                         سبد خرید
                     </Link>
                 </nav>
@@ -47,7 +52,9 @@ import { Head, Link } from '@inertiajs/vue3';
         </header>
 
         <main>
-            <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+            <section
+                class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
+            >
                 <div
                     class="grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr]"
                 >
@@ -58,7 +65,7 @@ import { Head, Link } from '@inertiajs/vue3';
                             فروشگاه آنلاین سلامت
                         </p>
                         <h1
-                            class="max-w-3xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl"
+                            class="max-w-3xl text-4xl leading-tight font-bold tracking-tight sm:text-5xl lg:text-6xl"
                         >
                             محصولات مورد نیازتان را ساده و مطمئن خرید کنید.
                         </h1>
@@ -66,8 +73,8 @@ import { Head, Link } from '@inertiajs/vue3';
                             class="mt-6 max-w-2xl text-lg leading-8 text-slate-600"
                         >
                             HealthStore برای جستجو، بررسی و خرید آنلاین محصولات
-                            سلامت طراحی شده است؛ با سبد خرید، بررسی موجودی و روند
-                            پرداخت در یک مسیر یکپارچه.
+                            سلامت طراحی شده است؛ با سبد خرید، بررسی موجودی و
+                            روند پرداخت در یک مسیر یکپارچه.
                         </p>
 
                         <div class="mt-8 flex flex-wrap gap-3">
@@ -86,7 +93,9 @@ import { Head, Link } from '@inertiajs/vue3';
                         </div>
                     </div>
 
-                    <div class="rounded-3xl bg-slate-900 p-8 text-white shadow-xl sm:p-10">
+                    <div
+                        class="rounded-3xl bg-slate-900 p-8 text-white shadow-xl sm:p-10"
+                    >
                         <div class="text-5xl">🛒</div>
                         <h2 class="mt-6 text-2xl font-bold">
                             خرید از هر جا، با مسیر مشخص
@@ -97,7 +106,9 @@ import { Head, Link } from '@inertiajs/vue3';
                             دنبال کنید.
                         </p>
 
-                        <div class="mt-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                        <div
+                            class="mt-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-1"
+                        >
                             <div
                                 class="rounded-2xl border border-white/10 bg-white/5 p-4"
                             >
@@ -140,13 +151,15 @@ import { Head, Link } from '@inertiajs/vue3';
                     <div class="rounded-2xl bg-slate-50 p-5">
                         <div class="font-bold">قیمت به‌روز</div>
                         <p class="mt-2 text-sm leading-6 text-slate-600">
-                            تغییرات قیمت در مسیر خرید بررسی و به شما اعلام می‌شود.
+                            تغییرات قیمت در مسیر خرید بررسی و به شما اعلام
+                            می‌شود.
                         </p>
                     </div>
                     <div class="rounded-2xl bg-slate-50 p-5">
                         <div class="font-bold">پیگیری سفارش</div>
                         <p class="mt-2 text-sm leading-6 text-slate-600">
-                            وضعیت سفارش پس از ثبت در حساب کاربری قابل پیگیری است.
+                            وضعیت سفارش پس از ثبت در حساب کاربری قابل پیگیری
+                            است.
                         </p>
                     </div>
                 </div>
