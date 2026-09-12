@@ -26,7 +26,7 @@ class Category extends Model
     ];
 
     /**
-     * Parent category
+     * @return BelongsTo<Category, $this>
      */
     public function parent(): BelongsTo
     {
@@ -34,7 +34,7 @@ class Category extends Model
     }
 
     /**
-     * Child categories
+     * @return HasMany<Category, $this>
      */
     public function children(): HasMany
     {
@@ -42,7 +42,7 @@ class Category extends Model
     }
 
     /**
-     * Products in this category
+     * @return HasMany<Product, $this>
      */
     public function products(): HasMany
     {
