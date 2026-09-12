@@ -59,9 +59,7 @@ export default defineConfigWithVueTs(
             ],
             'import/consistent-type-specifier-style': [
                 'error',
-                {
-                    style: 'prefer-top-level',
-                },
+                'prefer-top-level',
             ],
         },
     },
