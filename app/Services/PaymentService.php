@@ -70,54 +70,63 @@ class PaymentService
 
     public function requestGatewayPayment(Payment $payment): array
     {
-        $payment->refresh();
+        return DB::transaction(function () use ($payment): array {
+            $payment = Payment::query()
+                ->whereKey($payment->id)
+                ->lockForUpdate()
+                ->first();
 
-        if ($payment->status !== 'pending') {
-            throw new RuntimeException('فقط پرداخت‌های در انتظار می‌توانند به درگاه ارسال شوند.');
-        }
+            if (! $payment) {
+                throw new RuntimeException('پرداخت پیدا نشد.');
+            }
 
-        $gateway = $this->gateway ?? app(PaymentGatewayInterface::class);
-        $payment->loadMissing('order');
+            if ($payment->status !== 'pending') {
+                throw new RuntimeException('فقط پرداخت‌های در انتظار می‌توانند به درگاه ارسال شوند.');
+            }
 
-        if ($payment->authority !== null && $payment->authority !== '') {
+            $gateway = $this->gateway ?? app(PaymentGatewayInterface::class);
+            $payment->loadMissing('order');
+
+            if ($payment->authority !== null && $payment->authority !== '') {
+                return [
+                    'payment' => $payment,
+                    'gateway' => $payment->gateway,
+                    'authority' => $payment->authority,
+                    'payment_url' => $gateway->paymentUrl([
+                        'authority' => $payment->authority,
+                    ]),
+                    'gateway_response' => $payment->gateway_response,
+                ];
+            }
+
+            $result = $gateway->request($payment);
+            $authority = (string) ($result['authority'] ?? '');
+            $paymentUrl = (string) ($result['payment_url'] ?? '');
+
+            if ($authority === '') {
+                throw new RuntimeException('درگاه پرداخت Authority معتبری برنگرداند.');
+            }
+
+            if ($paymentUrl === '') {
+                throw new RuntimeException('درگاه پرداخت URL معتبری برای ادامه پرداخت برنگرداند.');
+            }
+
+            $payment->update([
+                'gateway' => $this->gatewayName($gateway),
+                'authority' => $authority,
+                'gateway_response' => $result['response'] ?? null,
+            ]);
+
+            $payment->refresh();
+
             return [
                 'payment' => $payment,
                 'gateway' => $payment->gateway,
                 'authority' => $payment->authority,
-                'payment_url' => $gateway->paymentUrl([
-                    'authority' => $payment->authority,
-                ]),
+                'payment_url' => $paymentUrl,
                 'gateway_response' => $payment->gateway_response,
             ];
-        }
-
-        $result = $gateway->request($payment);
-        $authority = (string) ($result['authority'] ?? '');
-        $paymentUrl = (string) ($result['payment_url'] ?? '');
-
-        if ($authority === '') {
-            throw new RuntimeException('درگاه پرداخت Authority معتبری برنگرداند.');
-        }
-
-        if ($paymentUrl === '') {
-            throw new RuntimeException('درگاه پرداخت URL معتبری برای ادامه پرداخت برنگرداند.');
-        }
-
-        $payment->update([
-            'gateway' => $this->gatewayName($gateway),
-            'authority' => $authority,
-            'gateway_response' => $result['response'] ?? null,
-        ]);
-
-        $payment->refresh();
-
-        return [
-            'payment' => $payment,
-            'gateway' => $payment->gateway,
-            'authority' => $payment->authority,
-            'payment_url' => $paymentUrl,
-            'gateway_response' => $payment->gateway_response,
-        ];
+        });
     }
 
     public function verifyGatewayPayment(Payment $payment, array $callbackData): array
