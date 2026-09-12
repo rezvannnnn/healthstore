@@ -24,6 +24,7 @@ class CartController extends Controller
 
         return Inertia::render('Cart/Index', [
             'cart' => [
+                'id' => $cart->id,
                 'items' => $cart->items->map(fn ($item) => [
                     'id' => $item->id,
                     'product_id' => $item->product_id,
