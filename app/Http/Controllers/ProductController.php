@@ -100,7 +100,7 @@ class ProductController extends Controller
             ->with(['brand', 'images'])
             ->where('is_active', true)
             ->when($product->category_id, fn ($query) => $query->where('category_id', $product->category_id))
-            ->whereKeyNot($product->id)
+            ->where('id', '!=', $product->id)
             ->orderByDesc('is_featured')
             ->orderBy('sort_order')
             ->limit(4)
