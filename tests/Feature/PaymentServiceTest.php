@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\InventoryReservationService;
+use App\Services\Payment\PaymentGatewayInterface;
 use App\Services\PaymentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
@@ -129,6 +130,54 @@ class PaymentServiceTest extends TestCase
 
         $this->assertEquals($firstPayment->id, $secondPayment->id);
         $this->assertDatabaseCount('payments', 1);
+    }
+
+    public function test_existing_gateway_authority_is_reused_without_new_gateway_request(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->createOrder($user, 360000);
+        $gateway = new class implements PaymentGatewayInterface {
+            public int $requestCalls = 0;
+
+            public function request(Payment $payment): array
+            {
+                $this->requestCalls++;
+
+                return [
+                    'authority' => 'AUTH-123456',
+                    'payment_url' => 'https://gateway.test/pay/AUTH-123456',
+                    'response' => ['code' => 100],
+                ];
+            }
+
+            public function verify(Payment $payment, array $callbackData): array
+            {
+                return [
+                    'success' => true,
+                    'verified' => true,
+                    'transaction_id' => 'TX-123456',
+                    'reference_number' => 'REF-123456',
+                    'response' => ['code' => 100],
+                ];
+            }
+
+            public function paymentUrl(array $gatewayData): string
+            {
+                return 'https://gateway.test/pay/'.($gatewayData['authority'] ?? '');
+            }
+        };
+        $service = new PaymentService(new InventoryReservationService, $gateway);
+        $payment = $service->create($order);
+
+        $firstResult = $service->requestGatewayPayment($payment);
+        $secondResult = $service->requestGatewayPayment($payment);
+
+        $this->assertSame(1, $gateway->requestCalls);
+        $this->assertSame('AUTH-123456', $firstResult['authority']);
+        $this->assertSame('AUTH-123456', $secondResult['authority']);
+        $this->assertSame($firstResult['payment_url'], $secondResult['payment_url']);
+        $this->assertSame('AUTH-123456', $secondResult['payment']->authority);
+        $this->assertSame('fake', $secondResult['gateway']);
     }
 
     public function test_successful_payment_marks_payment_as_paid_order_as_paid_and_consumes_reservations(): void
