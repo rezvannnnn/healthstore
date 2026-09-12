@@ -187,4 +187,95 @@ class CheckoutServiceTest extends TestCase
 
         $this->createCheckoutService()->confirmPriceChanges($cart);
     }
+
+    public function test_prepare_marks_out_of_stock_item_without_removing_it(): void
+    {
+        $user = User::factory()->create();
+        $product = $this->createProduct();
+        $this->createTieredPrices($product);
+        $this->createInventory($product, 0);
+
+        $cart = Cart::create([
+            'user_id' => $user->id,
+            'status' => 'active',
+        ]);
+
+        $item = CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'quantity' => 1,
+            'unit_price' => 100000,
+        ]);
+
+        $result = $this->createCheckoutService()->prepare($cart);
+
+        $this->assertCount(1, $result['availability_changes']);
+        $this->assertSame('out_of_stock', $result['availability_changes'][0]['type']);
+        $this->assertEquals(100000, $result['availability_changes'][0]['old_price']);
+        $this->assertEquals(0, $result['availability_changes'][0]['new_price']);
+        $this->assertTrue($result['requires_price_confirmation']);
+        $this->assertTrue($item->fresh()->exists);
+        $this->assertEquals(0, (float) $item->fresh()->unit_price);
+        $this->assertEquals(0, $result['subtotal']);
+        $this->assertFalse($result['can_proceed_to_payment']);
+    }
+
+    public function test_confirm_removes_out_of_stock_items_only_after_confirmation(): void
+    {
+        $user = User::factory()->create();
+        $product = $this->createProduct();
+        $this->createTieredPrices($product);
+        $this->createInventory($product, 0);
+
+        $cart = Cart::create([
+            'user_id' => $user->id,
+            'status' => 'active',
+        ]);
+
+        $item = CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'quantity' => 1,
+            'unit_price' => 0,
+        ]);
+
+        $result = $this->createCheckoutService()->confirmPriceChanges($cart);
+
+        $this->assertTrue($result['confirmed']);
+        $this->assertFalse($result['payment_allowed']);
+        $this->assertEquals(0, $result['subtotal']);
+        $this->assertDatabaseMissing('cart_items', [
+            'id' => $item->id,
+        ]);
+    }
+
+    public function test_reject_price_changes_keeps_out_of_stock_item_in_cart(): void
+    {
+        $user = User::factory()->create();
+        $product = $this->createProduct();
+        $this->createTieredPrices($product);
+        $this->createInventory($product, 0);
+
+        $cart = Cart::create([
+            'user_id' => $user->id,
+            'status' => 'active',
+        ]);
+
+        $item = CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'quantity' => 1,
+            'unit_price' => 100000,
+        ]);
+
+        $this->createCheckoutService()->prepare($cart);
+
+        $result = $this->createCheckoutService()->rejectPriceChanges($cart);
+
+        $this->assertFalse($result['confirmed']);
+        $this->assertFalse($result['payment_allowed']);
+        $this->assertDatabaseHas('cart_items', [
+            'id' => $item->id,
+        ]);
+    }
 }
