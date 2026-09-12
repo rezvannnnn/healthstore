@@ -1,0 +1,95 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Category;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class CategoryController extends Controller
+{
+    public function index(): Response
+    {
+        $categories = Category::query()
+            ->with('parent:id,name')
+            ->withCount('products')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['id', 'parent_id', 'name', 'slug', 'description', 'is_active', 'sort_order']);
+
+        return Inertia::render('Admin/Categories/Index', [
+            'categories' => $categories,
+        ]);
+    }
+
+    public function create(): Response
+    {
+        return Inertia::render('Admin/Categories/Create', [
+            'parents' => $this->parentOptions(),
+        ]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $data = $this->validatedData($request);
+        $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
+
+        Category::create($data);
+
+        return to_route('admin.categories.index')->with('success', 'دسته‌بندی با موفقیت ایجاد شد.');
+    }
+
+    public function edit(Category $category): Response
+    {
+        return Inertia::render('Admin/Categories/Edit', [
+            'category' => $category->only([
+                'id', 'parent_id', 'name', 'slug', 'description', 'is_active', 'sort_order',
+            ]),
+            'parents' => $this->parentOptions($category),
+        ]);
+    }
+
+    public function update(Request $request, Category $category): RedirectResponse
+    {
+        $data = $this->validatedData($request, $category);
+        $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
+
+        $category->update($data);
+
+        return to_route('admin.categories.index')->with('success', 'دسته‌بندی با موفقیت ویرایش شد.');
+    }
+
+    protected function parentOptions(?Category $category = null)
+    {
+        $query = Category::query()->where('is_active', true)->orderBy('name');
+
+        if ($category) {
+            $query->whereKeyNot($category->id);
+        }
+
+        return $query->get(['id', 'name']);
+    }
+
+    protected function validatedData(Request $request, ?Category $category = null): array
+    {
+        return $request->validate([
+            'parent_id' => ['nullable', 'integer', Rule::exists('categories', 'id')->where('is_active', true)],
+            'name' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', Rule::unique('categories', 'slug')->ignore($category?->id)],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'image' => ['nullable', 'string', 'max:2048'],
+            'is_active' => ['boolean'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+        ]);
+    }
+
+    protected function makeSlug(?string $slug, string $name): string
+    {
+        return trim((string) $slug) !== '' ? trim((string) $slug) : Str::slug($name);
+    }
+}
