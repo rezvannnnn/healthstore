@@ -160,7 +160,9 @@ class PaymentServiceTest extends TestCase
         $paymentService = new PaymentService(new InventoryReservationService);
         $payment = $paymentService->create($order);
         $result = $paymentService->markAsPaid($payment, 'TX-123456');
-        $payment->refresh(); $order->refresh(); $reservation->refresh();
+        $payment->refresh();
+        $order->refresh();
+        $reservation->refresh();
 
         $this->assertTrue($result);
         $this->assertEquals('paid', $payment->status);
@@ -208,7 +210,10 @@ class PaymentServiceTest extends TestCase
         $paymentService = new PaymentService(new InventoryReservationService);
         $payment = $paymentService->create($order);
         $result = $paymentService->markAsFailed($payment, 'Gateway payment failed');
-        $payment->refresh(); $order->refresh(); $reservation->refresh(); $inventory->refresh();
+        $payment->refresh();
+        $order->refresh();
+        $reservation->refresh();
+        $inventory->refresh();
 
         $this->assertTrue($result);
         $this->assertEquals('failed', $payment->status);
@@ -250,7 +255,9 @@ class PaymentServiceTest extends TestCase
         $paymentService = new PaymentService(new InventoryReservationService);
         $payment = $paymentService->create($order);
         $result = $paymentService->cancel($payment);
-        $payment->refresh(); $reservation->refresh(); $inventory->refresh();
+        $payment->refresh();
+        $reservation->refresh();
+        $inventory->refresh();
 
         $this->assertTrue($result);
         $this->assertEquals('cancelled', $payment->status);
