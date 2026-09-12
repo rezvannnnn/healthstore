@@ -44,14 +44,20 @@ class InventoryController extends Controller
         $products = collect($paginator->items())->map(function (Product $product): array {
             $physical = $this->inventoryService->getPhysicalQuantity($product);
             $reserved = $this->inventoryService->getReservedQuantity($product);
-
             $minimum = (int) Inventory::query()
                 ->where('product_id', $product->id)
                 ->where('is_active', true)
                 ->sum('minimum_quantity');
+            $inventory = Inventory::query()
+                ->where('product_id', $product->id)
+                ->where('is_active', true)
+                ->orderBy('expiry_date')
+                ->orderBy('id')
+                ->first(['id']);
 
             return [
                 'id' => $product->id,
+                'inventory_id' => $inventory?->id,
                 'name' => $product->name,
                 'sku' => $product->sku,
                 'physical_quantity' => $physical,
