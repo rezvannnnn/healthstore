@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Inventory;
 use App\Models\InventoryMovement;
 use App\Models\Product;
+use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -15,7 +16,7 @@ class AdminInventoryTest extends TestCase
 
     public function test_admin_can_view_inventory_management_page(): void
     {
-        $admin = \App\Models\User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->create(['is_admin' => true]);
 
         $this->actingAs($admin)
             ->get('/admin/inventory')
@@ -31,7 +32,7 @@ class AdminInventoryTest extends TestCase
 
     public function test_non_admin_cannot_view_inventory_management_page(): void
     {
-        $user = \App\Models\User::factory()->create(['is_admin' => false]);
+        $user = User::factory()->create(['is_admin' => false]);
 
         $this->actingAs($user)
             ->get('/admin/inventory')
@@ -40,7 +41,7 @@ class AdminInventoryTest extends TestCase
 
     public function test_admin_can_create_inventory_record(): void
     {
-        $admin = \App\Models\User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->create(['is_admin' => true]);
         $product = Product::factory()->create();
         $warehouse = Warehouse::factory()->create();
 
@@ -65,7 +66,7 @@ class AdminInventoryTest extends TestCase
 
     public function test_admin_can_increase_inventory_and_movement_is_recorded(): void
     {
-        $admin = \App\Models\User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->create(['is_admin' => true]);
         $product = Product::factory()->create();
         $warehouse = Warehouse::factory()->create();
         $inventory = Inventory::create([
@@ -95,7 +96,7 @@ class AdminInventoryTest extends TestCase
 
     public function test_admin_cannot_reduce_inventory_below_zero(): void
     {
-        $admin = \App\Models\User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->create(['is_admin' => true]);
         $product = Product::factory()->create();
         $warehouse = Warehouse::factory()->create();
         $inventory = Inventory::create([
@@ -117,7 +118,7 @@ class AdminInventoryTest extends TestCase
 
     public function test_admin_can_view_inventory_movements(): void
     {
-        $admin = \App\Models\User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->create(['is_admin' => true]);
         $product = Product::factory()->create();
         $warehouse = Warehouse::factory()->create();
         $inventory = Inventory::create([
