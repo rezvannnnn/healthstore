@@ -66,9 +66,11 @@ class OtpService
         }
         if (! Hash::check($code, $verification->code_hash)) {
             $verification->increment('attempts');
+
             return false;
         }
         $verification->update(['verified_at' => now()]);
+
         return true;
     }
 
@@ -86,6 +88,7 @@ class OtpService
         if (! preg_match('/^09\d{9}$/', $phone)) {
             throw new RuntimeException('شماره موبایل معتبر نیست.');
         }
+
         return $phone;
     }
 
@@ -96,6 +99,7 @@ class OtpService
         }
         $min = (int) ('1'.str_repeat('0', $length - 1));
         $max = (int) str_repeat('9', $length);
+
         return (string) random_int($min, $max);
     }
 }
