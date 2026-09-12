@@ -2,85 +2,26 @@
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
-type Product = {
-    id: number;
-    name: string;
-    sku: string | null;
-    physical_quantity: number;
-    reserved_quantity: number;
-    available_quantity: number;
-    minimum_quantity: number;
-    status: 'ok' | 'low' | 'out';
-};
-
+type Product = { id: number; inventory_id: number | null; name: string; sku: string | null; physical_quantity: number; reserved_quantity: number; available_quantity: number; minimum_quantity: number; status: 'ok' | 'low' | 'out' };
 type Warehouse = { id: number; name: string };
 type Filters = { search: string; status: string };
 type Pagination = { current_page: number; last_page: number; total: number };
-
-const props = defineProps<{
-    products: Product[];
-    warehouses: Warehouse[];
-    filters: Filters;
-    pagination: Pagination;
-}>();
-
-const search = ref(props.filters.search);
-const status = ref(props.filters.status || 'all');
-const selectedProduct = ref<number | null>(null);
-const selectedWarehouse = ref<number | null>(props.warehouses[0]?.id ?? null);
-const form = useForm({ product_id: 0, warehouse_id: 0, quantity: 0, minimum_quantity: 0, batch_number: '', expiry_date: '' });
+const props = defineProps<{ products: Product[]; warehouses: Warehouse[]; filters: Filters; pagination: Pagination }>();
+const search = ref(props.filters.search); const status = ref(props.filters.status || 'all'); const selectedProduct = ref<number | null>(null);
+const form = useForm({ product_id: 0, warehouse_id: props.warehouses[0]?.id ?? 0, quantity: 0, minimum_quantity: 0, batch_number: '', expiry_date: '' });
 const adjustment = useForm({ quantity_delta: 0, note: '' });
-
 const filter = () => router.get('/admin/inventory', { search: search.value, status: status.value }, { preserveState: true, replace: true });
-const openCreate = (productId: number) => { selectedProduct.value = productId; form.product_id = productId; form.warehouse_id = selectedWarehouse.value ?? 0; };
-const createInventory = () => form.post('/admin/inventory', { onSuccess: () => { selectedProduct.value = null; form.reset(); } });
-const adjust = (productId: number, delta: number) => { adjustment.quantity_delta = delta; adjustment.post(`/admin/inventory/${productId}/adjust`, { preserveScroll: true, onSuccess: () => adjustment.reset() }); };
+const openCreate = (productId: number) => { selectedProduct.value = productId; form.product_id = productId; };
+const createInventory = () => form.post('/admin/inventory', { onSuccess: () => { selectedProduct.value = null; form.reset(); form.warehouse_id = props.warehouses[0]?.id ?? 0; } });
+const adjust = (inventoryId: number, delta: number) => { adjustment.quantity_delta = delta; adjustment.post(`/admin/inventory/${inventoryId}/adjust`, { preserveScroll: true, onSuccess: () => adjustment.reset() }); };
 const formatStatus = (value: Product['status']) => value === 'out' ? 'ناموجود' : value === 'low' ? 'کم‌موجودی' : 'مناسب';
 </script>
-
 <template>
-    <Head title="مدیریت موجودی" />
-    <div dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 text-gray-900 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-7xl">
-            <div class="mb-8 flex items-center justify-between">
-                <div><p class="text-sm text-gray-500">HealthStore / مدیریت</p><h1 class="text-3xl font-bold">موجودی</h1></div>
-                <Link href="/admin" class="rounded-lg border bg-white px-4 py-2 text-sm">داشبورد</Link>
-            </div>
-
-            <div class="mb-6 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
-                <form class="flex flex-col gap-3 md:flex-row" @submit.prevent="filter">
-                    <input v-model="search" type="search" placeholder="نام، SKU یا بارکد..." class="flex-1 rounded-lg border px-4 py-2" />
-                    <select v-model="status" class="rounded-lg border px-4 py-2"><option value="all">همه</option><option value="low">کم‌موجودی</option><option value="out">ناموجود</option></select>
-                    <button class="rounded-lg bg-gray-900 px-5 py-2 text-white">جستجو</button>
-                </form>
-            </div>
-
-            <div class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200">
-                <div class="overflow-x-auto"><table class="min-w-full text-right text-sm">
-                    <thead class="border-b bg-gray-50"><tr><th class="px-4 py-3">محصول</th><th class="px-4 py-3">فیزیکی</th><th class="px-4 py-3">رزرو</th><th class="px-4 py-3">قابل فروش</th><th class="px-4 py-3">حداقل</th><th class="px-4 py-3">وضعیت</th><th class="px-4 py-3">عملیات</th></tr></thead>
-                    <tbody class="divide-y">
-                        <tr v-for="product in products" :key="product.id">
-                            <td class="px-4 py-4"><div class="font-semibold">{{ product.name }}</div><div class="text-xs text-gray-500">SKU: {{ product.sku || '—' }}</div></td>
-                            <td class="px-4 py-4">{{ product.physical_quantity }}</td><td class="px-4 py-4">{{ product.reserved_quantity }}</td><td class="px-4 py-4 font-semibold">{{ product.available_quantity }}</td><td class="px-4 py-4">{{ product.minimum_quantity }}</td>
-                            <td class="px-4 py-4"><span class="rounded-full bg-gray-100 px-2 py-1 text-xs">{{ formatStatus(product.status) }}</span></td>
-                            <td class="px-4 py-4"><div class="flex gap-2"><button @click="adjust(product.id, 1)" class="rounded bg-gray-900 px-3 py-1 text-white">+۱</button><button @click="adjust(product.id, -1)" class="rounded border px-3 py-1">−۱</button><button @click="openCreate(product.id)" class="rounded border px-3 py-1">ورود موجودی</button></div></td>
-                        </tr>
-                        <tr v-if="products.length === 0"><td colspan="7" class="px-4 py-12 text-center text-gray-500">محصولی پیدا نشد.</td></tr>
-                    </tbody>
-                </table></div>
-                <div class="border-t px-4 py-4 text-sm text-gray-600">مجموع: {{ pagination.total }} محصول</div>
-            </div>
-
-            <div v-if="selectedProduct !== null" class="mt-6 rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200">
-                <h2 class="mb-4 text-lg font-bold">ثبت رکورد موجودی</h2>
-                <form class="grid gap-3 md:grid-cols-5" @submit.prevent="createInventory">
-                    <select v-model="form.warehouse_id" class="rounded-lg border px-3 py-2"><option v-for="warehouse in warehouses" :key="warehouse.id" :value="warehouse.id">{{ warehouse.name }}</option></select>
-                    <input v-model="form.quantity" type="number" min="0" placeholder="تعداد" class="rounded-lg border px-3 py-2" />
-                    <input v-model="form.minimum_quantity" type="number" min="0" placeholder="حداقل" class="rounded-lg border px-3 py-2" />
-                    <input v-model="form.batch_number" placeholder="شماره بچ" class="rounded-lg border px-3 py-2" />
-                    <div class="flex gap-2"><button class="rounded-lg bg-gray-900 px-4 py-2 text-white">ثبت</button><button type="button" @click="selectedProduct = null" class="rounded-lg border px-4 py-2">لغو</button></div>
-                </form>
-            </div>
-        </div>
-    </div>
-</template>
+<Head title="مدیریت موجودی" /><div dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 text-gray-900"><div class="mx-auto max-w-7xl">
+<div class="mb-8 flex items-center justify-between"><div><p class="text-sm text-gray-500">HealthStore / مدیریت</p><h1 class="text-3xl font-bold">موجودی</h1></div><Link href="/admin" class="rounded-lg border bg-white px-4 py-2 text-sm">داشبورد</Link></div>
+<div class="mb-6 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200"><form class="flex flex-col gap-3 md:flex-row" @submit.prevent="filter"><input v-model="search" type="search" placeholder="نام، SKU یا بارکد..." class="flex-1 rounded-lg border px-4 py-2" /><select v-model="status" class="rounded-lg border px-4 py-2"><option value="all">همه</option><option value="low">کم‌موجودی</option><option value="out">ناموجود</option></select><button class="rounded-lg bg-gray-900 px-5 py-2 text-white">جستجو</button></form></div>
+<div class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200"><div class="overflow-x-auto"><table class="min-w-full text-right text-sm"><thead class="border-b bg-gray-50"><tr><th class="px-4 py-3">محصول</th><th class="px-4 py-3">فیزیکی</th><th class="px-4 py-3">رزرو</th><th class="px-4 py-3">قابل فروش</th><th class="px-4 py-3">حداقل</th><th class="px-4 py-3">وضعیت</th><th class="px-4 py-3">عملیات</th></tr></thead><tbody class="divide-y">
+<tr v-for="product in products" :key="product.id"><td class="px-4 py-4"><div class="font-semibold">{{ product.name }}</div><div class="text-xs text-gray-500">SKU: {{ product.sku || '—' }}</div></td><td class="px-4 py-4">{{ product.physical_quantity }}</td><td class="px-4 py-4">{{ product.reserved_quantity }}</td><td class="px-4 py-4 font-semibold">{{ product.available_quantity }}</td><td class="px-4 py-4">{{ product.minimum_quantity }}</td><td class="px-4 py-4">{{ formatStatus(product.status) }}</td><td class="px-4 py-4"><div class="flex flex-wrap gap-2"><template v-if="product.inventory_id"><button @click="adjust(product.inventory_id, 1)" class="rounded bg-gray-900 px-3 py-1 text-white">+۱</button><button @click="adjust(product.inventory_id, -1)" class="rounded border px-3 py-1">−۱</button><Link :href="`/admin/inventory/${product.inventory_id}/movements`" class="rounded border px-3 py-1">گردش</Link></template><button @click="openCreate(product.id)" class="rounded border px-3 py-1">ورود موجودی</button></div></td></tr>
+<tr v-if="products.length === 0"><td colspan="7" class="px-4 py-12 text-center text-gray-500">محصولی پیدا نشد.</td></tr></tbody></table></div><div class="border-t px-4 py-4 text-sm text-gray-600">مجموع: {{ pagination.total }} محصول</div></div>
+<div v-if="selectedProduct !== null" class="mt-6 rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200"><h2 class="mb-4 text-lg font-bold">ثبت رکورد موجودی</h2><form class="grid gap-3 md:grid-cols-5" @submit.prevent="createInventory"><select v-model="form.warehouse_id" class="rounded-lg border px-3 py-2"><option v-for="warehouse in warehouses" :key="warehouse.id" :value="warehouse.id">{{ warehouse.name }}</option></select><input v-model="form.quantity" type="number" min="0" placeholder="تعداد" class="rounded-lg border px-3 py-2" /><input v-model="form.minimum_quantity" type="number" min="0" placeholder="حداقل" class="rounded-lg border px-3 py-2" /><input v-model="form.batch_number" placeholder="شماره بچ" class="rounded-lg border px-3 py-2" /><div class="flex gap-2"><button class="rounded-lg bg-gray-900 px-4 py-2 text-white">ثبت</button><button type="button" @click="selectedProduct = null" class="rounded-lg border px-4 py-2">لغو</button></div></form></div>
+</div></div></template>
