@@ -14,6 +14,15 @@ class AdminInventoryTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function warehouse(): Warehouse
+    {
+        return Warehouse::create([
+            'name' => 'انبار اصلی',
+            'code' => 'MAIN',
+            'is_active' => true,
+        ]);
+    }
+
     public function test_admin_can_view_inventory_management_page(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
@@ -43,7 +52,7 @@ class AdminInventoryTest extends TestCase
     {
         $admin = User::factory()->create(['is_admin' => true]);
         $product = Product::factory()->create();
-        $warehouse = Warehouse::factory()->create();
+        $warehouse = $this->warehouse();
 
         $response = $this->actingAs($admin)->post('/admin/inventory', [
             'product_id' => $product->id,
@@ -68,7 +77,7 @@ class AdminInventoryTest extends TestCase
     {
         $admin = User::factory()->create(['is_admin' => true]);
         $product = Product::factory()->create();
-        $warehouse = Warehouse::factory()->create();
+        $warehouse = $this->warehouse();
         $inventory = Inventory::create([
             'product_id' => $product->id,
             'warehouse_id' => $warehouse->id,
@@ -98,7 +107,7 @@ class AdminInventoryTest extends TestCase
     {
         $admin = User::factory()->create(['is_admin' => true]);
         $product = Product::factory()->create();
-        $warehouse = Warehouse::factory()->create();
+        $warehouse = $this->warehouse();
         $inventory = Inventory::create([
             'product_id' => $product->id,
             'warehouse_id' => $warehouse->id,
@@ -120,7 +129,7 @@ class AdminInventoryTest extends TestCase
     {
         $admin = User::factory()->create(['is_admin' => true]);
         $product = Product::factory()->create();
-        $warehouse = Warehouse::factory()->create();
+        $warehouse = $this->warehouse();
         $inventory = Inventory::create([
             'product_id' => $product->id,
             'warehouse_id' => $warehouse->id,
