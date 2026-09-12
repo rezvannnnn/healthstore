@@ -12,8 +12,7 @@ class ZarinPalCallbackController extends Controller
 {
     public function __construct(
         protected PaymentService $paymentService
-    ) {
-    }
+    ) {}
 
     /**
      * Handle the customer return from ZarinPal.

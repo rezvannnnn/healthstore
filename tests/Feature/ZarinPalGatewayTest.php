@@ -21,14 +21,10 @@ class ZarinPalGatewayTest extends TestCase
         config([
             'services.zarinpal.merchant_id' => 'TEST-MERCHANT-ID',
             'services.zarinpal.sandbox' => true,
-            'services.zarinpal.request_endpoint' =>
-                'https://api.zarinpal.com/pg/v4/payment/request.json',
-            'services.zarinpal.verify_endpoint' =>
-                'https://api.zarinpal.com/pg/v4/payment/verify.json',
-            'services.zarinpal.payment_base_url' =>
-                'https://www.zarinpal.com',
-            'services.zarinpal.callback_url' =>
-                'http://127.0.0.1:8000/payment/zarinpal/callback',
+            'services.zarinpal.request_endpoint' => 'https://api.zarinpal.com/pg/v4/payment/request.json',
+            'services.zarinpal.verify_endpoint' => 'https://api.zarinpal.com/pg/v4/payment/verify.json',
+            'services.zarinpal.payment_base_url' => 'https://www.zarinpal.com',
+            'services.zarinpal.callback_url' => 'http://127.0.0.1:8000/payment/zarinpal/callback',
         ]);
     }
 
@@ -37,7 +33,7 @@ class ZarinPalGatewayTest extends TestCase
         int $totalAmount = 220000
     ): Order {
         return Order::create([
-            'order_number' => 'ORD-ZP-' . now()->format('YmdHis') . '-' . uniqid(),
+            'order_number' => 'ORD-ZP-'.now()->format('YmdHis').'-'.uniqid(),
             'user_id' => $user->id,
             'customer_type' => 'b2c',
             'business_profile_id' => null,
@@ -86,15 +82,14 @@ class ZarinPalGatewayTest extends TestCase
     public function test_gateway_request_sends_correct_payload_and_returns_authority(): void
     {
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
-                Http::response([
-                    'data' => [
-                        'code' => 100,
-                        'message' => 'Success',
-                        'authority' => 'S000000000000000000000000000001234',
-                    ],
-                    'errors' => [],
-                ], 200),
+            'https://api.zarinpal.com/pg/v4/payment/request.json' => Http::response([
+                'data' => [
+                    'code' => 100,
+                    'message' => 'Success',
+                    'authority' => 'S000000000000000000000000000001234',
+                ],
+                'errors' => [],
+            ], 200),
         ]);
 
         $user = User::factory()->create();
@@ -109,7 +104,7 @@ class ZarinPalGatewayTest extends TestCase
             220000
         );
 
-        $gateway = new ZarinPalGateway();
+        $gateway = new ZarinPalGateway;
 
         $result = $gateway->request($payment);
 
@@ -141,7 +136,7 @@ class ZarinPalGatewayTest extends TestCase
                 ($data['amount'] ?? null) === 220000
                 &&
                 ($data['description'] ?? null) ===
-                    'پرداخت سفارش ' . $order->order_number
+                    'پرداخت سفارش '.$order->order_number
                 &&
                 ($data['callback_url'] ?? null) ===
                     'http://127.0.0.1:8000/payment/zarinpal/callback';
@@ -151,16 +146,15 @@ class ZarinPalGatewayTest extends TestCase
     public function test_gateway_verify_returns_reference_number_for_successful_payment(): void
     {
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/verify.json' =>
-                Http::response([
-                    'data' => [
-                        'code' => 100,
-                        'message' => 'Verified',
-                        'card_pan' => '603799******1234',
-                        'ref_id' => 987654321,
-                    ],
-                    'errors' => [],
-                ], 200),
+            'https://api.zarinpal.com/pg/v4/payment/verify.json' => Http::response([
+                'data' => [
+                    'code' => 100,
+                    'message' => 'Verified',
+                    'card_pan' => '603799******1234',
+                    'ref_id' => 987654321,
+                ],
+                'errors' => [],
+            ], 200),
         ]);
 
         $user = User::factory()->create();
@@ -175,7 +169,7 @@ class ZarinPalGatewayTest extends TestCase
             220000
         );
 
-        $gateway = new ZarinPalGateway();
+        $gateway = new ZarinPalGateway;
 
         $result = $gateway->verify(
             $payment,
@@ -242,7 +236,7 @@ class ZarinPalGatewayTest extends TestCase
             220000
         );
 
-        $gateway = new ZarinPalGateway();
+        $gateway = new ZarinPalGateway;
 
         $result = $gateway->verify(
             $payment,
@@ -271,15 +265,14 @@ class ZarinPalGatewayTest extends TestCase
     public function test_gateway_treats_already_verified_response_as_successful(): void
     {
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/verify.json' =>
-                Http::response([
-                    'data' => [
-                        'code' => 101,
-                        'message' => 'Already verified',
-                        'ref_id' => 987654321,
-                    ],
-                    'errors' => [],
-                ], 200),
+            'https://api.zarinpal.com/pg/v4/payment/verify.json' => Http::response([
+                'data' => [
+                    'code' => 101,
+                    'message' => 'Already verified',
+                    'ref_id' => 987654321,
+                ],
+                'errors' => [],
+            ], 200),
         ]);
 
         $user = User::factory()->create();
@@ -294,7 +287,7 @@ class ZarinPalGatewayTest extends TestCase
             220000
         );
 
-        $gateway = new ZarinPalGateway();
+        $gateway = new ZarinPalGateway;
 
         $result = $gateway->verify(
             $payment,
@@ -321,14 +314,13 @@ class ZarinPalGatewayTest extends TestCase
     public function test_gateway_rejects_unsuccessful_request_response(): void
     {
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
-                Http::response([
-                    'data' => [
-                        'code' => -9,
-                        'message' => 'Invalid merchant',
-                    ],
-                    'errors' => [],
-                ], 200),
+            'https://api.zarinpal.com/pg/v4/payment/request.json' => Http::response([
+                'data' => [
+                    'code' => -9,
+                    'message' => 'Invalid merchant',
+                ],
+                'errors' => [],
+            ], 200),
         ]);
 
         $user = User::factory()->create();
@@ -343,7 +335,7 @@ class ZarinPalGatewayTest extends TestCase
             220000
         );
 
-        $gateway = new ZarinPalGateway();
+        $gateway = new ZarinPalGateway;
 
         $this->expectException(\RuntimeException::class);
 

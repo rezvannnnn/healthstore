@@ -28,7 +28,7 @@ class OrderStatusTest extends TestCase
         string $paymentStatus = 'pending'
     ): Order {
         return Order::create([
-            'order_number' => 'ORD-STATUS-' . now()->format('YmdHis') . '-' . uniqid(),
+            'order_number' => 'ORD-STATUS-'.now()->format('YmdHis').'-'.uniqid(),
             'user_id' => $user->id,
             'customer_type' => 'b2c',
             'business_profile_id' => null,
@@ -74,22 +74,22 @@ class OrderStatusTest extends TestCase
     }
 
     public function test_pending_order_cannot_be_marked_as_cancelled_through_set_status(): void
-{
-    $user = $this->createUser();
+    {
+        $user = $this->createUser();
 
-    $order = $this->createOrder(
-        $user,
-        'pending',
-        'pending'
-    );
+        $order = $this->createOrder(
+            $user,
+            'pending',
+            'pending'
+        );
 
-    $this->expectException(RuntimeException::class);
+        $this->expectException(RuntimeException::class);
 
-    app(OrderService::class)->setStatus(
-        $order,
-        'cancelled'
-    );
-}
+        app(OrderService::class)->setStatus(
+            $order,
+            'cancelled'
+        );
+    }
 
     public function test_paid_order_can_be_moved_to_processing(): void
     {

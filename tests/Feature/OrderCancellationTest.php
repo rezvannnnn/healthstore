@@ -22,8 +22,8 @@ class OrderCancellationTest extends TestCase
             'brand_id' => null,
             'category_id' => null,
             'name' => 'Cancellation Test Product',
-            'slug' => 'cancellation-test-product-' . uniqid(),
-            'sku' => 'CANCEL-' . uniqid(),
+            'slug' => 'cancellation-test-product-'.uniqid(),
+            'sku' => 'CANCEL-'.uniqid(),
             'product_type' => 'physical',
             'unit' => 'piece',
             'quantity_per_unit' => 1,
@@ -42,7 +42,7 @@ class OrderCancellationTest extends TestCase
     {
         return Warehouse::create([
             'name' => 'Cancellation Test Warehouse',
-            'code' => 'CANCEL-WH-' . uniqid(),
+            'code' => 'CANCEL-WH-'.uniqid(),
             'description' => null,
             'is_active' => true,
         ]);
@@ -58,7 +58,7 @@ class OrderCancellationTest extends TestCase
             'warehouse_id' => $warehouse->id,
             'quantity' => $quantity,
             'minimum_quantity' => 1,
-            'batch_number' => 'CANCEL-BATCH-' . uniqid(),
+            'batch_number' => 'CANCEL-BATCH-'.uniqid(),
             'expiry_date' => null,
             'is_active' => true,
         ]);
@@ -70,7 +70,7 @@ class OrderCancellationTest extends TestCase
         string $paymentStatus = 'pending'
     ): Order {
         return Order::create([
-            'order_number' => 'ORD-CANCEL-' . now()->format('YmdHis') . '-' . uniqid(),
+            'order_number' => 'ORD-CANCEL-'.now()->format('YmdHis').'-'.uniqid(),
             'user_id' => $user->id,
             'customer_type' => 'b2c',
             'business_profile_id' => null,
@@ -138,7 +138,7 @@ class OrderCancellationTest extends TestCase
         );
 
         $response = $this->actingAs($user)->post(
-            '/orders/' . $order->order_number . '/cancel'
+            '/orders/'.$order->order_number.'/cancel'
         );
 
         $response->assertRedirect();
@@ -179,7 +179,7 @@ class OrderCancellationTest extends TestCase
         $order = $this->createOrder($owner);
 
         $response = $this->actingAs($otherUser)->post(
-            '/orders/' . $order->order_number . '/cancel'
+            '/orders/'.$order->order_number.'/cancel'
         );
 
         $response->assertStatus(404);
@@ -198,26 +198,26 @@ class OrderCancellationTest extends TestCase
 
     public function test_guest_cannot_cancel_order(): void
     {
-    $user = User::factory()->create();
+        $user = User::factory()->create();
 
-    $order = $this->createOrder($user);
+        $order = $this->createOrder($user);
 
-    $response = $this->post(
-        '/orders/' . $order->order_number . '/cancel'
-    );
+        $response = $this->post(
+            '/orders/'.$order->order_number.'/cancel'
+        );
 
-    $response->assertStatus(401);
+        $response->assertStatus(401);
 
-    $order->refresh();
+        $order->refresh();
 
-    $this->assertEquals(
-        'pending',
-        $order->status
-    );
+        $this->assertEquals(
+            'pending',
+            $order->status
+        );
 
-    $this->assertNull(
-        $order->cancelled_at
-    );
+        $this->assertNull(
+            $order->cancelled_at
+        );
     }
 
     public function test_paid_order_cannot_be_cancelled_by_customer(): void
@@ -231,9 +231,9 @@ class OrderCancellationTest extends TestCase
         );
 
         $response = $this->from(
-            '/orders/' . $order->order_number
+            '/orders/'.$order->order_number
         )->actingAs($user)->post(
-            '/orders/' . $order->order_number . '/cancel'
+            '/orders/'.$order->order_number.'/cancel'
         );
 
         $response->assertRedirect();
@@ -269,9 +269,9 @@ class OrderCancellationTest extends TestCase
         ]);
 
         $response = $this->from(
-            '/orders/' . $order->order_number
+            '/orders/'.$order->order_number
         )->actingAs($user)->post(
-            '/orders/' . $order->order_number . '/cancel'
+            '/orders/'.$order->order_number.'/cancel'
         );
 
         $response->assertRedirect();
@@ -326,7 +326,7 @@ class OrderCancellationTest extends TestCase
         );
 
         $response = $this->actingAs($user)->post(
-            '/orders/' . $order->order_number . '/cancel'
+            '/orders/'.$order->order_number.'/cancel'
         );
 
         $response->assertRedirect();
@@ -375,7 +375,7 @@ class OrderCancellationTest extends TestCase
             4
         );
 
-        $service = new InventoryReservationService();
+        $service = new InventoryReservationService;
 
         $this->assertTrue(
             $service->release($reservation)
@@ -396,7 +396,7 @@ class OrderCancellationTest extends TestCase
         );
 
         $response = $this->actingAs($user)->post(
-            '/orders/' . $order->order_number . '/cancel'
+            '/orders/'.$order->order_number.'/cancel'
         );
 
         $response->assertRedirect();

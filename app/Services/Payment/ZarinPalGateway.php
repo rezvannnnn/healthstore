@@ -253,7 +253,7 @@ class ZarinPalGateway implements PaymentGatewayInterface
             );
         }
 
-        return $baseUrl . '/pg/StartPay/' . $authority;
+        return $baseUrl.'/pg/StartPay/'.$authority;
     }
 
     private function requestEndpoint(): string
@@ -344,7 +344,7 @@ class ZarinPalGateway implements PaymentGatewayInterface
             ?? null;
 
         if (is_string($message) && $message !== '') {
-            return 'خطای زرین‌پال: ' . $message;
+            return 'خطای زرین‌پال: '.$message;
         }
 
         return sprintf(

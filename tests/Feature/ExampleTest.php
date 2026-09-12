@@ -62,7 +62,7 @@ class ExampleTest extends TestCase
             'is_active' => true,
         ]);
 
-        $service = new CartService();
+        $service = new CartService;
 
         $item = $service->addItem(
             $user->id,
@@ -108,7 +108,7 @@ class ExampleTest extends TestCase
             'is_active' => true,
         ]);
 
-        $service = new CartService();
+        $service = new CartService;
 
         $item = $service->addItem(
             $user->id,
@@ -173,7 +173,7 @@ class ExampleTest extends TestCase
             'is_active' => true,
         ]);
 
-        $service = new CartService();
+        $service = new CartService;
 
         $service->addItem(
             $user->id,
@@ -215,7 +215,7 @@ class ExampleTest extends TestCase
 
         $this->createAvailableInventory($product);
 
-        $cartService = new CartService();
+        $cartService = new CartService;
 
         $item = $cartService->addItem(
             $user->id,
@@ -239,7 +239,7 @@ class ExampleTest extends TestCase
 
         $checkoutService = new CheckoutService(
             $cartService,
-            new InventoryService()
+            new InventoryService
         );
 
         $result = $checkoutService->prepare($cart);
@@ -301,7 +301,7 @@ class ExampleTest extends TestCase
 
         $this->createAvailableInventory($product);
 
-        $cartService = new CartService();
+        $cartService = new CartService;
 
         $cartService->addItem(
             $user->id,
@@ -315,7 +315,7 @@ class ExampleTest extends TestCase
 
         $checkoutService = new CheckoutService(
             $cartService,
-            new InventoryService()
+            new InventoryService
         );
 
         $result = $checkoutService->prepare($cart);
@@ -360,7 +360,7 @@ class ExampleTest extends TestCase
 
         $this->createAvailableInventory($product);
 
-        $cartService = new CartService();
+        $cartService = new CartService;
 
         $cartService->addItem(
             $user->id,
@@ -379,7 +379,7 @@ class ExampleTest extends TestCase
 
         $checkoutService = new CheckoutService(
             $cartService,
-            new InventoryService()
+            new InventoryService
         );
 
         $checkout = $checkoutService->prepare($cart);
@@ -434,7 +434,7 @@ class ExampleTest extends TestCase
 
         $this->createAvailableInventory($product);
 
-        $cartService = new CartService();
+        $cartService = new CartService;
 
         $item = $cartService->addItem(
             $user->id,
@@ -453,7 +453,7 @@ class ExampleTest extends TestCase
 
         $checkoutService = new CheckoutService(
             $cartService,
-            new InventoryService()
+            new InventoryService
         );
 
         $checkoutService->prepare($cart);
@@ -510,7 +510,7 @@ class ExampleTest extends TestCase
             'is_active' => true,
         ]);
 
-        $service = new InventoryService();
+        $service = new InventoryService;
 
         $this->assertTrue(
             $service->isAvailable($product)
@@ -549,7 +549,7 @@ class ExampleTest extends TestCase
             'is_active' => true,
         ]);
 
-        $service = new InventoryService();
+        $service = new InventoryService;
 
         $this->assertFalse(
             $service->isAvailable($product)
@@ -588,7 +588,7 @@ class ExampleTest extends TestCase
             'is_active' => false,
         ]);
 
-        $service = new InventoryService();
+        $service = new InventoryService;
 
         $this->assertFalse(
             $service->isAvailable($product)
@@ -628,7 +628,7 @@ class ExampleTest extends TestCase
             'is_active' => true,
         ]);
 
-        $service = new InventoryService();
+        $service = new InventoryService;
 
         $this->assertFalse(
             $service->isAvailable($product)
@@ -681,7 +681,7 @@ class ExampleTest extends TestCase
             'is_active' => true,
         ]);
 
-        $service = new InventoryService();
+        $service = new InventoryService;
 
         $this->assertTrue(
             $service->isAvailable($product)
@@ -730,7 +730,7 @@ class ExampleTest extends TestCase
             'is_active' => true,
         ]);
 
-        $cartService = new CartService();
+        $cartService = new CartService;
 
         $item = $cartService->addItem(
             $user->id,
@@ -754,7 +754,7 @@ class ExampleTest extends TestCase
 
         $checkoutService = new CheckoutService(
             $cartService,
-            new InventoryService()
+            new InventoryService
         );
 
         $result = $checkoutService->prepare($cart);
@@ -820,7 +820,7 @@ class ExampleTest extends TestCase
             'is_active' => true,
         ]);
 
-        $cartService = new CartService();
+        $cartService = new CartService;
 
         $item = $cartService->addItem(
             $user->id,
@@ -839,7 +839,7 @@ class ExampleTest extends TestCase
 
         $checkoutService = new CheckoutService(
             $cartService,
-            new InventoryService()
+            new InventoryService
         );
 
         $checkoutService->prepare($cart);
@@ -909,7 +909,7 @@ class ExampleTest extends TestCase
             'is_active' => true,
         ]);
 
-        $cartService = new CartService();
+        $cartService = new CartService;
 
         $item = $cartService->addItem(
             $user->id,
@@ -928,7 +928,7 @@ class ExampleTest extends TestCase
 
         $checkoutService = new CheckoutService(
             $cartService,
-            new InventoryService()
+            new InventoryService
         );
 
         $checkoutService->prepare($cart);

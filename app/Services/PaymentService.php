@@ -13,8 +13,7 @@ class PaymentService
     public function __construct(
         protected InventoryReservationService $reservationService,
         protected ?PaymentGatewayInterface $gateway = null
-    ) {
-    }
+    ) {}
 
     /**
      * Create or return the existing pending payment for an order.

@@ -100,7 +100,7 @@ class InventoryReservationService
 
             $remaining = $quantity;
 
-            $reservations = new Collection();
+            $reservations = new Collection;
 
             foreach ($inventoryRows as $inventory) {
                 if ($remaining <= 0) {

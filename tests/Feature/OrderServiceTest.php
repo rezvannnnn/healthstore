@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Cart;
-use RuntimeException;
 use App\Models\Inventory;
 use App\Models\InventoryReservation;
 use App\Models\Order;
@@ -17,6 +16,7 @@ use App\Services\InventoryReservationService;
 use App\Services\InventoryService;
 use App\Services\OrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use RuntimeException;
 use Tests\TestCase;
 
 class OrderServiceTest extends TestCase
@@ -70,7 +70,7 @@ class OrderServiceTest extends TestCase
     ): Warehouse {
         $warehouse = Warehouse::create([
             'name' => 'Order Test Warehouse',
-            'code' => 'ORDER-TEST-WH-' . uniqid(),
+            'code' => 'ORDER-TEST-WH-'.uniqid(),
             'description' => null,
             'is_active' => true,
         ]);
@@ -80,7 +80,7 @@ class OrderServiceTest extends TestCase
             'warehouse_id' => $warehouse->id,
             'quantity' => $quantity,
             'minimum_quantity' => 1,
-            'batch_number' => 'ORDER-TEST-BATCH-' . uniqid(),
+            'batch_number' => 'ORDER-TEST-BATCH-'.uniqid(),
             'expiry_date' => null,
             'is_active' => true,
         ]);
@@ -101,7 +101,7 @@ class OrderServiceTest extends TestCase
         $this->createPrice($product, 180000);
         $this->createInventory($product, 10);
 
-        $cartService = new CartService();
+        $cartService = new CartService;
 
         $item = $cartService->addItem(
             $user->id,
@@ -119,9 +119,9 @@ class OrderServiceTest extends TestCase
             ->first();
 
         $orderService = new OrderService(
-            new InventoryService(),
+            new InventoryService,
             $cartService,
-            new InventoryReservationService()
+            new InventoryReservationService
         );
 
         $order = $orderService->createFromCart($cart);
@@ -222,7 +222,7 @@ class OrderServiceTest extends TestCase
         $this->createPrice($product, 250000);
         $this->createInventory($product, 5);
 
-        $cartService = new CartService();
+        $cartService = new CartService;
 
         $cartService->addItem(
             $user->id,
@@ -235,9 +235,9 @@ class OrderServiceTest extends TestCase
             ->first();
 
         $orderService = new OrderService(
-            new InventoryService(),
+            new InventoryService,
             $cartService,
-            new InventoryReservationService()
+            new InventoryReservationService
         );
 
         $order = $orderService->createFromCart($cart);
@@ -285,7 +285,7 @@ class OrderServiceTest extends TestCase
             10
         );
 
-        $cartService = new CartService();
+        $cartService = new CartService;
 
         $cartService->addItem(
             $user->id,
@@ -298,9 +298,9 @@ class OrderServiceTest extends TestCase
             ->first();
 
         $orderService = new OrderService(
-            new InventoryService(),
+            new InventoryService,
             $cartService,
-            new InventoryReservationService()
+            new InventoryReservationService
         );
 
         $order = $orderService->createFromCart($cart);
@@ -329,7 +329,7 @@ class OrderServiceTest extends TestCase
             $reservation->quantity
         );
 
-        $inventoryService = new InventoryService();
+        $inventoryService = new InventoryService;
 
         $this->assertEquals(
             7,
@@ -350,7 +350,7 @@ class OrderServiceTest extends TestCase
         $this->createPrice($product, 120000);
         $this->createInventory($product, 10);
 
-        $cartService = new CartService();
+        $cartService = new CartService;
 
         $cartService->addItem(
             $user->id,
@@ -363,9 +363,9 @@ class OrderServiceTest extends TestCase
             ->first();
 
         $orderService = new OrderService(
-            new InventoryService(),
+            new InventoryService,
             $cartService,
-            new InventoryReservationService()
+            new InventoryReservationService
         );
 
         $orderService->createFromCart($cart);
@@ -391,7 +391,7 @@ class OrderServiceTest extends TestCase
         $this->createPrice($product, 100000);
         $this->createInventory($product, 1);
 
-        $cartService = new CartService();
+        $cartService = new CartService;
 
         $cartService->addItem(
             $user->id,
@@ -404,9 +404,9 @@ class OrderServiceTest extends TestCase
             ->first();
 
         $orderService = new OrderService(
-            new InventoryService(),
+            new InventoryService,
             $cartService,
-            new InventoryReservationService()
+            new InventoryReservationService
         );
 
         $this->expectException(RuntimeException::class);
@@ -436,7 +436,7 @@ class OrderServiceTest extends TestCase
             10
         );
 
-        $cartService = new CartService();
+        $cartService = new CartService;
 
         $cartService->addItem(
             $user->id,
@@ -449,9 +449,9 @@ class OrderServiceTest extends TestCase
             ->first();
 
         $orderService = new OrderService(
-            new InventoryService(),
+            new InventoryService,
             $cartService,
-            new InventoryReservationService()
+            new InventoryReservationService
         );
 
         $order = $orderService->createFromCart($cart);
@@ -485,7 +485,7 @@ class OrderServiceTest extends TestCase
             $inventory->quantity
         );
 
-        $inventoryService = new InventoryService();
+        $inventoryService = new InventoryService;
 
         $this->assertEquals(
             7,

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\OtpVerification;
 use App\Models\User;
+use App\Services\OtpService;
 use App\Services\Sms\FakeSmsProvider;
 use App\Services\Sms\SmsProviderInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -382,7 +383,7 @@ class RegistrationTest extends TestCase
         $code = $matches[1];
 
         app(
-            \App\Services\OtpService::class
+            OtpService::class
         )->verify(
             $phone,
             $code
@@ -546,40 +547,40 @@ class RegistrationTest extends TestCase
         );
     }
 
-   public function test_phone_must_be_unique(): void
-{
-    User::factory()->create([
-        'phone' => '09121234567',
-        'phone_verified_at' => now(),
-    ]);
-
-    $response = $this->from(
-        '/register'
-    )->post(
-        '/register/send-otp',
-        [
+    public function test_phone_must_be_unique(): void
+    {
+        User::factory()->create([
             'phone' => '09121234567',
-        ]
-    );
+            'phone_verified_at' => now(),
+        ]);
 
-    $response->assertSessionHasErrors([
-        'phone',
-    ]);
+        $response = $this->from(
+            '/register'
+        )->post(
+            '/register/send-otp',
+            [
+                'phone' => '09121234567',
+            ]
+        );
 
-    $this->assertGuest();
+        $response->assertSessionHasErrors([
+            'phone',
+        ]);
 
-    $this->assertDatabaseCount(
-        'users',
-        1
-    );
+        $this->assertGuest();
 
-    $this->assertDatabaseMissing(
-        'otp_verifications',
-        [
-            'phone' => '09121234567',
-        ]
-    );
-}
+        $this->assertDatabaseCount(
+            'users',
+            1
+        );
+
+        $this->assertDatabaseMissing(
+            'otp_verifications',
+            [
+                'phone' => '09121234567',
+            ]
+        );
+    }
 
     public function test_phone_is_normalized_before_registration(): void
     {

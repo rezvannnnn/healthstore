@@ -18,8 +18,7 @@ class CheckoutController extends Controller
         protected CheckoutService $checkoutService,
         protected CartService $cartService,
         protected OrderService $orderService
-    ) {
-    }
+    ) {}
 
     public function show(Request $request): Response|RedirectResponse
     {

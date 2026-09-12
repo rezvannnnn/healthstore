@@ -9,7 +9,6 @@ use App\Models\Payment;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
-use App\Services\InventoryReservationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -24,12 +23,9 @@ class ZarinPalCallbackTest extends TestCase
 
         config([
             'services.zarinpal.merchant_id' => 'TEST-MERCHANT-ID',
-            'services.zarinpal.verify_endpoint' =>
-                'https://api.zarinpal.com/pg/v4/payment/verify.json',
-            'services.zarinpal.payment_base_url' =>
-                'https://www.zarinpal.com',
-            'services.zarinpal.callback_url' =>
-                'http://127.0.0.1:8000/payment/zarinpal/callback',
+            'services.zarinpal.verify_endpoint' => 'https://api.zarinpal.com/pg/v4/payment/verify.json',
+            'services.zarinpal.payment_base_url' => 'https://www.zarinpal.com',
+            'services.zarinpal.callback_url' => 'http://127.0.0.1:8000/payment/zarinpal/callback',
         ]);
     }
 
@@ -38,7 +34,7 @@ class ZarinPalCallbackTest extends TestCase
         int $totalAmount = 220000
     ): Order {
         return Order::create([
-            'order_number' => 'ORD-CB-' . now()->format('YmdHis') . '-' . uniqid(),
+            'order_number' => 'ORD-CB-'.now()->format('YmdHis').'-'.uniqid(),
             'user_id' => $user->id,
             'customer_type' => 'b2c',
             'business_profile_id' => null,
@@ -93,8 +89,8 @@ class ZarinPalCallbackTest extends TestCase
             'brand_id' => null,
             'category_id' => null,
             'name' => 'Callback Test Product',
-            'slug' => 'callback-test-product-' . uniqid(),
-            'sku' => 'CALLBACK-' . uniqid(),
+            'slug' => 'callback-test-product-'.uniqid(),
+            'sku' => 'CALLBACK-'.uniqid(),
             'product_type' => 'physical',
             'unit' => 'piece',
             'quantity_per_unit' => 1,
@@ -110,7 +106,7 @@ class ZarinPalCallbackTest extends TestCase
 
         $warehouse = Warehouse::create([
             'name' => 'Callback Test Warehouse',
-            'code' => 'CALLBACK-WH-' . uniqid(),
+            'code' => 'CALLBACK-WH-'.uniqid(),
             'description' => null,
             'is_active' => true,
         ]);
@@ -120,7 +116,7 @@ class ZarinPalCallbackTest extends TestCase
             'warehouse_id' => $warehouse->id,
             'quantity' => 10,
             'minimum_quantity' => 1,
-            'batch_number' => 'CALLBACK-BATCH-' . uniqid(),
+            'batch_number' => 'CALLBACK-BATCH-'.uniqid(),
             'expiry_date' => null,
             'is_active' => true,
         ]);
@@ -152,15 +148,14 @@ class ZarinPalCallbackTest extends TestCase
         $authority = 'S000000000000000000000000000001111';
 
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/verify.json' =>
-                Http::response([
-                    'data' => [
-                        'code' => 100,
-                        'message' => 'Verified',
-                        'ref_id' => 987654321,
-                    ],
-                    'errors' => [],
-                ], 200),
+            'https://api.zarinpal.com/pg/v4/payment/verify.json' => Http::response([
+                'data' => [
+                    'code' => 100,
+                    'message' => 'Verified',
+                    'ref_id' => 987654321,
+                ],
+                'errors' => [],
+            ], 200),
         ]);
 
         $user = User::factory()->create();
@@ -182,7 +177,7 @@ class ZarinPalCallbackTest extends TestCase
         );
 
         $response = $this->get(
-            '/payment/zarinpal/callback?' .
+            '/payment/zarinpal/callback?'.
             http_build_query([
                 'Authority' => $authority,
                 'Status' => 'OK',
@@ -190,7 +185,7 @@ class ZarinPalCallbackTest extends TestCase
         );
 
         $response->assertRedirect(
-            '/orders/' . $order->order_number
+            '/orders/'.$order->order_number
         );
 
         $payment->refresh();
@@ -257,14 +252,13 @@ class ZarinPalCallbackTest extends TestCase
         $authority = 'S000000000000000000000000000002222';
 
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/verify.json' =>
-                Http::response([
-                    'data' => [
-                        'code' => -22,
-                        'message' => 'Transaction not found',
-                    ],
-                    'errors' => [],
-                ], 200),
+            'https://api.zarinpal.com/pg/v4/payment/verify.json' => Http::response([
+                'data' => [
+                    'code' => -22,
+                    'message' => 'Transaction not found',
+                ],
+                'errors' => [],
+            ], 200),
         ]);
 
         $user = User::factory()->create();
@@ -286,7 +280,7 @@ class ZarinPalCallbackTest extends TestCase
         );
 
         $response = $this->get(
-            '/payment/zarinpal/callback?' .
+            '/payment/zarinpal/callback?'.
             http_build_query([
                 'Authority' => $authority,
                 'Status' => 'OK',
@@ -294,7 +288,7 @@ class ZarinPalCallbackTest extends TestCase
         );
 
         $response->assertRedirect(
-            '/orders/' . $order->order_number
+            '/orders/'.$order->order_number
         );
 
         $payment->refresh();
@@ -346,7 +340,7 @@ class ZarinPalCallbackTest extends TestCase
         );
 
         $response = $this->get(
-            '/payment/zarinpal/callback?' .
+            '/payment/zarinpal/callback?'.
             http_build_query([
                 'Authority' => $authority,
                 'Status' => 'NOK',
@@ -354,7 +348,7 @@ class ZarinPalCallbackTest extends TestCase
         );
 
         $response->assertRedirect(
-            '/orders/' . $order->order_number
+            '/orders/'.$order->order_number
         );
 
         $payment->refresh();
@@ -409,7 +403,7 @@ class ZarinPalCallbackTest extends TestCase
         ]);
 
         $response = $this->get(
-            '/payment/zarinpal/callback?' .
+            '/payment/zarinpal/callback?'.
             http_build_query([
                 'Authority' => $authority,
                 'Status' => 'OK',
@@ -417,7 +411,7 @@ class ZarinPalCallbackTest extends TestCase
         );
 
         $response->assertRedirect(
-            '/orders/' . $order->order_number
+            '/orders/'.$order->order_number
         );
 
         Http::assertNothingSent();
@@ -440,10 +434,9 @@ class ZarinPalCallbackTest extends TestCase
         Http::fake();
 
         $response = $this->get(
-            '/payment/zarinpal/callback?' .
+            '/payment/zarinpal/callback?'.
             http_build_query([
-                'Authority' =>
-                    'S000000000000000000000000000009999',
+                'Authority' => 'S000000000000000000000000000009999',
                 'Status' => 'OK',
             ])
         );

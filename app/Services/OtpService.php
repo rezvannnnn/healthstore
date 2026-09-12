@@ -11,8 +11,7 @@ class OtpService
 {
     public function __construct(
         protected SmsProviderInterface $smsProvider
-    ) {
-    }
+    ) {}
 
     /**
      * Generate a new OTP and send it through the configured SMS provider.
@@ -248,12 +247,12 @@ class OtpService
         }
 
         if (str_starts_with($phone, '0098')) {
-            $phone = '0' . substr(
+            $phone = '0'.substr(
                 $phone,
                 4
             );
         } elseif (str_starts_with($phone, '98')) {
-            $phone = '0' . substr(
+            $phone = '0'.substr(
                 $phone,
                 2
             );

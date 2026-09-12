@@ -18,7 +18,6 @@ class OtpVerificationTest extends TestCase
     {
         parent::setUp();
 
-       
         /*
          * Use the fake SMS provider so no real SMS is ever sent
          * during automated tests.
@@ -395,144 +394,146 @@ class OtpVerificationTest extends TestCase
         );
     }
 
-   public function test_new_otp_replaces_the_previous_active_otp_for_same_phone(): void
-{
-    $service = app(OtpService::class);
+    public function test_new_otp_replaces_the_previous_active_otp_for_same_phone(): void
+    {
+        $service = app(OtpService::class);
 
-    $first = $service->send(
-        '09121234567'
-    );
+        $first = $service->send(
+            '09121234567'
+        );
 
-    $provider = app(
-        SmsProviderInterface::class
-    );
+        $provider = app(
+            SmsProviderInterface::class
+        );
 
-    $firstMessage = $provider->lastMessage();
+        $firstMessage = $provider->lastMessage();
 
-    $this->assertNotNull(
-        $firstMessage
-    );
+        $this->assertNotNull(
+            $firstMessage
+        );
 
-    preg_match(
-        '/\b(\d{6})\b/',
-        $firstMessage['message'],
-        $firstMatches
-    );
+        preg_match(
+            '/\b(\d{6})\b/',
+            $firstMessage['message'],
+            $firstMatches
+        );
 
-    $this->assertArrayHasKey(
-        1,
-        $firstMatches
-    );
+        $this->assertArrayHasKey(
+            1,
+            $firstMatches
+        );
 
-    $firstCode = $firstMatches[1];
-
-    /*
-     * Move the first OTP's creation time back beyond the cooldown.
-     * This avoids relying on the test clock implementation.
-     */
-$first['verification']->created_at = now()->subSeconds(
-    config('otp.resend_cooldown_seconds') + 10
-);
-
-$first['verification']->save();
-
-$first['verification']->refresh();
-
-    $second = $service->send(
-        '09121234567'
-    );
-
-    $secondMessage = $provider->lastMessage();
-
-    $this->assertNotNull(
-        $secondMessage
-    );
-
-    preg_match(
-        '/\b(\d{6})\b/',
-        $secondMessage['message'],
-        $secondMatches
-    );
-
-    $this->assertArrayHasKey(
-        1,
-        $secondMatches
-    );
-
-    $secondCode = $secondMatches[1];
-
-    $this->assertNotEquals(
-        $first['verification']->id,
-        $second['verification']->id
-    );
-
-    $this->assertDatabaseCount(
-        'otp_verifications',
-        2
-    );
-
-    /*
-     * The previous OTP must no longer be usable.
-     */
-    $this->assertFalse(
-        $service->verify(
-            '09121234567',
-            $firstCode
-        )
-    );
-
-    /*
-     * The newest OTP must work.
-     */
-    $this->assertTrue(
-        $service->verify(
-            '09121234567',
-            $secondCode
-        )
-    );
-}
-    public function test_new_otp_cannot_be_requested_before_resend_cooldown_expires(): void
-{
-    $service = app(OtpService::class);
-
-    $service->send(
-        '09121234567'
-    );
-
-    $this->expectException(\RuntimeException::class);
-
-    $service->send(
-        '09121234567'
-    );
-}
-public function test_otp_requests_are_limited_per_hour(): void
-{
-    $service = app(OtpService::class);
-
-    $phone = '09121234567';
-
-    for ($i = 0; $i < 5; $i++) {
-        $service->send($phone);
+        $firstCode = $firstMatches[1];
 
         /*
-         * Move past the resend cooldown so each request is allowed
-         * by the cooldown rule and we can specifically test the
-         * hourly request limit.
+         * Move the first OTP's creation time back beyond the cooldown.
+         * This avoids relying on the test clock implementation.
          */
-        $verification = \App\Models\OtpVerification::query()
-            ->where('phone', $phone)
-            ->latest('id')
-            ->firstOrFail();
-
-        $verification->created_at = now()->subSeconds(
+        $first['verification']->created_at = now()->subSeconds(
             config('otp.resend_cooldown_seconds') + 10
         );
 
-        $verification->save();
+        $first['verification']->save();
+
+        $first['verification']->refresh();
+
+        $second = $service->send(
+            '09121234567'
+        );
+
+        $secondMessage = $provider->lastMessage();
+
+        $this->assertNotNull(
+            $secondMessage
+        );
+
+        preg_match(
+            '/\b(\d{6})\b/',
+            $secondMessage['message'],
+            $secondMatches
+        );
+
+        $this->assertArrayHasKey(
+            1,
+            $secondMatches
+        );
+
+        $secondCode = $secondMatches[1];
+
+        $this->assertNotEquals(
+            $first['verification']->id,
+            $second['verification']->id
+        );
+
+        $this->assertDatabaseCount(
+            'otp_verifications',
+            2
+        );
+
+        /*
+         * The previous OTP must no longer be usable.
+         */
+        $this->assertFalse(
+            $service->verify(
+                '09121234567',
+                $firstCode
+            )
+        );
+
+        /*
+         * The newest OTP must work.
+         */
+        $this->assertTrue(
+            $service->verify(
+                '09121234567',
+                $secondCode
+            )
+        );
     }
 
-    $this->expectException(\RuntimeException::class);
+    public function test_new_otp_cannot_be_requested_before_resend_cooldown_expires(): void
+    {
+        $service = app(OtpService::class);
 
-    $service->send($phone);
-}
+        $service->send(
+            '09121234567'
+        );
+
+        $this->expectException(\RuntimeException::class);
+
+        $service->send(
+            '09121234567'
+        );
+    }
+
+    public function test_otp_requests_are_limited_per_hour(): void
+    {
+        $service = app(OtpService::class);
+
+        $phone = '09121234567';
+
+        for ($i = 0; $i < 5; $i++) {
+            $service->send($phone);
+
+            /*
+             * Move past the resend cooldown so each request is allowed
+             * by the cooldown rule and we can specifically test the
+             * hourly request limit.
+             */
+            $verification = OtpVerification::query()
+                ->where('phone', $phone)
+                ->latest('id')
+                ->firstOrFail();
+
+            $verification->created_at = now()->subSeconds(
+                config('otp.resend_cooldown_seconds') + 10
+            );
+
+            $verification->save();
+        }
+
+        $this->expectException(\RuntimeException::class);
+
+        $service->send($phone);
+    }
 }

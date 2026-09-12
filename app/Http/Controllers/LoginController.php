@@ -6,15 +6,14 @@ use App\Models\User;
 use App\Services\OtpService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
     public function __construct(
         protected OtpService $otpService
-    ) {
-    }
+    ) {}
 
     /**
      * Login an existing customer using a verified OTP.

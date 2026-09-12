@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Services\OrderService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use RuntimeException;
@@ -14,8 +15,7 @@ class OrderController extends Controller
 {
     public function __construct(
         protected OrderService $orderService
-    ) {
-    }
+    ) {}
 
     /**
      * Show the authenticated customer's order history.
@@ -106,7 +106,7 @@ class OrderController extends Controller
         try {
             $this->orderService->cancel($order);
         } catch (RuntimeException $exception) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'order' => $exception->getMessage(),
             ]);
         }

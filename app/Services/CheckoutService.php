@@ -11,8 +11,7 @@ class CheckoutService
     public function __construct(
         protected CartService $cartService,
         protected InventoryService $inventoryService
-    ) {
-    }
+    ) {}
 
     /**
      * Prepare cart for checkout.

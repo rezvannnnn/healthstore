@@ -11,8 +11,7 @@ class PaymentController extends Controller
 {
     public function __construct(
         protected PaymentService $paymentService
-    ) {
-    }
+    ) {}
 
     /**
      * Start the payment process for an order.

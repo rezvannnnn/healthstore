@@ -74,7 +74,7 @@ class OrderHistoryTest extends TestCase
                     '-',
                     $name
                 )
-            ) . '-' . uniqid(),
+            ).'-'.uniqid(),
             'sku' => $sku,
             'product_type' => 'physical',
             'unit' => 'piece',

@@ -74,7 +74,7 @@ class AddressControllerTest extends TestCase
 
         $response->assertStatus(200);
 
-        $response->assertInertia(function ($page) use ($owner) {
+        $response->assertInertia(function ($page) {
             $page
                 ->component('Account/Addresses/Index')
                 ->has('addresses', 0);
@@ -182,7 +182,7 @@ class AddressControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)->put(
-            '/account/addresses/' . $address->id,
+            '/account/addresses/'.$address->id,
             [
                 'title' => 'محل کار',
                 'recipient_name' => 'New Name',
@@ -229,7 +229,7 @@ class AddressControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($otherUser)->put(
-            '/account/addresses/' . $address->id,
+            '/account/addresses/'.$address->id,
             [
                 'title' => 'تغییر یافته',
                 'recipient_name' => 'Hacker',
@@ -268,7 +268,7 @@ class AddressControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)->delete(
-            '/account/addresses/' . $address->id
+            '/account/addresses/'.$address->id
         );
 
         $response->assertRedirect();
@@ -296,7 +296,7 @@ class AddressControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($otherUser)->delete(
-            '/account/addresses/' . $address->id
+            '/account/addresses/'.$address->id
         );
 
         $response->assertStatus(404);
@@ -336,7 +336,7 @@ class AddressControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)->put(
-            '/account/addresses/' . $secondAddress->id,
+            '/account/addresses/'.$secondAddress->id,
             [
                 'title' => 'محل کار',
                 'recipient_name' => 'Ali Ahmadi',

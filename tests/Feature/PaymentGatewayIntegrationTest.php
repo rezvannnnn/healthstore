@@ -3,10 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\Order;
-use App\Models\Payment;
 use App\Models\User;
-use App\Services\InventoryReservationService;
 use App\Services\Payment\PaymentGatewayInterface;
+use App\Services\Payment\ZarinPalGateway;
 use App\Services\PaymentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -22,14 +21,10 @@ class PaymentGatewayIntegrationTest extends TestCase
 
         config([
             'services.zarinpal.merchant_id' => 'TEST-MERCHANT-ID',
-            'services.zarinpal.request_endpoint' =>
-                'https://api.zarinpal.com/pg/v4/payment/request.json',
-            'services.zarinpal.verify_endpoint' =>
-                'https://api.zarinpal.com/pg/v4/payment/verify.json',
-            'services.zarinpal.payment_base_url' =>
-                'https://www.zarinpal.com',
-            'services.zarinpal.callback_url' =>
-                'http://127.0.0.1:8000/payment/zarinpal/callback',
+            'services.zarinpal.request_endpoint' => 'https://api.zarinpal.com/pg/v4/payment/request.json',
+            'services.zarinpal.verify_endpoint' => 'https://api.zarinpal.com/pg/v4/payment/verify.json',
+            'services.zarinpal.payment_base_url' => 'https://www.zarinpal.com',
+            'services.zarinpal.callback_url' => 'http://127.0.0.1:8000/payment/zarinpal/callback',
         ]);
     }
 
@@ -38,7 +33,7 @@ class PaymentGatewayIntegrationTest extends TestCase
         int $totalAmount = 220000
     ): Order {
         return Order::create([
-            'order_number' => 'ORD-GW-' . now()->format('YmdHis') . '-' . uniqid(),
+            'order_number' => 'ORD-GW-'.now()->format('YmdHis').'-'.uniqid(),
             'user_id' => $user->id,
             'customer_type' => 'b2c',
             'business_profile_id' => null,
@@ -72,7 +67,7 @@ class PaymentGatewayIntegrationTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            \App\Services\Payment\ZarinPalGateway::class,
+            ZarinPalGateway::class,
             $gateway
         );
     }
@@ -80,15 +75,14 @@ class PaymentGatewayIntegrationTest extends TestCase
     public function test_payment_service_can_request_gateway_payment(): void
     {
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
-                Http::response([
-                    'data' => [
-                        'code' => 100,
-                        'message' => 'Success',
-                        'authority' => 'S000000000000000000000000000009999',
-                    ],
-                    'errors' => [],
-                ], 200),
+            'https://api.zarinpal.com/pg/v4/payment/request.json' => Http::response([
+                'data' => [
+                    'code' => 100,
+                    'message' => 'Success',
+                    'authority' => 'S000000000000000000000000000009999',
+                ],
+                'errors' => [],
+            ], 200),
         ]);
 
         $user = User::factory()->create();
@@ -136,14 +130,13 @@ class PaymentGatewayIntegrationTest extends TestCase
     public function test_payment_service_does_not_create_second_gateway_request_for_existing_authority(): void
     {
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
-                Http::response([
-                    'data' => [
-                        'code' => 100,
-                        'authority' => 'S000000000000000000000000000008888',
-                    ],
-                    'errors' => [],
-                ], 200),
+            'https://api.zarinpal.com/pg/v4/payment/request.json' => Http::response([
+                'data' => [
+                    'code' => 100,
+                    'authority' => 'S000000000000000000000000000008888',
+                ],
+                'errors' => [],
+            ], 200),
         ]);
 
         $user = User::factory()->create();
@@ -181,14 +174,13 @@ class PaymentGatewayIntegrationTest extends TestCase
     public function test_gateway_payment_request_keeps_payment_pending(): void
     {
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
-                Http::response([
-                    'data' => [
-                        'code' => 100,
-                        'authority' => 'S000000000000000000000000000007777',
-                    ],
-                    'errors' => [],
-                ], 200),
+            'https://api.zarinpal.com/pg/v4/payment/request.json' => Http::response([
+                'data' => [
+                    'code' => 100,
+                    'authority' => 'S000000000000000000000000000007777',
+                ],
+                'errors' => [],
+            ], 200),
         ]);
 
         $user = User::factory()->create();

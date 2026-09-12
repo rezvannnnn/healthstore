@@ -15,8 +15,7 @@ class RegistrationController extends Controller
 {
     public function __construct(
         protected OtpService $otpService
-    ) {
-    }
+    ) {}
 
     /**
      * Send an OTP for the registration process.

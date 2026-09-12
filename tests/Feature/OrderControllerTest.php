@@ -12,6 +12,7 @@ use App\Models\ProductPrice;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\CartService;
+use App\Services\CheckoutService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -44,14 +45,14 @@ class OrderControllerTest extends TestCase
     {
         $warehouse = Warehouse::create([
             'name' => 'Controller Test Warehouse',
-            'code' => 'CTRL-WH-' . uniqid(),
+            'code' => 'CTRL-WH-'.uniqid(),
             'description' => null, 'is_active' => true,
         ]);
 
         Inventory::create([
             'product_id' => $product->id, 'warehouse_id' => $warehouse->id,
             'quantity' => $quantity, 'minimum_quantity' => 1,
-            'batch_number' => 'CTRL-BATCH-' . uniqid(), 'expiry_date' => null,
+            'batch_number' => 'CTRL-BATCH-'.uniqid(), 'expiry_date' => null,
             'is_active' => true,
         ]);
 
@@ -61,7 +62,7 @@ class OrderControllerTest extends TestCase
     private function createOrder(User $user, int $totalAmount = 240000): Order
     {
         return Order::create([
-            'order_number' => 'ORD-CTRL-' . now()->format('YmdHis') . '-' . uniqid(),
+            'order_number' => 'ORD-CTRL-'.now()->format('YmdHis').'-'.uniqid(),
             'user_id' => $user->id, 'address_id' => null, 'customer_type' => 'b2c',
             'business_profile_id' => null, 'status' => 'pending', 'payment_status' => 'pending',
             'subtotal' => $totalAmount, 'discount_amount' => 0, 'shipping_amount' => 0,
@@ -86,7 +87,7 @@ class OrderControllerTest extends TestCase
             'total_amount' => 240000,
         ]);
 
-        $response = $this->actingAs($user)->get('/orders/' . $order->order_number);
+        $response = $this->actingAs($user)->get('/orders/'.$order->order_number);
         $response->assertStatus(200);
         $response->assertInertia(function ($page) use ($order) {
             $page->component('Order/Show')
@@ -103,7 +104,7 @@ class OrderControllerTest extends TestCase
         $otherUser = User::factory()->create();
         $order = $this->createOrder($owner, 180000);
 
-        $response = $this->actingAs($otherUser)->get('/orders/' . $order->order_number);
+        $response = $this->actingAs($otherUser)->get('/orders/'.$order->order_number);
         $response->assertStatus(404);
     }
 
@@ -121,10 +122,10 @@ class OrderControllerTest extends TestCase
         $this->createPrice($product, 120000);
         $this->createInventory($product, 10);
 
-        $cartService = new CartService();
+        $cartService = new CartService;
         $cartService->addItem($user->id, $product->id, 2);
         $cart = Cart::where('user_id', $user->id)->where('status', 'active')->firstOrFail();
-        app(\App\Services\CheckoutService::class)->prepare($cart);
+        app(CheckoutService::class)->prepare($cart);
 
         $response = $this->actingAs($user)->post('/checkout/confirm', ['address_id' => $address->id]);
         $response->assertRedirect();

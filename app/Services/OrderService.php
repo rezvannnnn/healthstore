@@ -16,8 +16,7 @@ class OrderService
         protected InventoryService $inventoryService,
         protected CartService $cartService,
         protected InventoryReservationService $reservationService
-    ) {
-    }
+    ) {}
 
     public function createFromCart(Cart $cart, ?Address $address = null): Order
     {
@@ -269,9 +268,9 @@ class OrderService
     {
         do {
             $number =
-                'ORD-' .
-                now()->format('YmdHis') .
-                '-' .
+                'ORD-'.
+                now()->format('YmdHis').
+                '-'.
                 strtoupper(Str::random(6));
         } while (Order::where('order_number', $number)->exists());
 

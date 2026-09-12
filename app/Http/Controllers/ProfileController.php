@@ -39,7 +39,7 @@ class ProfileController extends Controller
                 'lowercase',
                 'email',
                 'max:255',
-                'unique:users,email,' . $request->user()->id,
+                'unique:users,email,'.$request->user()->id,
             ],
         ]);
 

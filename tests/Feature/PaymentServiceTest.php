@@ -24,7 +24,7 @@ class PaymentServiceTest extends TestCase
         float $totalAmount = 360000
     ): Order {
         return Order::create([
-            'order_number' => 'ORD-PAY-' . now()->format('YmdHis') . '-' . uniqid(),
+            'order_number' => 'ORD-PAY-'.now()->format('YmdHis').'-'.uniqid(),
             'user_id' => $user->id,
             'customer_type' => 'b2c',
             'business_profile_id' => null,
@@ -61,7 +61,7 @@ class PaymentServiceTest extends TestCase
         );
 
         $service = new PaymentService(
-            new InventoryReservationService()
+            new InventoryReservationService
         );
 
         $payment = $service->create($order);
@@ -107,7 +107,7 @@ class PaymentServiceTest extends TestCase
         );
 
         $service = new PaymentService(
-            new InventoryReservationService()
+            new InventoryReservationService
         );
 
         $payment = $service->create($order);
@@ -128,7 +128,7 @@ class PaymentServiceTest extends TestCase
         );
 
         $service = new PaymentService(
-            new InventoryReservationService()
+            new InventoryReservationService
         );
 
         $this->expectException(RuntimeException::class);
@@ -151,7 +151,7 @@ class PaymentServiceTest extends TestCase
         ]);
 
         $service = new PaymentService(
-            new InventoryReservationService()
+            new InventoryReservationService
         );
 
         $this->expectException(RuntimeException::class);
@@ -169,7 +169,7 @@ class PaymentServiceTest extends TestCase
         );
 
         $service = new PaymentService(
-            new InventoryReservationService()
+            new InventoryReservationService
         );
 
         $firstPayment = $service->create($order);
@@ -200,8 +200,8 @@ class PaymentServiceTest extends TestCase
             'brand_id' => null,
             'category_id' => null,
             'name' => 'Payment Product',
-            'slug' => 'payment-product-' . uniqid(),
-            'sku' => 'PAY-' . uniqid(),
+            'slug' => 'payment-product-'.uniqid(),
+            'sku' => 'PAY-'.uniqid(),
             'product_type' => 'physical',
             'unit' => 'piece',
             'quantity_per_unit' => 1,
@@ -217,7 +217,7 @@ class PaymentServiceTest extends TestCase
 
         $warehouse = Warehouse::create([
             'name' => 'Payment Warehouse',
-            'code' => 'PAY-WH-' . uniqid(),
+            'code' => 'PAY-WH-'.uniqid(),
             'description' => null,
             'is_active' => true,
         ]);
@@ -227,7 +227,7 @@ class PaymentServiceTest extends TestCase
             'warehouse_id' => $warehouse->id,
             'quantity' => 10,
             'minimum_quantity' => 1,
-            'batch_number' => 'PAY-BATCH-' . uniqid(),
+            'batch_number' => 'PAY-BATCH-'.uniqid(),
             'expiry_date' => null,
             'is_active' => true,
         ]);
@@ -244,7 +244,7 @@ class PaymentServiceTest extends TestCase
         ]);
 
         $paymentService = new PaymentService(
-            new InventoryReservationService()
+            new InventoryReservationService
         );
 
         $payment = $paymentService->create($order);
@@ -317,8 +317,8 @@ class PaymentServiceTest extends TestCase
             'brand_id' => null,
             'category_id' => null,
             'name' => 'Failed Payment Product',
-            'slug' => 'failed-payment-product-' . uniqid(),
-            'sku' => 'FAIL-' . uniqid(),
+            'slug' => 'failed-payment-product-'.uniqid(),
+            'sku' => 'FAIL-'.uniqid(),
             'product_type' => 'physical',
             'unit' => 'piece',
             'quantity_per_unit' => 1,
@@ -334,7 +334,7 @@ class PaymentServiceTest extends TestCase
 
         $warehouse = Warehouse::create([
             'name' => 'Failed Payment Warehouse',
-            'code' => 'FAIL-WH-' . uniqid(),
+            'code' => 'FAIL-WH-'.uniqid(),
             'description' => null,
             'is_active' => true,
         ]);
@@ -344,7 +344,7 @@ class PaymentServiceTest extends TestCase
             'warehouse_id' => $warehouse->id,
             'quantity' => 7,
             'minimum_quantity' => 1,
-            'batch_number' => 'FAIL-BATCH-' . uniqid(),
+            'batch_number' => 'FAIL-BATCH-'.uniqid(),
             'expiry_date' => null,
             'is_active' => true,
         ]);
@@ -376,7 +376,7 @@ class PaymentServiceTest extends TestCase
         );
 
         $paymentService = new PaymentService(
-            new InventoryReservationService()
+            new InventoryReservationService
         );
 
         $payment = $paymentService->create($order);
@@ -443,8 +443,8 @@ class PaymentServiceTest extends TestCase
             'brand_id' => null,
             'category_id' => null,
             'name' => 'Cancelled Payment Product',
-            'slug' => 'cancelled-payment-product-' . uniqid(),
-            'sku' => 'CANCEL-' . uniqid(),
+            'slug' => 'cancelled-payment-product-'.uniqid(),
+            'sku' => 'CANCEL-'.uniqid(),
             'product_type' => 'physical',
             'unit' => 'piece',
             'quantity_per_unit' => 1,
@@ -460,7 +460,7 @@ class PaymentServiceTest extends TestCase
 
         $warehouse = Warehouse::create([
             'name' => 'Cancelled Payment Warehouse',
-            'code' => 'CANCEL-WH-' . uniqid(),
+            'code' => 'CANCEL-WH-'.uniqid(),
             'description' => null,
             'is_active' => true,
         ]);
@@ -470,7 +470,7 @@ class PaymentServiceTest extends TestCase
             'warehouse_id' => $warehouse->id,
             'quantity' => 5,
             'minimum_quantity' => 1,
-            'batch_number' => 'CANCEL-BATCH-' . uniqid(),
+            'batch_number' => 'CANCEL-BATCH-'.uniqid(),
             'expiry_date' => null,
             'is_active' => true,
         ]);
@@ -492,7 +492,7 @@ class PaymentServiceTest extends TestCase
         );
 
         $paymentService = new PaymentService(
-            new InventoryReservationService()
+            new InventoryReservationService
         );
 
         $payment = $paymentService->create($order);
@@ -533,7 +533,7 @@ class PaymentServiceTest extends TestCase
         );
 
         $paymentService = new PaymentService(
-            new InventoryReservationService()
+            new InventoryReservationService
         );
 
         $payment = $paymentService->create($order);
@@ -576,4 +576,3 @@ class PaymentServiceTest extends TestCase
         );
     }
 }
-

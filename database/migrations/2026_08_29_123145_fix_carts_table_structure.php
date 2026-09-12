@@ -10,7 +10,7 @@ return new class extends Migration
     {
         // The original carts migration accidentally created cart_items.
         // The real carts table does not exist yet, so create it here.
-        if (!Schema::hasTable('carts')) {
+        if (! Schema::hasTable('carts')) {
             Schema::create('carts', function (Blueprint $table) {
                 $table->id();
 

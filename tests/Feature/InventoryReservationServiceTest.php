@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\InventoryReservationService;
+use App\Services\InventoryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
@@ -23,8 +24,8 @@ class InventoryReservationServiceTest extends TestCase
             'brand_id' => null,
             'category_id' => null,
             'name' => 'Reservation Service Product',
-            'slug' => 'reservation-service-product-' . uniqid(),
-            'sku' => 'RS-' . uniqid(),
+            'slug' => 'reservation-service-product-'.uniqid(),
+            'sku' => 'RS-'.uniqid(),
             'product_type' => 'physical',
             'unit' => 'piece',
             'quantity_per_unit' => 1,
@@ -43,7 +44,7 @@ class InventoryReservationServiceTest extends TestCase
     {
         return Warehouse::create([
             'name' => 'Reservation Service Warehouse',
-            'code' => 'RS-WH-' . uniqid(),
+            'code' => 'RS-WH-'.uniqid(),
             'description' => null,
             'is_active' => true,
         ]);
@@ -59,7 +60,7 @@ class InventoryReservationServiceTest extends TestCase
             'warehouse_id' => $warehouse->id,
             'quantity' => $quantity,
             'minimum_quantity' => 1,
-            'batch_number' => 'RS-BATCH-' . uniqid(),
+            'batch_number' => 'RS-BATCH-'.uniqid(),
             'expiry_date' => null,
             'is_active' => true,
         ]);
@@ -68,7 +69,7 @@ class InventoryReservationServiceTest extends TestCase
     private function createOrder(User $user): Order
     {
         return Order::create([
-            'order_number' => 'ORD-RS-' . now()->format('YmdHis') . '-' . uniqid(),
+            'order_number' => 'ORD-RS-'.now()->format('YmdHis').'-'.uniqid(),
             'user_id' => $user->id,
             'customer_type' => 'b2c',
             'business_profile_id' => null,
@@ -136,7 +137,7 @@ class InventoryReservationServiceTest extends TestCase
             3
         );
 
-        $service = new InventoryReservationService();
+        $service = new InventoryReservationService;
 
         $result = $service->consume($reservation);
 
@@ -193,7 +194,7 @@ class InventoryReservationServiceTest extends TestCase
             $inventory->quantity
         );
 
-        $service = new InventoryReservationService();
+        $service = new InventoryReservationService;
 
         $result = $service->release($reservation);
 
@@ -247,7 +248,7 @@ class InventoryReservationServiceTest extends TestCase
             $inventory->quantity
         );
 
-        $service = new InventoryReservationService();
+        $service = new InventoryReservationService;
 
         $releasedCount = $service->releaseExpired();
 
@@ -296,7 +297,7 @@ class InventoryReservationServiceTest extends TestCase
             3
         );
 
-        $service = new InventoryReservationService();
+        $service = new InventoryReservationService;
 
         $this->assertTrue(
             $service->consume($reservation)
@@ -343,7 +344,7 @@ class InventoryReservationServiceTest extends TestCase
             2
         );
 
-        $service = new InventoryReservationService();
+        $service = new InventoryReservationService;
 
         $this->assertTrue(
             $service->release($reservation)
@@ -390,7 +391,7 @@ class InventoryReservationServiceTest extends TestCase
 
         $order = $this->createOrder($user);
 
-        $service = new InventoryReservationService();
+        $service = new InventoryReservationService;
 
         $reservations = $service->reserve(
             $order,
@@ -441,7 +442,7 @@ class InventoryReservationServiceTest extends TestCase
             $inventory->quantity
         );
 
-        $inventoryService = new \App\Services\InventoryService();
+        $inventoryService = new InventoryService;
 
         $this->assertEquals(
             6,
@@ -472,7 +473,7 @@ class InventoryReservationServiceTest extends TestCase
 
         $order = $this->createOrder($user);
 
-        $service = new InventoryReservationService();
+        $service = new InventoryReservationService;
 
         $reservations = $service->reserve(
             $order,
@@ -529,7 +530,7 @@ class InventoryReservationServiceTest extends TestCase
             $inventory2->quantity
         );
 
-        $inventoryService = new \App\Services\InventoryService();
+        $inventoryService = new InventoryService;
 
         $this->assertEquals(
             1,
@@ -560,7 +561,7 @@ class InventoryReservationServiceTest extends TestCase
 
         $order = $this->createOrder($user);
 
-        $service = new InventoryReservationService();
+        $service = new InventoryReservationService;
 
         try {
             $service->reserve(
