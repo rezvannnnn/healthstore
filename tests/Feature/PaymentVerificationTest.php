@@ -164,7 +164,10 @@ class PaymentVerificationTest extends TestCase
         $this->assertSame('TX-VERIFY-123', $result['transaction_id']);
         $this->assertSame('REF-VERIFY-123', $result['reference_number']);
         $this->assertSame(1, $gateway->verifyCalls);
-        $this->assertSame(['code' => 100, 'message' => 'verified'], $payment->gateway_response);
+        $this->assertSame(
+            ['code' => 100, 'message' => 'verified'],
+            json_decode($payment->gateway_response, true, 512, JSON_THROW_ON_ERROR)
+        );
         $this->assertSame('pending', $payment->status);
     }
 }
