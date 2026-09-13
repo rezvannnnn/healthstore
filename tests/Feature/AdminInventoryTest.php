@@ -62,6 +62,28 @@ class AdminInventoryTest extends TestCase
         );
     }
 
+    public function test_admin_rejects_expired_inventory_record(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $product = $this->product();
+        $warehouse = $this->warehouse();
+
+        $this->actingAs($admin)
+            ->post('/admin/inventory', [
+                'product_id' => $product->id,
+                'warehouse_id' => $warehouse->id,
+                'quantity' => 10,
+                'minimum_quantity' => 2,
+                'expiry_date' => now()->subDay()->toDateString(),
+            ])
+            ->assertSessionHasErrors('expiry_date');
+
+        $this->assertDatabaseMissing('inventories', [
+            'product_id' => $product->id,
+            'warehouse_id' => $warehouse->id,
+        ]);
+    }
+
     public function test_admin_can_create_inventory_record(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
