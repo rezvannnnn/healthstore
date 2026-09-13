@@ -45,6 +45,19 @@ const submitFilters = () => {
     );
 };
 
+const resetFilters = () => {
+    search.value = '';
+    status.value = 'all';
+    router.get('/admin/products', {}, { preserveState: true, replace: true });
+};
+
+const pageUrl = (page: number) => ({
+    url: '/admin/products',
+    search: props.filters.search,
+    status: props.filters.status,
+    page,
+});
+
 const formatAmount = (amount: number | null) =>
     amount === null ? '—' : new Intl.NumberFormat('fa-IR').format(amount);
 </script>
@@ -104,12 +117,22 @@ const formatAmount = (amount: number | null) =>
                         <option value="active">فعال</option>
                         <option value="inactive">غیرفعال</option>
                     </select>
-                    <button
-                        type="submit"
-                        class="rounded-lg bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-800"
-                    >
-                        جستجو
-                    </button>
+                    <div class="flex gap-2">
+                        <button
+                            type="submit"
+                            class="rounded-lg bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                        >
+                            جستجو
+                        </button>
+                        <button
+                            v-if="search || status !== 'all'"
+                            type="button"
+                            class="rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-medium hover:bg-gray-50"
+                            @click="resetFilters"
+                        >
+                            پاک کردن
+                        </button>
+                    </div>
                 </form>
             </div>
 
@@ -121,13 +144,9 @@ const formatAmount = (amount: number | null) =>
                         <thead class="border-b bg-gray-50 text-gray-600">
                             <tr>
                                 <th class="px-4 py-3 font-medium">محصول</th>
-                                <th class="px-4 py-3 font-medium">
-                                    دسته / برند
-                                </th>
+                                <th class="px-4 py-3 font-medium">دسته / برند</th>
                                 <th class="px-4 py-3 font-medium">قیمت</th>
-                                <th class="px-4 py-3 font-medium">
-                                    موجودی فیزیکی
-                                </th>
+                                <th class="px-4 py-3 font-medium">موجودی فیزیکی</th>
                                 <th class="px-4 py-3 font-medium">رزرو شده</th>
                                 <th class="px-4 py-3 font-medium">قابل فروش</th>
                                 <th class="px-4 py-3 font-medium">وضعیت</th>
@@ -177,11 +196,7 @@ const formatAmount = (amount: number | null) =>
                                                 : 'bg-gray-100 text-gray-600'
                                         "
                                     >
-                                        {{
-                                            product.is_active
-                                                ? 'فعال'
-                                                : 'غیرفعال'
-                                        }}
+                                        {{ product.is_active ? 'فعال' : 'غیرفعال' }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-4">
@@ -206,13 +221,33 @@ const formatAmount = (amount: number | null) =>
                 </div>
 
                 <div
-                    class="flex items-center justify-between border-t px-4 py-4 text-sm text-gray-600"
+                    class="flex flex-col gap-3 border-t px-4 py-4 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between"
                 >
                     <span>مجموع: {{ pagination.total }} محصول</span>
-                    <span>
-                        صفحه {{ pagination.current_page }} از
-                        {{ pagination.last_page }}
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <Link
+                            v-if="pagination.current_page > 1"
+                            :href="pageUrl(pagination.current_page - 1)"
+                            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 hover:bg-gray-50"
+                            preserve-scroll
+                            preserve-state
+                        >
+                            قبلی
+                        </Link>
+                        <span>
+                            صفحه {{ pagination.current_page }} از
+                            {{ pagination.last_page }}
+                        </span>
+                        <Link
+                            v-if="pagination.current_page < pagination.last_page"
+                            :href="pageUrl(pagination.current_page + 1)"
+                            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 hover:bg-gray-50"
+                            preserve-scroll
+                            preserve-state
+                        >
+                            بعدی
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>
