@@ -128,7 +128,9 @@ function goToPage(page: number) {
             <section
                 class="mt-6 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200"
             >
-                <div class="flex items-center justify-between border-b px-5 py-4">
+                <div
+                    class="flex items-center justify-between border-b px-5 py-4"
+                >
                     <h2 class="font-bold">آخرین سفارش‌ها</h2>
                     <span class="text-sm text-gray-500">
                         {{ props.pagination.total }} سفارش
