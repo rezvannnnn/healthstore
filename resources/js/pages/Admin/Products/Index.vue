@@ -51,12 +51,19 @@ const resetFilters = () => {
     router.get('/admin/products', {}, { preserveState: true, replace: true });
 };
 
-const pageUrl = (page: number) => ({
-    url: '/admin/products',
-    search: props.filters.search,
-    status: props.filters.status,
-    page,
-});
+const pageUrl = (page: number) => {
+    const params = new URLSearchParams({ page: String(page) });
+
+    if (props.filters.search) {
+        params.set('search', props.filters.search);
+    }
+
+    if (props.filters.status) {
+        params.set('status', props.filters.status);
+    }
+
+    return `/admin/products?${params.toString()}`;
+};
 
 const formatAmount = (amount: number | null) =>
     amount === null ? '—' : new Intl.NumberFormat('fa-IR').format(amount);
