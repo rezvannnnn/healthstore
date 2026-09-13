@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\OrderService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use RuntimeException;
@@ -18,9 +19,15 @@ class OrderController extends Controller
 
     public function index(Request $request): Response
     {
-        $search = trim((string) $request->query('search', ''));
-        $status = trim((string) $request->query('status', 'all'));
-        $paymentStatus = trim((string) $request->query('payment_status', 'all'));
+        $data = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'status' => ['nullable', 'string', Rule::in(['all', 'pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'])],
+            'payment_status' => ['nullable', 'string', Rule::in(['all', 'pending', 'paid', 'failed', 'refunded'])],
+        ]);
+
+        $search = trim((string) ($data['search'] ?? ''));
+        $status = (string) ($data['status'] ?? 'all');
+        $paymentStatus = (string) ($data['payment_status'] ?? 'all');
 
         $query = Order::query()
             ->with('user:id,name,phone')
