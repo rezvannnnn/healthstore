@@ -64,7 +64,7 @@ class AdminReportTest extends TestCase
             'product_name' => $product->name,
             'unit_price' => 100000,
             'quantity' => 2,
-            'line_total' => 200000,
+            'total_amount' => 200000,
         ]);
 
         Payment::create([
@@ -78,7 +78,14 @@ class AdminReportTest extends TestCase
         $response = $this->actingAs($admin)->get('/admin/reports?from='.now()->toDateString().'&to='.now()->toDateString());
 
         $response->assertOk();
-        $response->assertSee('محصول گزارش');
-        $response->assertSee('200000');
+        $response->assertInertia(fn ($page) => $page
+            ->component('Admin/Reports/Index')
+            ->where('summary.gross_sales', 200000)
+            ->where('summary.successful_payments', 200000)
+            ->where('summary.items_sold', 2)
+            ->where('summary.average_order', 200000)
+            ->where('top_products.0.name', 'محصول گزارش')
+            ->where('top_products.0.quantity', 2)
+            ->where('top_products.0.sales', 200000));
     }
 }
