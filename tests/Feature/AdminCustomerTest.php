@@ -86,6 +86,27 @@ class AdminCustomerTest extends TestCase
                 ->where('customer.name', 'Customer Detail')
                 ->has('orders', 1)
                 ->where('orders.0.id', $order->id)
+                ->where('pagination.total', 1)
+            );
+    }
+
+    public function test_admin_customer_order_history_is_paginated(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $customer = User::factory()->create();
+
+        for ($index = 0; $index < 21; $index++) {
+            $this->order($customer);
+        }
+
+        $this->actingAs($admin)
+            ->get("/admin/customers/{$customer->id}")
+            ->assertSuccessful()
+            ->assertInertia(fn ($page) => $page
+                ->has('orders', 20)
+                ->where('pagination.current_page', 1)
+                ->where('pagination.last_page', 2)
+                ->where('pagination.total', 21)
             );
     }
 
