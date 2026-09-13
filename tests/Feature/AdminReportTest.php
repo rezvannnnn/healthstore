@@ -32,6 +32,15 @@ class AdminReportTest extends TestCase
         $response->assertForbidden();
     }
 
+    public function test_invalid_report_dates_are_rejected(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)
+            ->get('/admin/reports?from=not-a-date&to=2026-09-14')
+            ->assertSessionHasErrors('from');
+    }
+
     public function test_report_counts_non_cancelled_sales_and_top_products(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
