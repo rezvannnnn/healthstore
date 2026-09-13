@@ -21,7 +21,8 @@ class CategoryController extends Controller
             ->withCount('products')
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->get(['id', 'parent_id', 'name', 'slug', 'description', 'is_active', 'sort_order']);
+            ->paginate(25)
+            ->withQueryString();
 
         return Inertia::render('Admin/Categories/Index', [
             'categories' => $categories,

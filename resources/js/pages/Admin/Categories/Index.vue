@@ -13,7 +13,17 @@ type Category = {
     parent: { id: number; name: string } | null;
 };
 
-defineProps<{ categories: Category[] }>();
+type Pagination = {
+    current_page: number;
+    last_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+};
+
+defineProps<{ categories: { data: Category[] } & Pagination }>();
+
+const pageUrl = (page: number) => `/admin/categories?page=${page}`;
 </script>
 
 <template>
@@ -63,7 +73,7 @@ defineProps<{ categories: Category[] }>();
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             <tr
-                                v-for="category in categories"
+                                v-for="category in categories.data"
                                 :key="category.id"
                                 class="hover:bg-gray-50"
                             >
@@ -102,7 +112,7 @@ defineProps<{ categories: Category[] }>();
                                     >
                                 </td>
                             </tr>
-                            <tr v-if="categories.length === 0">
+                            <tr v-if="categories.data.length === 0">
                                 <td
                                     colspan="6"
                                     class="px-4 py-12 text-center text-gray-500"
@@ -112,6 +122,38 @@ defineProps<{ categories: Category[] }>();
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <div
+                    v-if="categories.last_page > 1"
+                    class="flex flex-col gap-3 border-t px-4 py-4 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between"
+                >
+                    <div>
+                        نمایش {{ categories.from }} تا {{ categories.to }} از
+                        {{ categories.total }} دسته‌بندی
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <Link
+                            v-if="categories.current_page > 1"
+                            :href="pageUrl(categories.current_page - 1)"
+                            preserve-scroll
+                            preserve-state
+                            class="rounded-lg border border-gray-300 bg-white px-3 py-2 font-medium hover:bg-gray-50"
+                            >قبلی</Link
+                        >
+                        <span
+                            class="rounded-lg bg-gray-100 px-3 py-2 font-medium"
+                            >صفحه {{ categories.current_page }} از
+                            {{ categories.last_page }}</span
+                        >
+                        <Link
+                            v-if="categories.current_page < categories.last_page"
+                            :href="pageUrl(categories.current_page + 1)"
+                            preserve-scroll
+                            preserve-state
+                            class="rounded-lg border border-gray-300 bg-white px-3 py-2 font-medium hover:bg-gray-50"
+                            >بعدی</Link
+                        >
+                    </div>
                 </div>
             </div>
         </div>
