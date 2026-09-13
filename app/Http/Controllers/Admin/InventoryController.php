@@ -39,6 +39,41 @@ class InventoryController extends Controller
             });
         }
 
+        $physicalQuery = Inventory::query()
+            ->selectRaw('COALESCE(SUM(quantity), 0)')
+            ->whereColumn('inventories.product_id', 'products.id')
+            ->where('is_active', true)
+            ->where('quantity', '>', 0)
+            ->where(function ($query): void {
+                $query->whereNull('expiry_date')
+                    ->orWhereDate('expiry_date', '>=', now()->toDateString());
+            });
+
+        $minimumQuery = Inventory::query()
+            ->selectRaw('COALESCE(SUM(minimum_quantity), 0)')
+            ->whereColumn('inventories.product_id', 'products.id')
+            ->where('is_active', true);
+
+        if ($status === 'out') {
+            $productsQuery->whereRaw(
+                "({$physicalQuery->toSql()}) <= 0",
+                $physicalQuery->getBindings(),
+            );
+        } elseif ($status === 'low') {
+            $productsQuery
+                ->whereRaw(
+                    "({$physicalQuery->toSql()}) > 0",
+                    $physicalQuery->getBindings(),
+                )
+                ->whereRaw(
+                    "({$physicalQuery->toSql()}) <= ({$minimumQuery->toSql()})",
+                    [
+                        ...$physicalQuery->getBindings(),
+                        ...$minimumQuery->getBindings(),
+                    ],
+                );
+        }
+
         $paginator = $productsQuery->paginate(20)->withQueryString();
 
         $products = collect($paginator->items())->map(function (Product $product): array {
@@ -67,10 +102,6 @@ class InventoryController extends Controller
                 'status' => $physical <= 0 ? 'out' : ($physical <= $minimum ? 'low' : 'ok'),
             ];
         });
-
-        if ($status === 'out' || $status === 'low') {
-            $products = $products->filter(fn (array $product): bool => $product['status'] === $status)->values();
-        }
 
         return Inertia::render('Admin/Inventory/Index', [
             'products' => $products->all(),
