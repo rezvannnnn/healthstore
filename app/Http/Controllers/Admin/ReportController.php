@@ -14,6 +14,11 @@ class ReportController extends Controller
 {
     public function index(Request $request): Response
     {
+        $request->validate([
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d'],
+        ]);
+
         $from = $request->date('from')?->startOfDay() ?? now()->startOfMonth()->startOfDay();
         $to = $request->date('to')?->endOfDay() ?? now()->endOfDay();
 
