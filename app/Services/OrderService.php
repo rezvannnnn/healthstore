@@ -15,12 +15,16 @@ class OrderService
     public function __construct(
         protected InventoryService $inventoryService,
         protected CartService $cartService,
-        protected InventoryReservationService $reservationService
+        protected InventoryReservationService $reservationService,
+        protected ?CouponService $couponService = null
     ) {}
 
-    public function createFromCart(Cart $cart, ?Address $address = null): Order
-    {
-        return DB::transaction(function () use ($cart, $address) {
+    public function createFromCart(
+        Cart $cart,
+        ?Address $address = null,
+        ?string $couponCode = null
+    ): Order {
+        return DB::transaction(function () use ($cart, $address, $couponCode) {
             $cart->load('items.product');
 
             if ($cart->items->isEmpty()) {
@@ -66,6 +70,22 @@ class OrderService
                 );
             }
 
+            $couponService = $this->couponService ?? app(CouponService::class);
+            $couponResult = $couponService->prepareForOrder(
+                $couponCode,
+                (int) $cart->user_id,
+                (float) $subtotal
+            );
+            $coupon = $couponResult['coupon'];
+            $discountAmount = (float) $couponResult['discount_amount'];
+            $totalAmount = (float) $subtotal - $discountAmount;
+
+            if ($totalAmount <= 0) {
+                throw new RuntimeException(
+                    'مبلغ نهایی سفارش باید بیشتر از صفر باشد.'
+                );
+            }
+
             $order = Order::create([
                 'order_number' => $this->generateOrderNumber(),
                 'user_id' => $cart->user_id,
@@ -75,9 +95,11 @@ class OrderService
                 'status' => 'pending',
                 'payment_status' => 'pending',
                 'subtotal' => $subtotal,
-                'discount_amount' => 0,
+                'discount_amount' => $discountAmount,
+                'coupon_id' => $coupon?->id,
+                'coupon_code' => $coupon?->code,
                 'shipping_amount' => 0,
-                'total_amount' => $subtotal,
+                'total_amount' => $totalAmount,
                 'currency' => 'IRR',
                 'recipient_name' => $address?->recipient_name,
                 'recipient_phone' => $address?->phone,
@@ -117,6 +139,14 @@ class OrderService
                 );
             }
 
+            if ($coupon) {
+                $couponService->reserveForOrder(
+                    $coupon,
+                    (int) $cart->user_id,
+                    $order
+                );
+            }
+
             $cart->update([
                 'status' => 'converted',
             ]);
@@ -126,6 +156,8 @@ class OrderService
                 'payments',
                 'inventoryReservations',
                 'address',
+                'coupon',
+                'couponUsages',
             ]);
 
             return $order;
@@ -170,6 +202,8 @@ class OrderService
                     );
                 }
             }
+
+            ($this->couponService ?? app(CouponService::class))->releaseForOrder($order);
 
             $order->update([
                 'status' => 'cancelled',

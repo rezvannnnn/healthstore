@@ -13,7 +13,7 @@ class Order extends Model
 
     protected $fillable = [
         'order_number', 'user_id', 'address_id', 'customer_type', 'business_profile_id',
-        'status', 'payment_status', 'subtotal', 'discount_amount', 'shipping_amount',
+        'status', 'payment_status', 'subtotal', 'discount_amount', 'coupon_id', 'coupon_code', 'shipping_amount',
         'total_amount', 'currency', 'recipient_name', 'recipient_phone', 'province',
         'city', 'shipping_address', 'postal_code', 'customer_note', 'admin_note',
         'confirmed_at', 'paid_at', 'shipped_at', 'delivered_at', 'cancelled_at',
@@ -40,6 +40,11 @@ class Order extends Model
         return $this->belongsTo(BusinessProfile::class);
     }
 
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class);
+    }
+
     /** @return HasMany<OrderItem, $this> */
     public function items(): HasMany
     {
@@ -56,5 +61,11 @@ class Order extends Model
     public function inventoryReservations(): HasMany
     {
         return $this->hasMany(InventoryReservation::class);
+    }
+
+    /** @return HasMany<CouponUsage, $this> */
+    public function couponUsages(): HasMany
+    {
+        return $this->hasMany(CouponUsage::class);
     }
 }
