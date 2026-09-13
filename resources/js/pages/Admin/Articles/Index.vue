@@ -15,7 +15,11 @@ interface Article {
 
 interface Props {
     articles: Article[];
-    pagination: { current_page: number; last_page: number; total: number };
+    pagination: {
+        current_page: number;
+        last_page: number;
+        total: number;
+    };
     filters: { search: string; status: string };
 }
 
@@ -27,6 +31,29 @@ function remove(article: Article) {
     }
 
     router.delete(`/admin/articles/${article.id}`);
+}
+
+function goToPage(page: number) {
+    if (
+        page < 1 ||
+        page > props.pagination.last_page ||
+        page === props.pagination.current_page
+    ) {
+        return;
+    }
+
+    router.get(
+        '/admin/articles',
+        {
+            search: props.filters.search || undefined,
+            status: props.filters.status || undefined,
+            page,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+        },
+    );
 }
 
 function formatDate(value: string | null) {
@@ -135,7 +162,41 @@ function formatDate(value: string | null) {
                     </tr>
                 </tbody>
             </table>
-            <div class="border-t p-4 text-sm text-gray-500">
+            <div
+                v-if="props.pagination.last_page > 1"
+                class="flex items-center justify-between gap-4 border-t p-4 text-sm"
+            >
+                <span class="text-gray-500">
+                    {{ props.pagination.total }} مقاله
+                </span>
+                <div class="flex items-center gap-2">
+                    <button
+                        :disabled="props.pagination.current_page === 1"
+                        class="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+                        @click="goToPage(props.pagination.current_page - 1)"
+                    >
+                        قبلی
+                    </button>
+                    <span class="min-w-24 text-center">
+                        صفحه {{ props.pagination.current_page }} از
+                        {{ props.pagination.last_page }}
+                    </span>
+                    <button
+                        :disabled="
+                            props.pagination.current_page ===
+                            props.pagination.last_page
+                        "
+                        class="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+                        @click="goToPage(props.pagination.current_page + 1)"
+                    >
+                        بعدی
+                    </button>
+                </div>
+            </div>
+            <div
+                v-else
+                class="border-t p-4 text-sm text-gray-500"
+            >
                 {{ props.pagination.total }} مقاله
             </div>
         </div>
