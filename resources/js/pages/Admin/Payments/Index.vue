@@ -140,7 +140,9 @@ const statusLabel = (value: string) =>
                             جستجو
                         </button>
                         <button
-                            v-if="search || status !== 'all' || gateway !== 'all'"
+                            v-if="
+                                search || status !== 'all' || gateway !== 'all'
+                            "
                             type="button"
                             class="rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-medium hover:bg-gray-50"
                             @click="resetFilters"
@@ -244,7 +246,9 @@ const statusLabel = (value: string) =>
                             {{ pagination.last_page }}
                         </span>
                         <Link
-                            v-if="pagination.current_page < pagination.last_page"
+                            v-if="
+                                pagination.current_page < pagination.last_page
+                            "
                             :href="pageUrl(pagination.current_page + 1)"
                             class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 hover:bg-gray-50"
                             preserve-scroll

@@ -106,7 +106,9 @@ const pageUrl = (page: number) => {
                                 <th class="px-4 py-3 font-medium">مشتری</th>
                                 <th class="px-4 py-3 font-medium">موبایل</th>
                                 <th class="px-4 py-3 font-medium">ایمیل</th>
-                                <th class="px-4 py-3 font-medium">تأیید موبایل</th>
+                                <th class="px-4 py-3 font-medium">
+                                    تأیید موبایل
+                                </th>
                                 <th class="px-4 py-3 font-medium">سفارش‌ها</th>
                                 <th class="px-4 py-3 font-medium">عضویت</th>
                                 <th class="px-4 py-3"></th>
@@ -193,7 +195,9 @@ const pageUrl = (page: number) => {
                             {{ pagination.last_page }}
                         </span>
                         <Link
-                            v-if="pagination.current_page < pagination.last_page"
+                            v-if="
+                                pagination.current_page < pagination.last_page
+                            "
                             :href="pageUrl(pagination.current_page + 1)"
                             class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 hover:bg-gray-50"
                             preserve-scroll
