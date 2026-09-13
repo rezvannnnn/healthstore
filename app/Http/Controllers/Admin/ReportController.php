@@ -14,8 +14,8 @@ class ReportController extends Controller
 {
     public function index(Request $request): Response
     {
-        $from = $request->date('from') ?? now()->startOfMonth()->startOfDay();
-        $to = $request->date('to') ?? now()->endOfDay();
+        $from = $request->date('from')?->startOfDay() ?? now()->startOfMonth()->startOfDay();
+        $to = $request->date('to')?->endOfDay() ?? now()->endOfDay();
 
         if ($from->greaterThan($to)) {
             [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
