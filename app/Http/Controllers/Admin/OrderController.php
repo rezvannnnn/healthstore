@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\User;
 use App\Services\OrderService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -48,19 +49,34 @@ class OrderController extends Controller
         }
 
         $paginator = $query->paginate(20)->withQueryString();
+        $orders = [];
 
-        return Inertia::render('Admin/Orders/Index', [
-            'orders' => collect($paginator->items())->map(fn (Order $order): array => [
+        foreach ($paginator->items() as $order) {
+            /** @var Order $order */
+            $user = $order->user;
+            $customerName = $order->recipient_name;
+            $customerPhone = $order->recipient_phone;
+
+            if ($user instanceof User) {
+                $customerName = $user->name ?: $customerName;
+                $customerPhone = $user->phone ?: $customerPhone;
+            }
+
+            $orders[] = [
                 'id' => $order->id,
                 'order_number' => $order->order_number,
-                'customer_name' => $order->user?->name ?: $order->recipient_name,
-                'customer_phone' => $order->user?->phone ?: $order->recipient_phone,
+                'customer_name' => $customerName,
+                'customer_phone' => $customerPhone,
                 'status' => $order->status,
                 'payment_status' => $order->payment_status,
                 'items_count' => $order->items_count,
                 'total_amount' => (float) $order->total_amount,
                 'created_at' => $order->created_at?->toISOString(),
-            ])->values()->all(),
+            ];
+        }
+
+        return Inertia::render('Admin/Orders/Index', [
+            'orders' => $orders,
             'pagination' => [
                 'current_page' => $paginator->currentPage(),
                 'last_page' => $paginator->lastPage(),
