@@ -22,7 +22,10 @@ interface Props {
 const props = defineProps<Props>();
 
 function remove(article: Article) {
-    if (!window.confirm(`مقاله «${article.title}» حذف شود؟`)) return;
+    if (!window.confirm(`مقاله «${article.title}» حذف شود؟`)) {
+        return;
+    }
+
     router.delete(`/admin/articles/${article.id}`);
 }
 
