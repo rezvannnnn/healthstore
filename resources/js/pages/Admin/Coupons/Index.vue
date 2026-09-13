@@ -99,7 +99,11 @@ function remove(coupon: Coupon) {
 }
 
 function goToPage(page: number) {
-    if (page < 1 || page > props.coupons.last_page || page === props.coupons.current_page) {
+    if (
+        page < 1 ||
+        page > props.coupons.last_page ||
+        page === props.coupons.current_page
+    ) {
         return;
     }
 
@@ -331,7 +335,8 @@ function formatNumber(value: number) {
                     </span>
                     <button
                         :disabled="
-                            props.coupons.current_page === props.coupons.last_page
+                            props.coupons.current_page ===
+                            props.coupons.last_page
                         "
                         class="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
                         @click="goToPage(props.coupons.current_page + 1)"
