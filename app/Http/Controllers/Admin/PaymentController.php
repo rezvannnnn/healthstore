@@ -46,24 +46,38 @@ class PaymentController extends Controller
         }
 
         $paginator = $query->paginate(20)->withQueryString();
+        $payments = [];
+
+        foreach ($paginator->getCollection() as $payment) {
+            $order = $payment->order;
+            $user = $order?->user;
+
+            $payments[] = [
+                'id' => $payment->id,
+                'order_id' => $payment->order_id,
+                'order_number' => $order?->order_number,
+                'customer_name' => $user?->getAttribute('name'),
+                'customer_phone' => $user?->getAttribute('phone'),
+                'amount' => (float) $payment->amount,
+                'gateway' => $payment->gateway,
+                'status' => $payment->status,
+                'transaction_id' => $payment->transaction_id,
+                'reference_number' => $payment->reference_number,
+                'created_at' => $payment->created_at?->toISOString(),
+                'paid_at' => $payment->paid_at?->toISOString(),
+            ];
+        }
+
+        $gateways = Payment::query()
+            ->whereNotNull('gateway')
+            ->where('gateway', '!=', '')
+            ->distinct()
+            ->orderBy('gateway')
+            ->pluck('gateway')
+            ->all();
 
         return Inertia::render('Admin/Payments/Index', [
-            'payments' => $paginator->getCollection()->map(function (Payment $payment): array {
-                return [
-                    'id' => $payment->id,
-                    'order_id' => $payment->order_id,
-                    'order_number' => $payment->order?->order_number,
-                    'customer_name' => $payment->order?->user?->name,
-                    'customer_phone' => $payment->order?->user?->phone,
-                    'amount' => (float) $payment->amount,
-                    'gateway' => $payment->gateway,
-                    'status' => $payment->status,
-                    'transaction_id' => $payment->transaction_id,
-                    'reference_number' => $payment->reference_number,
-                    'created_at' => $payment->created_at?->toISOString(),
-                    'paid_at' => $payment->paid_at?->toISOString(),
-                ];
-            })->values()->all(),
+            'payments' => $payments,
             'pagination' => [
                 'current_page' => $paginator->currentPage(),
                 'last_page' => $paginator->lastPage(),
@@ -74,7 +88,7 @@ class PaymentController extends Controller
                 'status' => $status,
                 'gateway' => $gateway,
             ],
-            'gateways' => Payment::query()->whereNotNull('gateway')->where('gateway', '!=', '')->distinct()->orderBy('gateway')->pluck('gateway')->values()->all(),
+            'gateways' => $gateways,
         ]);
     }
 
