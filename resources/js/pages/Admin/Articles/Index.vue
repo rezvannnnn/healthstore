@@ -47,8 +47,9 @@ function formatDate(value: string | null) {
             <Link
                 href="/admin/articles/create"
                 class="rounded-lg bg-black px-4 py-2 text-sm text-white"
-                >مقاله جدید</Link
             >
+                مقاله جدید
+            </Link>
         </div>
 
         <form
@@ -116,8 +117,9 @@ function formatDate(value: string | null) {
                             <Link
                                 :href="`/admin/articles/${article.id}/edit`"
                                 class="rounded border px-3 py-1"
-                                >ویرایش</Link
                             >
+                                ویرایش
+                            </Link>
                             <button
                                 class="rounded border border-red-300 px-3 py-1 text-red-600"
                                 @click="remove(article)"
