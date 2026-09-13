@@ -12,8 +12,8 @@ class PaymentService
 {
     public function __construct(
         protected InventoryReservationService $reservationService,
-        protected ?CouponService $couponService = null,
-        protected ?PaymentGatewayInterface $gateway = null
+        protected ?PaymentGatewayInterface $gateway = null,
+        protected ?CouponService $couponService = null
     ) {}
 
     public function create(Order $order): Payment
