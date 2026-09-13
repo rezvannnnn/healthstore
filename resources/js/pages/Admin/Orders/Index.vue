@@ -150,7 +150,11 @@ const paymentLabel = (value: string) =>
                             جستجو
                         </button>
                         <button
-                            v-if="search || status !== 'all' || paymentStatus !== 'all'"
+                            v-if="
+                                search ||
+                                status !== 'all' ||
+                                paymentStatus !== 'all'
+                            "
                             type="button"
                             class="rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-medium hover:bg-gray-50"
                             @click="resetFilters"
@@ -218,7 +222,9 @@ const paymentLabel = (value: string) =>
                                 <td class="px-4 py-4">
                                     <span
                                         class="rounded-full bg-gray-100 px-2.5 py-1 text-xs"
-                                        >{{ paymentLabel(order.payment_status) }}</span
+                                        >{{
+                                            paymentLabel(order.payment_status)
+                                        }}</span
                                     >
                                 </td>
                                 <td class="px-4 py-4">
@@ -259,7 +265,9 @@ const paymentLabel = (value: string) =>
                             {{ pagination.last_page }}
                         </span>
                         <Link
-                            v-if="pagination.current_page < pagination.last_page"
+                            v-if="
+                                pagination.current_page < pagination.last_page
+                            "
                             :href="pageUrl(pagination.current_page + 1)"
                             class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 hover:bg-gray-50"
                             preserve-scroll
