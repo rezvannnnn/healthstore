@@ -193,10 +193,7 @@ function formatDate(value: string | null) {
                     </button>
                 </div>
             </div>
-            <div
-                v-else
-                class="border-t p-4 text-sm text-gray-500"
-            >
+            <div v-else class="border-t p-4 text-sm text-gray-500">
                 {{ props.pagination.total }} مقاله
             </div>
         </div>
