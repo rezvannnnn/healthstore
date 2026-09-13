@@ -56,6 +56,15 @@ class AdminOrderTest extends TestCase
         $this->actingAs($user)->get('/admin/orders')->assertForbidden();
     }
 
+    public function test_invalid_order_filters_are_rejected(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)
+            ->get('/admin/orders?status=invalid&payment_status=invalid')
+            ->assertInvalid(['status', 'payment_status']);
+    }
+
     public function test_admin_can_view_order_details(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
