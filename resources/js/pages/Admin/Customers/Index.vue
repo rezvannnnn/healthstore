@@ -37,7 +37,9 @@ const resetSearch = () => {
 const pageUrl = (page: number) => {
     const params = new URLSearchParams({ page: String(page) });
 
-    if (props.filters.search) params.set('search', props.filters.search);
+    if (props.filters.search) {
+        params.set('search', props.filters.search);
+    }
 
     return `/admin/customers?${params.toString()}`;
 };
@@ -104,9 +106,7 @@ const pageUrl = (page: number) => {
                                 <th class="px-4 py-3 font-medium">مشتری</th>
                                 <th class="px-4 py-3 font-medium">موبایل</th>
                                 <th class="px-4 py-3 font-medium">ایمیل</th>
-                                <th class="px-4 py-3 font-medium">
-                                    تأیید موبایل
-                                </th>
+                                <th class="px-4 py-3 font-medium">تأیید موبایل</th>
                                 <th class="px-4 py-3 font-medium">سفارش‌ها</th>
                                 <th class="px-4 py-3 font-medium">عضویت</th>
                                 <th class="px-4 py-3"></th>
