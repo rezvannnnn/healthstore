@@ -51,6 +51,28 @@ class AdminProductTest extends TestCase
             );
     }
 
+    public function test_admin_rejects_product_with_past_expiry_date_or_invalid_compare_price(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)
+            ->post('/admin/products', [
+                'name' => 'Invalid Product',
+                'slug' => 'invalid-product',
+                'price' => 125000,
+                'compare_at_price' => 100000,
+                'expiry_date' => now()->subDay()->toDateString(),
+                'is_active' => true,
+                'is_featured' => false,
+                'sort_order' => 0,
+            ])
+            ->assertSessionHasErrors(['expiry_date', 'compare_at_price']);
+
+        $this->assertDatabaseMissing('products', [
+            'slug' => 'invalid-product',
+        ]);
+    }
+
     public function test_admin_can_create_product_and_retail_price(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);

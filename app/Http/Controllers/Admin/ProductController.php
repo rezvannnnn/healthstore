@@ -174,13 +174,13 @@ class ProductController extends Controller
             'quantity_per_unit' => ['nullable', 'integer', 'min:1'],
             'short_description' => ['nullable', 'string', 'max:1000'],
             'description' => ['nullable', 'string'],
-            'expiry_date' => ['nullable', 'date'],
+            'expiry_date' => ['nullable', 'date', 'after_or_equal:today'],
             'main_image' => ['nullable', 'string', 'max:2048'],
             'is_active' => ['boolean'],
             'is_featured' => ['boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'price' => ['required', 'numeric', 'min:0'],
-            'compare_at_price' => ['nullable', 'numeric', 'min:0'],
+            'compare_at_price' => ['nullable', 'numeric', 'gte:price'],
         ]);
     }
 
