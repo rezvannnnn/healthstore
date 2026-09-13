@@ -89,7 +89,10 @@ function submit() {
 }
 
 function remove(coupon: Coupon) {
-    if (!window.confirm(`کد «${coupon.code}» حذف شود؟`)) return;
+    if (!window.confirm(`کد «${coupon.code}» حذف شود؟`)) {
+        return;
+    }
+
     router.delete(`/admin/coupons/${coupon.id}`);
 }
 
