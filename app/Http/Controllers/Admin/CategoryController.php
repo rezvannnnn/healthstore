@@ -101,14 +101,14 @@ class CategoryController extends Controller
     }
 
     /**
-     * @return array<int>
+     * @return list<int>
      */
     protected function excludedParentIds(Category $category): array
     {
         $excluded = [$category->id];
         $pending = [$category->id];
 
-        while (count($pending) > 0) {
+        while (true) {
             $childIds = array_map(
                 'intval',
                 Category::query()
