@@ -22,6 +22,8 @@ interface Props {
         data: Coupon[];
         current_page: number;
         last_page: number;
+        from: number | null;
+        to: number | null;
         total: number;
     };
 }
@@ -94,6 +96,21 @@ function remove(coupon: Coupon) {
     }
 
     router.delete(`/admin/coupons/${coupon.id}`);
+}
+
+function goToPage(page: number) {
+    if (page < 1 || page > props.coupons.last_page || page === props.coupons.current_page) {
+        return;
+    }
+
+    router.get(
+        `/admin/coupons?page=${page}`,
+        {},
+        {
+            preserveState: true,
+            preserveScroll: true,
+        },
+    );
 }
 
 function formatNumber(value: number) {
@@ -290,6 +307,39 @@ function formatNumber(value: number) {
                     </tr>
                 </tbody>
             </table>
+
+            <div
+                v-if="props.coupons.last_page > 1"
+                class="flex items-center justify-between gap-4 border-t p-4 text-sm"
+            >
+                <span class="text-gray-500">
+                    نمایش {{ formatNumber(props.coupons.from ?? 0) }} تا
+                    {{ formatNumber(props.coupons.to ?? 0) }} از
+                    {{ formatNumber(props.coupons.total) }} کد
+                </span>
+                <div class="flex items-center gap-2">
+                    <button
+                        :disabled="props.coupons.current_page === 1"
+                        class="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+                        @click="goToPage(props.coupons.current_page - 1)"
+                    >
+                        قبلی
+                    </button>
+                    <span class="min-w-24 text-center">
+                        صفحه {{ formatNumber(props.coupons.current_page) }} از
+                        {{ formatNumber(props.coupons.last_page) }}
+                    </span>
+                    <button
+                        :disabled="
+                            props.coupons.current_page === props.coupons.last_page
+                        "
+                        class="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+                        @click="goToPage(props.coupons.current_page + 1)"
+                    >
+                        بعدی
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </template>
