@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 
 type Customer = {
     id: number;
@@ -20,9 +20,16 @@ type Order = {
     created_at: string | null;
 };
 
+type Pagination = {
+    current_page: number;
+    last_page: number;
+    total: number;
+};
+
 const props = defineProps<{
     customer: Customer;
     orders: Order[];
+    pagination: Pagination;
 }>();
 
 const formatAmount = (amount: number) =>
@@ -43,6 +50,22 @@ const paymentLabel = (value: string) =>
         failed: 'ناموفق',
         refunded: 'برگشت خورده',
     })[value] || value;
+
+function goToPage(page: number) {
+    if (
+        page < 1 ||
+        page > props.pagination.last_page ||
+        page === props.pagination.current_page
+    ) {
+        return;
+    }
+
+    router.get(
+        `/admin/customers/${props.customer.id}`,
+        { page },
+        { preserveState: true, preserveScroll: true },
+    );
+}
 </script>
 
 <template>
@@ -105,8 +128,11 @@ const paymentLabel = (value: string) =>
             <section
                 class="mt-6 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200"
             >
-                <div class="border-b px-5 py-4">
+                <div class="flex items-center justify-between border-b px-5 py-4">
                     <h2 class="font-bold">آخرین سفارش‌ها</h2>
+                    <span class="text-sm text-gray-500">
+                        {{ props.pagination.total }} سفارش
+                    </span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-right text-sm">
@@ -165,6 +191,32 @@ const paymentLabel = (value: string) =>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <div
+                    v-if="props.pagination.last_page > 1"
+                    class="flex items-center justify-between border-t px-5 py-4 text-sm"
+                >
+                    <button
+                        :disabled="props.pagination.current_page === 1"
+                        class="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+                        @click="goToPage(props.pagination.current_page - 1)"
+                    >
+                        قبلی
+                    </button>
+                    <span>
+                        صفحه {{ props.pagination.current_page }} از
+                        {{ props.pagination.last_page }}
+                    </span>
+                    <button
+                        :disabled="
+                            props.pagination.current_page ===
+                            props.pagination.last_page
+                        "
+                        class="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+                        @click="goToPage(props.pagination.current_page + 1)"
+                    >
+                        بعدی
+                    </button>
                 </div>
             </section>
         </div>
