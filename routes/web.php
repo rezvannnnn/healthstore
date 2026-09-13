@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\LoginController;
@@ -73,6 +74,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/coupons', [AdminCouponController::class, 'store'])->name('coupons.store');
     Route::put('/coupons/{coupon}', [AdminCouponController::class, 'update'])->name('coupons.update');
     Route::delete('/coupons/{coupon}', [AdminCouponController::class, 'destroy'])->name('coupons.destroy');
+    Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
+    Route::put('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
 });
 
 Route::middleware('auth')->group(function () {
