@@ -49,4 +49,29 @@ class AdminSettingsTest extends TestCase
         $this->assertSame('داروخونه آنلاین', StoreSetting::getValue('store_name'));
         $this->assertSame('50000', StoreSetting::getValue('shipping_fee'));
     }
+
+    public function test_admin_cannot_save_an_invalid_timezone(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $payload = [
+            'store_name' => 'داروخونه آنلاین',
+            'support_phone' => '',
+            'support_email' => '',
+            'store_address' => '',
+            'shipping_fee' => 0,
+            'free_shipping_threshold' => 0,
+            'min_order_amount' => 0,
+            'currency' => 'تومان',
+            'timezone' => 'Invalid/Timezone',
+        ];
+
+        $this->actingAs($admin)
+            ->put(route('admin.settings.update'), $payload)
+            ->assertSessionHasErrors('timezone');
+
+        $this->assertDatabaseMissing('store_settings', [
+            'key' => 'timezone',
+            'value' => 'Invalid/Timezone',
+        ]);
+    }
 }
