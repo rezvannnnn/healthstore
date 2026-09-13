@@ -101,7 +101,7 @@ class CategoryController extends Controller
     }
 
     /**
-     * @return array<int, int>
+     * @return list<int>
      */
     protected function excludedParentIds(Category $category): array
     {
@@ -123,7 +123,7 @@ class CategoryController extends Controller
             $pending = array_map('intval', $childIds);
         }
 
-        return $excluded;
+        return array_values($excluded);
     }
 
     protected function makeSlug(?string $slug, string $name): string
