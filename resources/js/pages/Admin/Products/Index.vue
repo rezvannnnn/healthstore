@@ -67,12 +67,20 @@ const formatAmount = (amount: number | null) =>
                         مدیریت و بررسی موجودی محصولات فروشگاه
                     </p>
                 </div>
-                <Link
-                    href="/admin"
-                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-100"
-                >
-                    بازگشت به داشبورد
-                </Link>
+                <div class="flex flex-wrap gap-2">
+                    <Link
+                        href="/admin"
+                        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-100"
+                    >
+                        داشبورد
+                    </Link>
+                    <Link
+                        href="/admin/products/create"
+                        class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                    >
+                        محصول جدید
+                    </Link>
+                </div>
             </div>
 
             <div
@@ -113,16 +121,13 @@ const formatAmount = (amount: number | null) =>
                         <thead class="border-b bg-gray-50 text-gray-600">
                             <tr>
                                 <th class="px-4 py-3 font-medium">محصول</th>
-                                <th class="px-4 py-3 font-medium">
-                                    دسته / برند
-                                </th>
+                                <th class="px-4 py-3 font-medium">دسته / برند</th>
                                 <th class="px-4 py-3 font-medium">قیمت</th>
-                                <th class="px-4 py-3 font-medium">
-                                    موجودی فیزیکی
-                                </th>
+                                <th class="px-4 py-3 font-medium">موجودی فیزیکی</th>
                                 <th class="px-4 py-3 font-medium">رزرو شده</th>
                                 <th class="px-4 py-3 font-medium">قابل فروش</th>
                                 <th class="px-4 py-3 font-medium">وضعیت</th>
+                                <th class="px-4 py-3 font-medium">عملیات</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -168,17 +173,21 @@ const formatAmount = (amount: number | null) =>
                                                 : 'bg-gray-100 text-gray-600'
                                         "
                                     >
-                                        {{
-                                            product.is_active
-                                                ? 'فعال'
-                                                : 'غیرفعال'
-                                        }}
+                                        {{ product.is_active ? 'فعال' : 'غیرفعال' }}
                                     </span>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <Link
+                                        :href="`/admin/products/${product.id}/edit`"
+                                        class="font-medium text-blue-700 hover:underline"
+                                    >
+                                        ویرایش
+                                    </Link>
                                 </td>
                             </tr>
                             <tr v-if="products.length === 0">
                                 <td
-                                    colspan="7"
+                                    colspan="8"
                                     class="px-4 py-12 text-center text-gray-500"
                                 >
                                     محصولی پیدا نشد.
