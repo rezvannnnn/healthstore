@@ -26,9 +26,10 @@ class ReportController extends Controller
 
         $ordersCount = (clone $orders)->count();
         $cancelledCount = (clone $orders)->where('status', 'cancelled')->count();
+        $completedOrdersCount = $ordersCount - $cancelledCount;
         $grossSales = (float) (clone $orders)->where('status', '!=', 'cancelled')->sum('total_amount');
         $successfulPayments = (float) (clone $payments)->sum('amount');
-        $averageOrder = $ordersCount > 0 ? $grossSales / $ordersCount : 0;
+        $averageOrder = $completedOrdersCount > 0 ? $grossSales / $completedOrdersCount : 0;
 
         $itemsSold = (int) OrderItem::query()
             ->whereHas('order', function ($query) use ($from, $to): void {
@@ -53,9 +54,9 @@ class ReportController extends Controller
         foreach ($topProducts as $item) {
             $productData[] = [
                 'product_id' => $item->product_id,
-                'name' => $item->product?->name ?? 'محصول حذف‌شده',
+                'name' => $item->product->name ?? 'محصول حذف‌شده',
                 'quantity' => (int) $item->quantity,
-                'sales' => (float) $item->sales,
+                'sales' => (float) $item->getAttribute('sales'),
             ];
         }
 
