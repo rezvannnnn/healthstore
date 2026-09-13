@@ -230,7 +230,9 @@ const formatStatus = (value: Product['status']) =>
                             قبلی
                         </span>
                         <Link
-                            v-if="pagination.current_page < pagination.last_page"
+                            v-if="
+                                pagination.current_page < pagination.last_page
+                            "
                             :href="pageUrl(pagination.current_page + 1)"
                             preserve-state
                             replace
