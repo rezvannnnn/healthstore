@@ -12,7 +12,8 @@ class PaymentService
 {
     public function __construct(
         protected InventoryReservationService $reservationService,
-        protected ?PaymentGatewayInterface $gateway = null
+        protected ?PaymentGatewayInterface $gateway = null,
+        protected ?CouponService $couponService = null
     ) {}
 
     public function create(Order $order): Payment
@@ -112,11 +113,6 @@ class PaymentService
         });
     }
 
-    /**
-     * Verify and finalize a gateway callback in one transaction.
-     * The payment row stays locked from gateway verification through
-     * inventory consumption and payment/order finalization.
-     */
     public function verifyAndFinalizeGatewayPayment(Payment $payment, array $callbackData): array
     {
         return DB::transaction(function () use ($payment, $callbackData): array {
@@ -148,6 +144,8 @@ class PaymentService
                 throw new RuntimeException('سفارش مربوط به این پرداخت پیدا نشد.');
             }
 
+            $couponService = $this->couponService ?? app(CouponService::class);
+
             if (! $verified || empty($transactionId)) {
                 $reservations = $order->inventoryReservations()->where('status', 'active')->get();
                 foreach ($reservations as $reservation) {
@@ -155,6 +153,8 @@ class PaymentService
                         throw new RuntimeException('آزادسازی رزرو موجودی سفارش انجام نشد.');
                     }
                 }
+
+                $couponService->releaseForOrder($order);
                 $payment->update(['status' => 'failed']);
                 $payment->refresh();
 
@@ -166,6 +166,8 @@ class PaymentService
             }
 
             if ($order->status === 'cancelled') {
+                $couponService->releaseForOrder($order);
+
                 return [
                     'status' => 'cancelled', 'success' => false, 'verified' => false, 'payment' => $payment,
                     'transaction_id' => $transactionId, 'reference_number' => $result['reference_number'] ?? null,
@@ -179,6 +181,8 @@ class PaymentService
                     throw new RuntimeException('مصرف رزرو موجودی سفارش انجام نشد.');
                 }
             }
+
+            $couponService->consumeForOrder($order);
 
             $now = now();
             $payment->update([
@@ -222,8 +226,12 @@ class PaymentService
                     throw new RuntimeException('مصرف رزرو موجودی سفارش انجام نشد.');
                 }
             }
-            $payment->update(['status' => 'paid', 'transaction_id' => $transactionId, 'paid_at' => now()]);
-            $order->update(['status' => 'paid', 'payment_status' => 'paid', 'paid_at' => now(), 'confirmed_at' => $order->confirmed_at ?? now()]);
+
+            ($this->couponService ?? app(CouponService::class))->consumeForOrder($order);
+
+            $now = now();
+            $payment->update(['status' => 'paid', 'transaction_id' => $transactionId, 'paid_at' => $now]);
+            $order->update(['status' => 'paid', 'payment_status' => 'paid', 'paid_at' => $now, 'confirmed_at' => $order->confirmed_at ?? $now]);
 
             return true;
         });
@@ -249,6 +257,8 @@ class PaymentService
                     throw new RuntimeException('آزادسازی رزرو موجودی سفارش انجام نشد.');
                 }
             }
+
+            ($this->couponService ?? app(CouponService::class))->releaseForOrder($order);
             $payment->update(['status' => 'failed', 'gateway_response' => $gatewayResponse]);
 
             return true;
@@ -275,6 +285,8 @@ class PaymentService
                     throw new RuntimeException('آزادسازی رزرو موجودی سفارش انجام نشد.');
                 }
             }
+
+            ($this->couponService ?? app(CouponService::class))->releaseForOrder($order);
             $payment->update(['status' => 'cancelled']);
 
             return true;

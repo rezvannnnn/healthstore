@@ -33,11 +33,15 @@ class CheckoutController extends Controller
                 'cart' => $cart->load('items.product'),
                 'addresses' => $addresses,
                 'selectedAddressId' => null,
+                'couponCode' => null,
+                'appliedCoupon' => null,
+                'discountAmount' => 0,
                 'changes' => [],
                 'priceChanges' => [],
                 'availabilityChanges' => [],
                 'requiresPriceConfirmation' => false,
                 'subtotal' => 0,
+                'totalAmount' => 0,
                 'canProceedToPayment' => false,
                 'cartHasPayableItems' => false,
                 'message' => 'سبد خرید شما خالی است.',
@@ -51,11 +55,15 @@ class CheckoutController extends Controller
             'cart' => $result['cart'],
             'addresses' => $addresses,
             'selectedAddressId' => $selectedAddressId,
+            'couponCode' => null,
+            'appliedCoupon' => null,
+            'discountAmount' => 0,
             'changes' => $result['changes'],
             'priceChanges' => $result['price_changes'],
             'availabilityChanges' => $result['availability_changes'],
             'requiresPriceConfirmation' => $result['requires_price_confirmation'],
             'subtotal' => $result['subtotal'],
+            'totalAmount' => $result['subtotal'],
             'canProceedToPayment' => $result['can_proceed_to_payment'],
             'cartHasPayableItems' => $result['cart_has_payable_items'],
         ]);
@@ -68,6 +76,7 @@ class CheckoutController extends Controller
 
         $validated = $request->validate([
             'address_id' => ['required', 'integer'],
+            'coupon_code' => ['nullable', 'string', 'max:64'],
         ]);
         $addressId = (int) $validated['address_id'];
         $address = Address::query()->where('user_id', $user->id)->find($addressId);
@@ -96,7 +105,11 @@ class CheckoutController extends Controller
         $cart = $this->cartService->getCartForUser($user->id);
 
         try {
-            $order = $this->orderService->createFromCart($cart, $address);
+            $order = $this->orderService->createFromCart(
+                $cart,
+                $address,
+                isset($validated['coupon_code']) ? (string) $validated['coupon_code'] : null
+            );
         } catch (RuntimeException $e) {
             return redirect()->route('checkout.show')->with('error', $e->getMessage());
         }
