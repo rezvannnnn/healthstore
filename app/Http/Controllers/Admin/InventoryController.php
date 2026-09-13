@@ -118,7 +118,7 @@ class InventoryController extends Controller
             'quantity' => ['required', 'integer', 'min:0'],
             'minimum_quantity' => ['nullable', 'integer', 'min:0'],
             'batch_number' => ['nullable', 'string', 'max:255'],
-            'expiry_date' => ['nullable', 'date'],
+            'expiry_date' => ['nullable', 'date', 'after_or_equal:today'],
         ]);
 
         DB::transaction(function () use ($data): void {
