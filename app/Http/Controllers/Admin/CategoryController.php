@@ -109,18 +109,24 @@ class CategoryController extends Controller
         $pending = [$category->id];
 
         while ($pending !== []) {
-            $childIds = Category::query()
-                ->whereIn('parent_id', $pending)
-                ->whereNotIn('id', $excluded)
-                ->pluck('id')
-                ->all();
+            $childIds = array_map(
+                'intval',
+                Category::query()
+                    ->whereIn('parent_id', $pending)
+                    ->whereNotIn('id', $excluded)
+                    ->pluck('id')
+                    ->all(),
+            );
 
-            if ($childIds === []) {
+            if (count($childIds) === 0) {
                 break;
             }
 
-            $excluded = [...$excluded, ...array_map('intval', $childIds)];
-            $pending = array_map('intval', $childIds);
+            foreach ($childIds as $childId) {
+                $excluded[] = $childId;
+            }
+
+            $pending = $childIds;
         }
 
         return array_values($excluded);
