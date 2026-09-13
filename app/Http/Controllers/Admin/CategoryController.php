@@ -71,7 +71,7 @@ class CategoryController extends Controller
         $query = Category::query()->where('is_active', true)->orderBy('name');
 
         if ($category) {
-            $query->where('id', '!=', $category->id);
+            $query->whereNotIn('id', $this->excludedParentIds($category));
         }
 
         return $query->get(['id', 'name']);
@@ -79,8 +79,18 @@ class CategoryController extends Controller
 
     protected function validatedData(Request $request, ?Category $category = null): array
     {
+        $parentRules = [
+            'nullable',
+            'integer',
+            Rule::exists('categories', 'id')->where('is_active', true),
+        ];
+
+        if ($category) {
+            $parentRules[] = Rule::notIn($this->excludedParentIds($category));
+        }
+
         return $request->validate([
-            'parent_id' => ['nullable', 'integer', Rule::exists('categories', 'id')->where('is_active', true)],
+            'parent_id' => $parentRules,
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('categories', 'slug')->ignore($category?->id)],
             'description' => ['nullable', 'string', 'max:2000'],
@@ -88,6 +98,38 @@ class CategoryController extends Controller
             'is_active' => ['boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
+    }
+
+    /**
+     * @return list<int>
+     */
+    protected function excludedParentIds(Category $category): array
+    {
+        $excluded = [$category->id];
+        $pending = [$category->id];
+
+        while (true) {
+            $childIds = array_map(
+                'intval',
+                Category::query()
+                    ->whereIn('parent_id', $pending)
+                    ->whereNotIn('id', $excluded)
+                    ->pluck('id')
+                    ->all(),
+            );
+
+            if (count($childIds) === 0) {
+                break;
+            }
+
+            foreach ($childIds as $childId) {
+                $excluded[] = $childId;
+            }
+
+            $pending = $childIds;
+        }
+
+        return $excluded;
     }
 
     protected function makeSlug(?string $slug, string $name): string
