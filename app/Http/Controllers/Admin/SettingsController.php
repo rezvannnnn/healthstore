@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\StoreSetting;
+use DateTimeZone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -50,7 +52,12 @@ class SettingsController extends Controller
             'free_shipping_threshold' => ['required', 'numeric', 'min:0'],
             'min_order_amount' => ['required', 'numeric', 'min:0'],
             'currency' => ['required', 'string', 'max:50'],
-            'timezone' => ['required', 'string', 'max:100'],
+            'timezone' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::in(DateTimeZone::listIdentifiers()),
+            ],
         ]);
 
         DB::transaction(function () use ($data): void {
