@@ -53,7 +53,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/brands', [AdminBrandController::class, 'index'])->name('brands.index');
     Route::get('/brands/create', [AdminBrandController::class, 'create'])->name('brands.create');
     Route::post('/brands', [AdminBrandController::class, 'store'])->name('brands.store');
-    Route::get('/brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('admin.brands.edit');
+    Route::get('/brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('brands.edit');
     Route::put('/brands/{brand}', [AdminBrandController::class, 'update'])->name('brands.update');
     Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
     Route::post('/inventory', [AdminInventoryController::class, 'store'])->name('inventory.store');
