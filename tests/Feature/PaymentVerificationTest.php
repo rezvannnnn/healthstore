@@ -166,7 +166,7 @@ class PaymentVerificationTest extends TestCase
         $this->assertSame(1, $gateway->verifyCalls);
         $this->assertSame(
             ['code' => 100, 'message' => 'verified'],
-            json_decode($payment->gateway_response, true, 512, JSON_THROW_ON_ERROR)
+            $payment->gateway_response
         );
         $this->assertSame('pending', $payment->status);
     }
