@@ -23,17 +23,53 @@ const formatAmount = (amount: number) =>
     new Intl.NumberFormat('fa-IR').format(amount);
 
 const sections = [
-    { href: '/admin/products', label: 'محصولات', description: 'محصولات و قیمت‌ها' },
-    { href: '/admin/categories', label: 'دسته‌بندی‌ها', description: 'ساختار دسته‌ها' },
+    {
+        href: '/admin/products',
+        label: 'محصولات',
+        description: 'محصولات و قیمت‌ها',
+    },
+    {
+        href: '/admin/categories',
+        label: 'دسته‌بندی‌ها',
+        description: 'ساختار دسته‌ها',
+    },
     { href: '/admin/brands', label: 'برندها', description: 'برندهای محصولات' },
-    { href: '/admin/inventory', label: 'موجودی', description: 'موجودی و گردش انبار' },
-    { href: '/admin/orders', label: 'سفارش‌ها', description: 'پیگیری سفارش‌ها' },
-    { href: '/admin/payments', label: 'پرداخت‌ها', description: 'وضعیت تراکنش‌ها' },
-    { href: '/admin/customers', label: 'مشتری‌ها', description: 'مشتریان فروشگاه' },
-    { href: '/admin/coupons', label: 'کدهای تخفیف', description: 'کوپن و محدودیت مصرف' },
+    {
+        href: '/admin/inventory',
+        label: 'موجودی',
+        description: 'موجودی و گردش انبار',
+    },
+    {
+        href: '/admin/orders',
+        label: 'سفارش‌ها',
+        description: 'پیگیری سفارش‌ها',
+    },
+    {
+        href: '/admin/payments',
+        label: 'پرداخت‌ها',
+        description: 'وضعیت تراکنش‌ها',
+    },
+    {
+        href: '/admin/customers',
+        label: 'مشتری‌ها',
+        description: 'مشتریان فروشگاه',
+    },
+    {
+        href: '/admin/coupons',
+        label: 'کدهای تخفیف',
+        description: 'کوپن و محدودیت مصرف',
+    },
     { href: '/admin/articles', label: 'مقالات', description: 'محتوای وبلاگ' },
-    { href: '/admin/reports', label: 'گزارش‌ها', description: 'گزارش‌های مدیریتی' },
-    { href: '/admin/settings', label: 'تنظیمات', description: 'تنظیمات فروشگاه' },
+    {
+        href: '/admin/reports',
+        label: 'گزارش‌ها',
+        description: 'گزارش‌های مدیریتی',
+    },
+    {
+        href: '/admin/settings',
+        label: 'تنظیمات',
+        description: 'تنظیمات فروشگاه',
+    },
 ];
 </script>
 
@@ -148,7 +184,9 @@ const sections = [
                 </Link>
             </div>
 
-            <div class="mt-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+            <div
+                class="mt-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
+            >
                 <div class="flex items-center justify-between gap-4">
                     <div>
                         <h2 class="text-lg font-semibold">مدیریت بخش‌ها</h2>
@@ -158,7 +196,9 @@ const sections = [
                     </div>
                 </div>
 
-                <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div
+                    class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                >
                     <Link
                         v-for="section in sections"
                         :key="section.href"
@@ -173,22 +213,42 @@ const sections = [
                 </div>
             </div>
 
-            <div class="mt-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+            <div
+                class="mt-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
+            >
                 <h2 class="text-lg font-semibold">وضعیت فروشگاه</h2>
                 <div class="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                    <Link href="/admin/products" class="rounded-lg bg-gray-50 p-4 hover:bg-gray-100">
+                    <Link
+                        href="/admin/products"
+                        class="rounded-lg bg-gray-50 p-4 hover:bg-gray-100"
+                    >
                         <p class="text-sm text-gray-500">کل محصولات</p>
-                        <p class="mt-1 font-semibold">{{ stats.products_count }}</p>
+                        <p class="mt-1 font-semibold">
+                            {{ stats.products_count }}
+                        </p>
                     </Link>
-                    <Link href="/admin/products?status=active" class="rounded-lg bg-gray-50 p-4 hover:bg-gray-100">
+                    <Link
+                        href="/admin/products?status=active"
+                        class="rounded-lg bg-gray-50 p-4 hover:bg-gray-100"
+                    >
                         <p class="text-sm text-gray-500">محصولات فعال</p>
-                        <p class="mt-1 font-semibold">{{ stats.active_products_count }}</p>
+                        <p class="mt-1 font-semibold">
+                            {{ stats.active_products_count }}
+                        </p>
                     </Link>
-                    <Link href="/admin/payments?status=failed" class="rounded-lg bg-gray-50 p-4 hover:bg-gray-100">
+                    <Link
+                        href="/admin/payments?status=failed"
+                        class="rounded-lg bg-gray-50 p-4 hover:bg-gray-100"
+                    >
                         <p class="text-sm text-gray-500">پرداخت ناموفق</p>
-                        <p class="mt-1 font-semibold">{{ stats.failed_payments }}</p>
+                        <p class="mt-1 font-semibold">
+                            {{ stats.failed_payments }}
+                        </p>
                     </Link>
-                    <Link href="/admin/coupons" class="rounded-lg bg-gray-50 p-4 hover:bg-gray-100">
+                    <Link
+                        href="/admin/coupons"
+                        class="rounded-lg bg-gray-50 p-4 hover:bg-gray-100"
+                    >
                         <p class="text-sm text-gray-500">کدهای تخفیف</p>
                         <p class="mt-1 font-semibold">مدیریت</p>
                     </Link>

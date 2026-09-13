@@ -121,9 +121,13 @@ const formatAmount = (amount: number | null) =>
                         <thead class="border-b bg-gray-50 text-gray-600">
                             <tr>
                                 <th class="px-4 py-3 font-medium">محصول</th>
-                                <th class="px-4 py-3 font-medium">دسته / برند</th>
+                                <th class="px-4 py-3 font-medium">
+                                    دسته / برند
+                                </th>
                                 <th class="px-4 py-3 font-medium">قیمت</th>
-                                <th class="px-4 py-3 font-medium">موجودی فیزیکی</th>
+                                <th class="px-4 py-3 font-medium">
+                                    موجودی فیزیکی
+                                </th>
                                 <th class="px-4 py-3 font-medium">رزرو شده</th>
                                 <th class="px-4 py-3 font-medium">قابل فروش</th>
                                 <th class="px-4 py-3 font-medium">وضعیت</th>
@@ -173,7 +177,11 @@ const formatAmount = (amount: number | null) =>
                                                 : 'bg-gray-100 text-gray-600'
                                         "
                                     >
-                                        {{ product.is_active ? 'فعال' : 'غیرفعال' }}
+                                        {{
+                                            product.is_active
+                                                ? 'فعال'
+                                                : 'غیرفعال'
+                                        }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-4">
