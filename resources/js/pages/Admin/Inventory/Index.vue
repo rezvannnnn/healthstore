@@ -40,6 +40,19 @@ const filter = () =>
         { search: search.value, status: status.value },
         { preserveState: true, replace: true },
     );
+const pageUrl = (page: number) => {
+    const params = new URLSearchParams();
+
+    if (search.value) {
+        params.set('search', search.value);
+    }
+    if (status.value && status.value !== 'all') {
+        params.set('status', status.value);
+    }
+    params.set('page', String(page));
+
+    return `/admin/inventory?${params.toString()}`;
+};
 const openCreate = (productId: number) => {
     selectedProduct.value = productId;
     form.product_id = productId;
@@ -192,8 +205,46 @@ const formatStatus = (value: Product['status']) =>
                         </tbody>
                     </table>
                 </div>
-                <div class="border-t px-4 py-4 text-sm text-gray-600">
-                    مجموع: {{ pagination.total }} محصول
+                <div
+                    class="flex flex-col gap-3 border-t px-4 py-4 text-sm text-gray-600 md:flex-row md:items-center md:justify-between"
+                >
+                    <span>
+                        مجموع: {{ pagination.total }} محصول — صفحه
+                        {{ pagination.current_page }} از
+                        {{ pagination.last_page }}
+                    </span>
+                    <div class="flex gap-2">
+                        <Link
+                            v-if="pagination.current_page > 1"
+                            :href="pageUrl(pagination.current_page - 1)"
+                            preserve-state
+                            replace
+                            class="rounded-lg border bg-white px-3 py-2"
+                        >
+                            قبلی
+                        </Link>
+                        <span
+                            v-else
+                            class="rounded-lg border px-3 py-2 text-gray-400"
+                        >
+                            قبلی
+                        </span>
+                        <Link
+                            v-if="pagination.current_page < pagination.last_page"
+                            :href="pageUrl(pagination.current_page + 1)"
+                            preserve-state
+                            replace
+                            class="rounded-lg border bg-white px-3 py-2"
+                        >
+                            بعدی
+                        </Link>
+                        <span
+                            v-else
+                            class="rounded-lg border px-3 py-2 text-gray-400"
+                        >
+                            بعدی
+                        </span>
+                    </div>
                 </div>
             </div>
             <div

@@ -39,6 +39,33 @@ class InventoryController extends Controller
             });
         }
 
+        if ($status === 'out') {
+            $productsWithStock = Inventory::query()
+                ->select('product_id')
+                ->where('is_active', true)
+                ->where('quantity', '>', 0)
+                ->where(function ($query): void {
+                    $query->whereNull('expiry_date')
+                        ->orWhereDate('expiry_date', '>=', now()->toDateString());
+                })
+                ->groupBy('product_id');
+
+            $productsQuery->whereNotIn('id', $productsWithStock);
+        } elseif ($status === 'low') {
+            $lowStockProductIds = Inventory::query()
+                ->select('product_id')
+                ->where('is_active', true)
+                ->where(function ($query): void {
+                    $query->whereNull('expiry_date')
+                        ->orWhereDate('expiry_date', '>=', now()->toDateString());
+                })
+                ->groupBy('product_id')
+                ->havingRaw('SUM(quantity) > 0')
+                ->havingRaw('SUM(quantity) <= SUM(minimum_quantity)');
+
+            $productsQuery->whereIn('id', $lowStockProductIds);
+        }
+
         $paginator = $productsQuery->paginate(20)->withQueryString();
 
         $products = collect($paginator->items())->map(function (Product $product): array {
@@ -67,10 +94,6 @@ class InventoryController extends Controller
                 'status' => $physical <= 0 ? 'out' : ($physical <= $minimum ? 'low' : 'ok'),
             ];
         });
-
-        if ($status === 'out' || $status === 'low') {
-            $products = $products->filter(fn (array $product): bool => $product['status'] === $status)->values();
-        }
 
         return Inertia::render('Admin/Inventory/Index', [
             'products' => $products->all(),
