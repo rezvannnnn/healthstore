@@ -36,6 +36,32 @@ class AdminInventoryTest extends TestCase
         $this->actingAs($user)->get('/admin/inventory')->assertForbidden();
     }
 
+    public function test_inventory_status_filtering_is_applied_before_pagination(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $warehouse = $this->warehouse();
+        $okProduct = $this->product('OK Product');
+        $lowProduct = $this->product('Low Product');
+        $outProduct = $this->product('Out Product');
+
+        Inventory::create(['product_id' => $okProduct->id, 'warehouse_id' => $warehouse->id, 'quantity' => 20, 'minimum_quantity' => 5, 'is_active' => true]);
+        Inventory::create(['product_id' => $lowProduct->id, 'warehouse_id' => $warehouse->id, 'quantity' => 3, 'minimum_quantity' => 5, 'is_active' => true]);
+
+        $response = $this->actingAs($admin)->get('/admin/inventory?status=low');
+        $response->assertSuccessful()->assertInertia(fn ($page) => $page
+            ->where('filters.status', 'low')
+            ->where('pagination.total', 1)
+            ->where('products.0.id', $lowProduct->id)
+        );
+
+        $response = $this->actingAs($admin)->get('/admin/inventory?status=out');
+        $response->assertSuccessful()->assertInertia(fn ($page) => $page
+            ->where('filters.status', 'out')
+            ->where('pagination.total', 1)
+            ->where('products.0.id', $outProduct->id)
+        );
+    }
+
     public function test_admin_can_create_inventory_record(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
