@@ -45,13 +45,23 @@ const resetFilters = () => {
     router.get('/admin/orders', {}, { preserveState: true, replace: true });
 };
 
-const pageUrl = (page: number) => ({
-    url: '/admin/orders',
-    search: props.filters.search,
-    status: props.filters.status,
-    payment_status: props.filters.payment_status,
-    page,
-});
+const pageUrl = (page: number) => {
+    const params = new URLSearchParams({ page: String(page) });
+
+    if (props.filters.search) {
+        params.set('search', props.filters.search);
+    }
+
+    if (props.filters.status) {
+        params.set('status', props.filters.status);
+    }
+
+    if (props.filters.payment_status) {
+        params.set('payment_status', props.filters.payment_status);
+    }
+
+    return `/admin/orders?${params.toString()}`;
+};
 
 const formatAmount = (amount: number) =>
     new Intl.NumberFormat('fa-IR').format(amount);
