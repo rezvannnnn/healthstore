@@ -39,7 +39,7 @@ class ReportController extends Controller
             ->sum('quantity');
 
         $topProducts = OrderItem::query()
-            ->selectRaw('product_id, SUM(quantity) as quantity, SUM(line_total) as sales')
+            ->selectRaw('product_id, SUM(quantity) as quantity, SUM(total_amount) as sales')
             ->whereHas('order', function ($query) use ($from, $to): void {
                 $query->whereBetween('created_at', [$from, $to])
                     ->where('status', '!=', 'cancelled');
