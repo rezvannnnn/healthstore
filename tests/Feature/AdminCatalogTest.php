@@ -22,7 +22,9 @@ class AdminCatalogTest extends TestCase
             ->assertSuccessful()
             ->assertInertia(fn ($page) => $page
                 ->component('Admin/Categories/Index')
-                ->has('categories', 1)
+                ->has('categories.data', 1)
+                ->where('categories.current_page', 1)
+                ->where('categories.total', 1)
             );
     }
 
