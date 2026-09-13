@@ -62,6 +62,37 @@ class AdminCatalogTest extends TestCase
         ]);
     }
 
+    public function test_category_cannot_be_assigned_to_one_of_its_descendants(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $parent = Category::create([
+            'name' => 'والد',
+            'slug' => 'parent',
+            'is_active' => true,
+        ]);
+        $child = Category::create([
+            'parent_id' => $parent->id,
+            'name' => 'فرزند',
+            'slug' => 'child',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->put('/admin/categories/'.$parent->id, [
+                'parent_id' => $child->id,
+                'name' => $parent->name,
+                'slug' => $parent->slug,
+                'is_active' => true,
+                'sort_order' => 0,
+            ])
+            ->assertSessionHasErrors('parent_id');
+
+        $this->assertDatabaseHas('categories', [
+            'id' => $parent->id,
+            'parent_id' => null,
+        ]);
+    }
+
     public function test_admin_can_create_and_edit_brand(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
