@@ -4,15 +4,13 @@ namespace Tests\Feature;
 
 use App\Models\Cart;
 use App\Models\Coupon;
-use App\Models\CouponUsage;
 use App\Models\Inventory;
-use App\Models\Order;
-use App\Models\Payment;
 use App\Models\Product;
 use App\Models\ProductPrice;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\CartService;
+use App\Services\CouponService;
 use App\Services\InventoryReservationService;
 use App\Services\InventoryService;
 use App\Services\OrderService;
@@ -239,7 +237,7 @@ class CouponIntegrationTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('ظرفیت استفاده از این کد تخفیف تکمیل شده است.');
 
-        app(\App\Services\CouponService::class)->prepareForOrder(
+        app(CouponService::class)->prepareForOrder(
             'LIMIT10',
             $otherUser->id,
             200000
