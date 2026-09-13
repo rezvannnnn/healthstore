@@ -39,39 +39,31 @@ class InventoryController extends Controller
             });
         }
 
-        $physicalQuery = Inventory::query()
-            ->selectRaw('COALESCE(SUM(quantity), 0)')
-            ->whereColumn('inventories.product_id', 'products.id')
-            ->where('is_active', true)
-            ->where('quantity', '>', 0)
-            ->where(function ($query): void {
-                $query->whereNull('expiry_date')
-                    ->orWhereDate('expiry_date', '>=', now()->toDateString());
-            });
-
-        $minimumQuery = Inventory::query()
-            ->selectRaw('COALESCE(SUM(minimum_quantity), 0)')
-            ->whereColumn('inventories.product_id', 'products.id')
-            ->where('is_active', true);
-
         if ($status === 'out') {
-            $productsQuery->whereRaw(
-                "({$physicalQuery->toSql()}) <= 0",
-                $physicalQuery->getBindings(),
-            );
+            $productsWithStock = Inventory::query()
+                ->select('product_id')
+                ->where('is_active', true)
+                ->where('quantity', '>', 0)
+                ->where(function ($query): void {
+                    $query->whereNull('expiry_date')
+                        ->orWhereDate('expiry_date', '>=', now()->toDateString());
+                })
+                ->groupBy('product_id');
+
+            $productsQuery->whereNotIn('id', $productsWithStock);
         } elseif ($status === 'low') {
-            $productsQuery
-                ->whereRaw(
-                    "({$physicalQuery->toSql()}) > 0",
-                    $physicalQuery->getBindings(),
-                )
-                ->whereRaw(
-                    "({$physicalQuery->toSql()}) <= ({$minimumQuery->toSql()})",
-                    [
-                        ...$physicalQuery->getBindings(),
-                        ...$minimumQuery->getBindings(),
-                    ],
-                );
+            $lowStockProductIds = Inventory::query()
+                ->select('product_id')
+                ->where('is_active', true)
+                ->where(function ($query): void {
+                    $query->whereNull('expiry_date')
+                        ->orWhereDate('expiry_date', '>=', now()->toDateString());
+                })
+                ->groupBy('product_id')
+                ->havingRaw('SUM(quantity) > 0')
+                ->havingRaw('SUM(quantity) <= SUM(minimum_quantity)');
+
+            $productsQuery->whereIn('id', $lowStockProductIds);
         }
 
         $paginator = $productsQuery->paginate(20)->withQueryString();
