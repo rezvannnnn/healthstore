@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
+
 type Brand = {
     id: number;
     name: string;
@@ -9,7 +10,18 @@ type Brand = {
     is_active: boolean;
     products_count: number;
 };
-defineProps<{ brands: Brand[] }>();
+
+type Pagination = {
+    current_page: number;
+    last_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+};
+
+defineProps<{ brands: { data: Brand[] } & Pagination }>();
+
+const pageUrl = (page: number) => `/admin/brands?page=${page}`;
 </script>
 
 <template>
@@ -55,7 +67,7 @@ defineProps<{ brands: Brand[] }>();
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             <tr
-                                v-for="brand in brands"
+                                v-for="brand in brands.data"
                                 :key="brand.id"
                                 class="hover:bg-gray-50"
                             >
@@ -89,7 +101,7 @@ defineProps<{ brands: Brand[] }>();
                                     >
                                 </td>
                             </tr>
-                            <tr v-if="brands.length === 0">
+                            <tr v-if="brands.data.length === 0">
                                 <td
                                     colspan="5"
                                     class="px-4 py-12 text-center text-gray-500"
@@ -99,6 +111,38 @@ defineProps<{ brands: Brand[] }>();
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <div
+                    v-if="brands.last_page > 1"
+                    class="flex flex-col gap-3 border-t px-4 py-4 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between"
+                >
+                    <div>
+                        نمایش {{ brands.from }} تا {{ brands.to }} از
+                        {{ brands.total }} برند
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <Link
+                            v-if="brands.current_page > 1"
+                            :href="pageUrl(brands.current_page - 1)"
+                            preserve-scroll
+                            preserve-state
+                            class="rounded-lg border border-gray-300 bg-white px-3 py-2 font-medium hover:bg-gray-50"
+                            >قبلی</Link
+                        >
+                        <span
+                            class="rounded-lg bg-gray-100 px-3 py-2 font-medium"
+                            >صفحه {{ brands.current_page }} از
+                            {{ brands.last_page }}</span
+                        >
+                        <Link
+                            v-if="brands.current_page < brands.last_page"
+                            :href="pageUrl(brands.current_page + 1)"
+                            preserve-scroll
+                            preserve-state
+                            class="rounded-lg border border-gray-300 bg-white px-3 py-2 font-medium hover:bg-gray-50"
+                            >بعدی</Link
+                        >
+                    </div>
                 </div>
             </div>
         </div>
