@@ -101,7 +101,7 @@ class CategoryController extends Controller
     }
 
     /**
-     * @return list<int>
+     * @return array<int, int>
      */
     protected function excludedParentIds(Category $category): array
     {
