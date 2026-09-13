@@ -36,6 +36,23 @@ const submitFilters = () =>
         { preserveState: true, replace: true },
     );
 
+const resetFilters = () => {
+    search.value = '';
+    status.value = 'all';
+    gateway.value = 'all';
+    router.get('/admin/payments', {}, { preserveState: true, replace: true });
+};
+
+const pageUrl = (page: number) => {
+    const params = new URLSearchParams({ page: String(page) });
+
+    if (props.filters.search) params.set('search', props.filters.search);
+    if (props.filters.status) params.set('status', props.filters.status);
+    if (props.filters.gateway) params.set('gateway', props.filters.gateway);
+
+    return `/admin/payments?${params.toString()}`;
+};
+
 const formatAmount = (amount: number) =>
     new Intl.NumberFormat('fa-IR').format(amount);
 const statusLabel = (value: string) =>
@@ -109,12 +126,22 @@ const statusLabel = (value: string) =>
                             {{ item }}
                         </option>
                     </select>
-                    <button
-                        type="submit"
-                        class="rounded-lg bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-800"
-                    >
-                        جستجو
-                    </button>
+                    <div class="flex gap-2">
+                        <button
+                            type="submit"
+                            class="flex-1 rounded-lg bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                        >
+                            جستجو
+                        </button>
+                        <button
+                            v-if="search || status !== 'all' || gateway !== 'all'"
+                            type="button"
+                            class="rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-medium hover:bg-gray-50"
+                            @click="resetFilters"
+                        >
+                            پاک کردن
+                        </button>
+                    </div>
                 </form>
             </div>
 
@@ -193,13 +220,33 @@ const statusLabel = (value: string) =>
                     </table>
                 </div>
                 <div
-                    class="flex items-center justify-between border-t px-4 py-4 text-sm text-gray-600"
+                    class="flex flex-col gap-3 border-t px-4 py-4 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between"
                 >
-                    <span>مجموع: {{ pagination.total }} پرداخت</span
-                    ><span
-                        >صفحه {{ pagination.current_page }} از
-                        {{ pagination.last_page }}</span
-                    >
+                    <span>مجموع: {{ pagination.total }} پرداخت</span>
+                    <div class="flex items-center gap-2">
+                        <Link
+                            v-if="pagination.current_page > 1"
+                            :href="pageUrl(pagination.current_page - 1)"
+                            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 hover:bg-gray-50"
+                            preserve-scroll
+                            preserve-state
+                        >
+                            قبلی
+                        </Link>
+                        <span>
+                            صفحه {{ pagination.current_page }} از
+                            {{ pagination.last_page }}
+                        </span>
+                        <Link
+                            v-if="pagination.current_page < pagination.last_page"
+                            :href="pageUrl(pagination.current_page + 1)"
+                            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 hover:bg-gray-50"
+                            preserve-scroll
+                            preserve-state
+                        >
+                            بعدی
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>
