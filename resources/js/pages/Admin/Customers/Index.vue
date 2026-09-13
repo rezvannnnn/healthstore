@@ -12,7 +12,6 @@ type Customer = {
     created_at: string | null;
 };
 type Pagination = { current_page: number; last_page: number; total: number };
-
 type Filters = { search: string };
 
 const props = defineProps<{
@@ -29,6 +28,19 @@ const submitSearch = () =>
         { search: search.value },
         { preserveState: true, replace: true },
     );
+
+const resetSearch = () => {
+    search.value = '';
+    router.get('/admin/customers', {}, { preserveState: true, replace: true });
+};
+
+const pageUrl = (page: number) => {
+    const params = new URLSearchParams({ page: String(page) });
+
+    if (props.filters.search) params.set('search', props.filters.search);
+
+    return `/admin/customers?${params.toString()}`;
+};
 </script>
 
 <template>
@@ -70,6 +82,14 @@ const submitSearch = () =>
                         class="rounded-lg bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-800"
                     >
                         جستجو
+                    </button>
+                    <button
+                        v-if="search"
+                        type="button"
+                        class="rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-medium hover:bg-gray-50"
+                        @click="resetSearch"
+                    >
+                        پاک کردن
                     </button>
                 </form>
             </div>
@@ -155,13 +175,33 @@ const submitSearch = () =>
                     </table>
                 </div>
                 <div
-                    class="flex items-center justify-between border-t px-4 py-4 text-sm text-gray-600"
+                    class="flex flex-col gap-3 border-t px-4 py-4 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between"
                 >
                     <span>مجموع: {{ pagination.total }} مشتری</span>
-                    <span
-                        >صفحه {{ pagination.current_page }} از
-                        {{ pagination.last_page }}</span
-                    >
+                    <div class="flex items-center gap-2">
+                        <Link
+                            v-if="pagination.current_page > 1"
+                            :href="pageUrl(pagination.current_page - 1)"
+                            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 hover:bg-gray-50"
+                            preserve-scroll
+                            preserve-state
+                        >
+                            قبلی
+                        </Link>
+                        <span>
+                            صفحه {{ pagination.current_page }} از
+                            {{ pagination.last_page }}
+                        </span>
+                        <Link
+                            v-if="pagination.current_page < pagination.last_page"
+                            :href="pageUrl(pagination.current_page + 1)"
+                            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 hover:bg-gray-50"
+                            preserve-scroll
+                            preserve-state
+                        >
+                            بعدی
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>
