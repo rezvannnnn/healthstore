@@ -146,7 +146,9 @@ const pageUrl = (page: number) => `/admin/categories?page=${page}`;
                             {{ categories.last_page }}</span
                         >
                         <Link
-                            v-if="categories.current_page < categories.last_page"
+                            v-if="
+                                categories.current_page < categories.last_page
+                            "
                             :href="pageUrl(categories.current_page + 1)"
                             preserve-scroll
                             preserve-state
