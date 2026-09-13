@@ -89,7 +89,11 @@ const paymentLabel = (value: string) =>
                     <div>
                         <p class="text-xs text-gray-500">تأیید موبایل</p>
                         <p class="mt-1 font-medium">
-                            {{ customer.phone_verified ? 'تأیید شده' : 'تأیید نشده' }}
+                            {{
+                                customer.phone_verified
+                                    ? 'تأیید شده'
+                                    : 'تأیید نشده'
+                            }}
                         </p>
                     </div>
                 </div>

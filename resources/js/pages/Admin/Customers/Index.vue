@@ -84,7 +84,9 @@ const submitSearch = () =>
                                 <th class="px-4 py-3 font-medium">مشتری</th>
                                 <th class="px-4 py-3 font-medium">موبایل</th>
                                 <th class="px-4 py-3 font-medium">ایمیل</th>
-                                <th class="px-4 py-3 font-medium">تأیید موبایل</th>
+                                <th class="px-4 py-3 font-medium">
+                                    تأیید موبایل
+                                </th>
                                 <th class="px-4 py-3 font-medium">سفارش‌ها</th>
                                 <th class="px-4 py-3 font-medium">عضویت</th>
                                 <th class="px-4 py-3"></th>
