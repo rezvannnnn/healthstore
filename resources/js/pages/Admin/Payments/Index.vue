@@ -46,9 +46,15 @@ const resetFilters = () => {
 const pageUrl = (page: number) => {
     const params = new URLSearchParams({ page: String(page) });
 
-    if (props.filters.search) params.set('search', props.filters.search);
-    if (props.filters.status) params.set('status', props.filters.status);
-    if (props.filters.gateway) params.set('gateway', props.filters.gateway);
+    if (props.filters.search) {
+        params.set('search', props.filters.search);
+    }
+    if (props.filters.status) {
+        params.set('status', props.filters.status);
+    }
+    if (props.filters.gateway) {
+        params.set('gateway', props.filters.gateway);
+    }
 
     return `/admin/payments?${params.toString()}`;
 };
