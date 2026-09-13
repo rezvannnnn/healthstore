@@ -67,12 +67,12 @@ class CustomerController extends Controller
             ->withCount('items')
             ->orderByDesc('created_at')
             ->orderByDesc('id')
-            ->limit(20)
-            ->get();
+            ->paginate(20)
+            ->withQueryString();
 
         $orderData = [];
 
-        foreach ($orders as $order) {
+        foreach ($orders->items() as $order) {
             $orderData[] = [
                 'id' => $order->id,
                 'order_number' => $order->order_number,
@@ -94,6 +94,11 @@ class CustomerController extends Controller
                 'created_at' => $user->created_at?->toISOString(),
             ],
             'orders' => $orderData,
+            'pagination' => [
+                'current_page' => $orders->currentPage(),
+                'last_page' => $orders->lastPage(),
+                'total' => $orders->total(),
+            ],
         ]);
     }
 }
