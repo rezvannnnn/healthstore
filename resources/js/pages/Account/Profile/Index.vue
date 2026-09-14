@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 
 interface User {
     id: number;
@@ -9,10 +9,21 @@ interface User {
     phone_verified_at?: string | null;
 }
 
+interface PagePropsWithFlash {
+    [key: string]: unknown;
+    flash?: {
+        success?: string;
+        error?: string;
+        info?: string;
+        status?: string;
+    };
+}
+
 const props = defineProps<{
     user: User;
 }>();
 
+const page = usePage<PagePropsWithFlash>();
 const form = useForm({
     name: props.user.name,
     email: props.user.email ?? '',
@@ -38,6 +49,28 @@ function submit(): void {
                     اطلاعات حساب کاربری خود را مدیریت کنید.
                 </p>
             </header>
+
+            <div
+                v-if="page.props.flash?.success || page.props.flash?.status"
+                class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700"
+                role="status"
+            >
+                {{ page.props.flash.success || page.props.flash.status }}
+            </div>
+            <div
+                v-if="page.props.flash?.error"
+                class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+                role="alert"
+            >
+                {{ page.props.flash.error }}
+            </div>
+            <div
+                v-if="page.props.flash?.info"
+                class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700"
+                role="status"
+            >
+                {{ page.props.flash.info }}
+            </div>
 
             <section
                 class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800"
