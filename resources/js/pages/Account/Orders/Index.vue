@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 
 interface Order {
     id: number;
@@ -19,6 +19,14 @@ const statusLabels: Record<string, string> = {
     processing: 'در حال پردازش',
     shipped: 'ارسال‌شده',
     delivered: 'تحویل‌شده',
+    cancelled: 'لغوشده',
+};
+
+const paymentStatusLabels: Record<string, string> = {
+    pending: 'در انتظار پرداخت',
+    paid: 'پرداخت موفق',
+    failed: 'پرداخت ناموفق',
+    refunded: 'مستردشده',
     cancelled: 'لغوشده',
 };
 
@@ -47,10 +55,10 @@ function formatDate(value: string | null): string {
                         سوابق سفارش‌های ثبت‌شده شما
                     </p>
                 </div>
-                <a
+                <Link
                     href="/account/addresses"
                     class="text-sm font-medium text-indigo-600 hover:underline"
-                    >آدرس‌ها</a
+                    >آدرس‌ها</Link
                 >
             </header>
 
@@ -80,8 +88,11 @@ function formatDate(value: string | null): string {
                                 </span>
                             </div>
                             <p class="mt-2 text-sm text-gray-500">
-                                {{ formatDate(order.created_at) }} · وضعیت
-                                پرداخت: {{ order.payment_status }}
+                                {{ formatDate(order.created_at) }} · وضعیت پرداخت:
+                                {{
+                                    paymentStatusLabels[order.payment_status] ||
+                                    order.payment_status
+                                }}
                             </p>
                         </div>
                         <div class="text-right">
@@ -95,10 +106,10 @@ function formatDate(value: string | null): string {
                                     )
                                 }}
                             </div>
-                            <a
+                            <Link
                                 :href="`/orders/${order.order_number}`"
                                 class="mt-2 inline-block text-sm font-medium text-indigo-600 hover:underline"
-                                >مشاهده سفارش</a
+                                >مشاهده سفارش</Link
                             >
                         </div>
                     </div>
