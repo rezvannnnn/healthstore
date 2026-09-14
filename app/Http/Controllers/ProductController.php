@@ -125,6 +125,11 @@ class ProductController extends Controller
             ->all();
 
         return Inertia::render('Product/Show', [
+            'seo' => [
+                'title' => $product->seo_title ?: $product->name,
+                'description' => $product->seo_description ?: $product->short_description,
+                'canonical' => $product->canonical_url ?: url('/products/'.$product->slug),
+            ],
             'product' => [
                 'id' => $product->id,
                 'name' => $product->name,
