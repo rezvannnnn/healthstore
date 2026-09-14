@@ -79,7 +79,9 @@ function removeAddress(id: number): void {
         <div class="mx-auto max-w-5xl space-y-8">
             <header class="flex items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    <h1
+                        class="text-2xl font-bold text-gray-900 dark:text-white"
+                    >
                         آدرس‌های من
                     </h1>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -105,7 +107,9 @@ function removeAddress(id: number): void {
                 class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800"
             >
                 <div class="mb-5 flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h2
+                        class="text-lg font-semibold text-gray-900 dark:text-white"
+                    >
                         {{ editingId ? 'ویرایش آدرس' : 'افزودن آدرس جدید' }}
                     </h2>
                     <button
@@ -118,68 +122,115 @@ function removeAddress(id: number): void {
                     </button>
                 </div>
 
-                <form class="grid gap-4 md:grid-cols-2" @submit.prevent="submit">
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <form
+                    class="grid gap-4 md:grid-cols-2"
+                    @submit.prevent="submit"
+                >
+                    <label
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                         عنوان
                         <input
                             v-model="form.title"
                             class="mt-1 w-full rounded-xl border-gray-300"
                             placeholder="مثلاً خانه"
                         />
-                        <span v-if="form.errors.title" class="mt-1 block text-xs text-red-500">
+                        <span
+                            v-if="form.errors.title"
+                            class="mt-1 block text-xs text-red-500"
+                        >
                             {{ form.errors.title }}
                         </span>
                     </label>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                         نام گیرنده
                         <input
                             v-model="form.recipient_name"
                             required
                             class="mt-1 w-full rounded-xl border-gray-300"
                         />
-                        <span v-if="form.errors.recipient_name" class="mt-1 block text-xs text-red-500">
+                        <span
+                            v-if="form.errors.recipient_name"
+                            class="mt-1 block text-xs text-red-500"
+                        >
                             {{ form.errors.recipient_name }}
                         </span>
                     </label>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                         شماره موبایل
                         <input
                             v-model="form.phone"
                             required
                             class="mt-1 w-full rounded-xl border-gray-300"
                         />
-                        <span v-if="form.errors.phone" class="mt-1 block text-xs text-red-500">
+                        <span
+                            v-if="form.errors.phone"
+                            class="mt-1 block text-xs text-red-500"
+                        >
                             {{ form.errors.phone }}
                         </span>
                     </label>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                         استان
-                        <input v-model="form.province" class="mt-1 w-full rounded-xl border-gray-300" />
+                        <input
+                            v-model="form.province"
+                            class="mt-1 w-full rounded-xl border-gray-300"
+                        />
                     </label>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                         شهر
-                        <input v-model="form.city" class="mt-1 w-full rounded-xl border-gray-300" />
+                        <input
+                            v-model="form.city"
+                            class="mt-1 w-full rounded-xl border-gray-300"
+                        />
                     </label>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                         کد پستی
-                        <input v-model="form.postal_code" class="mt-1 w-full rounded-xl border-gray-300" />
-                        <span v-if="form.errors.postal_code" class="mt-1 block text-xs text-red-500">
+                        <input
+                            v-model="form.postal_code"
+                            class="mt-1 w-full rounded-xl border-gray-300"
+                        />
+                        <span
+                            v-if="form.errors.postal_code"
+                            class="mt-1 block text-xs text-red-500"
+                        >
                             {{ form.errors.postal_code }}
                         </span>
                     </label>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 md:col-span-2">
+                    <label
+                        class="text-sm font-medium text-gray-700 md:col-span-2 dark:text-gray-300"
+                    >
                         نشانی کامل
                         <textarea
                             v-model="form.address"
                             required
                             class="mt-1 min-h-28 w-full rounded-xl border-gray-300"
                         />
-                        <span v-if="form.errors.address" class="mt-1 block text-xs text-red-500">
+                        <span
+                            v-if="form.errors.address"
+                            class="mt-1 block text-xs text-red-500"
+                        >
                             {{ form.errors.address }}
                         </span>
                     </label>
-                    <label class="flex items-center gap-2 text-sm text-gray-700 md:col-span-2 dark:text-gray-300">
-                        <input v-model="form.is_default" type="checkbox" class="rounded" />
+                    <label
+                        class="flex items-center gap-2 text-sm text-gray-700 md:col-span-2 dark:text-gray-300"
+                    >
+                        <input
+                            v-model="form.is_default"
+                            type="checkbox"
+                            class="rounded"
+                        />
                         آدرس پیش‌فرض باشد
                     </label>
                     <button
@@ -187,23 +238,35 @@ function removeAddress(id: number): void {
                         :disabled="form.processing"
                         class="rounded-xl bg-indigo-600 px-5 py-3 font-medium text-white hover:bg-indigo-700 disabled:opacity-60 md:col-span-2"
                     >
-                        {{ form.processing ? 'در حال ذخیره...' : editingId ? 'ذخیره تغییرات' : 'ثبت آدرس' }}
+                        {{
+                            form.processing
+                                ? 'در حال ذخیره...'
+                                : editingId
+                                  ? 'ذخیره تغییرات'
+                                  : 'ثبت آدرس'
+                        }}
                     </button>
                 </form>
             </section>
 
             <section class="space-y-4">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">آدرس‌های ثبت‌شده</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    آدرس‌های ثبت‌شده
+                </h2>
                 <div v-if="addresses.length" class="grid gap-4">
                     <article
                         v-for="address in addresses"
                         :key="address.id"
                         class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800"
                     >
-                        <div class="flex flex-wrap items-start justify-between gap-4">
+                        <div
+                            class="flex flex-wrap items-start justify-between gap-4"
+                        >
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <h3 class="font-semibold text-gray-900 dark:text-white">
+                                    <h3
+                                        class="font-semibold text-gray-900 dark:text-white"
+                                    >
                                         {{ address.title || 'آدرس' }}
                                     </h3>
                                     <span
@@ -213,16 +276,26 @@ function removeAddress(id: number): void {
                                         پیش‌فرض
                                     </span>
                                 </div>
-                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                                    {{ address.recipient_name }} · {{ address.phone }}
+                                <p
+                                    class="mt-2 text-sm text-gray-600 dark:text-gray-300"
+                                >
+                                    {{ address.recipient_name }} ·
+                                    {{ address.phone }}
                                 </p>
-                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                                <p
+                                    class="mt-1 text-sm text-gray-600 dark:text-gray-300"
+                                >
                                     {{ address.province }} {{ address.city }}
                                 </p>
-                                <p class="mt-2 text-sm leading-6 text-gray-700 dark:text-gray-300">
+                                <p
+                                    class="mt-2 text-sm leading-6 text-gray-700 dark:text-gray-300"
+                                >
                                     {{ address.address }}
                                 </p>
-                                <p v-if="address.postal_code" class="mt-1 text-xs text-gray-500">
+                                <p
+                                    v-if="address.postal_code"
+                                    class="mt-1 text-xs text-gray-500"
+                                >
                                     کد پستی: {{ address.postal_code }}
                                 </p>
                             </div>
