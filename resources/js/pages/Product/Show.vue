@@ -88,7 +88,11 @@ function addToCart(): void {
             :content="seo.description"
         />
         <meta property="og:url" :content="seo.canonical" />
-        <meta v-if="product.image" property="og:image" :content="product.image" />
+        <meta
+            v-if="product.image"
+            property="og:image"
+            :content="product.image"
+        />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" :content="seo.title" />
         <meta
@@ -96,7 +100,11 @@ function addToCart(): void {
             name="twitter:description"
             :content="seo.description"
         />
-        <meta v-if="product.image" name="twitter:image" :content="product.image" />
+        <meta
+            v-if="product.image"
+            name="twitter:image"
+            :content="product.image"
+        />
     </Head>
 
     <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
@@ -270,10 +278,14 @@ function addToCart(): void {
             >
                 <div class="mb-5 flex items-end justify-between gap-4">
                     <div>
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        <h2
+                            class="text-2xl font-bold text-gray-900 dark:text-white"
+                        >
                             محصولات مرتبط
                         </h2>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        <p
+                            class="mt-1 text-sm text-gray-500 dark:text-gray-400"
+                        >
                             محصولات دیگری از همین دسته‌بندی
                         </p>
                     </div>
@@ -292,7 +304,9 @@ function addToCart(): void {
                         :href="`/products/${related.slug}`"
                         class="group rounded-2xl border border-gray-200 bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-950"
                     >
-                        <div class="aspect-square rounded-xl bg-gray-100 dark:bg-gray-900">
+                        <div
+                            class="aspect-square rounded-xl bg-gray-100 dark:bg-gray-900"
+                        >
                             <img
                                 v-if="related.image"
                                 :src="related.image"
@@ -311,7 +325,9 @@ function addToCart(): void {
                         >
                             {{ related.name }}
                         </h3>
-                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                        <p
+                            class="mt-2 text-sm text-gray-600 dark:text-gray-300"
+                        >
                             {{ formatPrice(related.price) }}
                         </p>
                     </Link>
