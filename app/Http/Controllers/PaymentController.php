@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Services\PaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use RuntimeException;
 
 class PaymentController extends Controller
 {
@@ -23,8 +24,15 @@ class PaymentController extends Controller
 
         $order = Order::query()->where('order_number', $orderNumber)
             ->where('user_id', $user->id)->firstOrFail();
-        $payment = $this->paymentService->create($order);
-        $gatewayPayment = $this->paymentService->requestGatewayPayment($payment);
+
+        try {
+            $payment = $this->paymentService->create($order);
+            $gatewayPayment = $this->paymentService->requestGatewayPayment($payment);
+        } catch (RuntimeException $e) {
+            return redirect()->route('orders.show', [
+                'orderNumber' => $order->order_number,
+            ])->with('error', $e->getMessage());
+        }
 
         return redirect()->away($gatewayPayment['payment_url']);
     }
