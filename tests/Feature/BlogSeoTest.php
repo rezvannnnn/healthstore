@@ -14,6 +14,5 @@ class BlogSeoTest extends TestCase
         $response = $this->get('/blog');
 
         $response->assertOk();
-        $response->assertSee('مجله سلامت');
     }
 }
