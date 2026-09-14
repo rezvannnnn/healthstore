@@ -43,7 +43,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/orders/{orderNumber}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{orderNumber}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
-    Route::post('/orders/{orderNumber}/payment', [PaymentController::class, 'start'])->name('orders.payment.start');
+    Route::post('/orders/{orderNumber}/payment', [PaymentController::class, 'start'])
+        ->middleware('throttle:10,1')
+        ->name('orders.payment.start');
 });
 
 Route::get('/payment/zarinpal/callback', [ZarinPalCallbackController::class, 'handle'])->name('payment.zarinpal.callback');
@@ -69,8 +71,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/brands', [AdminBrandController::class, 'index'])->name('brands.index');
     Route::get('/brands/create', [AdminBrandController::class, 'create'])->name('brands.create');
     Route::post('/brands', [AdminBrandController::class, 'store'])->name('brands.store');
-    Route::get('/brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('brands.edit');
     Route::put('/brands/{brand}', [AdminBrandController::class, 'update'])->name('brands.update');
+    Route::get('/brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('brands.edit');
     Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
     Route::post('/inventory', [AdminInventoryController::class, 'store'])->name('inventory.store');
     Route::post('/inventory/{inventory}/adjust', [AdminInventoryController::class, 'adjust'])->name('inventory.adjust');
