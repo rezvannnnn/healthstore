@@ -9,26 +9,17 @@ interface User {
     phone_verified_at?: string | null;
 }
 
-interface FlashProps {
-    flash?: {
-        success?: string;
-        error?: string;
-        info?: string;
-        status?: string;
-    };
-}
-
-defineProps<{
+const props = defineProps<{
     user: User;
 }>();
 
 const form = useForm({
-    name: '',
-    email: '',
+    name: props.user.name,
+    email: props.user.email ?? '',
 });
 
 function submit(): void {
-    form.put('/account/profile', undefined, {
+    form.put('/account/profile', {
         preserveScroll: true,
     });
 }
@@ -58,30 +49,45 @@ function submit(): void {
                     <div>
                         <label
                             class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >نام</label
                         >
+                            نام
+                        </label>
                         <input
                             v-model="form.name"
                             required
                             class="w-full rounded-xl border-gray-300"
                         />
+                        <p
+                            v-if="form.errors.name"
+                            class="mt-1 text-sm text-red-500"
+                        >
+                            {{ form.errors.name }}
+                        </p>
                     </div>
                     <div>
                         <label
                             class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >ایمیل</label
                         >
+                            ایمیل
+                        </label>
                         <input
                             v-model="form.email"
                             type="email"
                             class="w-full rounded-xl border-gray-300"
                         />
+                        <p
+                            v-if="form.errors.email"
+                            class="mt-1 text-sm text-red-500"
+                        >
+                            {{ form.errors.email }}
+                        </p>
                     </div>
                     <div>
                         <label
                             class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >موبایل</label
                         >
+                            موبایل
+                        </label>
                         <input
                             :value="user.phone"
                             disabled
@@ -98,20 +104,9 @@ function submit(): void {
                     <div
                         v-if="form.hasErrors"
                         class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+                        role="alert"
                     >
                         لطفاً خطاهای فرم را بررسی و اصلاح کنید.
-                    </div>
-                    <div
-                        v-if="form.errors.name"
-                        class="text-sm text-red-500"
-                    >
-                        {{ form.errors.name }}
-                    </div>
-                    <div
-                        v-if="form.errors.email"
-                        class="text-sm text-red-500"
-                    >
-                        {{ form.errors.email }}
                     </div>
                     <button
                         type="submit"
