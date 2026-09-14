@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\User;
 use App\Services\InventoryReservationService;
 use App\Services\PaymentService;
@@ -21,7 +22,7 @@ class PaymentCancelledOrderTest extends TestCase
             'user_id' => $user->id,
             'customer_type' => 'b2c',
             'business_profile_id' => null,
-            'status' => 'cancelled',
+            'status' => 'pending',
             'payment_status' => 'pending',
             'subtotal' => 100000,
             'discount_amount' => 0,
@@ -40,12 +41,16 @@ class PaymentCancelledOrderTest extends TestCase
             'paid_at' => null,
             'shipped_at' => null,
             'delivered_at' => null,
-            'cancelled_at' => now(),
+            'cancelled_at' => null,
         ]);
 
         $service = new PaymentService(new InventoryReservationService);
-        $payment = $service->create($order->forceFill(['status' => 'pending']));
-        $order->update(['status' => 'cancelled', 'cancelled_at' => now()]);
+        $payment = $service->create($order);
+
+        $order->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+        ]);
 
         $result = $service->markAsPaid($payment, 'TX-CANCELLED');
 
@@ -53,5 +58,6 @@ class PaymentCancelledOrderTest extends TestCase
         $this->assertFalse($result);
         $this->assertSame('cancelled', $payment->status);
         $this->assertSame('pending', $order->fresh()->payment_status);
+        $this->assertSame('TX-CANCELLED', $payment->transaction_id);
     }
 }
