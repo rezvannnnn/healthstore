@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 
 interface Article {
     id: number;
@@ -12,25 +12,39 @@ interface Article {
     published_at: string | null;
 }
 
-interface Seo {
-    title: string;
-    description: string;
-    canonical: string;
-}
-
 defineProps<{
-    seo: Seo;
     articles: Article[];
     pagination: { current_page: number; last_page: number; total: number };
     filters: { search: string };
 }>();
+
+function pageUrl(page: number): string {
+    const params = new URLSearchParams();
+
+    if (page > 1) {
+        params.set('page', String(page));
+    }
+
+    const currentSearch = new URLSearchParams(window.location.search).get(
+        'search',
+    );
+    if (currentSearch) {
+        params.set('search', currentSearch);
+    }
+
+    const query = params.toString();
+    return query ? `/blog?${query}` : '/blog';
+}
 </script>
 
 <template>
     <Head>
-        <title>{{ seo.title }}</title>
-        <meta name="description" :content="seo.description" />
-        <link rel="canonical" :href="seo.canonical" />
+        <title>مجله سلامت | مطالب آموزشی و کاربردی سلامت</title>
+        <meta
+            name="description"
+            content="مطالب آموزشی و کاربردی درباره سلامت، محصولات بهداشتی و مراقبت از خود."
+        />
+        <link rel="canonical" href="/blog" />
     </Head>
     <div class="mx-auto max-w-7xl space-y-8 p-6" dir="rtl">
         <header>
@@ -84,5 +98,42 @@ defineProps<{
         >
             مقاله‌ای پیدا نشد.
         </div>
+
+        <nav
+            v-if="pagination.last_page > 1"
+            aria-label="صفحات مجله"
+            class="flex flex-wrap items-center justify-center gap-2"
+        >
+            <Link
+                v-if="pagination.current_page > 1"
+                :href="pageUrl(pagination.current_page - 1)"
+                preserve-scroll
+                class="rounded-lg border bg-white px-4 py-2 text-sm hover:bg-gray-50"
+            >
+                قبلی
+            </Link>
+            <Link
+                v-for="page in pagination.last_page"
+                :key="page"
+                :href="pageUrl(page)"
+                preserve-scroll
+                class="min-w-10 rounded-lg px-3 py-2 text-center text-sm"
+                :class="
+                    page === pagination.current_page
+                        ? 'bg-indigo-600 text-white'
+                        : 'border bg-white text-gray-700 hover:bg-gray-50'
+                "
+            >
+                {{ page.toLocaleString('fa-IR') }}
+            </Link>
+            <Link
+                v-if="pagination.current_page < pagination.last_page"
+                :href="pageUrl(pagination.current_page + 1)"
+                preserve-scroll
+                class="rounded-lg border bg-white px-4 py-2 text-sm hover:bg-gray-50"
+            >
+                بعدی
+            </Link>
+        </nav>
     </div>
 </template>
