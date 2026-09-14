@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const step = ref<'verify' | 'details'>('verify');
@@ -38,7 +38,9 @@ function register(): void {
 </script>
 
 <template>
-    <Head title="ثبت‌نام" />
+    <Head title="ثبت‌نام">
+        <meta name="robots" content="noindex, nofollow, noarchive" />
+    </Head>
 
     <main
         dir="rtl"
@@ -47,8 +49,8 @@ function register(): void {
         <section
             class="w-full max-w-md rounded-3xl bg-white p-7 shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800"
         >
-            <a href="/" class="text-sm font-medium text-indigo-600"
-                >فروشگاه سلامت</a
+            <Link href="/" class="text-sm font-medium text-indigo-600"
+                >فروشگاه سلامت</Link
             >
             <h1 class="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
                 ساخت حساب کاربری
@@ -177,10 +179,10 @@ function register(): void {
 
             <p class="mt-7 text-center text-sm text-gray-500">
                 قبلاً ثبت‌نام کرده‌اید؟
-                <a
+                <Link
                     href="/login"
                     class="font-semibold text-indigo-600 hover:underline"
-                    >وارد شوید</a
+                    >وارد شوید</Link
                 >
             </p>
         </section>
