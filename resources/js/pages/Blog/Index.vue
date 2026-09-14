@@ -20,7 +20,7 @@ defineProps<{
 </script>
 
 <template>
-    <Head title="مجله سلامت" />
+    <Head title="مجله سلامت | مطالب آموزشی و کاربردی سلامت" />
     <div class="mx-auto max-w-7xl space-y-8 p-6" dir="rtl">
         <header>
             <h1 class="text-3xl font-bold">مجله سلامت</h1>
