@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 interface CartItem {
@@ -16,6 +16,15 @@ interface CartItem {
     };
 }
 
+interface FlashProps {
+    flash?: {
+        success?: string;
+        error?: string;
+        info?: string;
+        status?: string;
+    };
+}
+
 const props = defineProps<{
     cart: {
         id: number;
@@ -24,6 +33,7 @@ const props = defineProps<{
     };
 }>();
 
+const page = usePage<FlashProps>();
 const busyItem = ref<number | null>(null);
 
 function formatPrice(value: number): string {
@@ -84,6 +94,28 @@ function removeItem(item: CartItem): void {
                     >ادامه خرید</Link
                 >
             </header>
+
+            <div
+                v-if="page.props.flash?.success || page.props.flash?.status"
+                class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700"
+                role="status"
+            >
+                {{ page.props.flash.success || page.props.flash.status }}
+            </div>
+            <div
+                v-if="page.props.flash?.error"
+                class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+                role="alert"
+            >
+                {{ page.props.flash.error }}
+            </div>
+            <div
+                v-if="page.props.flash?.info"
+                class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700"
+                role="status"
+            >
+                {{ page.props.flash.info }}
+            </div>
 
             <section
                 v-if="cart.items.length"
