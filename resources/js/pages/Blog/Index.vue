@@ -140,7 +140,9 @@ function pageUrl(page: number): string {
                 :key="page"
                 :href="pageUrl(page)"
                 preserve-scroll
-                :aria-current="page === pagination.current_page ? 'page' : undefined"
+                :aria-current="
+                    page === pagination.current_page ? 'page' : undefined
+                "
                 :aria-label="`صفحه ${page.toLocaleString('fa-IR')}`"
                 class="min-w-10 rounded-lg px-3 py-2 text-center text-sm"
                 :class="
