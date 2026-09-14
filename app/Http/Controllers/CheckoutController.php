@@ -8,6 +8,7 @@ use App\Services\CheckoutService;
 use App\Services\OrderService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 use RuntimeException;
@@ -103,6 +104,14 @@ class CheckoutController extends Controller
         }
 
         $cart = $this->cartService->getCartForUser($user->id);
+        $lock = Cache::lock("checkout:user:{$user->id}", 30);
+
+        if (! $lock->get()) {
+            return redirect()->route('checkout.show')->with(
+                'info',
+                'ثبت سفارش دیگری در حال انجام است. لطفاً چند لحظه صبر کنید.'
+            );
+        }
 
         try {
             $order = $this->orderService->createFromCart(
@@ -112,6 +121,8 @@ class CheckoutController extends Controller
             );
         } catch (RuntimeException $e) {
             return redirect()->route('checkout.show')->with('error', $e->getMessage());
+        } finally {
+            $lock->release();
         }
 
         return redirect()->route('orders.show', [
