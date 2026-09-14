@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
-import { reactive } from 'vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 
 interface User {
     id: number;
@@ -10,21 +9,38 @@ interface User {
     phone_verified_at?: string | null;
 }
 
-const props = defineProps<{ user: User }>();
-const form = reactive({
-    name: props.user.name,
-    email: props.user.email ?? '',
+interface FlashProps {
+    flash?: {
+        success?: string;
+        error?: string;
+        info?: string;
+        status?: string;
+    };
+}
+
+defineProps<{
+    user: User;
+}>();
+
+const form = useForm({
+    name: '',
+    email: '',
 });
 
 function submit(): void {
-    router.put('/account/profile', form);
+    form.put('/account/profile', undefined, {
+        preserveScroll: true,
+    });
 }
 </script>
 
 <template>
     <Head title="پروفایل من" />
 
-    <main class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
+    <main
+        dir="rtl"
+        class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950"
+    >
         <div class="mx-auto max-w-2xl space-y-6">
             <header>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -79,25 +95,47 @@ function submit(): void {
                             }}
                         </p>
                     </div>
+                    <div
+                        v-if="form.hasErrors"
+                        class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+                    >
+                        لطفاً خطاهای فرم را بررسی و اصلاح کنید.
+                    </div>
+                    <div
+                        v-if="form.errors.name"
+                        class="text-sm text-red-500"
+                    >
+                        {{ form.errors.name }}
+                    </div>
+                    <div
+                        v-if="form.errors.email"
+                        class="text-sm text-red-500"
+                    >
+                        {{ form.errors.email }}
+                    </div>
                     <button
                         type="submit"
-                        class="rounded-xl bg-indigo-600 px-5 py-3 font-medium text-white hover:bg-indigo-700"
+                        :disabled="form.processing"
+                        class="rounded-xl bg-indigo-600 px-5 py-3 font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
                     >
-                        ذخیره اطلاعات
+                        {{ form.processing ? 'در حال ذخیره...' : 'ذخیره اطلاعات' }}
                     </button>
                 </form>
             </section>
 
-            <nav class="flex gap-4 text-sm">
-                <a
+            <nav class="flex flex-wrap gap-4 text-sm">
+                <Link
                     href="/account/orders"
                     class="text-indigo-600 hover:underline"
-                    >سفارش‌های من</a
+                    >سفارش‌های من</Link
                 >
-                <a
+                <Link
                     href="/account/addresses"
                     class="text-indigo-600 hover:underline"
-                    >آدرس‌های من</a
+                    >آدرس‌های من</Link
+                >
+                <Link href="/products" class="text-indigo-600 hover:underline"
+                    >بازگشت به فروشگاه</Link
                 >
             </nav>
         </div>
