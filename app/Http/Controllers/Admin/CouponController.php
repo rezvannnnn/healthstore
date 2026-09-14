@@ -48,6 +48,10 @@ class CouponController extends Controller
 
     protected function validatedData(Request $request, ?Coupon $coupon = null): array
     {
+        $request->merge([
+            'code' => strtoupper(trim((string) $request->input('code', ''))),
+        ]);
+
         $data = $request->validate([
             'code' => [
                 'required',
@@ -66,7 +70,6 @@ class CouponController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        $data['code'] = strtoupper(trim($data['code']));
         $data['min_order_amount'] = $data['min_order_amount'] ?? 0;
         $data['is_active'] = (bool) ($data['is_active'] ?? false);
 
