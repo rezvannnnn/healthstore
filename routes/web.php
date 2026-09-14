@@ -55,8 +55,12 @@ Route::post('/register/send-otp', [RegistrationController::class, 'sendOtp'])
 Route::post('/register/verify-otp', [RegistrationController::class, 'verifyOtp'])
     ->middleware('throttle:10,1')
     ->name('register.verify-otp');
-Route::post('/register', [RegistrationController::class, 'store'])->name('register');
-Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+Route::post('/register', [RegistrationController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('register');
+Route::post('/login', [LoginController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('login.store');
 Route::post('/login/send-otp', [LoginController::class, 'sendOtp'])
     ->middleware('throttle:5,1')
     ->name('login.send-otp');
