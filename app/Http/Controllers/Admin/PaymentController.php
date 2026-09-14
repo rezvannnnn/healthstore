@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,6 +16,14 @@ class PaymentController extends Controller
         $search = trim((string) $request->query('search', ''));
         $status = trim((string) $request->query('status', 'all'));
         $gateway = trim((string) $request->query('gateway', 'all'));
+
+        $validatedFilters = $request->validate([
+            'status' => ['nullable', 'string', Rule::in(['all', 'pending', 'paid', 'failed', 'refunded'])],
+            'gateway' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $status = (string) ($validatedFilters['status'] ?? 'all');
+        $gateway = (string) ($validatedFilters['gateway'] ?? 'all');
 
         $query = Payment::query()
             ->with('order:id,order_number,user_id')
