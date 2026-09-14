@@ -210,7 +210,9 @@ const submit = () => {
                         </label>
 
                         <label class="block">
-                            <span class="text-sm font-medium">تعداد در واحد</span>
+                            <span class="text-sm font-medium"
+                                >تعداد در واحد</span
+                            >
                             <input
                                 v-model.number="form.quantity_per_unit"
                                 type="number"
@@ -242,7 +244,9 @@ const submit = () => {
                             >
                         </label>
                         <label class="block">
-                            <span class="text-sm font-medium">قیمت قبل از تخفیف</span>
+                            <span class="text-sm font-medium"
+                                >قیمت قبل از تخفیف</span
+                            >
                             <input
                                 v-model.number="form.compare_at_price"
                                 type="number"
@@ -262,7 +266,9 @@ const submit = () => {
                 <section
                     class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
                 >
-                    <h2 class="mb-5 text-lg font-semibold">توضیحات و اطلاعات تکمیلی</h2>
+                    <h2 class="mb-5 text-lg font-semibold">
+                        توضیحات و اطلاعات تکمیلی
+                    </h2>
                     <div class="space-y-4">
                         <label class="block">
                             <span class="text-sm font-medium">توضیح کوتاه</span>
@@ -277,7 +283,9 @@ const submit = () => {
                             >
                         </label>
                         <label class="block">
-                            <span class="text-sm font-medium">توضیحات کامل</span>
+                            <span class="text-sm font-medium"
+                                >توضیحات کامل</span
+                            >
                             <textarea
                                 v-model="form.description"
                                 rows="6"
@@ -286,7 +294,9 @@ const submit = () => {
                         </label>
                         <div class="grid gap-4 md:grid-cols-2">
                             <label class="block">
-                                <span class="text-sm font-medium">تاریخ انقضا</span>
+                                <span class="text-sm font-medium"
+                                    >تاریخ انقضا</span
+                                >
                                 <input
                                     v-model="form.expiry_date"
                                     type="date"
@@ -299,7 +309,9 @@ const submit = () => {
                                 >
                             </label>
                             <label class="block">
-                                <span class="text-sm font-medium">آدرس تصویر اصلی</span>
+                                <span class="text-sm font-medium"
+                                    >آدرس تصویر اصلی</span
+                                >
                                 <input
                                     v-model="form.main_image"
                                     dir="ltr"
@@ -353,7 +365,9 @@ const submit = () => {
                             >
                         </label>
                         <label class="block">
-                            <span class="text-sm font-medium">Canonical URL</span>
+                            <span class="text-sm font-medium"
+                                >Canonical URL</span
+                            >
                             <input
                                 v-model="form.canonical_url"
                                 dir="ltr"
