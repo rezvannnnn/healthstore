@@ -19,8 +19,13 @@ class ProductController extends Controller
 
     public function index(Request $request): Response
     {
-        $search = trim((string) $request->query('search', ''));
-        $categorySlug = trim((string) $request->query('category', ''));
+        $validatedFilters = $request->validate([
+            'search' => ['nullable', 'string', 'max:200'],
+            'category' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $search = trim((string) ($validatedFilters['search'] ?? ''));
+        $categorySlug = trim((string) ($validatedFilters['category'] ?? ''));
 
         $query = Product::query()
             ->with(['brand', 'category', 'images'])
