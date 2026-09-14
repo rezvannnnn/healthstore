@@ -23,6 +23,9 @@ class Product extends Model
         'quantity_per_unit',
         'short_description',
         'description',
+        'seo_title',
+        'seo_description',
+        'canonical_url',
         'specifications',
         'expiry_date',
         'main_image',
@@ -38,41 +41,31 @@ class Product extends Model
         'specifications' => 'array',
     ];
 
-    /**
-     * @return BelongsTo<Brand, $this>
-     */
+    /** @return BelongsTo<Brand, $this> */
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
     }
 
-    /**
-     * @return BelongsTo<Category, $this>
-     */
+    /** @return BelongsTo<Category, $this> */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    /**
-     * @return HasMany<ProductImage, $this>
-     */
+    /** @return HasMany<ProductImage, $this> */
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
     }
 
-    /**
-     * @return HasMany<ProductPrice, $this>
-     */
+    /** @return HasMany<ProductPrice, $this> */
     public function prices(): HasMany
     {
         return $this->hasMany(ProductPrice::class);
     }
 
-    /**
-     * @return HasMany<Inventory, $this>
-     */
+    /** @return HasMany<Inventory, $this> */
     public function inventories(): HasMany
     {
         return $this->hasMany(Inventory::class);
