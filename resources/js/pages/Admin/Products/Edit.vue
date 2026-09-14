@@ -15,6 +15,9 @@ type Product = {
     quantity_per_unit: number | null;
     short_description: string | null;
     description: string | null;
+    seo_title: string | null;
+    seo_description: string | null;
+    canonical_url: string | null;
     expiry_date: string | null;
     main_image: string | null;
     is_active: boolean;
