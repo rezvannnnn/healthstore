@@ -45,6 +45,25 @@ function pageUrl(page: number): string {
             content="مطالب آموزشی و کاربردی درباره سلامت، محصولات بهداشتی و مراقبت از خود."
         />
         <link rel="canonical" href="/blog" />
+        <meta property="og:type" content="website" />
+        <meta
+            property="og:title"
+            content="مجله سلامت | مطالب آموزشی و کاربردی سلامت"
+        />
+        <meta
+            property="og:description"
+            content="مطالب آموزشی و کاربردی درباره سلامت، محصولات بهداشتی و مراقبت از خود."
+        />
+        <meta property="og:url" content="/blog" />
+        <meta name="twitter:card" content="summary" />
+        <meta
+            name="twitter:title"
+            content="مجله سلامت | مطالب آموزشی و کاربردی سلامت"
+        />
+        <meta
+            name="twitter:description"
+            content="مطالب آموزشی و کاربردی درباره سلامت، محصولات بهداشتی و مراقبت از خود."
+        />
     </Head>
     <div class="mx-auto max-w-7xl space-y-8 p-6" dir="rtl">
         <header>
@@ -59,6 +78,7 @@ function pageUrl(page: number): string {
                 :value="filters.search"
                 class="min-w-0 flex-1 rounded-lg border p-3"
                 placeholder="جستجو در مقالات"
+                aria-label="جستجو در مقالات"
             /><button class="rounded-lg border px-5">جستجو</button>
         </form>
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -71,6 +91,8 @@ function pageUrl(page: number): string {
                     v-if="article.featured_image"
                     :src="article.featured_image"
                     :alt="article.featured_image_alt || article.title"
+                    loading="lazy"
+                    decoding="async"
                     class="h-48 w-full object-cover"
                 />
                 <div class="space-y-3 p-5">
@@ -108,6 +130,7 @@ function pageUrl(page: number): string {
                 v-if="pagination.current_page > 1"
                 :href="pageUrl(pagination.current_page - 1)"
                 preserve-scroll
+                aria-label="صفحه قبلی"
                 class="rounded-lg border bg-white px-4 py-2 text-sm hover:bg-gray-50"
             >
                 قبلی
@@ -117,6 +140,8 @@ function pageUrl(page: number): string {
                 :key="page"
                 :href="pageUrl(page)"
                 preserve-scroll
+                :aria-current="page === pagination.current_page ? 'page' : undefined"
+                :aria-label="`صفحه ${page.toLocaleString('fa-IR')}`"
                 class="min-w-10 rounded-lg px-3 py-2 text-center text-sm"
                 :class="
                     page === pagination.current_page
@@ -130,6 +155,7 @@ function pageUrl(page: number): string {
                 v-if="pagination.current_page < pagination.last_page"
                 :href="pageUrl(pagination.current_page + 1)"
                 preserve-scroll
+                aria-label="صفحه بعدی"
                 class="rounded-lg border bg-white px-4 py-2 text-sm hover:bg-gray-50"
             >
                 بعدی
