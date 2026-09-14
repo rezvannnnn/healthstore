@@ -188,7 +188,10 @@ class PaymentService
                 throw new RuntimeException('سفارش مربوط به این پرداخت پیدا نشد.');
             }
             if ($order->status === 'cancelled') {
-                $payment->update(['status' => 'cancelled']);
+                $payment->update([
+                    'status' => 'cancelled',
+                    'transaction_id' => $transactionId,
+                ]);
 
                 return false;
             }
