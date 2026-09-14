@@ -10,7 +10,10 @@ import { Head, Link } from '@inertiajs/vue3';
             content="خرید و بررسی آنلاین محصولات سلامت با جستجوی محصول، سبد خرید، بررسی موجودی و مسیر پرداخت یکپارچه."
         />
         <link rel="canonical" href="/" />
-        <meta property="og:title" content="HealthStore | فروشگاه آنلاین محصولات سلامت" />
+        <meta
+            property="og:title"
+            content="HealthStore | فروشگاه آنلاین محصولات سلامت"
+        />
         <meta
             property="og:description"
             content="خرید و بررسی آنلاین محصولات سلامت با یک مسیر ساده و یکپارچه."
@@ -18,7 +21,10 @@ import { Head, Link } from '@inertiajs/vue3';
         <meta property="og:type" content="website" />
         <meta property="og:url" content="/" />
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content="HealthStore | فروشگاه آنلاین محصولات سلامت" />
+        <meta
+            name="twitter:title"
+            content="HealthStore | فروشگاه آنلاین محصولات سلامت"
+        />
         <meta
             name="twitter:description"
             content="خرید و بررسی آنلاین محصولات سلامت با یک مسیر ساده و یکپارچه."
