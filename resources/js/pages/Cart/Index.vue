@@ -97,6 +97,7 @@ function removeItem(item: CartItem): void {
                     >
                         <Link
                             :href="`/products/${item.product.slug}`"
+                            :aria-label="`مشاهده ${item.product.name}`"
                             class="h-28 w-28 shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800"
                         >
                             <img
@@ -126,11 +127,13 @@ function removeItem(item: CartItem): void {
                             >
                                 <div
                                     class="flex items-center rounded-xl border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-950"
+                                    :aria-label="`تغییر تعداد ${item.product.name}`"
                                 >
                                     <button
                                         type="button"
                                         class="px-3 py-2"
                                         :disabled="busyItem === item.id"
+                                        :aria-label="`کاهش تعداد ${item.product.name}`"
                                         @click="
                                             updateQuantity(
                                                 item,
@@ -142,6 +145,7 @@ function removeItem(item: CartItem): void {
                                     </button>
                                     <span
                                         class="min-w-8 text-center text-sm font-semibold"
+                                        aria-live="polite"
                                         >{{
                                             item.quantity.toLocaleString(
                                                 'fa-IR',
@@ -152,6 +156,7 @@ function removeItem(item: CartItem): void {
                                         type="button"
                                         class="px-3 py-2"
                                         :disabled="busyItem === item.id"
+                                        :aria-label="`افزایش تعداد ${item.product.name}`"
                                         @click="
                                             updateQuantity(
                                                 item,
@@ -166,6 +171,7 @@ function removeItem(item: CartItem): void {
                                     type="button"
                                     class="text-sm font-medium text-red-500 hover:text-red-600"
                                     :disabled="busyItem === item.id"
+                                    :aria-label="`حذف ${item.product.name} از سبد خرید`"
                                     @click="removeItem(item)"
                                 >
                                     حذف
