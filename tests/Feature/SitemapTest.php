@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class SitemapTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_sitemap_is_public_xml(): void
     {
         $response = $this->get('/sitemap.xml');
