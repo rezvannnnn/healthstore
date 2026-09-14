@@ -206,7 +206,7 @@ class OrderCancellationTest extends TestCase
             '/orders/'.$order->order_number.'/cancel'
         );
 
-        $response->assertStatus(401);
+        $response->assertRedirect('/login');
 
         $order->refresh();
 
