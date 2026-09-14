@@ -64,6 +64,28 @@ class AdminArticleTest extends TestCase
         ]);
     }
 
+    public function test_normalized_article_slug_must_be_unique(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        Article::create([
+            'title' => 'Existing Article',
+            'slug' => 'health-guide',
+            'content' => 'Existing content',
+            'is_active' => false,
+        ]);
+
+        $this->actingAs($admin)
+            ->post('/admin/articles', [
+                'title' => 'Another Article',
+                'slug' => ' Health Guide ',
+                'content' => 'New content',
+                'is_active' => false,
+            ])
+            ->assertSessionHasErrors('slug');
+
+        $this->assertSame(1, Article::where('slug', 'health-guide')->count());
+    }
+
     public function test_public_only_shows_published_articles(): void
     {
         $published = Article::create([
