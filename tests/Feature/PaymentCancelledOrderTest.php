@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Order;
-use App\Models\Payment;
 use App\Models\User;
 use App\Services\InventoryReservationService;
 use App\Services\PaymentService;
