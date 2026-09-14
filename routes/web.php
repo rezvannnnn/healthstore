@@ -66,7 +66,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/brands', [AdminBrandController::class, 'index'])->name('brands.index');
     Route::get('/brands/create', [AdminBrandController::class, 'create'])->name('brands.create');
     Route::post('/brands', [AdminBrandController::class, 'store'])->name('brands.store');
-    Route::get('/brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('admin.brands.edit');
+    Route::get('/brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('brands.edit');
     Route::put('/brands/{brand}', [AdminBrandController::class, 'update'])->name('brands.update');
     Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
     Route::post('/inventory', [AdminInventoryController::class, 'store'])->name('inventory.store');
@@ -75,7 +75,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
-    Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
+    Route::get('/payments', [AdminPaymentController::class, 'index'])->name('admin.payments.index');
     Route::get('/payments/{payment}', [AdminPaymentController::class, 'show'])->name('payments.show');
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/{user}', [AdminCustomerController::class, 'show'])->name('customers.show');
