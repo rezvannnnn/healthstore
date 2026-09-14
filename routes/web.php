@@ -75,7 +75,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
-    Route::get('/payments', [AdminPaymentController::class, 'index'])->name('admin.payments.index');
+    Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
     Route::get('/payments/{payment}', [AdminPaymentController::class, 'show'])->name('payments.show');
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/{user}', [AdminCustomerController::class, 'show'])->name('customers.show');
