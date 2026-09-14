@@ -12,7 +12,14 @@ interface Article {
     published_at: string | null;
 }
 
+interface Seo {
+    title: string;
+    description: string;
+    canonical: string;
+}
+
 defineProps<{
+    seo: Seo;
     articles: Article[];
     pagination: { current_page: number; last_page: number; total: number };
     filters: { search: string };
@@ -20,7 +27,11 @@ defineProps<{
 </script>
 
 <template>
-    <Head title="مجله سلامت | مطالب آموزشی و کاربردی سلامت" />
+    <Head>
+        <title>{{ seo.title }}</title>
+        <meta name="description" :content="seo.description" />
+        <link rel="canonical" :href="seo.canonical" />
+    </Head>
     <div class="mx-auto max-w-7xl space-y-8 p-6" dir="rtl">
         <header>
             <h1 class="text-3xl font-bold">مجله سلامت</h1>

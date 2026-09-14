@@ -30,7 +30,14 @@ interface Pagination {
     to: number | null;
 }
 
+interface Seo {
+    title: string;
+    description: string;
+    canonical: string;
+}
+
 const props = defineProps<{
+    seo: Seo;
     products: Product[];
     categories: Category[];
     pagination: Pagination;
@@ -87,7 +94,11 @@ function addToCart(productId: number): void {
 </script>
 
 <template>
-    <Head title="محصولات" />
+    <Head>
+        <title>{{ seo.title }}</title>
+        <meta name="description" :content="seo.description" />
+        <link rel="canonical" :href="seo.canonical" />
+    </Head>
 
     <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
         <div class="mx-auto max-w-7xl space-y-8">

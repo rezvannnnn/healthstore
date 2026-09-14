@@ -47,6 +47,11 @@ class ArticleController extends Controller
         }
 
         return Inertia::render('Blog/Index', [
+            'seo' => [
+                'title' => 'مجله سلامت | مطالب آموزشی و کاربردی سلامت',
+                'description' => 'مطالب آموزشی و کاربردی درباره سلامت و محصولات بهداشتی.',
+                'canonical' => url('/blog'),
+            ],
             'articles' => $articles,
             'pagination' => [
                 'current_page' => $paginator->currentPage(),

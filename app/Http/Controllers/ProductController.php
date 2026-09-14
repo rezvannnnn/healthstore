@@ -78,6 +78,11 @@ class ProductController extends Controller
             ->get(['id', 'name', 'slug']);
 
         return Inertia::render('Product/Index', [
+            'seo' => [
+                'title' => 'محصولات | فروشگاه سلامت',
+                'description' => 'خرید و بررسی محصولات بهداشتی و سلامت از فروشگاه آنلاین.',
+                'canonical' => url('/products'),
+            ],
             'products' => $products,
             'pagination' => [
                 'current_page' => $paginator->currentPage(),
