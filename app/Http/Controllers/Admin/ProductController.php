@@ -31,13 +31,17 @@ class ProductController extends Controller
                 $builder->where('name', 'like', "%{$search}%")->orWhere('sku', 'like', "%{$search}%")->orWhere('barcode', 'like', "%{$search}%");
             });
         }
-        if ($status === 'active') $query->where('is_active', true);
-        elseif ($status === 'inactive') $query->where('is_active', false);
+        if ($status === 'active') {
+            $query->where('is_active', true);
+        } elseif ($status === 'inactive') {
+            $query->where('is_active', false);
+        }
         $paginator = $query->paginate(15)->withQueryString();
         $products = collect($paginator->items())->map(function (Product $product) {
             $price = $this->cartService->getCurrentPrice($product);
             $physical = $this->inventoryService->getPhysicalQuantity($product);
             $reserved = $this->inventoryService->getReservedQuantity($product);
+
             return [
                 'id' => $product->id, 'name' => $product->name, 'sku' => $product->sku,
                 'brand' => $product->brand?->name, 'category' => $product->category?->name,
@@ -48,6 +52,7 @@ class ProductController extends Controller
                 'available_quantity' => max(0, $physical - $reserved),
             ];
         })->values()->all();
+
         return Inertia::render('Admin/Products/Index', [
             'products' => $products,
             'pagination' => ['current_page' => $paginator->currentPage(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()],
@@ -67,6 +72,7 @@ class ProductController extends Controller
             $product = Product::create($this->productData($data));
             $this->syncRetailPrice($product, $data);
         });
+
         return to_route('admin.products.index')->with('success', 'محصول با موفقیت ایجاد شد.');
     }
 
@@ -74,6 +80,7 @@ class ProductController extends Controller
     {
         $product->load(['brand', 'category', 'prices']);
         $price = $product->prices->where('price_type', 'retail')->where('min_quantity', 1)->sortByDesc('id')->first();
+
         return Inertia::render('Admin/Products/Edit', [
             ...$this->formOptions(),
             'product' => [
@@ -96,6 +103,7 @@ class ProductController extends Controller
             $product->update($this->productData($data));
             $this->syncRetailPrice($product, $data);
         });
+
         return to_route('admin.products.index')->with('success', 'محصول با موفقیت ویرایش شد.');
     }
 
@@ -127,6 +135,7 @@ class ProductController extends Controller
         $slug = trim((string) ($data['slug'] ?? ''));
         $name = trim((string) $data['name']);
         $description = trim((string) ($data['short_description'] ?? ''));
+
         return [
             'name' => $name, 'slug' => $slug !== '' ? $slug : Str::slug($name), 'sku' => $data['sku'] ?? null,
             'barcode' => $data['barcode'] ?? null, 'brand_id' => $data['brand_id'] ?? null, 'category_id' => $data['category_id'] ?? null,
