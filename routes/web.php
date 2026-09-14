@@ -35,14 +35,17 @@ Route::get('/products', [ProductController::class, 'index'])->name('products.ind
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/blog', [ArticleController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [ArticleController::class, 'show'])->name('blog.show');
+
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
     Route::post('/checkout/confirm', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
     Route::post('/checkout/reject', [CheckoutController::class, 'reject'])->name('checkout.reject');
+
+    Route::get('/orders/{orderNumber}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{orderNumber}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::post('/orders/{orderNumber}/payment', [PaymentController::class, 'start'])->name('orders.payment.start');
 });
-Route::get('/orders/{orderNumber}', [OrderController::class, 'show'])->name('orders.show');
-Route::post('/orders/{orderNumber}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
-Route::post('/orders/{orderNumber}/payment', [PaymentController::class, 'start'])->name('orders.payment.start');
+
 Route::get('/payment/zarinpal/callback', [ZarinPalCallbackController::class, 'handle'])->name('payment.zarinpal.callback');
 Route::post('/register/send-otp', [RegistrationController::class, 'sendOtp'])->name('register.send-otp');
 Route::post('/register/verify-otp', [RegistrationController::class, 'verifyOtp'])->name('register.verify-otp');
