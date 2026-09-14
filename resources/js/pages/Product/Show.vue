@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface ProductImage {
@@ -85,7 +85,7 @@ function addToCart(): void {
     <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
         <div class="mx-auto max-w-6xl space-y-8">
             <nav class="text-sm text-gray-500 dark:text-gray-400">
-                <a href="/products" class="hover:text-indigo-600">محصولات</a
+                <Link href="/products" class="hover:text-indigo-600">محصولات</Link
                 ><span class="mx-2">/</span><span>{{ product.name }}</span>
             </nav>
             <section
@@ -139,11 +139,11 @@ function addToCart(): void {
                             class="rounded-full bg-indigo-50 px-3 py-1 font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
                             >{{ product.brand }}</span
                         >
-                        <a
+                        <Link
                             v-if="product.category_slug"
-                            :href="`/products?category=${product.category_slug}`"
+                            :href="`/products?category=${encodeURIComponent(product.category_slug)}`"
                             class="rounded-full bg-gray-100 px-3 py-1 text-gray-600 dark:bg-gray-800 dark:text-gray-300"
-                            >{{ product.category }}</a
+                            >{{ product.category }}</Link
                         >
                     </div>
                     <h1
