@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const step = ref<'phone' | 'code'>('phone');
@@ -27,7 +27,9 @@ function login(): void {
 </script>
 
 <template>
-    <Head title="ورود" />
+    <Head title="ورود">
+        <meta name="robots" content="noindex, nofollow, noarchive" />
+    </Head>
 
     <main
         dir="rtl"
@@ -36,8 +38,8 @@ function login(): void {
         <section
             class="w-full max-w-md rounded-3xl bg-white p-7 shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800"
         >
-            <a href="/" class="text-sm font-medium text-indigo-600"
-                >فروشگاه سلامت</a
+            <Link href="/" class="text-sm font-medium text-indigo-600"
+                >فروشگاه سلامت</Link
             >
             <h1 class="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
                 ورود به حساب
@@ -114,10 +116,10 @@ function login(): void {
 
             <p class="mt-7 text-center text-sm text-gray-500">
                 حساب ندارید؟
-                <a
+                <Link
                     href="/register"
                     class="font-semibold text-indigo-600 hover:underline"
-                    >ثبت‌نام کنید</a
+                    >ثبت‌نام کنید</Link
                 >
             </p>
         </section>
