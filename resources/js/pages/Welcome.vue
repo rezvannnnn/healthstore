@@ -3,7 +3,27 @@ import { Head, Link } from '@inertiajs/vue3';
 </script>
 
 <template>
-    <Head title="HealthStore" />
+    <Head>
+        <title>HealthStore | فروشگاه آنلاین محصولات سلامت</title>
+        <meta
+            name="description"
+            content="خرید و بررسی آنلاین محصولات سلامت با جستجوی محصول، سبد خرید، بررسی موجودی و مسیر پرداخت یکپارچه."
+        />
+        <link rel="canonical" href="/" />
+        <meta property="og:title" content="HealthStore | فروشگاه آنلاین محصولات سلامت" />
+        <meta
+            property="og:description"
+            content="خرید و بررسی آنلاین محصولات سلامت با یک مسیر ساده و یکپارچه."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="/" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="HealthStore | فروشگاه آنلاین محصولات سلامت" />
+        <meta
+            name="twitter:description"
+            content="خرید و بررسی آنلاین محصولات سلامت با یک مسیر ساده و یکپارچه."
+        />
+    </Head>
 
     <div class="min-h-screen bg-slate-50 text-slate-900">
         <header class="border-b border-slate-200 bg-white">
