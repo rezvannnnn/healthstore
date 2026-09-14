@@ -43,7 +43,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/orders/{orderNumber}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{orderNumber}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
-    Route::post('/orders/{orderNumber}/payment', [PaymentController::class, 'start'])->name('orders.payment.start');
+    Route::post('/orders/{orderNumber}/payment', [PaymentController::class, 'start'])
+        ->middleware('throttle:10,1')
+        ->name('orders.payment.start');
 });
 
 Route::get('/payment/zarinpal/callback', [ZarinPalCallbackController::class, 'handle'])->name('payment.zarinpal.callback');
