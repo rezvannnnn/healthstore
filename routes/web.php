@@ -23,12 +23,14 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegistrationController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\ZarinPalCallbackController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
 Route::inertia('/login', 'Auth/Login')->name('login');
 Route::inertia('/register', 'Auth/Register')->name('register.form');
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/blog', [ArticleController::class, 'index'])->name('blog.index');
@@ -57,7 +59,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/categories', [AdminCategoryController::class, 'index'])->name('categories.index');
     Route::get('/categories/create', [AdminCategoryController::class, 'create'])->name('categories.create');
     Route::post('/categories', [AdminCategoryController::class, 'store'])->name('categories.store');
-    Route::get('/categories/{category}/edit', [AdminCategoryController::class, 'edit'])->name('categories.edit');
+    Route::get('/categories/{category}/edit', [AdminCategoryController::class, 'edit'])->name('admin.categories.edit');
     Route::put('/categories/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
     Route::get('/brands', [AdminBrandController::class, 'index'])->name('brands.index');
     Route::get('/brands/create', [AdminBrandController::class, 'create'])->name('brands.create');
