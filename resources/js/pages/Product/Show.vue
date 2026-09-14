@@ -80,6 +80,23 @@ function addToCart(): void {
             :content="seo.description"
         />
         <link rel="canonical" :href="seo.canonical" />
+        <meta property="og:type" content="product" />
+        <meta property="og:title" :content="seo.title" />
+        <meta
+            v-if="seo.description"
+            property="og:description"
+            :content="seo.description"
+        />
+        <meta property="og:url" :content="seo.canonical" />
+        <meta v-if="product.image" property="og:image" :content="product.image" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" :content="seo.title" />
+        <meta
+            v-if="seo.description"
+            name="twitter:description"
+            :content="seo.description"
+        />
+        <meta v-if="product.image" name="twitter:image" :content="product.image" />
     </Head>
 
     <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
@@ -244,6 +261,60 @@ function addToCart(): void {
                     >
                         {{ product.description }}
                     </div>
+                </div>
+            </section>
+
+            <section
+                v-if="relatedProducts.length"
+                class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-gray-200 md:p-8 dark:bg-gray-900 dark:ring-gray-800"
+            >
+                <div class="mb-5 flex items-end justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                            محصولات مرتبط
+                        </h2>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            محصولات دیگری از همین دسته‌بندی
+                        </p>
+                    </div>
+                    <Link
+                        v-if="product.category_slug"
+                        :href="`/products?category=${encodeURIComponent(product.category_slug)}`"
+                        class="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                    >
+                        مشاهده همه
+                    </Link>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <Link
+                        v-for="related in relatedProducts"
+                        :key="related.id"
+                        :href="`/products/${related.slug}`"
+                        class="group rounded-2xl border border-gray-200 bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-950"
+                    >
+                        <div class="aspect-square rounded-xl bg-gray-100 dark:bg-gray-900">
+                            <img
+                                v-if="related.image"
+                                :src="related.image"
+                                :alt="related.name"
+                                class="h-full w-full object-contain p-4"
+                            />
+                            <div
+                                v-else
+                                class="flex h-full items-center justify-center text-sm text-gray-400"
+                            >
+                                بدون تصویر
+                            </div>
+                        </div>
+                        <h3
+                            class="mt-3 line-clamp-2 font-semibold text-gray-900 group-hover:text-indigo-600 dark:text-white"
+                        >
+                            {{ related.name }}
+                        </h3>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                            {{ formatPrice(related.price) }}
+                        </p>
+                    </Link>
                 </div>
             </section>
         </div>
