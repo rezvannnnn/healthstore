@@ -59,18 +59,23 @@ function submit(): void {
     });
 }
 
-function goToPage(page: number): void {
-    router.get(
-        '/products',
-        {
-            ...form,
-            page,
-        },
-        {
-            preserveState: true,
-            replace: true,
-        },
-    );
+function pageUrl(page: number): string {
+    const params = new URLSearchParams();
+
+    if (page > 1) {
+        params.set('page', String(page));
+    }
+
+    if (form.search) {
+        params.set('search', form.search);
+    }
+
+    if (form.category) {
+        params.set('category', form.category);
+    }
+
+    const query = params.toString();
+    return query ? `/products?${query}` : '/products';
 }
 
 function formatPrice(value: number | null): string {
@@ -255,25 +260,42 @@ function addToCart(productId: number): void {
                 محصولی مطابق جستجوی شما پیدا نشد.
             </section>
 
-            <footer
+            <nav
                 v-if="pagination.last_page > 1"
+                aria-label="صفحات محصولات"
                 class="flex flex-wrap items-center justify-center gap-2"
             >
-                <button
+                <Link
+                    v-if="pagination.current_page > 1"
+                    :href="pageUrl(pagination.current_page - 1)"
+                    preserve-scroll
+                    class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800"
+                >
+                    قبلی
+                </Link>
+                <Link
                     v-for="page in pagination.last_page"
                     :key="page"
-                    type="button"
-                    class="min-w-10 rounded-xl px-3 py-2 text-sm font-medium"
+                    :href="pageUrl(page)"
+                    preserve-scroll
+                    class="min-w-10 rounded-xl px-3 py-2 text-center text-sm font-medium"
                     :class="
                         page === pagination.current_page
                             ? 'bg-indigo-600 text-white'
                             : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800'
                     "
-                    @click="goToPage(page)"
                 >
                     {{ page.toLocaleString('fa-IR') }}
-                </button>
-            </footer>
+                </Link>
+                <Link
+                    v-if="pagination.current_page < pagination.last_page"
+                    :href="pageUrl(pagination.current_page + 1)"
+                    preserve-scroll
+                    class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800"
+                >
+                    بعدی
+                </Link>
+            </nav>
         </div>
     </main>
 </template>
