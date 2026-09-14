@@ -16,7 +16,8 @@ interface CartItem {
     };
 }
 
-interface FlashProps {
+interface PagePropsWithFlash {
+    [key: string]: unknown;
     flash?: {
         success?: string;
         error?: string;
@@ -33,7 +34,7 @@ const props = defineProps<{
     };
 }>();
 
-const page = usePage<FlashProps>();
+const page = usePage<PagePropsWithFlash>();
 const busyItem = ref<number | null>(null);
 
 function formatPrice(value: number): string {
