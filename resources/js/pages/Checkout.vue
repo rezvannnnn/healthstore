@@ -47,11 +47,15 @@ const props = defineProps<{
     cart: Cart;
     addresses: Address[];
     selectedAddressId?: number | null;
+    couponCode?: string | null;
+    appliedCoupon?: unknown;
+    discountAmount?: number;
     changes: Change[];
     priceChanges: Change[];
     availabilityChanges: Change[];
     requiresPriceConfirmation: boolean;
     subtotal: number;
+    totalAmount?: number;
     canProceedToPayment: boolean;
     cartHasPayableItems: boolean;
     message?: string;
@@ -60,6 +64,7 @@ const props = defineProps<{
 const selectedAddressId = ref<number | null>(
     props.selectedAddressId ?? props.addresses[0]?.id ?? null,
 );
+const couponCode = ref(props.couponCode ?? '');
 
 const priceFormatter = new Intl.NumberFormat('fa-IR');
 
@@ -82,6 +87,7 @@ const submitCheckout = () => {
         '/checkout/confirm',
         {
             address_id: selectedAddressId.value,
+            coupon_code: couponCode.value.trim() || null,
         },
         {
             preserveScroll: true,
@@ -107,6 +113,10 @@ const goBackToCart = () => {
                     <p>لطفاً اطلاعات، آدرس و قیمت نهایی سفارش را بررسی کنید.</p>
                 </div>
             </header>
+
+            <div v-if="message" class="feedback-message">
+                {{ message }}
+            </div>
 
             <section class="address-section">
                 <div class="section-heading">
@@ -174,6 +184,34 @@ const goBackToCart = () => {
                         </div>
                     </label>
                 </div>
+            </section>
+
+            <section class="coupon-section" v-if="cartHasPayableItems">
+                <div class="section-heading">
+                    <div>
+                        <h2>کد تخفیف</h2>
+                        <p>در صورت داشتن کد تخفیف، آن را پیش از ثبت سفارش وارد کنید.</p>
+                    </div>
+                </div>
+                <div class="coupon-form">
+                    <input
+                        v-model="couponCode"
+                        type="text"
+                        maxlength="64"
+                        autocomplete="off"
+                        placeholder="کد تخفیف"
+                        class="coupon-input"
+                    />
+                    <span v-if="props.appliedCoupon" class="coupon-applied">
+                        تخفیف اعمال شده
+                        <template v-if="Number(props.discountAmount || 0) > 0">
+                            - {{ formatPrice(props.discountAmount || 0) }}
+                        </template>
+                    </span>
+                </div>
+                <p class="coupon-note">
+                    اعتبار و میزان تخفیف هنگام ثبت سفارش در سمت سرور بررسی می‌شود.
+                </p>
             </section>
 
             <div v-if="hasChanges" class="changes-notice">
@@ -260,7 +298,14 @@ const goBackToCart = () => {
             <section class="summary-section">
                 <div class="summary-row">
                     <span>مبلغ قابل پرداخت</span>
-                    <strong>{{ formatPrice(subtotal) }}</strong>
+                    <strong>{{ formatPrice(totalAmount ?? subtotal) }}</strong>
+                </div>
+                <div
+                    v-if="Number(discountAmount || 0) > 0"
+                    class="summary-row discount-row"
+                >
+                    <span>تخفیف</span>
+                    <strong>- {{ formatPrice(discountAmount || 0) }}</strong>
                 </div>
             </section>
 
@@ -360,7 +405,16 @@ const goBackToCart = () => {
     margin: 0;
     color: #666;
 }
+.feedback-message {
+    margin-bottom: 25px;
+    padding: 14px 18px;
+    border: 1px solid #b7d7c1;
+    border-radius: 12px;
+    background: #effaf2;
+    color: #25643a;
+}
 .address-section,
+.coupon-section,
 .cart-section,
 .summary-section,
 .confirmation-section,
@@ -436,6 +490,32 @@ const goBackToCart = () => {
 }
 .no-addresses p {
     color: #666;
+}
+.coupon-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+.coupon-input {
+    width: min(100%, 360px);
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 12px 14px;
+    outline: none;
+}
+.coupon-input:focus {
+    border-color: #111;
+}
+.coupon-applied {
+    color: #25643a;
+    font-size: 14px;
+    font-weight: 600;
+}
+.coupon-note {
+    margin: 10px 0 0;
+    color: #777;
+    font-size: 13px;
 }
 .changes-notice {
     margin-bottom: 25px;
@@ -525,6 +605,11 @@ const goBackToCart = () => {
     align-items: center;
     font-size: 18px;
 }
+.discount-row {
+    margin-top: 10px;
+    color: #25643a;
+    font-size: 15px;
+}
 .zero-total-section {
     border: 1px solid #e0e0e0;
     text-align: center;
@@ -587,6 +672,9 @@ const goBackToCart = () => {
     .btn {
         width: 100%;
         text-align: center;
+    }
+    .coupon-input {
+        width: 100%;
     }
 }
 </style>
