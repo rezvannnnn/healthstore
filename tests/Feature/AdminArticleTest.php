@@ -30,6 +30,24 @@ class AdminArticleTest extends TestCase
         $response->assertForbidden();
     }
 
+    public function test_invalid_article_status_filter_is_rejected(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)
+            ->get('/admin/articles?status=archived')
+            ->assertSessionHasErrors('status');
+    }
+
+    public function test_oversized_article_search_filter_is_rejected(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)
+            ->get('/admin/articles?search='.str_repeat('a', 256))
+            ->assertSessionHasErrors('search');
+    }
+
     public function test_admin_can_create_and_publish_article(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);

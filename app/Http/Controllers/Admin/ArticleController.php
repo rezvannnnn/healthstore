@@ -16,8 +16,13 @@ class ArticleController extends Controller
 {
     public function index(Request $request): Response
     {
-        $search = trim((string) $request->query('search', ''));
-        $status = trim((string) $request->query('status', 'all'));
+        $validatedFilters = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'status' => ['nullable', 'string', Rule::in(['all', 'published', 'draft'])],
+        ]);
+
+        $search = trim((string) ($validatedFilters['search'] ?? ''));
+        $status = (string) ($validatedFilters['status'] ?? 'all');
 
         $query = Article::query()
             ->with('category:id,name')
