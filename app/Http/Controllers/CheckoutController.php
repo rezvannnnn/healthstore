@@ -88,22 +88,6 @@ class CheckoutController extends Controller
             ]);
         }
 
-        $cart = $this->cartService->getCartForUser($user->id);
-
-        try {
-            $result = $this->checkoutService->confirmPriceChanges($cart);
-        } catch (RuntimeException $e) {
-            return redirect()->route('checkout.show')->with('error', $e->getMessage());
-        }
-
-        if (! $result['payment_allowed']) {
-            return redirect()->route('checkout.show')->with(
-                'info',
-                $result['message'] ?? 'هیچ کالای قابل پرداختی در سبد باقی نمانده است.'
-            );
-        }
-
-        $cart = $this->cartService->getCartForUser($user->id);
         $lock = Cache::lock("checkout:user:{$user->id}", 30);
 
         if (! $lock->get()) {
@@ -114,6 +98,18 @@ class CheckoutController extends Controller
         }
 
         try {
+            $cart = $this->cartService->getCartForUser($user->id);
+
+            $result = $this->checkoutService->confirmPriceChanges($cart);
+
+            if (! $result['payment_allowed']) {
+                return redirect()->route('checkout.show')->with(
+                    'info',
+                    $result['message'] ?? 'هیچ کالای قابل پرداختی در سبد باقی نمانده است.'
+                );
+            }
+
+            $cart = $this->cartService->getCartForUser($user->id);
             $order = $this->orderService->createFromCart(
                 $cart,
                 $address,
