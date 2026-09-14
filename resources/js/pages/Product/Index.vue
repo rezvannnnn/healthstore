@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { reactive } from 'vue';
 
 interface Product {
@@ -121,12 +121,12 @@ function addToCart(productId: number): void {
                             محصولات فعال فروشگاه را جستجو و بررسی کنید.
                         </p>
                     </div>
-                    <a
+                    <Link
                         href="/cart"
                         class="inline-flex items-center justify-center rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900"
                     >
                         مشاهده سبد خرید
-                    </a>
+                    </Link>
                 </div>
 
                 <form
@@ -170,7 +170,7 @@ function addToCart(productId: number): void {
                     :key="product.id"
                     class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:-translate-y-0.5 hover:shadow-md dark:bg-gray-900 dark:ring-gray-800"
                 >
-                    <a :href="`/products/${product.slug}`" class="block">
+                    <Link :href="`/products/${product.slug}`" class="block">
                         <div class="aspect-square bg-gray-100 dark:bg-gray-800">
                             <img
                                 v-if="product.image"
@@ -212,7 +212,7 @@ function addToCart(productId: number): void {
                                 {{ product.short_description }}
                             </p>
                         </div>
-                    </a>
+                    </Link>
                     <div
                         class="flex items-center justify-between gap-3 border-t border-gray-100 p-4 dark:border-gray-800"
                     >
