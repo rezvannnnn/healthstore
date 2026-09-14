@@ -166,7 +166,20 @@ class PaymentService
             }
 
             if ($order->status === 'cancelled') {
+                $reservations = $order->inventoryReservations()->where('status', 'active')->get();
+                foreach ($reservations as $reservation) {
+                    if (! $this->reservationService->release($reservation)) {
+                        throw new RuntimeException('آزادسازی رزرو موجودی سفارش انجام نشد.');
+                    }
+                }
+
                 $couponService->releaseForOrder($order);
+                $payment->update([
+                    'status' => 'cancelled',
+                    'transaction_id' => (string) $transactionId,
+                    'reference_number' => $result['reference_number'] ?? null,
+                ]);
+                $payment->refresh();
 
                 return [
                     'status' => 'cancelled', 'success' => false, 'verified' => false, 'payment' => $payment,
