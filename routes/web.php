@@ -35,9 +35,11 @@ Route::get('/products', [ProductController::class, 'index'])->name('products.ind
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/blog', [ArticleController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [ArticleController::class, 'show'])->name('blog.show');
-Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
-Route::post('/checkout/confirm', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
-Route::post('/checkout/reject', [CheckoutController::class, 'reject'])->name('checkout.reject');
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
+    Route::post('/checkout/confirm', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
+    Route::post('/checkout/reject', [CheckoutController::class, 'reject'])->name('checkout.reject');
+});
 Route::get('/orders/{orderNumber}', [OrderController::class, 'show'])->name('orders.show');
 Route::post('/orders/{orderNumber}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 Route::post('/orders/{orderNumber}/payment', [PaymentController::class, 'start'])->name('orders.payment.start');
@@ -64,7 +66,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/brands', [AdminBrandController::class, 'index'])->name('brands.index');
     Route::get('/brands/create', [AdminBrandController::class, 'create'])->name('brands.create');
     Route::post('/brands', [AdminBrandController::class, 'store'])->name('brands.store');
-    Route::get('/brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('brands.edit');
+    Route::get('/brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('admin.brands.edit');
     Route::put('/brands/{brand}', [AdminBrandController::class, 'update'])->name('brands.update');
     Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
     Route::post('/inventory', [AdminInventoryController::class, 'store'])->name('inventory.store');
