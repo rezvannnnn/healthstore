@@ -23,16 +23,51 @@ defineProps<{ article: Article }>();
     <Head>
         <title>{{ article.seo_title || article.title }}</title>
         <meta
-            v-if="article.seo_description"
+            v-if="article.seo_description || article.excerpt"
             head-key="description"
             name="description"
-            :content="article.seo_description"
+            :content="article.seo_description || article.excerpt || undefined"
         />
         <link
             v-if="article.canonical_url"
             head-key="canonical"
             rel="canonical"
             :href="article.canonical_url"
+        />
+        <meta property="og:type" content="article" />
+        <meta
+            property="og:title"
+            :content="article.seo_title || article.title"
+        />
+        <meta
+            v-if="article.seo_description || article.excerpt"
+            property="og:description"
+            :content="article.seo_description || article.excerpt || undefined"
+        />
+        <meta
+            v-if="article.canonical_url"
+            property="og:url"
+            :content="article.canonical_url"
+        />
+        <meta
+            v-if="article.featured_image"
+            property="og:image"
+            :content="article.featured_image"
+        />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+            name="twitter:title"
+            :content="article.seo_title || article.title"
+        />
+        <meta
+            v-if="article.seo_description || article.excerpt"
+            name="twitter:description"
+            :content="article.seo_description || article.excerpt || undefined"
+        />
+        <meta
+            v-if="article.featured_image"
+            name="twitter:image"
+            :content="article.featured_image"
         />
     </Head>
     <div class="mx-auto max-w-4xl space-y-6 p-6" dir="rtl">
