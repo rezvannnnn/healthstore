@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class AdminOrderFilterValidationTest extends TestCase
@@ -30,7 +29,7 @@ class AdminOrderFilterValidationTest extends TestCase
         ]);
     }
 
-    public function test_invalid_order_status_filter_returns_no_results(): void
+    public function test_invalid_order_status_filter_is_rejected(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
         $customer = User::factory()->create();
@@ -38,15 +37,11 @@ class AdminOrderFilterValidationTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/orders?status=invalid-status')
-            ->assertSuccessful()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('Admin/Orders/Index')
-                ->where('filters.status', 'invalid-status')
-                ->has('orders', 0)
-            );
+            ->assertRedirect()
+            ->assertSessionHasErrors('status');
     }
 
-    public function test_invalid_payment_status_filter_returns_no_results(): void
+    public function test_invalid_payment_status_filter_is_rejected(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
         $customer = User::factory()->create();
@@ -54,11 +49,7 @@ class AdminOrderFilterValidationTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/admin/orders?payment_status=invalid-payment-status')
-            ->assertSuccessful()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('Admin/Orders/Index')
-                ->where('filters.payment_status', 'invalid-payment-status')
-                ->has('orders', 0)
-            );
+            ->assertRedirect()
+            ->assertSessionHasErrors('payment_status');
     }
 }
