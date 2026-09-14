@@ -15,6 +15,9 @@ type Product = {
     quantity_per_unit: number | null;
     short_description: string | null;
     description: string | null;
+    seo_title: string | null;
+    seo_description: string | null;
+    canonical_url: string | null;
     expiry_date: string | null;
     main_image: string | null;
     is_active: boolean;
@@ -36,6 +39,9 @@ type FormData = {
     quantity_per_unit: number | null;
     short_description: string;
     description: string;
+    seo_title: string;
+    seo_description: string;
+    canonical_url: string;
     expiry_date: string;
     main_image: string;
     is_active: boolean;
@@ -66,6 +72,9 @@ const form = useForm<FormData>({
     quantity_per_unit: props.product?.quantity_per_unit ?? null,
     short_description: props.product?.short_description ?? '',
     description: props.product?.description ?? '',
+    seo_title: props.product?.seo_title ?? '',
+    seo_description: props.product?.seo_description ?? '',
+    canonical_url: props.product?.canonical_url ?? '',
     expiry_date: props.product?.expiry_date ?? '',
     main_image: props.product?.main_image ?? '',
     is_active: props.product?.is_active ?? true,
@@ -89,7 +98,7 @@ const submit = () => {
             <div class="mb-6">
                 <h1 class="text-2xl font-bold">{{ title }}</h1>
                 <p class="mt-1 text-sm text-gray-500">
-                    اطلاعات پایه و قیمت فروش محصول
+                    اطلاعات پایه، قیمت و تنظیمات سئو محصول
                 </p>
             </div>
 
@@ -119,6 +128,11 @@ const submit = () => {
                                 dir="ltr"
                                 class="mt-1 w-full rounded-lg border-gray-300"
                             />
+                            <span
+                                v-if="form.errors.slug"
+                                class="text-sm text-red-600"
+                                >{{ form.errors.slug }}</span
+                            >
                         </label>
 
                         <label class="block">
@@ -196,9 +210,7 @@ const submit = () => {
                         </label>
 
                         <label class="block">
-                            <span class="text-sm font-medium"
-                                >تعداد در واحد</span
-                            >
+                            <span class="text-sm font-medium">تعداد در واحد</span>
                             <input
                                 v-model.number="form.quantity_per_unit"
                                 type="number"
@@ -230,9 +242,7 @@ const submit = () => {
                             >
                         </label>
                         <label class="block">
-                            <span class="text-sm font-medium"
-                                >قیمت قبل از تخفیف</span
-                            >
+                            <span class="text-sm font-medium">قیمت قبل از تخفیف</span>
                             <input
                                 v-model.number="form.compare_at_price"
                                 type="number"
@@ -240,6 +250,11 @@ const submit = () => {
                                 step="0.01"
                                 class="mt-1 w-full rounded-lg border-gray-300"
                             />
+                            <span
+                                v-if="form.errors.compare_at_price"
+                                class="text-sm text-red-600"
+                                >{{ form.errors.compare_at_price }}</span
+                            >
                         </label>
                     </div>
                 </section>
@@ -247,9 +262,7 @@ const submit = () => {
                 <section
                     class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
                 >
-                    <h2 class="mb-5 text-lg font-semibold">
-                        توضیحات و اطلاعات تکمیلی
-                    </h2>
+                    <h2 class="mb-5 text-lg font-semibold">توضیحات و اطلاعات تکمیلی</h2>
                     <div class="space-y-4">
                         <label class="block">
                             <span class="text-sm font-medium">توضیح کوتاه</span>
@@ -257,11 +270,14 @@ const submit = () => {
                                 v-model="form.short_description"
                                 class="mt-1 w-full rounded-lg border-gray-300"
                             />
+                            <span
+                                v-if="form.errors.short_description"
+                                class="text-sm text-red-600"
+                                >{{ form.errors.short_description }}</span
+                            >
                         </label>
                         <label class="block">
-                            <span class="text-sm font-medium"
-                                >توضیحات کامل</span
-                            >
+                            <span class="text-sm font-medium">توضیحات کامل</span>
                             <textarea
                                 v-model="form.description"
                                 rows="6"
@@ -270,26 +286,87 @@ const submit = () => {
                         </label>
                         <div class="grid gap-4 md:grid-cols-2">
                             <label class="block">
-                                <span class="text-sm font-medium"
-                                    >تاریخ انقضا</span
-                                >
+                                <span class="text-sm font-medium">تاریخ انقضا</span>
                                 <input
                                     v-model="form.expiry_date"
                                     type="date"
                                     class="mt-1 w-full rounded-lg border-gray-300"
                                 />
+                                <span
+                                    v-if="form.errors.expiry_date"
+                                    class="text-sm text-red-600"
+                                    >{{ form.errors.expiry_date }}</span
+                                >
                             </label>
                             <label class="block">
-                                <span class="text-sm font-medium"
-                                    >آدرس تصویر اصلی</span
-                                >
+                                <span class="text-sm font-medium">آدرس تصویر اصلی</span>
                                 <input
                                     v-model="form.main_image"
                                     dir="ltr"
                                     class="mt-1 w-full rounded-lg border-gray-300"
                                 />
+                                <span
+                                    v-if="form.errors.main_image"
+                                    class="text-sm text-red-600"
+                                    >{{ form.errors.main_image }}</span
+                                >
                             </label>
                         </div>
+                    </div>
+                </section>
+
+                <section
+                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
+                >
+                    <h2 class="mb-5 text-lg font-semibold">سئو</h2>
+                    <div class="space-y-4">
+                        <label class="block">
+                            <span class="text-sm font-medium">عنوان سئو</span>
+                            <input
+                                v-model="form.seo_title"
+                                maxlength="255"
+                                class="mt-1 w-full rounded-lg border-gray-300"
+                                placeholder="در صورت خالی بودن، نام محصول استفاده می‌شود"
+                            />
+                            <span
+                                v-if="form.errors.seo_title"
+                                class="text-sm text-red-600"
+                                >{{ form.errors.seo_title }}</span
+                            >
+                        </label>
+                        <label class="block">
+                            <span class="text-sm font-medium">توضیحات سئو</span>
+                            <textarea
+                                v-model="form.seo_description"
+                                maxlength="160"
+                                rows="4"
+                                class="mt-1 w-full rounded-lg border-gray-300"
+                                placeholder="حداکثر ۱۶۰ کاراکتر"
+                            />
+                            <span class="mt-1 block text-xs text-gray-500">
+                                {{ form.seo_description.length }} / 160
+                            </span>
+                            <span
+                                v-if="form.errors.seo_description"
+                                class="text-sm text-red-600"
+                                >{{ form.errors.seo_description }}</span
+                            >
+                        </label>
+                        <label class="block">
+                            <span class="text-sm font-medium">Canonical URL</span>
+                            <input
+                                v-model="form.canonical_url"
+                                dir="ltr"
+                                maxlength="2048"
+                                class="mt-1 w-full rounded-lg border-gray-300"
+                                placeholder="در صورت خالی بودن، آدرس استاندارد محصول تولید می‌شود"
+                            />
+                            <span
+                                v-if="form.errors.canonical_url"
+                                class="text-sm text-red-600"
+                                >{{ form.errors.canonical_url }}</span
+                            >
+                        </label>
                     </div>
                 </section>
 
