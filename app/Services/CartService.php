@@ -37,9 +37,9 @@ class CartService
         int $productId,
         int $quantity = 1
     ): CartItem {
-        if ($quantity < 1) {
+        if ($quantity < 1 || $quantity > 100) {
             throw new RuntimeException(
-                'تعداد محصول باید حداقل ۱ باشد.'
+                'تعداد محصول باید بین ۱ تا ۱۰۰ باشد.'
             );
         }
 
@@ -64,6 +64,12 @@ class CartService
                 ->where('product_id', $productId)
                 ->first();
             $newQuantity = ($item === null ? 0 : $item->quantity) + $quantity;
+
+            if ($newQuantity > 100) {
+                throw new RuntimeException(
+                    'حداکثر تعداد مجاز هر محصول در سبد خرید ۱۰۰ عدد است.'
+                );
+            }
 
             $price = $this->getCurrentPrice($product, $newQuantity);
 
