@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
 
 class LoginController extends Controller
 {
@@ -25,7 +26,6 @@ class LoginController extends Controller
                 'required',
                 'string',
             ],
-
             'code' => [
                 'required',
                 'string',
@@ -33,17 +33,14 @@ class LoginController extends Controller
             ],
         ]);
 
-        /*
-         * Normalize the phone number before verification
-         * and database lookup.
-         */
-        $phone = $this->otpService->normalizePhone(
-            $validated['phone']
-        );
+        try {
+            $phone = $this->otpService->normalizePhone($validated['phone']);
+        } catch (RuntimeException $exception) {
+            throw ValidationException::withMessages([
+                'phone' => $exception->getMessage(),
+            ]);
+        }
 
-        /*
-         * The OTP must be valid and successfully verified.
-         */
         $verified = $this->otpService->verify(
             $phone,
             $validated['code']
@@ -55,9 +52,6 @@ class LoginController extends Controller
             ]);
         }
 
-        /*
-         * Only an existing registered customer may log in.
-         */
         $user = User::query()
             ->where('phone', $phone)
             ->first();
@@ -68,23 +62,13 @@ class LoginController extends Controller
             ]);
         }
 
-        /*
-         * Only a verified phone may be used for authentication.
-         */
         if (! $user->hasVerifiedPhone()) {
             throw ValidationException::withMessages([
                 'phone' => 'شماره موبایل این حساب هنوز تأیید نشده است.',
             ]);
         }
 
-        /*
-         * Authenticate the customer.
-         */
         Auth::login($user);
-
-        /*
-         * Prevent session fixation after authentication.
-         */
         $request->session()->regenerate();
 
         return redirect()->intended(
@@ -104,14 +88,14 @@ class LoginController extends Controller
             ],
         ]);
 
-        $phone = $this->otpService->normalizePhone(
-            $validated['phone']
-        );
+        try {
+            $phone = $this->otpService->normalizePhone($validated['phone']);
+        } catch (RuntimeException $exception) {
+            throw ValidationException::withMessages([
+                'phone' => $exception->getMessage(),
+            ]);
+        }
 
-        /*
-         * Do not reveal whether a phone number is registered.
-         * The same generic response can be used by the frontend.
-         */
         $userExists = User::query()
             ->where('phone', $phone)
             ->whereNotNull('phone_verified_at')
@@ -123,9 +107,13 @@ class LoginController extends Controller
             ]);
         }
 
-        $this->otpService->send(
-            $phone
-        );
+        try {
+            $this->otpService->send($phone);
+        } catch (RuntimeException $exception) {
+            throw ValidationException::withMessages([
+                'phone' => $exception->getMessage(),
+            ]);
+        }
 
         return back()->with(
             'status',
