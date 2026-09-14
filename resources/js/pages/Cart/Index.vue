@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 interface CartItem {
@@ -78,10 +78,10 @@ function removeItem(item: CartItem): void {
                         محصولات انتخاب‌شده خود را بررسی کنید.
                     </p>
                 </div>
-                <a
+                <Link
                     href="/products"
                     class="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800"
-                    >ادامه خرید</a
+                    >ادامه خرید</Link
                 >
             </header>
 
@@ -95,7 +95,7 @@ function removeItem(item: CartItem): void {
                         :key="item.id"
                         class="flex gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800"
                     >
-                        <a
+                        <Link
                             :href="`/products/${item.product.slug}`"
                             class="h-28 w-28 shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800"
                         >
@@ -105,12 +105,12 @@ function removeItem(item: CartItem): void {
                                 :alt="item.product.name"
                                 class="h-full w-full object-contain p-2"
                             />
-                        </a>
+                        </Link>
                         <div class="min-w-0 flex-1">
-                            <a
+                            <Link
                                 :href="`/products/${item.product.slug}`"
                                 class="font-semibold text-gray-900 hover:text-indigo-600 dark:text-white"
-                                >{{ item.product.name }}</a
+                                >{{ item.product.name }}</Link
                             >
                             <div
                                 v-if="item.product.brand"
@@ -204,10 +204,10 @@ function removeItem(item: CartItem): void {
                             formatPrice(cart.subtotal)
                         }}</span>
                     </div>
-                    <a
+                    <Link
                         href="/checkout"
                         class="mt-6 block rounded-xl bg-indigo-600 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-700"
-                        >ادامه و انتخاب آدرس</a
+                        >ادامه و انتخاب آدرس</Link
                     >
                 </aside>
             </section>
@@ -222,10 +222,10 @@ function removeItem(item: CartItem): void {
                 <p class="mt-2 text-sm text-gray-500">
                     از فروشگاه محصول موردنظر خود را انتخاب کنید.
                 </p>
-                <a
+                <Link
                     href="/products"
                     class="mt-5 inline-block rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-700"
-                    >مشاهده محصولات</a
+                    >مشاهده محصولات</Link
                 >
             </section>
         </div>
