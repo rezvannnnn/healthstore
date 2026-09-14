@@ -85,7 +85,8 @@ function addToCart(): void {
     <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
         <div class="mx-auto max-w-6xl space-y-8">
             <nav class="text-sm text-gray-500 dark:text-gray-400">
-                <Link href="/products" class="hover:text-indigo-600">محصولات</Link
+                <Link href="/products" class="hover:text-indigo-600"
+                    >محصولات</Link
                 ><span class="mx-2">/</span><span>{{ product.name }}</span>
             </nav>
             <section
