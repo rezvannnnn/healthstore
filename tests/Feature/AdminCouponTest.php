@@ -59,6 +59,22 @@ class AdminCouponTest extends TestCase
         ]);
     }
 
+    public function test_normalized_coupon_code_must_be_unique(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        Coupon::create(['code' => 'SUMMER20', 'type' => 'percent', 'value' => 20]);
+
+        $this->actingAs($admin)
+            ->post('/admin/coupons', [
+                'code' => ' summer20 ',
+                'type' => 'percent',
+                'value' => 15,
+            ])
+            ->assertSessionHasErrors('code');
+
+        $this->assertSame(1, Coupon::where('code', 'SUMMER20')->count());
+    }
+
     public function test_percent_coupon_cannot_exceed_one_hundred(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
