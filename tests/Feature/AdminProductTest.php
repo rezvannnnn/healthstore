@@ -104,6 +104,32 @@ class AdminProductTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_create_product_with_custom_seo_metadata(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $response = $this->actingAs($admin)->post('/admin/products', [
+            'name' => 'Custom SEO Product',
+            'slug' => 'custom-seo-product',
+            'price' => 125000,
+            'seo_title' => 'عنوان اختصاصی سئو',
+            'seo_description' => 'توضیحات اختصاصی برای موتورهای جستجو',
+            'canonical_url' => 'https://example.com/products/custom-seo-product',
+            'is_active' => true,
+            'is_featured' => false,
+            'sort_order' => 0,
+        ]);
+
+        $response->assertRedirect('/admin/products');
+
+        $this->assertDatabaseHas('products', [
+            'slug' => 'custom-seo-product',
+            'seo_title' => 'عنوان اختصاصی سئو',
+            'seo_description' => 'توضیحات اختصاصی برای موتورهای جستجو',
+            'canonical_url' => 'https://example.com/products/custom-seo-product',
+        ]);
+    }
+
     public function test_admin_can_edit_product_and_update_retail_price(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
