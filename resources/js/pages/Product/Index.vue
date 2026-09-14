@@ -103,6 +103,13 @@ function addToCart(productId: number): void {
         <title>{{ seo.title }}</title>
         <meta name="description" :content="seo.description" />
         <link rel="canonical" :href="seo.canonical" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" :content="seo.title" />
+        <meta property="og:description" :content="seo.description" />
+        <meta property="og:url" :content="seo.canonical" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" :content="seo.title" />
+        <meta name="twitter:description" :content="seo.description" />
     </Head>
 
     <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
@@ -269,6 +276,7 @@ function addToCart(productId: number): void {
                     v-if="pagination.current_page > 1"
                     :href="pageUrl(pagination.current_page - 1)"
                     preserve-scroll
+                    aria-label="صفحه قبلی"
                     class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800"
                 >
                     قبلی
@@ -278,6 +286,8 @@ function addToCart(productId: number): void {
                     :key="page"
                     :href="pageUrl(page)"
                     preserve-scroll
+                    :aria-current="page === pagination.current_page ? 'page' : undefined"
+                    :aria-label="`صفحه ${page.toLocaleString('fa-IR')}`"
                     class="min-w-10 rounded-xl px-3 py-2 text-center text-sm font-medium"
                     :class="
                         page === pagination.current_page
@@ -291,6 +301,7 @@ function addToCart(productId: number): void {
                     v-if="pagination.current_page < pagination.last_page"
                     :href="pageUrl(pagination.current_page + 1)"
                     preserve-scroll
+                    aria-label="صفحه بعدی"
                     class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800"
                 >
                     بعدی
