@@ -124,6 +124,12 @@ class ArticleController extends Controller
     /** @return array<string, mixed> */
     protected function validatedData(Request $request, ?Article $article = null): array
     {
+        $request->merge([
+            'slug' => trim((string) $request->input('slug', '')) !== ''
+                ? Str::slug((string) $request->input('slug'))
+                : null,
+        ]);
+
         return $request->validate([
             'category_id' => ['nullable', 'integer', Rule::exists('article_categories', 'id')->where('is_active', true)],
             'title' => ['required', 'string', 'max:255'],
