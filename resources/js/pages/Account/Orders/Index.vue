@@ -88,7 +88,8 @@ function formatDate(value: string | null): string {
                                 </span>
                             </div>
                             <p class="mt-2 text-sm text-gray-500">
-                                {{ formatDate(order.created_at) }} · وضعیت پرداخت:
+                                {{ formatDate(order.created_at) }} · وضعیت
+                                پرداخت:
                                 {{
                                     paymentStatusLabels[order.payment_status] ||
                                     order.payment_status

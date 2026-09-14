@@ -28,10 +28,7 @@ function submit(): void {
 <template>
     <Head title="پروفایل من" />
 
-    <main
-        dir="rtl"
-        class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950"
-    >
+    <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
         <div class="mx-auto max-w-2xl space-y-6">
             <header>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -113,7 +110,11 @@ function submit(): void {
                         :disabled="form.processing"
                         class="rounded-xl bg-indigo-600 px-5 py-3 font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
                     >
-                        {{ form.processing ? 'در حال ذخیره...' : 'ذخیره اطلاعات' }}
+                        {{
+                            form.processing
+                                ? 'در حال ذخیره...'
+                                : 'ذخیره اطلاعات'
+                        }}
                     </button>
                 </form>
             </section>
