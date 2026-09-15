@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\OtpVerification;
 use App\Services\Sms\SmsProviderInterface;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use RuntimeException;
 
@@ -60,18 +61,29 @@ class OtpService
     {
         $phone = $this->normalizePhone($phone);
         $maxAttempts = (int) config('otp.max_attempts', 5);
-        $verification = OtpVerification::query()->where('phone', $phone)->whereNull('verified_at')->latest('id')->first();
-        if (! $verification || $verification->expires_at->isPast() || $verification->hasExceededAttempts($maxAttempts)) {
-            return false;
-        }
-        if (! Hash::check($code, $verification->code_hash)) {
-            $verification->increment('attempts');
 
-            return false;
-        }
-        $verification->update(['verified_at' => now()]);
+        return DB::transaction(function () use ($phone, $code, $maxAttempts): bool {
+            $verification = OtpVerification::query()
+                ->where('phone', $phone)
+                ->whereNull('verified_at')
+                ->latest('id')
+                ->lockForUpdate()
+                ->first();
 
-        return true;
+            if (! $verification || $verification->expires_at->isPast() || $verification->hasExceededAttempts($maxAttempts)) {
+                return false;
+            }
+
+            if (! Hash::check($code, $verification->code_hash)) {
+                $verification->increment('attempts');
+
+                return false;
+            }
+
+            $verification->update(['verified_at' => now()]);
+
+            return true;
+        });
     }
 
     public function normalizePhone(string $phone): string
