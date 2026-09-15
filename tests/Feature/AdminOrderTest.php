@@ -117,4 +117,47 @@ class AdminOrderTest extends TestCase
         $response->assertSessionHasErrors('status');
         $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'pending']);
     }
+
+    public function test_admin_can_advance_paid_order_through_shipping_lifecycle(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $customer = User::factory()->create();
+        $order = $this->order($customer, 'paid', 'paid');
+
+        $this->actingAs($admin)->post("/admin/orders/{$order->id}/status", [
+            'status' => 'processing',
+        ])->assertRedirect();
+
+        $this->actingAs($admin)->post("/admin/orders/{$order->id}/status", [
+            'status' => 'shipped',
+        ])->assertRedirect();
+
+        $this->actingAs($admin)->post("/admin/orders/{$order->id}/status", [
+            'status' => 'delivered',
+        ])->assertRedirect();
+
+        $order->refresh();
+
+        $this->assertSame('delivered', $order->status);
+        $this->assertNotNull($order->confirmed_at);
+        $this->assertNotNull($order->shipped_at);
+        $this->assertNotNull($order->delivered_at);
+    }
+
+    public function test_admin_cannot_skip_order_status_transition(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $customer = User::factory()->create();
+        $order = $this->order($customer, 'paid', 'paid');
+
+        $response = $this->actingAs($admin)->post("/admin/orders/{$order->id}/status", [
+            'status' => 'shipped',
+        ]);
+
+        $response->assertSessionHasErrors('status');
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'status' => 'paid',
+        ]);
+    }
 }
