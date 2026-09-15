@@ -281,7 +281,9 @@ const goBackToCart = () => {
                 >
                     <div class="cart-item-main">
                         <strong>{{ item.product.name }}</strong>
-                        <span v-if="item.product.sku">{{ item.product.sku }}</span>
+                        <span v-if="item.product.sku">{{
+                            item.product.sku
+                        }}</span>
                     </div>
                     <div class="cart-item-meta">
                         <span>تعداد: {{ item.quantity }}</span>
@@ -300,11 +302,15 @@ const goBackToCart = () => {
                     class="summary-row discount-row"
                 >
                     <span>تخفیف</span>
-                    <strong>- {{ formatPrice(props.discountAmount || 0) }}</strong>
+                    <strong
+                        >- {{ formatPrice(props.discountAmount || 0) }}</strong
+                    >
                 </div>
                 <div class="summary-row total-row">
                     <span>مبلغ نهایی</span>
-                    <strong>{{ formatPrice(props.totalAmount ?? props.subtotal) }}</strong>
+                    <strong>{{
+                        formatPrice(props.totalAmount ?? props.subtotal)
+                    }}</strong>
                 </div>
             </section>
 
@@ -339,7 +345,11 @@ const goBackToCart = () => {
                 >
                     رد تغییرات
                 </button>
-                <button type="button" class="btn btn-link" @click="goBackToCart">
+                <button
+                    type="button"
+                    class="btn btn-link"
+                    @click="goBackToCart"
+                >
                     بازگشت به سبد خرید
                 </button>
             </div>
