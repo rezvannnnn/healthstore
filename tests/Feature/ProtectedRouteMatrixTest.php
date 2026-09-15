@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ProtectedRouteMatrixTest extends TestCase
@@ -72,9 +73,7 @@ class ProtectedRouteMatrixTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider protectedRoutes
-     */
+    #[DataProvider('protectedRoutes')]
     public function test_guest_is_redirected_from_protected_route(string $method, string $uri): void
     {
         $response = $this->call($method, $uri);
