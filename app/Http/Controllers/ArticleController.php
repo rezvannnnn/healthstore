@@ -74,6 +74,9 @@ class ArticleController extends Controller
             ->where('published_at', '<=', now())
             ->firstOrFail();
 
+        $canonicalUrl = $article->canonical_url ?: url('/blog/'.$article->slug);
+        $seoDescription = $article->seo_description ?: $article->excerpt;
+
         return Inertia::render('Blog/Show', [
             'article' => [
                 'id' => $article->id,
@@ -84,8 +87,8 @@ class ArticleController extends Controller
                 'featured_image' => $article->featured_image,
                 'featured_image_alt' => $article->featured_image_alt,
                 'seo_title' => $article->seo_title,
-                'seo_description' => $article->seo_description,
-                'canonical_url' => $article->canonical_url,
+                'seo_description' => $seoDescription,
+                'canonical_url' => $canonicalUrl,
                 'category' => $article->category?->only(['id', 'name', 'slug']),
                 'author' => $article->author?->only(['id', 'name']),
                 'published_at' => $article->published_at?->toISOString(),
