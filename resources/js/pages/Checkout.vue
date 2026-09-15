@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface Product {
@@ -127,14 +127,14 @@ const goBackToCart = () => {
                             کنید.
                         </p>
                     </div>
-                    <a href="/account/addresses">مدیریت آدرس‌ها</a>
+                    <Link href="/account/addresses">مدیریت آدرس‌ها</Link>
                 </div>
 
                 <div v-if="addresses.length === 0" class="no-addresses">
                     <strong>هنوز آدرسی ثبت نکرده‌اید.</strong>
                     <p>برای ادامه سفارش، ابتدا یک آدرس ثبت کنید.</p>
-                    <a class="btn btn-secondary" href="/account/addresses"
-                        >ثبت آدرس جدید</a
+                    <Link class="btn btn-secondary" href="/account/addresses"
+                        >ثبت آدرس جدید</Link
                     >
                 </div>
 
@@ -278,109 +278,71 @@ const goBackToCart = () => {
                     v-for="item in cart.items"
                     :key="item.id"
                     class="cart-item"
-                    :class="{ 'is-unavailable': Number(item.unit_price) === 0 }"
                 >
-                    <div class="item-info">
-                        <h3>{{ item.product.name }}</h3>
-                        <span v-if="item.product.sku"
-                            >کد کالا: {{ item.product.sku }}</span
-                        >
-                        <span>تعداد: {{ item.quantity }}</span>
+                    <div class="cart-item-main">
+                        <strong>{{ item.product.name }}</strong>
+                        <span v-if="item.product.sku">{{ item.product.sku }}</span>
                     </div>
-                    <div class="item-price">
-                        <template v-if="Number(item.unit_price) > 0">{{
-                            formatPrice(item.unit_price)
-                        }}</template>
-                        <template v-else>
-                            <span class="unavailable-label">ناموجود</span>
-                            <span class="zero-price">۰ تومان</span>
-                        </template>
+                    <div class="cart-item-meta">
+                        <span>تعداد: {{ item.quantity }}</span>
+                        <span>{{ formatPrice(item.unit_price) }}</span>
                     </div>
                 </div>
             </section>
 
             <section class="summary-section">
                 <div class="summary-row">
-                    <span>مبلغ قابل پرداخت</span>
-                    <strong>{{ formatPrice(totalAmount ?? subtotal) }}</strong>
+                    <span>جمع سبد خرید</span>
+                    <strong>{{ formatPrice(props.subtotal) }}</strong>
                 </div>
                 <div
-                    v-if="Number(discountAmount || 0) > 0"
+                    v-if="Number(props.discountAmount || 0) > 0"
                     class="summary-row discount-row"
                 >
                     <span>تخفیف</span>
-                    <strong>- {{ formatPrice(discountAmount || 0) }}</strong>
+                    <strong>- {{ formatPrice(props.discountAmount || 0) }}</strong>
+                </div>
+                <div class="summary-row total-row">
+                    <span>مبلغ نهایی</span>
+                    <strong>{{ formatPrice(props.totalAmount ?? props.subtotal) }}</strong>
                 </div>
             </section>
 
-            <section v-if="isZeroTotal" class="zero-total-section">
-                <div class="zero-total-icon">!</div>
-                <h2>هیچ کالای قابل خریدی در سبد شما باقی نمانده است.</h2>
-                <p>محصولات ناموجود پس از تأیید از سبد حذف خواهند شد.</p>
-                <div class="actions">
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        @click="goBackToCart"
-                    >
-                        بازگشت به سبد خرید
-                    </button>
-                </div>
+            <section v-if="isZeroTotal" class="zero-total">
+                <strong>مبلغ قابل پرداخت صفر است.</strong>
+                <p>برای ادامه، سفارش با مبلغ نهایی صفر ثبت خواهد شد.</p>
             </section>
 
-            <section
-                v-else-if="addresses.length === 0"
-                class="confirmation-section"
-            >
-                <h2>آدرس تحویل لازم است</h2>
-                <p>برای ثبت سفارش، ابتدا یک آدرس برای تحویل سفارش ثبت کنید.</p>
+            <section v-if="!hasAddress" class="checkout-warning">
+                <strong>برای ثبت سفارش، ابتدا یک آدرس انتخاب کنید.</strong>
             </section>
 
-            <section
-                v-else-if="requiresPriceConfirmation"
-                class="confirmation-section"
-            >
-                <h2>تأیید تغییرات</h2>
-                <p>
-                    برای ادامه، باید تغییرات سبد خرید و آدرس تحویل را تأیید
-                    کنید.
-                </p>
-                <div class="actions">
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        :disabled="!canProceedToPayment || !hasAddress"
-                        @click="submitCheckout"
-                    >
-                        تأیید تغییرات و ادامه پرداخت
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        @click="rejectChanges"
-                    >
-                        عدم تأیید و بازگشت به سبد
-                    </button>
-                </div>
+            <section v-if="requiresPriceConfirmation" class="checkout-warning">
+                <strong>قیمت برخی اقلام تغییر کرده است.</strong>
+                <p>برای ادامه، تغییرات بالا را بررسی و تأیید کنید.</p>
             </section>
 
-            <section v-else class="confirmation-section">
-                <h2>سفارش آماده است</h2>
-                <p>
-                    آدرس و قیمت سفارش را بررسی کرده‌اید. برای ایجاد سفارش ادامه
-                    دهید.
-                </p>
-                <div class="actions">
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        :disabled="!canProceedToPayment || !hasAddress"
-                        @click="submitCheckout"
-                    >
-                        ثبت سفارش و ادامه به پرداخت
-                    </button>
-                </div>
-            </section>
+            <div class="checkout-actions">
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    :disabled="!canProceedToPayment || !hasAddress"
+                    @click="submitCheckout"
+                >
+                    ثبت سفارش و ادامه پرداخت
+                </button>
+                <button
+                    v-if="hasChanges"
+                    type="button"
+                    class="btn btn-secondary"
+                    @click="rejectChanges"
+                >
+                    رد تغییرات
+                </button>
+                <button type="button" class="btn btn-link" @click="goBackToCart">
+                    بازگشت به سبد خرید
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -388,297 +350,63 @@ const goBackToCart = () => {
 <style scoped>
 .checkout-page {
     min-height: 100vh;
-    background: #f8f9fa;
-    padding: 40px 20px;
+    padding: 2rem 1rem;
 }
 .checkout-container {
-    width: min(100%, 1000px);
+    width: min(100%, 1100px);
     margin: 0 auto;
 }
-.checkout-header {
-    margin-bottom: 30px;
-}
-.checkout-header h1 {
-    margin: 0 0 8px;
-    font-size: 30px;
-}
-.checkout-header p,
-.section-heading p,
-.confirmation-section p,
-.zero-total-section p {
-    margin: 0;
-    color: #666;
-}
-.feedback-message {
-    margin-bottom: 25px;
-    padding: 14px 18px;
-    border: 1px solid #b7d7c1;
-    border-radius: 12px;
-    background: #effaf2;
-    color: #25643a;
-}
-.address-section,
-.coupon-section,
-.cart-section,
-.summary-section,
-.confirmation-section,
-.zero-total-section {
-    margin-bottom: 25px;
-    padding: 24px;
-    border-radius: 16px;
-    background: #fff;
-}
-.section-heading {
+.checkout-header,
+.section-heading,
+.cart-item,
+.summary-row,
+.checkout-actions,
+.coupon-form,
+.change-row {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    gap: 20px;
-    align-items: flex-start;
-    margin-bottom: 20px;
+    gap: 1rem;
 }
-.section-heading h2,
-.cart-section h2,
-.confirmation-section h2,
-.zero-total-section h2 {
-    margin-top: 0;
-}
-.section-heading a {
-    white-space: nowrap;
+section,
+.checkout-header,
+.feedback-message,
+.changes-notice,
+.checkout-warning,
+.zero-total {
+    margin-bottom: 1.5rem;
 }
 .address-list {
     display: grid;
-    gap: 12px;
+    gap: 1rem;
 }
 .address-card {
     display: flex;
-    gap: 14px;
-    padding: 18px;
-    border: 1px solid #ddd;
-    border-radius: 12px;
+    gap: 1rem;
+    align-items: flex-start;
     cursor: pointer;
 }
-.address-card.is-selected {
-    border-color: #111;
-    box-shadow: 0 0 0 1px #111;
-}
-.address-card input {
-    margin-top: 4px;
-}
 .address-content {
+    flex: 1;
+}
+.address-title-row,
+.price-change,
+.stock-status,
+.cart-item-main,
+.cart-item-meta {
     display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-.address-title-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-.default-badge {
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: #eee;
-    font-size: 12px;
-}
-.address-text {
-    color: #444;
-    line-height: 1.8;
-}
-.postal-code {
-    color: #777;
-    font-size: 14px;
-}
-.no-addresses {
-    padding: 20px;
-    border: 1px dashed #ccc;
-    border-radius: 12px;
-}
-.no-addresses p {
-    color: #666;
-}
-.coupon-form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
+    gap: 0.75rem;
     align-items: center;
 }
 .coupon-input {
-    width: min(100%, 360px);
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 12px 14px;
-    outline: none;
+    min-width: 240px;
 }
-.coupon-input:focus {
-    border-color: #111;
-}
-.coupon-applied {
-    color: #25643a;
-    font-size: 14px;
-    font-weight: 600;
-}
-.coupon-note {
-    margin: 10px 0 0;
-    color: #777;
-    font-size: 13px;
-}
-.changes-notice {
-    margin-bottom: 25px;
-    padding: 24px;
-    border: 1px solid #f0c36d;
-    border-radius: 16px;
-    background: #fff9e8;
-}
-.changes-notice h2 {
-    margin-top: 0;
-}
-.change-section {
-    margin-top: 20px;
-}
-.change-section h3 {
-    margin-bottom: 12px;
-}
-.change-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    padding: 14px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-.change-row:last-child {
-    border-bottom: 0;
-}
-.price-change,
-.stock-status {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.old-price,
-.strikethrough-price {
-    color: #999;
-    text-decoration: line-through;
-}
-.new-price,
-.stock-status {
-    font-weight: 700;
-}
-.cart-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    padding: 18px 0;
-    border-bottom: 1px solid #eee;
-}
-.cart-item:last-child {
-    border-bottom: 0;
-}
-.item-info {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.item-info h3 {
-    margin: 0;
-}
-.item-info span {
-    color: #777;
-    font-size: 14px;
-}
-.item-price {
-    font-weight: 700;
-    white-space: nowrap;
-}
-.is-unavailable {
-    opacity: 0.7;
-}
-.unavailable-label {
-    display: block;
-    color: #c62828;
-}
-.zero-price {
-    display: block;
-    margin-top: 5px;
-    color: #777;
-    font-size: 14px;
-}
+.change-row,
+.cart-item,
 .summary-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 18px;
+    padding: 0.75rem 0;
 }
-.discount-row {
-    margin-top: 10px;
-    color: #25643a;
-    font-size: 15px;
-}
-.zero-total-section {
-    border: 1px solid #e0e0e0;
-    text-align: center;
-}
-.zero-total-icon {
-    width: 42px;
-    height: 42px;
-    margin: 0 auto 15px;
-    border-radius: 50%;
-    background: #eee;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-}
-.actions {
-    display: flex;
+.checkout-actions {
     flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 20px;
-}
-.btn {
-    display: inline-block;
-    border: 0;
-    border-radius: 10px;
-    padding: 12px 20px;
-    cursor: pointer;
-    font-size: 15px;
-    text-decoration: none;
-}
-.btn-primary {
-    background: #111;
-    color: #fff;
-}
-.btn-secondary {
-    background: #e9ecef;
-    color: #222;
-}
-.btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-.empty-cart {
-    padding: 30px 0;
-    color: #777;
-    text-align: center;
-}
-@media (max-width: 700px) {
-    .change-row,
-    .cart-item,
-    .summary-row,
-    .section-heading {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-    .price-change,
-    .stock-status {
-        align-items: flex-start;
-    }
-    .btn {
-        width: 100%;
-        text-align: center;
-    }
-    .coupon-input {
-        width: 100%;
-    }
 }
 </style>
