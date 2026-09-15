@@ -4,12 +4,13 @@ namespace Tests\Feature;
 
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Route as RouteFacade;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class RouteSecurityContractTest extends TestCase
 {
     /**
-     * @return array<string, array{string, string[]}> 
+     * @return array<string, array{string, string[]}>
      */
     public static function protectedRouteProvider(): array
     {
@@ -67,7 +68,7 @@ class RouteSecurityContractTest extends TestCase
         ];
     }
 
-    /** @dataProvider protectedRouteProvider */
+    #[DataProvider('protectedRouteProvider')]
     public function test_protected_route_has_expected_middleware(string $name, array $expected): void
     {
         $route = RouteFacade::getRoutes()->getByName($name);
@@ -84,7 +85,7 @@ class RouteSecurityContractTest extends TestCase
         }
     }
 
-    /** @dataProvider publicRouteProvider */
+    #[DataProvider('publicRouteProvider')]
     public function test_public_route_has_no_customer_or_admin_middleware(string $name): void
     {
         $route = RouteFacade::getRoutes()->getByName($name);
