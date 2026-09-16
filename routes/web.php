@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\OrderController;
@@ -27,7 +28,7 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\ZarinPalCallbackController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'Welcome')->name('home');
+Route::get('/', HomeController::class)->name('home');
 Route::inertia('/login', 'Auth/Login')->name('login');
 Route::inertia('/register', 'Auth/Register')->name('register.form');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
