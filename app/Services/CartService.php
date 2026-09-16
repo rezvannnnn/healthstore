@@ -12,7 +12,12 @@ use RuntimeException;
 
 class CartService
 {
-    public function __construct(protected InventoryService $inventoryService) {}
+    protected InventoryService $inventoryService;
+
+    public function __construct(?InventoryService $inventoryService = null)
+    {
+        $this->inventoryService = $inventoryService ?? app(InventoryService::class);
+    }
 
     /**
      * Get or create the active cart for the user.
