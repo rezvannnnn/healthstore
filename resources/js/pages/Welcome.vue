@@ -28,7 +28,9 @@ function formatPrice(value: number | null): string {
 }
 
 function addToCart(product: FeaturedProduct): void {
-    if (!product.available || product.price === null) return;
+    if (!product.available || product.price === null) {
+        return;
+    }
     router.post('/cart/items', { product_id: product.id, quantity: 1 }, { preserveScroll: true });
 }
 </script>
