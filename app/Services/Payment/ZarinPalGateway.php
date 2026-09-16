@@ -29,16 +29,12 @@ class ZarinPalGateway implements PaymentGatewayInterface
         }
 
         $callbackUrl = $this->callbackUrl();
-
         $endpoint = $this->requestEndpoint();
 
         $payload = [
             'merchant_id' => $merchantId,
             'amount' => $amount,
-            'description' => sprintf(
-                'پرداخت سفارش %s',
-                $payment->order->order_number
-            ),
+            'description' => sprintf('پرداخت سفارش %s', $payment->order->order_number),
             'callback_url' => $callbackUrl,
         ];
 
@@ -57,69 +53,41 @@ class ZarinPalGateway implements PaymentGatewayInterface
         $body = $this->decodeResponse($response);
 
         if (! $response->successful()) {
-            throw new RuntimeException(
-                $this->gatewayErrorMessage(
-                    $body,
-                    $response
-                )
-            );
+            throw new RuntimeException($this->gatewayErrorMessage($body, $response));
         }
 
         $errors = $body['errors'] ?? [];
 
         if (! empty($errors)) {
-            throw new RuntimeException(
-                $this->gatewayErrorMessage(
-                    $body,
-                    $response
-                )
-            );
+            throw new RuntimeException($this->gatewayErrorMessage($body, $response));
         }
 
         $data = $body['data'] ?? [];
-
         $code = (int) ($data['code'] ?? 0);
         $authority = (string) ($data['authority'] ?? '');
 
         if ($code !== 100 || $authority === '') {
-            throw new RuntimeException(
-                'زرین‌پال درخواست پرداخت را نپذیرفت.'
-            );
+            throw new RuntimeException('زرین‌پال درخواست پرداخت را نپذیرفت.');
         }
 
         return [
             'success' => true,
             'authority' => $authority,
-            'payment_url' => $this->paymentUrl([
-                'authority' => $authority,
-            ]),
+            'payment_url' => $this->paymentUrl(['authority' => $authority]),
             'response' => $body,
         ];
     }
 
-    public function verify(
-        Payment $payment,
-        array $callbackData
-    ): array {
+    public function verify(Payment $payment, array $callbackData): array
+    {
         $merchantId = (string) config('services.zarinpal.merchant_id');
 
         if ($merchantId === '') {
-            throw new RuntimeException(
-                'Merchant ID زرین‌پال تنظیم نشده است.'
-            );
+            throw new RuntimeException('Merchant ID زرین‌پال تنظیم نشده است.');
         }
 
-        $authority = (string) (
-            $callbackData['Authority']
-            ?? $callbackData['authority']
-            ?? ''
-        );
-
-        $status = strtoupper((string) (
-            $callbackData['Status']
-            ?? $callbackData['status']
-            ?? ''
-        ));
+        $authority = (string) ($callbackData['Authority'] ?? $callbackData['authority'] ?? '');
+        $status = strtoupper((string) ($callbackData['Status'] ?? $callbackData['status'] ?? ''));
 
         if ($authority === '') {
             return [
@@ -128,16 +96,23 @@ class ZarinPalGateway implements PaymentGatewayInterface
                 'authority' => null,
                 'transaction_id' => null,
                 'reference_number' => null,
-                'response' => [
-                    'message' => 'Authority از Callback دریافت نشد.',
-                ],
+                'response' => ['message' => 'Authority از Callback دریافت نشد.'],
             ];
         }
 
-        /*
-         * The customer may cancel the payment on the gateway.
-         * In that case there is no reason to call Verify.
-         */
+        $paymentAuthority = trim((string) $payment->authority);
+
+        if ($paymentAuthority !== '' && ! hash_equals($paymentAuthority, $authority)) {
+            return [
+                'success' => false,
+                'verified' => false,
+                'authority' => $authority,
+                'transaction_id' => null,
+                'reference_number' => null,
+                'response' => ['message' => 'Authority Callback با Authority پرداخت مطابقت ندارد.'],
+            ];
+        }
+
         if ($status !== 'OK') {
             return [
                 'success' => false,
@@ -155,13 +130,10 @@ class ZarinPalGateway implements PaymentGatewayInterface
         $amount = (int) round((float) $payment->amount);
 
         if ($amount <= 0) {
-            throw new RuntimeException(
-                'مبلغ پرداخت برای Verify معتبر نیست.'
-            );
+            throw new RuntimeException('مبلغ پرداخت برای Verify معتبر نیست.');
         }
 
         $endpoint = $this->verifyEndpoint();
-
         $payload = [
             'merchant_id' => $merchantId,
             'amount' => $amount,
@@ -183,12 +155,7 @@ class ZarinPalGateway implements PaymentGatewayInterface
         $body = $this->decodeResponse($response);
 
         if (! $response->successful()) {
-            throw new RuntimeException(
-                $this->gatewayErrorMessage(
-                    $body,
-                    $response
-                )
-            );
+            throw new RuntimeException($this->gatewayErrorMessage($body, $response));
         }
 
         $errors = $body['errors'] ?? [];
@@ -205,26 +172,15 @@ class ZarinPalGateway implements PaymentGatewayInterface
         }
 
         $data = $body['data'] ?? [];
-
         $code = (int) ($data['code'] ?? 0);
-
-        /*
-         * ZarinPal uses:
-         * 100 = successful first verification
-         * 101 = already verified / successful verification
-         */
         $verified = in_array($code, [100, 101], true);
 
         return [
             'success' => $verified,
             'verified' => $verified,
             'authority' => $authority,
-            'transaction_id' => isset($data['ref_id'])
-                ? (string) $data['ref_id']
-                : null,
-            'reference_number' => isset($data['ref_id'])
-                ? (string) $data['ref_id']
-                : null,
+            'transaction_id' => isset($data['ref_id']) ? (string) $data['ref_id'] : null,
+            'reference_number' => isset($data['ref_id']) ? (string) $data['ref_id'] : null,
             'card_pan' => $data['card_pan'] ?? null,
             'response' => $body,
         ];
@@ -235,22 +191,13 @@ class ZarinPalGateway implements PaymentGatewayInterface
         $authority = (string) ($gatewayData['authority'] ?? '');
 
         if ($authority === '') {
-            throw new RuntimeException(
-                'Authority برای ایجاد آدرس پرداخت وجود ندارد.'
-            );
+            throw new RuntimeException('Authority برای ایجاد آدرس پرداخت وجود ندارد.');
         }
 
-        $baseUrl = rtrim(
-            (string) config(
-                'services.zarinpal.payment_base_url'
-            ),
-            '/'
-        );
+        $baseUrl = rtrim((string) config('services.zarinpal.payment_base_url'), '/');
 
         if ($baseUrl === '') {
-            throw new RuntimeException(
-                'آدرس صفحه پرداخت زرین‌پال تنظیم نشده است.'
-            );
+            throw new RuntimeException('آدرس صفحه پرداخت زرین‌پال تنظیم نشده است.');
         }
 
         return $baseUrl.'/pg/StartPay/'.$authority;
@@ -258,14 +205,10 @@ class ZarinPalGateway implements PaymentGatewayInterface
 
     private function requestEndpoint(): string
     {
-        $endpoint = (string) config(
-            'services.zarinpal.request_endpoint'
-        );
+        $endpoint = (string) config('services.zarinpal.request_endpoint');
 
         if ($endpoint === '') {
-            throw new RuntimeException(
-                'Endpoint درخواست زرین‌پال تنظیم نشده است.'
-            );
+            throw new RuntimeException('Endpoint درخواست زرین‌پال تنظیم نشده است.');
         }
 
         return $endpoint;
@@ -273,14 +216,10 @@ class ZarinPalGateway implements PaymentGatewayInterface
 
     private function verifyEndpoint(): string
     {
-        $endpoint = (string) config(
-            'services.zarinpal.verify_endpoint'
-        );
+        $endpoint = (string) config('services.zarinpal.verify_endpoint');
 
         if ($endpoint === '') {
-            throw new RuntimeException(
-                'Endpoint Verify زرین‌پال تنظیم نشده است.'
-            );
+            throw new RuntimeException('Endpoint Verify زرین‌پال تنظیم نشده است.');
         }
 
         return $endpoint;
@@ -288,34 +227,13 @@ class ZarinPalGateway implements PaymentGatewayInterface
 
     private function callbackUrl(): string
     {
-        $configuredUrl = trim(
-            (string) config(
-                'services.zarinpal.callback_url'
-            )
-        );
+        $configuredUrl = trim((string) config('services.zarinpal.callback_url'));
 
         if ($configuredUrl === '') {
-            throw new RuntimeException(
-                'Callback URL زرین‌پال تنظیم نشده است.'
-            );
+            throw new RuntimeException('Callback URL زرین‌پال تنظیم نشده است.');
         }
 
-        /*
-         * Allow both:
-         * /payment/zarinpal/callback
-         * https://example.com/payment/zarinpal/callback
-         */
-        if (
-            str_starts_with(
-                $configuredUrl,
-                'http://'
-            )
-            ||
-            str_starts_with(
-                $configuredUrl,
-                'https://'
-            )
-        ) {
+        if (str_starts_with($configuredUrl, 'http://') || str_starts_with($configuredUrl, 'https://')) {
             return $configuredUrl;
         }
 
@@ -327,29 +245,20 @@ class ZarinPalGateway implements PaymentGatewayInterface
         $body = $response->json();
 
         if (! is_array($body)) {
-            throw new RuntimeException(
-                'پاسخ نامعتبر از زرین‌پال دریافت شد.'
-            );
+            throw new RuntimeException('پاسخ نامعتبر از زرین‌پال دریافت شد.');
         }
 
         return $body;
     }
 
-    private function gatewayErrorMessage(
-        array $body,
-        Response $response
-    ): string {
-        $message = $body['errors']['message']
-            ?? $body['data']['message']
-            ?? null;
+    private function gatewayErrorMessage(array $body, Response $response): string
+    {
+        $message = $body['errors']['message'] ?? $body['data']['message'] ?? null;
 
         if (is_string($message) && $message !== '') {
             return 'خطای زرین‌پال: '.$message;
         }
 
-        return sprintf(
-            'زرین‌پال با کد HTTP %d پاسخ ناموفق برگرداند.',
-            $response->status()
-        );
+        return sprintf('زرین‌پال با کد HTTP %d پاسخ ناموفق برگرداند.', $response->status());
     }
 }
