@@ -8,19 +8,20 @@ use App\Models\Product;
 use App\Models\ProductPrice;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class CartControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function createProduct(): Product
+    private function createProduct(bool $active = true): Product
     {
         $product = Product::create([
-            'name' => 'Cart Product',
-            'slug' => 'cart-product',
-            'sku' => 'CART-001',
-            'is_active' => true,
+            'name' => 'Cart Product '.uniqid(),
+            'slug' => 'cart-product-'.uniqid(),
+            'sku' => 'CART-'.uniqid(),
+            'is_active' => $active,
         ]);
 
         ProductPrice::create([
@@ -194,5 +195,53 @@ class CartControllerTest extends TestCase
         $this->assertDatabaseMissing('cart_items', [
             'id' => $item->id,
         ]);
+    }
+
+    public function test_customer_cannot_update_inactive_product_in_cart(): void
+    {
+        $user = User::factory()->create();
+        $product = $this->createProduct(false);
+        $cart = Cart::create([
+            'user_id' => $user->id,
+            'status' => 'active',
+        ]);
+        $item = CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'quantity' => 1,
+            'unit_price' => 100000,
+        ]);
+
+        $this->actingAs($user)
+            ->put("/cart/{$cart->id}/items/{$item->id}", ['quantity' => 2])
+            ->assertSessionHasErrors('quantity');
+
+        $this->assertDatabaseHas('cart_items', [
+            'id' => $item->id,
+            'quantity' => 1,
+        ]);
+    }
+
+    public function test_cart_add_is_blocked_while_customer_cart_lock_is_held(): void
+    {
+        $user = User::factory()->create();
+        $product = $this->createProduct();
+        $lock = Cache::lock("cart:user:{$user->id}", 30);
+        $this->assertTrue($lock->get());
+
+        try {
+            $this->actingAs($user)
+                ->post('/cart/items', [
+                    'product_id' => $product->id,
+                    'quantity' => 1,
+                ])
+                ->assertSessionHasErrors('product_id');
+
+            $this->assertDatabaseMissing('cart_items', [
+                'product_id' => $product->id,
+            ]);
+        } finally {
+            $lock->release();
+        }
     }
 }

@@ -88,12 +88,12 @@ class CheckoutController extends Controller
             ]);
         }
 
-        $lock = Cache::lock("checkout:user:{$user->id}", 30);
+        $lock = Cache::lock("cart:user:{$user->id}", 30);
 
         if (! $lock->get()) {
             return redirect()->route('checkout.show')->with(
                 'info',
-                'ثبت سفارش دیگری در حال انجام است. لطفاً چند لحظه صبر کنید.'
+                'عملیات دیگری روی سبد خرید شما در حال انجام است. لطفاً چند لحظه صبر کنید.'
             );
         }
 
@@ -138,8 +138,21 @@ class CheckoutController extends Controller
         $user = $request->user();
         abort_unless($user !== null, 401);
 
-        $cart = $this->cartService->getCartForUser($user->id);
-        $this->checkoutService->rejectPriceChanges($cart);
+        $lock = Cache::lock("cart:user:{$user->id}", 30);
+
+        if (! $lock->get()) {
+            return redirect()->route('checkout.show')->with(
+                'info',
+                'عملیات دیگری روی سبد خرید شما در حال انجام است. لطفاً چند لحظه صبر کنید.'
+            );
+        }
+
+        try {
+            $cart = $this->cartService->getCartForUser($user->id);
+            $this->checkoutService->rejectPriceChanges($cart);
+        } finally {
+            $lock->release();
+        }
 
         return redirect()->route('checkout.show')->with(
             'info',
