@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use App\Services\CartService;
+use App\Services\InventoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -13,7 +14,10 @@ use RuntimeException;
 
 class CartController extends Controller
 {
-    public function __construct(protected CartService $cartService) {}
+    public function __construct(
+        protected CartService $cartService,
+        protected InventoryService $inventoryService
+    ) {}
 
     public function index(Request $request): Response
     {
@@ -95,6 +99,14 @@ class CartController extends Controller
 
                 if (! $product || ! $product->is_active) {
                     throw new RuntimeException('محصول مورد نظر موجود نیست یا غیرفعال شده است.');
+                }
+
+                $availableQuantity = $this->inventoryService->getAvailableQuantity($product);
+
+                if ((int) $validated['quantity'] > $availableQuantity) {
+                    throw new RuntimeException(
+                        "موجودی این محصول کافی نیست. حداکثر تعداد قابل انتخاب: {$availableQuantity}."
+                    );
                 }
 
                 $price = $this->cartService->getCurrentPrice(
