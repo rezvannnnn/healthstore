@@ -4,9 +4,11 @@ namespace Tests\Feature;
 
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductPrice;
 use App\Models\User;
+use App\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
@@ -29,6 +31,22 @@ class CartControllerTest extends TestCase
             'price_type' => 'retail',
             'price' => 100000,
             'min_quantity' => 1,
+            'is_active' => true,
+        ]);
+
+        $warehouse = Warehouse::create([
+            'name' => 'Cart Test Warehouse',
+            'code' => 'CART-TEST-WH-'.uniqid(),
+            'is_active' => true,
+        ]);
+
+        Inventory::create([
+            'product_id' => $product->id,
+            'warehouse_id' => $warehouse->id,
+            'quantity' => 100,
+            'minimum_quantity' => 1,
+            'batch_number' => 'CART-TEST-BATCH-'.uniqid(),
+            'expiry_date' => null,
             'is_active' => true,
         ]);
 
