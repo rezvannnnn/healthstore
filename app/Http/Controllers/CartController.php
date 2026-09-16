@@ -6,6 +6,7 @@ use App\Models\Cart;
 use App\Services\CartService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 use RuntimeException;
@@ -79,24 +80,41 @@ class CartController extends Controller
             'quantity' => ['required', 'integer', 'min:1', 'max:100'],
         ]);
 
-        try {
-            $cartItem = $cart->items()->whereKey($item)->firstOrFail();
-            $product = $cartItem->product;
-            $price = $this->cartService->getCurrentPrice(
-                $product,
-                (int) $validated['quantity']
-            );
+        $lock = Cache::lock("cart:user:{$user->id}", 30);
 
-            if (! $price) {
-                throw new RuntimeException('برای این تعداد، قیمت فعالی برای محصول ثبت نشده است.');
-            }
-
-            $cartItem->update([
-                'quantity' => (int) $validated['quantity'],
-                'unit_price' => $price->price,
+        if (! $lock->get()) {
+            return back()->withErrors([
+                'quantity' => 'عملیات دیگری روی سبد خرید شما در حال انجام است. لطفاً چند لحظه صبر کنید.',
             ]);
-        } catch (RuntimeException $e) {
-            return back()->withErrors(['quantity' => $e->getMessage()]);
+        }
+
+        try {
+            try {
+                $cartItem = $cart->items()->whereKey($item)->firstOrFail();
+                $product = $cartItem->product;
+
+                if (! $product || ! $product->is_active) {
+                    throw new RuntimeException('محصول مورد نظر موجود نیست یا غیرفعال شده است.');
+                }
+
+                $price = $this->cartService->getCurrentPrice(
+                    $product,
+                    (int) $validated['quantity']
+                );
+
+                if (! $price) {
+                    throw new RuntimeException('برای این تعداد، قیمت فعالی برای محصول ثبت نشده است.');
+                }
+
+                $cartItem->update([
+                    'quantity' => (int) $validated['quantity'],
+                    'unit_price' => $price->price,
+                ]);
+            } catch (RuntimeException $e) {
+                return back()->withErrors(['quantity' => $e->getMessage()]);
+            }
+        } finally {
+            $lock->release();
         }
 
         return back()->with('success', 'سبد خرید به‌روزرسانی شد.');
@@ -111,7 +129,19 @@ class CartController extends Controller
             abort(404);
         }
 
-        $cart->items()->whereKey($item)->delete();
+        $lock = Cache::lock("cart:user:{$user->id}", 30);
+
+        if (! $lock->get()) {
+            return back()->withErrors([
+                'item' => 'عملیات دیگری روی سبد خرید شما در حال انجام است. لطفاً چند لحظه صبر کنید.',
+            ]);
+        }
+
+        try {
+            $cart->items()->whereKey($item)->delete();
+        } finally {
+            $lock->release();
+        }
 
         return back()->with('success', 'محصول از سبد خرید حذف شد.');
     }
