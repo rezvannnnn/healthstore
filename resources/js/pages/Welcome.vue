@@ -41,7 +41,7 @@ function addToCart(product: FeaturedProduct): void {
         <meta property="og:title" content="HealthStore | فروشگاه آنلاین محصولات سلامت" />
         <meta property="og:description" content="محصولات سلامت و بهداشتی را جستجو، بررسی و آنلاین خرید کنید." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" href="/" />
+        <meta property="og:url" content="/" />
     </Head>
 
     <div dir="rtl" class="min-h-screen bg-slate-50 text-slate-900">
