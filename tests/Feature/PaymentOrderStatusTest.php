@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\InventoryReservationService;
 use App\Services\PaymentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -14,7 +15,7 @@ class PaymentOrderStatusTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @dataProvider nonPendingOrderStatuses */
+    #[DataProvider('nonPendingOrderStatuses')]
     public function test_payment_cannot_be_created_for_a_non_pending_order(string $status): void
     {
         $user = User::factory()->create();
