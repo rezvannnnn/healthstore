@@ -131,11 +131,15 @@ class OrderService
                     'discount_amount' => 0,
                     'total_amount' => $lineTotal,
                 ]);
+            }
 
+            // Reserve products in a deterministic product order so concurrent
+            // multi-product checkouts acquire inventory locks consistently.
+            foreach ($cart->items->sortBy('product_id')->values() as $item) {
                 $this->reservationService->reserve(
                     $order,
                     $item->product,
-                    $quantity
+                    (int) $item->quantity
                 );
             }
 
