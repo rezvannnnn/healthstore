@@ -6,6 +6,7 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\ProductPrice;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -43,56 +44,68 @@ class CartService
             );
         }
 
-        return DB::transaction(function () use (
-            $userId,
-            $productId,
-            $quantity
-        ) {
-            $product = Product::query()
-                ->where('id', $productId)
-                ->where('is_active', true)
-                ->first();
+        $lock = Cache::lock("cart:user:{$userId}", 30);
 
-            if (! $product) {
-                throw new RuntimeException(
-                    'محصول مورد نظر موجود نیست یا غیرفعال شده است.'
-                );
-            }
+        if (! $lock->get()) {
+            throw new RuntimeException(
+                'عملیات دیگری روی سبد خرید شما در حال انجام است. لطفاً چند لحظه صبر کنید.'
+            );
+        }
 
-            $cart = $this->getCartForUser($userId);
-            $item = $cart->items()
-                ->where('product_id', $productId)
-                ->first();
-            $newQuantity = ($item === null ? 0 : $item->quantity) + $quantity;
+        try {
+            return DB::transaction(function () use (
+                $userId,
+                $productId,
+                $quantity
+            ) {
+                $product = Product::query()
+                    ->where('id', $productId)
+                    ->where('is_active', true)
+                    ->first();
 
-            if ($newQuantity > 100) {
-                throw new RuntimeException(
-                    'حداکثر تعداد مجاز هر محصول در سبد خرید ۱۰۰ عدد است.'
-                );
-            }
+                if (! $product) {
+                    throw new RuntimeException(
+                        'محصول مورد نظر موجود نیست یا غیرفعال شده است.'
+                    );
+                }
 
-            $price = $this->getCurrentPrice($product, $newQuantity);
+                $cart = $this->getCartForUser($userId);
+                $item = $cart->items()
+                    ->where('product_id', $productId)
+                    ->first();
+                $newQuantity = ($item === null ? 0 : $item->quantity) + $quantity;
 
-            if (! $price) {
-                throw new RuntimeException(
-                    'برای این محصول و تعداد انتخاب‌شده قیمت فعالی ثبت نشده است.'
-                );
-            }
+                if ($newQuantity > 100) {
+                    throw new RuntimeException(
+                        'حداکثر تعداد مجاز هر محصول در سبد خرید ۱۰۰ عدد است.'
+                    );
+                }
 
-            if ($item) {
-                $item->quantity = $newQuantity;
-                $item->unit_price = $price->price;
-                $item->save();
+                $price = $this->getCurrentPrice($product, $newQuantity);
 
-                return $item;
-            }
+                if (! $price) {
+                    throw new RuntimeException(
+                        'برای این محصول و تعداد انتخاب‌شده قیمت فعالی ثبت نشده است.'
+                    );
+                }
 
-            return $cart->items()->create([
-                'product_id' => $productId,
-                'quantity' => $quantity,
-                'unit_price' => $price->price,
-            ]);
-        });
+                if ($item) {
+                    $item->quantity = $newQuantity;
+                    $item->unit_price = $price->price;
+                    $item->save();
+
+                    return $item;
+                }
+
+                return $cart->items()->create([
+                    'product_id' => $productId,
+                    'quantity' => $quantity,
+                    'unit_price' => $price->price,
+                ]);
+            });
+        } finally {
+            $lock->release();
+        }
     }
 
     /**
