@@ -23,6 +23,9 @@ class PaymentService
             if (! $lockedOrder) {
                 throw new RuntimeException('سفارش پیدا نشد.');
             }
+            if ($lockedOrder->status !== 'pending') {
+                throw new RuntimeException('فقط سفارش‌های در انتظار می‌توانند وارد فرایند پرداخت شوند.');
+            }
             if ($lockedOrder->status === 'cancelled') {
                 throw new RuntimeException('برای سفارش لغوشده امکان ایجاد پرداخت وجود ندارد.');
             }
