@@ -9,7 +9,7 @@ interface Product {
     product_type: string | null; unit: string | null; quantity_per_unit: number | null;
     short_description: string | null; description: string | null;
     specifications: Record<string, unknown> | null; brand: string | null; category: string | null;
-    category_slug: string | null; image: string | null; images: ProductImage[];
+    category_slug: string | null; images: ProductImage[]; image: string | null;
     price: number | null; compare_at_price: number | null; available_quantity: number; available: boolean;
 }
 interface Seo { title: string; description: string | null; canonical: string; }
@@ -19,7 +19,9 @@ const selectedImage = ref(props.product.images[0]?.path || props.product.image |
 const quantity = ref(1);
 const gallery = computed(() => {
     const images = props.product.images.map((image) => image.path);
-    if (props.product.image && !images.includes(props.product.image)) images.unshift(props.product.image);
+    if (props.product.image && !images.includes(props.product.image)) {
+        images.unshift(props.product.image);
+    }
     return images;
 });
 const specifications = computed(() => Object.entries(props.product.specifications ?? {}).filter(([key, value]) => key.trim() && value !== null && value !== ''));
