@@ -307,6 +307,44 @@ class AddressControllerTest extends TestCase
         ]);
     }
 
+    public function test_deleting_default_address_promotes_oldest_remaining_address(): void
+    {
+        $user = User::factory()->create();
+
+        $firstAddress = Address::create([
+            'user_id' => $user->id,
+            'title' => 'خانه',
+            'recipient_name' => 'Ali Ahmadi',
+            'phone' => '09121234567',
+            'address' => 'First address',
+            'is_default' => false,
+        ]);
+
+        $defaultAddress = Address::create([
+            'user_id' => $user->id,
+            'title' => 'محل کار',
+            'recipient_name' => 'Ali Ahmadi',
+            'phone' => '09121234567',
+            'address' => 'Default address',
+            'is_default' => true,
+        ]);
+
+        $response = $this->actingAs($user)->delete(
+            '/account/addresses/'.$defaultAddress->id
+        );
+
+        $response->assertRedirect();
+
+        $this->assertDatabaseMissing('addresses', [
+            'id' => $defaultAddress->id,
+        ]);
+
+        $this->assertDatabaseHas('addresses', [
+            'id' => $firstAddress->id,
+            'is_default' => true,
+        ]);
+    }
+
     public function test_customer_can_make_an_address_default(): void
     {
         $user = User::factory()->create();
