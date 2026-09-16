@@ -192,6 +192,7 @@ class PaymentService
             }
             if ($order->status === 'cancelled') {
                 $payment->update(['status' => 'cancelled', 'transaction_id' => $transactionId]);
+
                 return false;
             }
             $reservations = $order->inventoryReservations()->where('status', 'active')->get();
