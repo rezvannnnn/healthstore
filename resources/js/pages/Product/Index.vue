@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 
 interface Product {
     id: number;
@@ -51,12 +51,24 @@ const form = reactive({
     search: props.filters.search,
     category: props.filters.category,
 });
+const isSubmitting = ref(false);
 
 function submit(): void {
+    isSubmitting.value = true;
     router.get('/products', form, {
         preserveState: true,
+        preserveScroll: true,
         replace: true,
+        onFinish: () => {
+            isSubmitting.value = false;
+        },
     });
+}
+
+function clearFilters(): void {
+    form.search = '';
+    form.category = '';
+    submit();
 }
 
 function pageUrl(page: number): string {
@@ -145,13 +157,18 @@ function addToCart(productId: number): void {
                     @submit.prevent="submit"
                     class="grid gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 md:grid-cols-[1fr_220px_auto] dark:bg-gray-900 dark:ring-gray-800"
                 >
+                    <label class="sr-only" for="product-search">جستجوی محصول</label>
                     <input
+                        id="product-search"
                         v-model="form.search"
                         type="search"
                         placeholder="نام محصول، SKU یا بارکد..."
+                        autocomplete="off"
                         class="rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
                     />
+                    <label class="sr-only" for="product-category">دسته‌بندی</label>
                     <select
+                        id="product-category"
                         v-model="form.category"
                         class="rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
                     >
@@ -164,14 +181,38 @@ function addToCart(productId: number): void {
                             {{ category.name }}
                         </option>
                     </select>
-                    <button
-                        type="submit"
-                        class="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-700"
-                    >
-                        جستجو
-                    </button>
+                    <div class="flex gap-2">
+                        <button
+                            type="submit"
+                            :disabled="isSubmitting"
+                            class="flex-1 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {{ isSubmitting ? 'در حال جستجو...' : 'جستجو' }}
+                        </button>
+                        <button
+                            v-if="form.search || form.category"
+                            type="button"
+                            :disabled="isSubmitting"
+                            class="rounded-xl border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                            @click="clearFilters"
+                        >
+                            پاک کردن
+                        </button>
+                    </div>
                 </form>
             </header>
+
+            <div
+                v-if="pagination.total"
+                class="flex flex-wrap items-center justify-between gap-2 text-sm text-gray-500 dark:text-gray-400"
+            >
+                <span>
+                    نمایش {{ pagination.from?.toLocaleString('fa-IR') }} تا
+                    {{ pagination.to?.toLocaleString('fa-IR') }} از
+                    {{ pagination.total.toLocaleString('fa-IR') }} محصول
+                </span>
+                <span v-if="form.search || form.category">نتایج فیلترشده</span>
+            </div>
 
             <section
                 v-if="products.length"
@@ -188,6 +229,7 @@ function addToCart(productId: number): void {
                                 v-if="product.image"
                                 :src="product.image"
                                 :alt="product.name"
+                                loading="lazy"
                                 class="h-full w-full object-contain p-6"
                             />
                             <div
@@ -264,7 +306,22 @@ function addToCart(productId: number): void {
                 v-else
                 class="rounded-2xl border border-dashed border-gray-300 p-12 text-center text-gray-500 dark:border-gray-700"
             >
-                محصولی مطابق جستجوی شما پیدا نشد.
+                <h2 class="font-semibold text-gray-700 dark:text-gray-200">
+                    محصولی پیدا نشد
+                </h2>
+                <p class="mt-2 text-sm">
+                    {{ form.search || form.category
+                        ? 'فیلترها یا عبارت جستجو را تغییر دهید.'
+                        : 'در حال حاضر محصول فعالی برای نمایش وجود ندارد.' }}
+                </p>
+                <button
+                    v-if="form.search || form.category"
+                    type="button"
+                    class="mt-5 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+                    @click="clearFilters"
+                >
+                    حذف فیلترها
+                </button>
             </section>
 
             <nav
@@ -281,24 +338,40 @@ function addToCart(productId: number): void {
                 >
                     قبلی
                 </Link>
-                <Link
-                    v-for="page in pagination.last_page"
-                    :key="page"
-                    :href="pageUrl(page)"
-                    preserve-scroll
-                    :aria-current="
-                        page === pagination.current_page ? 'page' : undefined
-                    "
-                    :aria-label="`صفحه ${page.toLocaleString('fa-IR')}`"
-                    class="min-w-10 rounded-xl px-3 py-2 text-center text-sm font-medium"
-                    :class="
-                        page === pagination.current_page
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800'
-                    "
-                >
-                    {{ page.toLocaleString('fa-IR') }}
-                </Link>
+
+                <template v-for="page in pagination.last_page" :key="page">
+                    <Link
+                        v-if="
+                            page === 1 ||
+                            page === pagination.last_page ||
+                            Math.abs(page - pagination.current_page) <= 1
+                        "
+                        :href="pageUrl(page)"
+                        preserve-scroll
+                        :aria-current="
+                            page === pagination.current_page ? 'page' : undefined
+                        "
+                        :aria-label="`صفحه ${page.toLocaleString('fa-IR')}`"
+                        class="min-w-10 rounded-xl px-3 py-2 text-center text-sm font-medium"
+                        :class="
+                            page === pagination.current_page
+                                ? 'bg-indigo-600 text-white'
+                                : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800'
+                        "
+                    >
+                        {{ page.toLocaleString('fa-IR') }}
+                    </Link>
+                    <span
+                        v-else-if="
+                            page === 2 || page === pagination.last_page - 1
+                        "
+                        aria-hidden="true"
+                        class="px-1 text-gray-400"
+                    >
+                        …
+                    </span>
+                </template>
+
                 <Link
                     v-if="pagination.current_page < pagination.last_page"
                     :href="pageUrl(pagination.current_page + 1)"
