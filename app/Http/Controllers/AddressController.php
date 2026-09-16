@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Address;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -39,27 +40,30 @@ class AddressController extends Controller
             'is_default' => ['nullable', 'boolean'],
         ]);
 
+        $user = $request->user();
         $isDefault = (bool) ($validated['is_default'] ?? false);
 
-        if ($isDefault) {
-            Address::query()
-                ->where('user_id', $request->user()->id)
-                ->update([
-                    'is_default' => false,
-                ]);
-        }
+        DB::transaction(function () use ($user, $validated, $isDefault): void {
+            $user->newQuery()->whereKey($user->id)->lockForUpdate()->firstOrFail();
 
-        Address::create([
-            'user_id' => $request->user()->id,
-            'title' => $validated['title'] ?? null,
-            'recipient_name' => $validated['recipient_name'],
-            'phone' => $validated['phone'],
-            'province' => $validated['province'] ?? null,
-            'city' => $validated['city'] ?? null,
-            'address' => $validated['address'],
-            'postal_code' => $validated['postal_code'] ?? null,
-            'is_default' => $isDefault,
-        ]);
+            if ($isDefault) {
+                Address::query()
+                    ->where('user_id', $user->id)
+                    ->update(['is_default' => false]);
+            }
+
+            Address::create([
+                'user_id' => $user->id,
+                'title' => $validated['title'] ?? null,
+                'recipient_name' => $validated['recipient_name'],
+                'phone' => $validated['phone'],
+                'province' => $validated['province'] ?? null,
+                'city' => $validated['city'] ?? null,
+                'address' => $validated['address'],
+                'postal_code' => $validated['postal_code'] ?? null,
+                'is_default' => $isDefault,
+            ]);
+        });
 
         return back()->with(
             'status',
@@ -86,27 +90,31 @@ class AddressController extends Controller
             'is_default' => ['nullable', 'boolean'],
         ]);
 
+        $user = $request->user();
         $isDefault = (bool) ($validated['is_default'] ?? false);
 
-        if ($isDefault) {
-            Address::query()
-                ->where('user_id', $request->user()->id)
-                ->whereKeyNot($model->id)
-                ->update([
-                    'is_default' => false,
-                ]);
-        }
+        DB::transaction(function () use ($user, $model, $validated, $isDefault): void {
+            $user->newQuery()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $model->refresh();
 
-        $model->update([
-            'title' => $validated['title'] ?? null,
-            'recipient_name' => $validated['recipient_name'],
-            'phone' => $validated['phone'],
-            'province' => $validated['province'] ?? null,
-            'city' => $validated['city'] ?? null,
-            'address' => $validated['address'],
-            'postal_code' => $validated['postal_code'] ?? null,
-            'is_default' => $isDefault,
-        ]);
+            if ($isDefault) {
+                Address::query()
+                    ->where('user_id', $user->id)
+                    ->whereKeyNot($model->id)
+                    ->update(['is_default' => false]);
+            }
+
+            $model->update([
+                'title' => $validated['title'] ?? null,
+                'recipient_name' => $validated['recipient_name'],
+                'phone' => $validated['phone'],
+                'province' => $validated['province'] ?? null,
+                'city' => $validated['city'] ?? null,
+                'address' => $validated['address'],
+                'postal_code' => $validated['postal_code'] ?? null,
+                'is_default' => $isDefault,
+            ]);
+        });
 
         return back()->with(
             'status',
@@ -118,26 +126,31 @@ class AddressController extends Controller
         Request $request,
         int $address
     ): RedirectResponse {
-        $model = Address::query()
-            ->where('user_id', $request->user()->id)
-            ->findOrFail($address);
+        $user = $request->user();
 
-        $wasDefault = $model->is_default;
+        DB::transaction(function () use ($user, $address): void {
+            $user->newQuery()->whereKey($user->id)->lockForUpdate()->firstOrFail();
 
-        $model->delete();
+            $model = Address::query()
+                ->where('user_id', $user->id)
+                ->findOrFail($address);
 
-        if ($wasDefault) {
-            $newDefault = Address::query()
-                ->where('user_id', $request->user()->id)
-                ->orderBy('id')
-                ->first();
+            $wasDefault = $model->is_default;
+            $model->delete();
 
-            if ($newDefault) {
-                $newDefault->update([
-                    'is_default' => true,
-                ]);
+            if ($wasDefault) {
+                $newDefault = Address::query()
+                    ->where('user_id', $user->id)
+                    ->orderBy('id')
+                    ->first();
+
+                if ($newDefault) {
+                    $newDefault->update([
+                        'is_default' => true,
+                    ]);
+                }
             }
-        }
+        });
 
         return back()->with(
             'status',
