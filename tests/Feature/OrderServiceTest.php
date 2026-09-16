@@ -91,405 +91,136 @@ class OrderServiceTest extends TestCase
     public function test_confirmed_cart_can_be_converted_to_order(): void
     {
         $user = User::factory()->create();
-
-        $product = $this->createProduct(
-            'Order Test Product',
-            'order-test-product',
-            'ORDER-001'
-        );
-
+        $product = $this->createProduct('Order Test Product', 'order-test-product', 'ORDER-001');
         $this->createPrice($product, 180000);
         $this->createInventory($product, 10);
-
         $cartService = new CartService;
-
-        $item = $cartService->addItem(
-            $user->id,
-            $product->id,
-            2
-        );
-
-        $this->assertEquals(
-            180000,
-            (float) $item->unit_price
-        );
-
-        $cart = Cart::where('user_id', $user->id)
-            ->where('status', 'active')
-            ->first();
-
-        $orderService = new OrderService(
-            new InventoryService,
-            $cartService,
-            new InventoryReservationService
-        );
-
+        $item = $cartService->addItem($user->id, $product->id, 2);
+        $this->assertEquals(180000, (float) $item->unit_price);
+        $cart = Cart::where('user_id', $user->id)->where('status', 'active')->first();
+        $orderService = new OrderService(new InventoryService, $cartService, new InventoryReservationService);
         $order = $orderService->createFromCart($cart);
-
-        $this->assertInstanceOf(
-            Order::class,
-            $order
-        );
-
-        $this->assertEquals(
-            $user->id,
-            $order->user_id
-        );
-
-        $this->assertEquals(
-            360000,
-            (float) $order->subtotal
-        );
-
-        $this->assertEquals(
-            360000,
-            (float) $order->total_amount
-        );
-
-        $this->assertEquals(
-            'pending',
-            $order->status
-        );
-
-        $this->assertEquals(
-            'pending',
-            $order->payment_status
-        );
-
-        $this->assertNotEmpty(
-            $order->order_number
-        );
-
-        $this->assertCount(
-            1,
-            $order->items
-        );
-
+        $this->assertInstanceOf(Order::class, $order);
+        $this->assertEquals($user->id, $order->user_id);
+        $this->assertEquals(360000, (float) $order->subtotal);
+        $this->assertEquals(360000, (float) $order->total_amount);
+        $this->assertEquals('pending', $order->status);
+        $this->assertEquals('pending', $order->payment_status);
+        $this->assertNotEmpty($order->order_number);
+        $this->assertCount(1, $order->items);
         $orderItem = $order->items->first();
-
-        $this->assertEquals(
-            $product->id,
-            $orderItem->product_id
-        );
-
-        $this->assertEquals(
-            'Order Test Product',
-            $orderItem->product_name
-        );
-
-        $this->assertEquals(
-            'ORDER-001',
-            $orderItem->product_sku
-        );
-
-        $this->assertEquals(
-            2,
-            $orderItem->quantity
-        );
-
-        $this->assertEquals(
-            180000,
-            (float) $orderItem->unit_price
-        );
-
-        $this->assertEquals(
-            360000,
-            (float) $orderItem->total_amount
-        );
-
-        $this->assertDatabaseHas('orders', [
-            'id' => $order->id,
-            'user_id' => $user->id,
-        ]);
-
-        $this->assertDatabaseHas('order_items', [
-            'order_id' => $order->id,
-            'product_id' => $product->id,
-            'quantity' => 2,
-        ]);
+        $this->assertEquals($product->id, $orderItem->product_id);
+        $this->assertEquals('Order Test Product', $orderItem->product_name);
+        $this->assertEquals('ORDER-001', $orderItem->product_sku);
+        $this->assertEquals(2, $orderItem->quantity);
+        $this->assertEquals(180000, (float) $orderItem->unit_price);
+        $this->assertEquals(360000, (float) $orderItem->total_amount);
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'user_id' => $user->id]);
+        $this->assertDatabaseHas('order_items', ['order_id' => $order->id, 'product_id' => $product->id, 'quantity' => 2]);
     }
 
     public function test_order_preserves_product_snapshot_information(): void
     {
         $user = User::factory()->create();
-
-        $product = $this->createProduct(
-            'Snapshot Product',
-            'snapshot-product',
-            'SNAP-001'
-        );
-
+        $product = $this->createProduct('Snapshot Product', 'snapshot-product', 'SNAP-001');
         $this->createPrice($product, 250000);
         $this->createInventory($product, 5);
-
         $cartService = new CartService;
-
-        $cartService->addItem(
-            $user->id,
-            $product->id,
-            1
-        );
-
-        $cart = Cart::where('user_id', $user->id)
-            ->where('status', 'active')
-            ->first();
-
-        $orderService = new OrderService(
-            new InventoryService,
-            $cartService,
-            new InventoryReservationService
-        );
-
+        $cartService->addItem($user->id, $product->id, 1);
+        $cart = Cart::where('user_id', $user->id)->where('status', 'active')->first();
+        $orderService = new OrderService(new InventoryService, $cartService, new InventoryReservationService);
         $order = $orderService->createFromCart($cart);
-
-        $product->update([
-            'name' => 'Changed Product Name',
-            'sku' => 'SNAP-999',
-        ]);
-
-        $orderItem = OrderItem::where(
-            'order_id',
-            $order->id
-        )->first();
-
-        $this->assertEquals(
-            'Snapshot Product',
-            $orderItem->product_name
-        );
-
-        $this->assertEquals(
-            'SNAP-001',
-            $orderItem->product_sku
-        );
-
-        $this->assertEquals(
-            250000,
-            (float) $orderItem->unit_price
-        );
+        $product->update(['name' => 'Changed Product Name', 'sku' => 'SNAP-999']);
+        $orderItem = OrderItem::where('order_id', $order->id)->first();
+        $this->assertEquals('Snapshot Product', $orderItem->product_name);
+        $this->assertEquals('SNAP-001', $orderItem->product_sku);
+        $this->assertEquals(250000, (float) $orderItem->unit_price);
     }
 
     public function test_order_creation_reserves_inventory_without_consuming_physical_stock(): void
     {
         $user = User::factory()->create();
-
-        $product = $this->createProduct(
-            'Inventory Order Product',
-            'inventory-order-product',
-            'INV-ORDER-001'
-        );
-
+        $product = $this->createProduct('Inventory Order Product', 'inventory-order-product', 'INV-ORDER-001');
         $this->createPrice($product, 100000);
-
-        $warehouse = $this->createInventory(
-            $product,
-            10
-        );
-
+        $warehouse = $this->createInventory($product, 10);
         $cartService = new CartService;
-
-        $cartService->addItem(
-            $user->id,
-            $product->id,
-            3
-        );
-
-        $cart = Cart::where('user_id', $user->id)
-            ->where('status', 'active')
-            ->first();
-
-        $orderService = new OrderService(
-            new InventoryService,
-            $cartService,
-            new InventoryReservationService
-        );
-
+        $cartService->addItem($user->id, $product->id, 3);
+        $cart = Cart::where('user_id', $user->id)->where('status', 'active')->first();
+        $orderService = new OrderService(new InventoryService, $cartService, new InventoryReservationService);
         $order = $orderService->createFromCart($cart);
-
-        $inventory = Inventory::where('product_id', $product->id)
-            ->where('warehouse_id', $warehouse->id)
-            ->first();
-
-        $this->assertEquals(
-            10,
-            $inventory->quantity
-        );
-
-        $reservation = InventoryReservation::where(
-            'order_id',
-            $order->id
-        )
-            ->where('product_id', $product->id)
-            ->where('status', 'active')
-            ->first();
-
+        $inventory = Inventory::where('product_id', $product->id)->where('warehouse_id', $warehouse->id)->first();
+        $this->assertEquals(10, $inventory->quantity);
+        $reservation = InventoryReservation::where('order_id', $order->id)->where('product_id', $product->id)->where('status', 'active')->first();
         $this->assertNotNull($reservation);
-
-        $this->assertEquals(
-            3,
-            $reservation->quantity
-        );
-
-        $inventoryService = new InventoryService;
-
-        $this->assertEquals(
-            7,
-            $inventoryService->getAvailableQuantity($product)
-        );
+        $this->assertEquals(3, $reservation->quantity);
+        $this->assertEquals(7, (new InventoryService)->getAvailableQuantity($product));
     }
 
     public function test_order_creation_marks_cart_as_converted(): void
     {
         $user = User::factory()->create();
-
-        $product = $this->createProduct(
-            'Converted Cart Product',
-            'converted-cart-product',
-            'CART-ORDER-001'
-        );
-
+        $product = $this->createProduct('Converted Cart Product', 'converted-cart-product', 'CART-ORDER-001');
         $this->createPrice($product, 120000);
         $this->createInventory($product, 10);
-
         $cartService = new CartService;
-
-        $cartService->addItem(
-            $user->id,
-            $product->id,
-            1
-        );
-
-        $cart = Cart::where('user_id', $user->id)
-            ->where('status', 'active')
-            ->first();
-
-        $orderService = new OrderService(
-            new InventoryService,
-            $cartService,
-            new InventoryReservationService
-        );
-
+        $cartService->addItem($user->id, $product->id, 1);
+        $cart = Cart::where('user_id', $user->id)->where('status', 'active')->first();
+        $orderService = new OrderService(new InventoryService, $cartService, new InventoryReservationService);
         $orderService->createFromCart($cart);
-
         $cart->refresh();
-
-        $this->assertEquals(
-            'converted',
-            $cart->status
-        );
+        $this->assertEquals('converted', $cart->status);
     }
 
     public function test_order_creation_fails_when_inventory_is_insufficient(): void
     {
         $user = User::factory()->create();
-
-        $product = $this->createProduct(
-            'Insufficient Inventory Product',
-            'insufficient-inventory-product',
-            'INV-ORDER-002'
-        );
-
+        $product = $this->createProduct('Insufficient Inventory Product', 'insufficient-inventory-product', 'INV-ORDER-002');
         $this->createPrice($product, 100000);
         $this->createInventory($product, 1);
 
-        $cartService = new CartService;
+        $cart = Cart::create([
+            'user_id' => $user->id,
+            'status' => 'active',
+            'coupon_id' => null,
+            'coupon_code' => null,
+            'discount_amount' => 0,
+        ]);
 
-        $cartService->addItem(
-            $user->id,
-            $product->id,
-            2
-        );
-
-        $cart = Cart::where('user_id', $user->id)
-            ->where('status', 'active')
-            ->first();
+        $cart->items()->create([
+            'product_id' => $product->id,
+            'quantity' => 2,
+            'unit_price' => 100000,
+            'total_price' => 200000,
+        ]);
 
         $orderService = new OrderService(
             new InventoryService,
-            $cartService,
+            new CartService,
             new InventoryReservationService
         );
 
         $this->expectException(RuntimeException::class);
-
         $orderService->createFromCart($cart);
-
-        $this->assertDatabaseCount(
-            'orders',
-            0
-        );
+        $this->assertDatabaseCount('orders', 0);
     }
 
     public function test_order_creation_uses_inventory_reservation_service(): void
     {
         $user = User::factory()->create();
-
-        $product = $this->createProduct(
-            'Delegated Reservation Product',
-            'delegated-reservation-product',
-            'DELEGATE-001'
-        );
-
+        $product = $this->createProduct('Delegated Reservation Product', 'delegated-reservation-product', 'DELEGATE-001');
         $this->createPrice($product, 150000);
-
-        $warehouse = $this->createInventory(
-            $product,
-            10
-        );
-
+        $warehouse = $this->createInventory($product, 10);
         $cartService = new CartService;
-
-        $cartService->addItem(
-            $user->id,
-            $product->id,
-            3
-        );
-
-        $cart = Cart::where('user_id', $user->id)
-            ->where('status', 'active')
-            ->first();
-
-        $orderService = new OrderService(
-            new InventoryService,
-            $cartService,
-            new InventoryReservationService
-        );
-
+        $cartService->addItem($user->id, $product->id, 3);
+        $cart = Cart::where('user_id', $user->id)->where('status', 'active')->first();
+        $orderService = new OrderService(new InventoryService, $cartService, new InventoryReservationService);
         $order = $orderService->createFromCart($cart);
-
-        $reservations = InventoryReservation::where(
-            'order_id',
-            $order->id
-        )
-            ->where('product_id', $product->id)
-            ->where('status', 'active')
-            ->get();
-
-        $this->assertCount(
-            1,
-            $reservations
-        );
-
-        $this->assertEquals(
-            3,
-            $reservations->sum('quantity')
-        );
-
-        $inventory = Inventory::where('product_id', $product->id)
-            ->where('warehouse_id', $warehouse->id)
-            ->first();
-
+        $reservations = InventoryReservation::where('order_id', $order->id)->where('product_id', $product->id)->where('status', 'active')->get();
+        $this->assertCount(1, $reservations);
+        $this->assertEquals(3, $reservations->sum('quantity'));
+        $inventory = Inventory::where('product_id', $product->id)->where('warehouse_id', $warehouse->id)->first();
         $this->assertNotNull($inventory);
-
-        $this->assertEquals(
-            10,
-            $inventory->quantity
-        );
-
-        $inventoryService = new InventoryService;
-
-        $this->assertEquals(
-            7,
-            $inventoryService->getAvailableQuantity($product)
-        );
+        $this->assertEquals(10, $inventory->quantity);
+        $this->assertEquals(7, (new InventoryService)->getAvailableQuantity($product));
     }
 }
