@@ -23,14 +23,14 @@ class PaymentService
             if (! $lockedOrder) {
                 throw new RuntimeException('سفارش پیدا نشد.');
             }
-            if ($lockedOrder->status !== 'pending') {
-                throw new RuntimeException('فقط سفارش‌های در انتظار می‌توانند وارد فرایند پرداخت شوند.');
-            }
             if ($lockedOrder->status === 'cancelled') {
                 throw new RuntimeException('برای سفارش لغوشده امکان ایجاد پرداخت وجود ندارد.');
             }
             if ($lockedOrder->status === 'paid' || $lockedOrder->payment_status === 'paid') {
                 throw new RuntimeException('این سفارش قبلاً پرداخت شده است.');
+            }
+            if ($lockedOrder->status !== 'pending') {
+                throw new RuntimeException('فقط سفارش‌های در انتظار می‌توانند وارد فرایند پرداخت شوند.');
             }
             $amount = (float) $lockedOrder->total_amount;
             if ($amount <= 0) {
@@ -191,11 +191,7 @@ class PaymentService
                 throw new RuntimeException('سفارش مربوط به این پرداخت پیدا نشد.');
             }
             if ($order->status === 'cancelled') {
-                $payment->update([
-                    'status' => 'cancelled',
-                    'transaction_id' => $transactionId,
-                ]);
-
+                $payment->update(['status' => 'cancelled', 'transaction_id' => $transactionId]);
                 return false;
             }
             $reservations = $order->inventoryReservations()->where('status', 'active')->get();
