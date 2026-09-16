@@ -12,6 +12,8 @@ use RuntimeException;
 
 class CartService
 {
+    public function __construct(protected InventoryService $inventoryService) {}
+
     /**
      * Get or create the active cart for the user.
      */
@@ -78,6 +80,14 @@ class CartService
                 if ($newQuantity > 100) {
                     throw new RuntimeException(
                         'حداکثر تعداد مجاز هر محصول در سبد خرید ۱۰۰ عدد است.'
+                    );
+                }
+
+                $availableQuantity = $this->inventoryService->getAvailableQuantity($product);
+
+                if ($newQuantity > $availableQuantity) {
+                    throw new RuntimeException(
+                        "موجودی این محصول کافی نیست. حداکثر تعداد قابل افزودن: {$availableQuantity}."
                     );
                 }
 
