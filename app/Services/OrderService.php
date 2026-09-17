@@ -16,7 +16,8 @@ class OrderService
         protected InventoryService $inventoryService,
         protected CartService $cartService,
         protected InventoryReservationService $reservationService,
-        protected ?CouponService $couponService = null
+        protected ?CouponService $couponService = null,
+        protected ?StorePricingService $pricingService = null
     ) {}
 
     public function createFromCart(
@@ -28,46 +29,33 @@ class OrderService
             $cart->load('items.product');
 
             if ($cart->items->isEmpty()) {
-                throw new RuntimeException(
-                    'سبد خرید خالی است و امکان ایجاد سفارش وجود ندارد.'
-                );
+                throw new RuntimeException('سبد خرید خالی است و امکان ایجاد سفارش وجود ندارد.');
             }
 
             if ($cart->status !== 'active') {
-                throw new RuntimeException(
-                    'این سبد خرید دیگر فعال نیست.'
-                );
+                throw new RuntimeException('این سبد خرید دیگر فعال نیست.');
             }
 
             if ($address && (int) $address->user_id !== (int) $cart->user_id) {
-                throw new RuntimeException(
-                    'آدرس انتخاب‌شده متعلق به این کاربر نیست.'
-                );
+                throw new RuntimeException('آدرس انتخاب‌شده متعلق به این کاربر نیست.');
             }
 
             foreach ($cart->items as $item) {
                 if (! $item->product) {
-                    throw new RuntimeException(
-                        'یکی از محصولات سبد خرید دیگر وجود ندارد.'
-                    );
+                    throw new RuntimeException('یکی از محصولات سبد خرید دیگر وجود ندارد.');
                 }
 
-                $availableQuantity = $this->inventoryService
-                    ->getAvailableQuantity($item->product);
+                $availableQuantity = $this->inventoryService->getAvailableQuantity($item->product);
 
                 if ($availableQuantity < $item->quantity) {
-                    throw new RuntimeException(
-                        "موجودی محصول «{$item->product->name}» کافی نیست."
-                    );
+                    throw new RuntimeException("موجودی محصول «{$item->product->name}» کافی نیست.");
                 }
             }
 
             $subtotal = $this->cartService->calculateSubtotal($cart);
 
             if ($subtotal <= 0) {
-                throw new RuntimeException(
-                    'مبلغ سفارش باید بیشتر از صفر باشد.'
-                );
+                throw new RuntimeException('مبلغ سفارش باید بیشتر از صفر باشد.');
             }
 
             $couponService = $this->couponService ?? app(CouponService::class);
@@ -78,13 +66,8 @@ class OrderService
             );
             $coupon = $couponResult['coupon'];
             $discountAmount = (float) $couponResult['discount_amount'];
-            $totalAmount = (float) $subtotal - $discountAmount;
-
-            if ($totalAmount <= 0) {
-                throw new RuntimeException(
-                    'مبلغ نهایی سفارش باید بیشتر از صفر باشد.'
-                );
-            }
+            $pricingService = $this->pricingService ?? app(StorePricingService::class);
+            $pricing = $pricingService->calculateTotal($subtotal, $discountAmount);
 
             $order = Order::create([
                 'order_number' => $this->generateOrderNumber(),
@@ -94,12 +77,12 @@ class OrderService
                 'business_profile_id' => null,
                 'status' => 'pending',
                 'payment_status' => 'pending',
-                'subtotal' => $subtotal,
-                'discount_amount' => $discountAmount,
+                'subtotal' => $pricing['subtotal'],
+                'discount_amount' => $pricing['discount_amount'],
                 'coupon_id' => $coupon?->id,
                 'coupon_code' => $coupon?->code,
-                'shipping_amount' => 0,
-                'total_amount' => $totalAmount,
+                'shipping_amount' => $pricing['shipping_amount'],
+                'total_amount' => $pricing['total_amount'],
                 'currency' => 'IRR',
                 'recipient_name' => $address?->recipient_name,
                 'recipient_phone' => $address?->phone,
@@ -133,8 +116,6 @@ class OrderService
                 ]);
             }
 
-            // Reserve products in a deterministic product order so concurrent
-            // multi-product checkouts acquire inventory locks consistently.
             foreach ($cart->items->sortBy('product_id')->values() as $item) {
                 $this->reservationService->reserve(
                     $order,
@@ -151,9 +132,7 @@ class OrderService
                 );
             }
 
-            $cart->update([
-                'status' => 'converted',
-            ]);
+            $cart->update(['status' => 'converted']);
 
             $order->load([
                 'items',
@@ -171,19 +150,13 @@ class OrderService
     public function cancel(Order $order): bool
     {
         return DB::transaction(function () use ($order) {
-            $order = Order::query()
-                ->whereKey($order->id)
-                ->lockForUpdate()
-                ->first();
+            $order = Order::query()->whereKey($order->id)->lockForUpdate()->first();
 
             if (! $order) {
                 throw new RuntimeException('سفارش پیدا نشد.');
             }
 
-            if (
-                $order->status === 'paid'
-                || $order->payment_status === 'paid'
-            ) {
+            if ($order->status === 'paid' || $order->payment_status === 'paid') {
                 throw new RuntimeException('سفارش پرداخت‌شده قابل لغو نیست.');
             }
 
@@ -195,24 +168,17 @@ class OrderService
                 throw new RuntimeException('این سفارش در وضعیت فعلی قابل لغو نیست.');
             }
 
-            $reservations = $order->inventoryReservations()
-                ->where('status', 'active')
-                ->get();
+            $reservations = $order->inventoryReservations()->where('status', 'active')->get();
 
             foreach ($reservations as $reservation) {
                 if (! $this->reservationService->release($reservation)) {
-                    throw new RuntimeException(
-                        'آزادسازی رزرو موجودی سفارش انجام نشد.'
-                    );
+                    throw new RuntimeException('آزادسازی رزرو موجودی سفارش انجام نشد.');
                 }
             }
 
             ($this->couponService ?? app(CouponService::class))->releaseForOrder($order);
 
-            $order->update([
-                'status' => 'cancelled',
-                'cancelled_at' => now(),
-            ]);
+            $order->update(['status' => 'cancelled', 'cancelled_at' => now()]);
 
             return true;
         });
@@ -221,10 +187,7 @@ class OrderService
     public function setStatus(Order $order, string $newStatus): bool
     {
         return DB::transaction(function () use ($order, $newStatus) {
-            $order = Order::query()
-                ->whereKey($order->id)
-                ->lockForUpdate()
-                ->first();
+            $order = Order::query()->whereKey($order->id)->lockForUpdate()->first();
 
             if (! $order) {
                 throw new RuntimeException('سفارش پیدا نشد.');
@@ -246,25 +209,16 @@ class OrderService
             $allowedStatuses = $allowedTransitions[$currentStatus] ?? [];
 
             if (! in_array($newStatus, $allowedStatuses, true)) {
-                throw new RuntimeException(
-                    "تغییر وضعیت سفارش از «{$currentStatus}» به «{$newStatus}» مجاز نیست."
-                );
+                throw new RuntimeException("تغییر وضعیت سفارش از «{$currentStatus}» به «{$newStatus}» مجاز نیست.");
             }
 
-            if (
-                $newStatus === 'processing'
-                && $order->payment_status !== 'paid'
-            ) {
-                throw new RuntimeException(
-                    'فقط سفارش پرداخت‌شده می‌تواند وارد مرحله پردازش شود.'
-                );
+            if ($newStatus === 'processing' && $order->payment_status !== 'paid') {
+                throw new RuntimeException('فقط سفارش پرداخت‌شده می‌تواند وارد مرحله پردازش شود.');
             }
 
             if ($newStatus === 'paid') {
                 if ($order->payment_status !== 'paid') {
-                    throw new RuntimeException(
-                        'سفارش بدون پرداخت موفق نمی‌تواند به وضعیت paid برسد.'
-                    );
+                    throw new RuntimeException('سفارش بدون پرداخت موفق نمی‌تواند به وضعیت paid برسد.');
                 }
 
                 $order->update([
@@ -291,9 +245,7 @@ class OrderService
             }
 
             if ($newStatus === 'cancelled') {
-                throw new RuntimeException(
-                    'برای لغو سفارش از عملیات لغو سفارش استفاده کنید.'
-                );
+                throw new RuntimeException('برای لغو سفارش از عملیات لغو سفارش استفاده کنید.');
             }
 
             $order->update($updates);
@@ -305,11 +257,7 @@ class OrderService
     protected function generateOrderNumber(): string
     {
         do {
-            $number =
-                'ORD-'.
-                now()->format('YmdHis').
-                '-'.
-                strtoupper(Str::random(6));
+            $number = 'ORD-'.now()->format('YmdHis').'-'.strtoupper(Str::random(6));
         } while (Order::where('order_number', $number)->exists());
 
         return $number;
