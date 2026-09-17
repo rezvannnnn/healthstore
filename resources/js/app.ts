@@ -24,11 +24,7 @@ createInertiaApp({
 
     setup({ el, App, props, plugin }) {
         createApp({
-            render: () =>
-                h('div', [
-                    h(App, props),
-                    h(StructuredData),
-                ]),
+            render: () => [h(App, props), h(StructuredData)],
         })
             .use(plugin)
             .mount(el);
