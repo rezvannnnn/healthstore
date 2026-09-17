@@ -2,10 +2,12 @@
 
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductPrice;
 use App\Models\StoreSetting;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Services\CartService;
 use App\Services\CheckoutService;
 use App\Services\InventoryService;
@@ -13,12 +15,35 @@ use App\Services\StorePricingService;
 
 it('reports checkout shipping and minimum order state from store pricing rules', function () {
     $user = User::factory()->create();
-    $product = Product::factory()->create(['is_active' => true]);
-    ProductPrice::factory()->create([
+    $product = Product::create([
+        'name' => 'Pricing Test Product',
+        'slug' => 'pricing-test-product',
+        'sku' => 'PRICING-001',
+        'product_type' => 'physical',
+        'unit' => 'piece',
+        'is_active' => true,
+        'is_featured' => false,
+        'sort_order' => 0,
+    ]);
+    ProductPrice::create([
         'product_id' => $product->id,
-        'type' => 'retail',
+        'price_type' => 'retail',
         'price' => 500_000,
         'min_quantity' => 1,
+        'is_active' => true,
+    ]);
+
+    $warehouse = Warehouse::create([
+        'name' => 'Pricing Test Warehouse',
+        'code' => 'PRICING-WH',
+        'is_active' => true,
+    ]);
+    Inventory::create([
+        'product_id' => $product->id,
+        'warehouse_id' => $warehouse->id,
+        'quantity' => 10,
+        'minimum_quantity' => 1,
+        'is_active' => true,
     ]);
 
     StoreSetting::setValue('shipping_fee', '50_000');
