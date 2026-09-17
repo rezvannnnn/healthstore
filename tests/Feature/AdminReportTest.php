@@ -41,7 +41,7 @@ class AdminReportTest extends TestCase
             ->assertSessionHasErrors('from');
     }
 
-    public function test_report_counts_non_cancelled_sales_and_top_products(): void
+    public function test_report_counts_only_paid_orders_as_sales_and_top_products(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
         $customer = User::factory()->create(['is_admin' => false]);
@@ -52,7 +52,7 @@ class AdminReportTest extends TestCase
             'is_active' => true,
         ]);
 
-        $order = Order::create([
+        $paidOrder = Order::create([
             'order_number' => 'REP-1001',
             'user_id' => $customer->id,
             'status' => 'paid',
@@ -68,7 +68,7 @@ class AdminReportTest extends TestCase
         ]);
 
         OrderItem::create([
-            'order_id' => $order->id,
+            'order_id' => $paidOrder->id,
             'product_id' => $product->id,
             'product_name' => $product->name,
             'unit_price' => 100000,
@@ -77,11 +77,35 @@ class AdminReportTest extends TestCase
         ]);
 
         Payment::create([
-            'order_id' => $order->id,
+            'order_id' => $paidOrder->id,
             'amount' => 200000,
             'gateway' => 'test',
             'status' => 'paid',
             'paid_at' => now(),
+        ]);
+
+        $pendingOrder = Order::create([
+            'order_number' => 'REP-1002',
+            'user_id' => $customer->id,
+            'status' => 'pending',
+            'payment_status' => 'pending',
+            'subtotal' => 500000,
+            'discount_amount' => 0,
+            'shipping_amount' => 0,
+            'total_amount' => 500000,
+            'currency' => 'IRR',
+            'recipient_name' => 'Test Customer',
+            'recipient_phone' => '09120000000',
+            'shipping_address' => 'Test address',
+        ]);
+
+        OrderItem::create([
+            'order_id' => $pendingOrder->id,
+            'product_id' => $product->id,
+            'product_name' => $product->name,
+            'unit_price' => 100000,
+            'quantity' => 5,
+            'total_amount' => 500000,
         ]);
 
         $response = $this->actingAs($admin)->get('/admin/reports?from='.now()->toDateString().'&to='.now()->toDateString());
@@ -89,6 +113,8 @@ class AdminReportTest extends TestCase
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
             ->component('Admin/Reports/Index')
+            ->where('summary.orders_count', 2)
+            ->where('summary.paid_orders_count', 1)
             ->where('summary.gross_sales', 200000)
             ->where('summary.successful_payments', 200000)
             ->where('summary.items_sold', 2)
