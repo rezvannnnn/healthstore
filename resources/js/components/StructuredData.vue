@@ -9,19 +9,12 @@ interface StructuredDataProps {
 const page = usePage();
 const json = computed(() => {
     const data = (page.props as Record<string, unknown>).structuredData as
-        | StructuredDataProps
-        | undefined;
+        StructuredDataProps | undefined;
 
-    return data
-        ? JSON.stringify(data).replace(/</g, '\\u003c')
-        : '';
+    return data ? JSON.stringify(data).replace(/</g, '\\u003c') : '';
 });
 </script>
 
 <template>
-    <script
-        v-if="json"
-        type="application/ld+json"
-        v-html="json"
-    ></script>
+    <script v-if="json" type="application/ld+json" v-html="json"></script>
 </template>
