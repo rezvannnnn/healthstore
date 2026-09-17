@@ -33,6 +33,7 @@ class CheckoutService
                         'product_name' => $item->product->name, 'old_price' => $oldPrice, 'new_price' => 0,
                     ];
                 }
+
                 continue;
             }
 
@@ -47,6 +48,7 @@ class CheckoutService
                         'product_name' => $item->product->name, 'old_price' => $oldPrice, 'new_price' => 0,
                     ];
                 }
+
                 continue;
             }
 
@@ -54,6 +56,7 @@ class CheckoutService
             $newPrice = (float) $currentPrice->price;
             if ($oldPrice == 0) {
                 $item->update(['unit_price' => $currentPrice->price]);
+
                 continue;
             }
 
@@ -114,6 +117,7 @@ class CheckoutService
                 $newPrice = (float) $currentPrice->price;
                 if ($oldPrice == 0) {
                     $item->update(['unit_price' => $currentPrice->price]);
+
                     continue;
                 }
 
@@ -147,6 +151,7 @@ class CheckoutService
             }
 
             $shippingAmount = $this->pricing()->calculateShipping($subtotal);
+
             return [
                 'cart' => $cart, 'confirmed' => true, 'payment_allowed' => true,
                 'subtotal' => $subtotal, 'shipping_amount' => $shippingAmount,
