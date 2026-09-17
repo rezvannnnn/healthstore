@@ -42,6 +42,37 @@ class ProductSeoContractTest extends TestCase
         );
     }
 
+    public function test_product_show_exposes_product_structured_data(): void
+    {
+        $product = $this->createProduct([
+            'name' => 'کرم مرطوب کننده',
+            'slug' => 'structured-data-cream',
+            'sku' => 'SKU-123',
+            'short_description' => 'کرم مناسب پوست خشک.',
+        ]);
+
+        ProductPrice::create([
+            'product_id' => $product->id,
+            'price_type' => 'retail',
+            'price' => 125000,
+            'min_quantity' => 1,
+            'is_active' => true,
+        ]);
+
+        $response = $this->get('/products/'.$product->slug);
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->where('structuredData.@context', 'https://schema.org')
+            ->where('structuredData.@type', 'Product')
+            ->where('structuredData.name', $product->name)
+            ->where('structuredData.sku', $product->sku)
+            ->where('structuredData.offers.@type', 'Offer')
+            ->where('structuredData.offers.price', 125000.0)
+            ->where('structuredData.offers.availability', 'https://schema.org/InStock')
+        );
+    }
+
     public function test_product_show_uses_custom_seo_title(): void
     {
         $product = $this->createProduct([
