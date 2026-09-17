@@ -190,4 +190,47 @@ class AdminProductTest extends TestCase
             'compare_at_price' => 160000,
         ]);
     }
+
+    public function test_admin_can_edit_a_product_without_changing_its_expired_date(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $expiredDate = now()->subDay()->toDateString();
+
+        $product = Product::create([
+            'name' => 'Expired Batch Product',
+            'slug' => 'expired-batch-product',
+            'sku' => 'EXPIRED-001',
+            'expiry_date' => $expiredDate,
+            'is_active' => false,
+            'is_featured' => false,
+            'sort_order' => 0,
+        ]);
+
+        ProductPrice::create([
+            'product_id' => $product->id,
+            'price_type' => 'retail',
+            'price' => 90000,
+            'min_quantity' => 1,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->put("/admin/products/{$product->id}", [
+                'name' => 'Expired Batch Product Updated',
+                'slug' => 'expired-batch-product-updated',
+                'sku' => 'EXPIRED-001-UPDATED',
+                'price' => 95000,
+                'expiry_date' => $expiredDate,
+                'is_active' => false,
+                'is_featured' => false,
+                'sort_order' => 1,
+            ])
+            ->assertRedirect('/admin/products')
+            ->assertSessionHasNoErrors();
+
+        $updatedProduct = Product::query()->findOrFail($product->id);
+
+        $this->assertSame('Expired Batch Product Updated', $updatedProduct->name);
+        $this->assertSame($expiredDate, $updatedProduct->expiry_date?->toDateString());
+    }
 }

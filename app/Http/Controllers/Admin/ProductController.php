@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\ProductPrice;
 use App\Services\CartService;
 use App\Services\InventoryService;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -164,6 +165,30 @@ class ProductController extends Controller
 
     protected function validatedData(Request $request, ?Product $product = null): array
     {
+        $expiryRules = ['nullable', 'date'];
+
+        $expiryRules[] = function (string $attribute, mixed $value, \Closure $fail) use ($product): void {
+            if ($value === null || $value === '') {
+                return;
+            }
+
+            $date = Carbon::parse((string) $value)->startOfDay();
+            $today = Carbon::today();
+
+            if (! $date->lessThan($today)) {
+                return;
+            }
+
+            if (
+                $product !== null
+                && $product->expiry_date?->toDateString() === $date->toDateString()
+            ) {
+                return;
+            }
+
+            $fail('تاریخ انقضا نمی‌تواند در گذشته باشد.');
+        };
+
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('products', 'slug')->ignore($product?->id)],
@@ -179,7 +204,7 @@ class ProductController extends Controller
             'seo_title' => ['nullable', 'string', 'max:255'],
             'seo_description' => ['nullable', 'string', 'max:160'],
             'canonical_url' => ['nullable', 'url', 'max:2048'],
-            'expiry_date' => ['nullable', 'date', 'after_or_equal:today'],
+            'expiry_date' => $expiryRules,
             'main_image' => ['nullable', 'string', 'max:2048'],
             'is_active' => ['boolean'],
             'is_featured' => ['boolean'],
