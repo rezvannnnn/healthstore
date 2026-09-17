@@ -228,10 +228,9 @@ class AdminProductTest extends TestCase
             ->assertRedirect('/admin/products')
             ->assertSessionHasNoErrors();
 
-        $this->assertDatabaseHas('products', [
-            'id' => $product->id,
-            'name' => 'Expired Batch Product Updated',
-            'expiry_date' => $expiredDate,
-        ]);
+        $updatedProduct = Product::query()->findOrFail($product->id);
+
+        $this->assertSame('Expired Batch Product Updated', $updatedProduct->name);
+        $this->assertSame($expiredDate, $updatedProduct->expiry_date?->toDateString());
     }
 }
