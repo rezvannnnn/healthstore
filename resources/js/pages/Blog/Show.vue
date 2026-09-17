@@ -17,8 +17,6 @@ interface Article {
     published_at: string | null;
 }
 
-defineProps<{ article: Article }>();
-
 const props = defineProps<{ article: Article }>();
 const structuredData = computed(() => ({
     '@context': 'https://schema.org',
