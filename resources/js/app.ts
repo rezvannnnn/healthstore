@@ -1,4 +1,3 @@
-import { usePage } from '@inertiajs/vue3';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { createApp, h } from 'vue';
 import type { DefineComponent } from 'vue';
