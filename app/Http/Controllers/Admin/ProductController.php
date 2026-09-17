@@ -165,9 +165,9 @@ class ProductController extends Controller
 
     protected function validatedData(Request $request, ?Product $product = null): array
     {
-        $parentExpiryRules = ['nullable', 'date'];
+        $expiryRules = ['nullable', 'date'];
 
-        $parentExpiryRules[] = function (string $attribute, mixed $value, \Closure $fail) use ($product): void {
+        $expiryRules[] = function (string $attribute, mixed $value, \Closure $fail) use ($product): void {
             if ($value === null || $value === '') {
                 return;
             }
@@ -190,7 +190,6 @@ class ProductController extends Controller
         };
 
         return $request->validate([
-            'parent_id' => [],
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('products', 'slug')->ignore($product?->id)],
             'sku' => ['nullable', 'string', 'max:255', Rule::unique('products', 'sku')->ignore($product?->id)],
@@ -205,7 +204,7 @@ class ProductController extends Controller
             'seo_title' => ['nullable', 'string', 'max:255'],
             'seo_description' => ['nullable', 'string', 'max:160'],
             'canonical_url' => ['nullable', 'url', 'max:2048'],
-            'expiry_date' => $parentExpiryRules,
+            'expiry_date' => $expiryRules,
             'main_image' => ['nullable', 'string', 'max:2048'],
             'is_active' => ['boolean'],
             'is_featured' => ['boolean'],
