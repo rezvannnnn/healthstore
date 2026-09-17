@@ -1,6 +1,7 @@
 import { createInertiaApp } from '@inertiajs/vue3';
 import { createApp, h } from 'vue';
 import type { DefineComponent } from 'vue';
+import StructuredData from './components/StructuredData.vue';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -23,7 +24,11 @@ createInertiaApp({
 
     setup({ el, App, props, plugin }) {
         createApp({
-            render: () => h(App, props),
+            render: () =>
+                h('div', [
+                    h(App, props),
+                    h(StructuredData),
+                ]),
         })
             .use(plugin)
             .mount(el);
