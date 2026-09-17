@@ -27,18 +27,22 @@ class ReportController extends Controller
         }
 
         $orders = Order::query()->whereBetween('created_at', [$from, $to]);
+        $salesOrders = (clone $orders)
+            ->where('payment_status', 'paid')
+            ->where('status', '!=', 'cancelled');
         $payments = Payment::query()->where('status', 'paid')->whereBetween('paid_at', [$from, $to]);
 
         $ordersCount = (clone $orders)->count();
         $cancelledCount = (clone $orders)->where('status', 'cancelled')->count();
-        $completedOrdersCount = $ordersCount - $cancelledCount;
-        $grossSales = (float) (clone $orders)->where('status', '!=', 'cancelled')->sum('total_amount');
+        $paidOrdersCount = (clone $salesOrders)->count();
+        $grossSales = (float) (clone $salesOrders)->sum('total_amount');
         $successfulPayments = (float) (clone $payments)->sum('amount');
-        $averageOrder = $completedOrdersCount > 0 ? $grossSales / $completedOrdersCount : 0;
+        $averageOrder = $paidOrdersCount > 0 ? $grossSales / $paidOrdersCount : 0;
 
         $itemsSold = (int) OrderItem::query()
             ->whereHas('order', function ($query) use ($from, $to): void {
                 $query->whereBetween('created_at', [$from, $to])
+                    ->where('payment_status', 'paid')
                     ->where('status', '!=', 'cancelled');
             })
             ->sum('quantity');
@@ -47,6 +51,7 @@ class ReportController extends Controller
             ->selectRaw('product_id, SUM(quantity) as quantity, SUM(total_amount) as sales')
             ->whereHas('order', function ($query) use ($from, $to): void {
                 $query->whereBetween('created_at', [$from, $to])
+                    ->where('payment_status', 'paid')
                     ->where('status', '!=', 'cancelled');
             })
             ->with('product:id,name')
@@ -69,6 +74,7 @@ class ReportController extends Controller
             'summary' => [
                 'orders_count' => $ordersCount,
                 'cancelled_count' => $cancelledCount,
+                'paid_orders_count' => $paidOrdersCount,
                 'gross_sales' => $grossSales,
                 'successful_payments' => $successfulPayments,
                 'items_sold' => $itemsSold,
