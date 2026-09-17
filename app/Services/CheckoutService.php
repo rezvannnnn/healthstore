@@ -75,6 +75,8 @@ class CheckoutService
         $changes = array_merge($priceChanges, $availabilityChanges);
         $subtotal = $this->cartService->calculateSubtotal($cart);
         $shippingAmount = $this->pricing()->calculateShipping($subtotal);
+        $minimumOrderAmount = $this->pricing()->minimumOrderAmount();
+        $minimumOrderMet = $minimumOrderAmount <= 0 || $subtotal >= $minimumOrderAmount;
 
         return [
             'cart' => $cart,
@@ -85,7 +87,9 @@ class CheckoutService
             'subtotal' => $subtotal,
             'shipping_amount' => $shippingAmount,
             'total_amount' => $subtotal + $shippingAmount,
-            'can_proceed_to_payment' => $subtotal > 0,
+            'minimum_order_amount' => $minimumOrderAmount,
+            'minimum_order_met' => $minimumOrderMet,
+            'can_proceed_to_payment' => $subtotal > 0 && $minimumOrderMet,
             'cart_has_payable_items' => $subtotal > 0,
         ];
     }
@@ -141,21 +145,38 @@ class CheckoutService
             $cart->refresh();
             $cart->load('items.product');
             $subtotal = $this->cartService->calculateSubtotal($cart);
+            $minimumOrderAmount = $this->pricing()->minimumOrderAmount();
+            $minimumOrderMet = $minimumOrderAmount <= 0 || $subtotal >= $minimumOrderAmount;
 
             if ($subtotal <= 0) {
                 return [
                     'cart' => $cart, 'confirmed' => true, 'payment_allowed' => false,
                     'subtotal' => 0, 'shipping_amount' => 0, 'total_amount' => 0,
+                    'minimum_order_amount' => $minimumOrderAmount,
+                    'minimum_order_met' => false,
                     'message' => 'هیچ کالای قابل خریدی در سبد شما باقی نمانده است.',
                 ];
             }
 
             $shippingAmount = $this->pricing()->calculateShipping($subtotal);
 
+            if (! $minimumOrderMet) {
+                return [
+                    'cart' => $cart, 'confirmed' => true, 'payment_allowed' => false,
+                    'subtotal' => $subtotal, 'shipping_amount' => $shippingAmount,
+                    'total_amount' => $subtotal + $shippingAmount,
+                    'minimum_order_amount' => $minimumOrderAmount,
+                    'minimum_order_met' => false,
+                    'message' => 'حداقل مبلغ سفارش '.number_format($minimumOrderAmount, 0, '.', ',').' تومان است.',
+                ];
+            }
+
             return [
                 'cart' => $cart, 'confirmed' => true, 'payment_allowed' => true,
                 'subtotal' => $subtotal, 'shipping_amount' => $shippingAmount,
                 'total_amount' => $subtotal + $shippingAmount,
+                'minimum_order_amount' => $minimumOrderAmount,
+                'minimum_order_met' => true,
             ];
         });
     }
@@ -165,12 +186,16 @@ class CheckoutService
         $cart->refresh();
         $cart->load('items.product');
         $subtotal = $this->cartService->calculateSubtotal($cart);
-        $shippingAmount = $this->pricing()->calculateShipping($subtotal);
+        $shippingAmount = $subtotal > 0 ? $this->pricing()->calculateShipping($subtotal) : 0;
+        $minimumOrderAmount = $this->pricing()->minimumOrderAmount();
+        $minimumOrderMet = $minimumOrderAmount <= 0 || $subtotal >= $minimumOrderAmount;
 
         return [
             'cart' => $cart, 'confirmed' => false, 'payment_allowed' => false,
             'subtotal' => $subtotal, 'shipping_amount' => $shippingAmount,
             'total_amount' => $subtotal + $shippingAmount,
+            'minimum_order_amount' => $minimumOrderAmount,
+            'minimum_order_met' => $minimumOrderMet,
         ];
     }
 

@@ -19,9 +19,14 @@ class StorePricingService
         return $shippingFee;
     }
 
+    public function minimumOrderAmount(): float
+    {
+        return $this->numericSetting('min_order_amount');
+    }
+
     public function calculateTotal(float $subtotal, float $discountAmount = 0): array
     {
-        $minimumOrderAmount = $this->numericSetting('min_order_amount');
+        $minimumOrderAmount = $this->minimumOrderAmount();
 
         if ($minimumOrderAmount > 0 && $subtotal < $minimumOrderAmount) {
             throw new RuntimeException(
