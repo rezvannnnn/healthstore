@@ -4,6 +4,7 @@ import { Head, router } from '@inertiajs/vue3';
 interface Summary {
     orders_count: number;
     cancelled_count: number;
+    paid_orders_count: number;
     gross_sales: number;
     successful_payments: number;
     items_sold: number;
@@ -88,6 +89,12 @@ function money(value: number) {
                 <p class="text-sm text-gray-500">تعداد سفارش‌ها</p>
                 <p class="mt-2 text-2xl font-bold">
                     {{ money(props.summary.orders_count) }}
+                </p>
+            </div>
+            <div class="rounded-xl border bg-white p-5 shadow-sm">
+                <p class="text-sm text-gray-500">سفارش‌های پرداخت‌شده</p>
+                <p class="mt-2 text-2xl font-bold">
+                    {{ money(props.summary.paid_orders_count) }}
                 </p>
             </div>
             <div class="rounded-xl border bg-white p-5 shadow-sm">
