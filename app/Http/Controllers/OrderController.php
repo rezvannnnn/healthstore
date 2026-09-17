@@ -36,8 +36,14 @@ class OrderController extends Controller
         $user = $request->user();
         abort_unless($user !== null, 401);
 
-        $order = Order::query()->where('order_number', $orderNumber)->where('user_id', $user->id)
-            ->with(['items', 'payments', 'inventoryReservations'])->firstOrFail();
+        $order = Order::query()
+            ->where('order_number', $orderNumber)
+            ->where('user_id', $user->id)
+            ->with([
+                'items',
+                'payments:id,order_id,amount,gateway,status,transaction_id,reference_number,paid_at',
+            ])
+            ->firstOrFail();
 
         return Inertia::render('Order/Show', [
             'order' => $order, 'success' => session('success'),
