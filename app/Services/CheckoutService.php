@@ -74,7 +74,9 @@ class CheckoutService
         $cart->load('items.product');
         $changes = array_merge($priceChanges, $availabilityChanges);
         $subtotal = $this->cartService->calculateSubtotal($cart);
-        $shippingAmount = $this->pricing()->calculateShipping($subtotal);
+        $pricing = $this->pricing()->calculateTotal($subtotal);
+        $minimumOrderAmount = $this->pricing()->minimumOrderAmount();
+        $minimumOrderMet = $minimumOrderAmount <= 0 || $subtotal >= $minimumOrderAmount;
 
         return [
             'cart' => $cart,
@@ -82,10 +84,12 @@ class CheckoutService
             'price_changes' => $priceChanges,
             'availability_changes' => $availabilityChanges,
             'requires_price_confirmation' => count($changes) > 0,
-            'subtotal' => $subtotal,
-            'shipping_amount' => $shippingAmount,
-            'total_amount' => $subtotal + $shippingAmount,
-            'can_proceed_to_payment' => $subtotal > 0,
+            'subtotal' => $pricing['subtotal'],
+            'shipping_amount' => $pricing['shipping_amount'],
+            'total_amount' => $pricing['total_amount'],
+            'minimum_order_amount' => $minimumOrderAmount,
+            'minimum_order_met' => $minimumOrderMet,
+            'can_proceed_to_payment' => $subtotal > 0 && $minimumOrderMet,
             'cart_has_payable_items' => $subtotal > 0,
         ];
     }
@@ -146,16 +150,31 @@ class CheckoutService
                 return [
                     'cart' => $cart, 'confirmed' => true, 'payment_allowed' => false,
                     'subtotal' => 0, 'shipping_amount' => 0, 'total_amount' => 0,
+                    'minimum_order_amount' => $this->pricing()->minimumOrderAmount(),
+                    'minimum_order_met' => false,
                     'message' => 'هیچ کالای قابل خریدی در سبد شما باقی نمانده است.',
                 ];
             }
 
-            $shippingAmount = $this->pricing()->calculateShipping($subtotal);
+            try {
+                $pricing = $this->pricing()->calculateTotal($subtotal);
+            } catch (RuntimeException $e) {
+                return [
+                    'cart' => $cart, 'confirmed' => true, 'payment_allowed' => false,
+                    'subtotal' => $subtotal, 'shipping_amount' => $this->pricing()->calculateShipping($subtotal),
+                    'total_amount' => $subtotal + $this->pricing()->calculateShipping($subtotal),
+                    'minimum_order_amount' => $this->pricing()->minimumOrderAmount(),
+                    'minimum_order_met' => false,
+                    'message' => $e->getMessage(),
+                ];
+            }
 
             return [
                 'cart' => $cart, 'confirmed' => true, 'payment_allowed' => true,
-                'subtotal' => $subtotal, 'shipping_amount' => $shippingAmount,
-                'total_amount' => $subtotal + $shippingAmount,
+                'subtotal' => $pricing['subtotal'], 'shipping_amount' => $pricing['shipping_amount'],
+                'total_amount' => $pricing['total_amount'],
+                'minimum_order_amount' => $this->pricing()->minimumOrderAmount(),
+                'minimum_order_met' => true,
             ];
         });
     }
@@ -165,12 +184,18 @@ class CheckoutService
         $cart->refresh();
         $cart->load('items.product');
         $subtotal = $this->cartService->calculateSubtotal($cart);
-        $shippingAmount = $this->pricing()->calculateShipping($subtotal);
+        $pricing = $subtotal > 0 ? $this->pricing()->calculateTotal($subtotal) : [
+            'subtotal' => 0, 'shipping_amount' => 0, 'total_amount' => 0,
+        ];
+        $minimumOrderAmount = $this->pricing()->minimumOrderAmount();
+        $minimumOrderMet = $minimumOrderAmount <= 0 || $subtotal >= $minimumOrderAmount;
 
         return [
             'cart' => $cart, 'confirmed' => false, 'payment_allowed' => false,
-            'subtotal' => $subtotal, 'shipping_amount' => $shippingAmount,
-            'total_amount' => $subtotal + $shippingAmount,
+            'subtotal' => $pricing['subtotal'], 'shipping_amount' => $pricing['shipping_amount'],
+            'total_amount' => $pricing['total_amount'],
+            'minimum_order_amount' => $minimumOrderAmount,
+            'minimum_order_met' => $minimumOrderMet,
         ];
     }
 
