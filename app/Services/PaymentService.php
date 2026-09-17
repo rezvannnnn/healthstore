@@ -191,6 +191,13 @@ class PaymentService
                 throw new RuntimeException('سفارش مربوط به این پرداخت پیدا نشد.');
             }
             if ($order->status === 'cancelled') {
+                $reservations = $order->inventoryReservations()->where('status', 'active')->get();
+                foreach ($reservations as $reservation) {
+                    if (! $this->reservationService->release($reservation)) {
+                        throw new RuntimeException('آزادسازی رزرو موجودی سفارش انجام نشد.');
+                    }
+                }
+                ($this->couponService ?? app(CouponService::class))->releaseForOrder($order);
                 $payment->update(['status' => 'cancelled', 'transaction_id' => $transactionId]);
 
                 return false;
