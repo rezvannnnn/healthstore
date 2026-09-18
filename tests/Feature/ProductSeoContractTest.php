@@ -66,6 +66,8 @@ class ProductSeoContractTest extends TestCase
             ->where('structuredData.@context', 'https://schema.org')
             ->where('structuredData.@type', 'Product')
             ->where('structuredData.name', $product->name)
+            ->where('structuredData.description', $product->short_description)
+            ->where('structuredData.url', url('/products/'.$product->slug))
             ->where('structuredData.sku', $product->sku)
             ->where('structuredData.offers.@type', 'Offer')
             ->where('structuredData.offers.price', 125000.0)
