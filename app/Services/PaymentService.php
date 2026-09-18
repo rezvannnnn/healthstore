@@ -60,9 +60,13 @@ class PaymentService
                 throw new RuntimeException('فقط پرداخت‌های در انتظار می‌توانند به درگاه ارسال شوند.');
             }
             $gateway = $this->gateway ?? app(PaymentGatewayInterface::class);
+            $gatewayName = $this->gatewayName($gateway);
             $payment->loadMissing('order');
             if ($payment->authority !== null && $payment->authority !== '') {
-                return ['payment' => $payment, 'gateway' => $payment->gateway, 'authority' => $payment->authority, 'payment_url' => $gateway->paymentUrl(['authority' => $payment->authority]), 'gateway_response' => $payment->gateway_response];
+                if ($payment->gateway !== null && $payment->gateway !== $gatewayName) {
+                    throw new RuntimeException('درگاه پرداخت این تراکنش با درگاه فعال سامانه مطابقت ندارد.');
+                }
+                return ['payment' => $payment, 'gateway' => $payment->gateway ?: $gatewayName, 'authority' => $payment->authority, 'payment_url' => $gateway->paymentUrl(['authority' => $payment->authority]), 'gateway_response' => $payment->gateway_response];
             }
             $result = $gateway->request($payment);
             $authority = (string) ($result['authority'] ?? '');
