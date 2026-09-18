@@ -76,6 +76,9 @@ function addToCart(product: FeaturedProduct): void {
                     <Link href="/products" class="hover:text-emerald-600"
                         >محصولات</Link
                     >
+                    <Link href="/brands" class="hover:text-emerald-600"
+                        >برندها</Link
+                    >
                     <Link href="/blog" class="hover:text-emerald-600"
                         >مجله سلامت</Link
                     >
