@@ -46,6 +46,31 @@ class ArticleController extends Controller
             ];
         }
 
+        $structuredArticles = collect($articles)
+            ->map(fn (array $article, int $index) => [
+                '@type' => 'ListItem',
+                'position' => ($paginator->currentPage() - 1) * $paginator->perPage() + $index + 1,
+                'url' => route('blog.show', $article['slug']),
+                'name' => $article['title'],
+            ])
+            ->all();
+
+        $structuredData = [
+            '@context' => 'https://schema.org',
+            '@type' => 'CollectionPage',
+            'name' => 'مجله سلامت | مطالب آموزشی و کاربردی سلامت',
+            'description' => 'مطالب آموزشی و کاربردی درباره سلامت و محصولات بهداشتی.',
+            'url' => route('blog.index'),
+        ];
+
+        if ($structuredArticles !== []) {
+            $structuredData['mainEntity'] = [
+                '@type' => 'ItemList',
+                'numberOfItems' => count($structuredArticles),
+                'itemListElement' => $structuredArticles,
+            ];
+        }
+
         return Inertia::render('Blog/Index', [
             'seo' => [
                 'title' => 'مجله سلامت | مطالب آموزشی و کاربردی سلامت',
@@ -58,6 +83,7 @@ class ArticleController extends Controller
                 'last_page' => $paginator->lastPage(),
                 'total' => $paginator->total(),
             ],
+            'structuredData' => $structuredData,
             'filters' => [
                 'search' => $search,
             ],
