@@ -176,7 +176,6 @@ class ProductController extends Controller
             ];
         }
 
-
         return Inertia::render('Product/Show', [
             'seo' => [
                 'title' => $product->seo_title ?: $product->name,
