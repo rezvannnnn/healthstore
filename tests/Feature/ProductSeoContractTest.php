@@ -70,7 +70,7 @@ class ProductSeoContractTest extends TestCase
             ->where('structuredData.url', url('/products/'.$product->slug))
             ->where('structuredData.sku', $product->sku)
             ->where('structuredData.offers.@type', 'Offer')
-            ->where('structuredData.offers.price', 125000.0)
+            ->where('structuredData.offers.price', 125000)
             ->where('structuredData.offers.availability', 'https://schema.org/InStock')
         );
     }
