@@ -23,6 +23,7 @@ class BlogCategoryTest extends TestCase
         Article::query()->create([
             'title' => 'مقاله منتشرشده',
             'slug' => 'published-article',
+            'content' => 'محتوای مقاله منتشرشده.',
             'category_id' => $category->id,
             'is_active' => true,
             'published_at' => now()->subDay(),
@@ -31,6 +32,7 @@ class BlogCategoryTest extends TestCase
         Article::query()->create([
             'title' => 'مقاله پیش‌نویس',
             'slug' => 'draft-article',
+            'content' => 'محتوای پیش‌نویس.',
             'category_id' => $category->id,
             'is_active' => true,
             'published_at' => null,
@@ -39,6 +41,7 @@ class BlogCategoryTest extends TestCase
         Article::query()->create([
             'title' => 'مقاله آینده',
             'slug' => 'future-article',
+            'content' => 'محتوای مقاله آینده.',
             'category_id' => $category->id,
             'is_active' => true,
             'published_at' => now()->addDay(),
@@ -47,6 +50,7 @@ class BlogCategoryTest extends TestCase
         Article::query()->create([
             'title' => 'مقاله غیرفعال',
             'slug' => 'inactive-article',
+            'content' => 'محتوای مقاله غیرفعال.',
             'category_id' => $category->id,
             'is_active' => false,
             'published_at' => now()->subDay(),
