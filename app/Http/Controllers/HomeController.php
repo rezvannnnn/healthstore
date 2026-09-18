@@ -60,7 +60,21 @@ class HomeController extends Controller
             ->values()
             ->all();
 
+        $structuredData = [
+            '@context' => 'https://schema.org',
+            '@type' => 'WebSite',
+            'name' => config('app.name', 'HealthStore'),
+            'url' => route('home'),
+            'inLanguage' => 'fa-IR',
+            'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => route('products.index').'?search={search_term_string}',
+                'query-input' => 'required name=search_term_string',
+            ],
+        ];
+
         return Inertia::render('Welcome', [
+            'structuredData' => $structuredData,
             'featuredProducts' => $featuredProducts,
             'categories' => $categories,
         ]);
