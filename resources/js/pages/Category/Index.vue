@@ -79,7 +79,7 @@ function pageUrl(page: number): string {
                     انتخاب بر اساس دسته
                 </p>
                 <h1
-                    class="mt-2 text-3xl font-bold text-gray-900 dark:text-white md:text-4xl"
+                    class="mt-2 text-3xl font-bold text-gray-900 md:text-4xl dark:text-white"
                 >
                     دسته‌بندی محصولات
                 </h1>
