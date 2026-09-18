@@ -69,11 +69,13 @@ function pageUrl(page: number): string {
                     انتخاب بر اساس برند
                 </p>
                 <h1
-                    class="mt-2 text-3xl font-bold text-gray-900 dark:text-white md:text-4xl"
+                    class="mt-2 text-3xl font-bold text-gray-900 md:text-4xl dark:text-white"
                 >
                     برندهای فروشگاه
                 </h1>
-                <p class="mt-4 max-w-3xl leading-8 text-gray-600 dark:text-gray-300">
+                <p
+                    class="mt-4 max-w-3xl leading-8 text-gray-600 dark:text-gray-300"
+                >
                     برندهای فعال فروشگاه را مشاهده کنید و محصولات هر برند را
                     جداگانه بررسی کنید.
                 </p>
