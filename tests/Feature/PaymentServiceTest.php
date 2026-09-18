@@ -182,6 +182,43 @@ class PaymentServiceTest extends TestCase
         $this->assertSame($firstResult['gateway'], $secondResult['gateway']);
     }
 
+    public function test_existing_authority_is_rejected_when_payment_gateway_does_not_match_active_gateway(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->createOrder($user, 360000);
+        $gateway = new class implements PaymentGatewayInterface
+        {
+            public function request(Payment $payment): array
+            {
+                return [
+                    'authority' => 'AUTH-MISMATCH',
+                    'payment_url' => 'https://gateway.test/pay/AUTH-MISMATCH',
+                ];
+            }
+
+            public function verify(Payment $payment, array $callbackData): array
+            {
+                return [];
+            }
+
+            public function paymentUrl(array $gatewayData): string
+            {
+                return 'https://gateway.test/pay/'.($gatewayData['authority'] ?? '');
+            }
+        };
+
+        $paymentService = new PaymentService(new InventoryReservationService, $gateway);
+        $payment = $paymentService->create($order);
+        $payment->update([
+            'gateway' => 'different-gateway',
+            'authority' => 'AUTH-OLD',
+        ]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('درگاه پرداخت این تراکنش با درگاه فعال سامانه مطابقت ندارد.');
+        $paymentService->requestGatewayPayment($payment);
+    }
+
     public function test_successful_payment_marks_payment_as_paid_order_as_paid_and_consumes_reservations(): void
     {
         $user = User::factory()->create();
