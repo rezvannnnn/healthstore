@@ -23,6 +23,12 @@ interface Category {
     slug: string;
 }
 
+interface Brand {
+    id: number;
+    name: string;
+    slug: string;
+}
+
 interface Pagination {
     current_page: number;
     last_page: number;
@@ -41,16 +47,19 @@ const props = defineProps<{
     seo: Seo;
     products: Product[];
     categories: Category[];
+    brands: Brand[];
     pagination: Pagination;
     filters: {
         search: string;
         category: string;
+        brand: string;
     };
 }>();
 
 const form = reactive({
     search: props.filters.search,
     category: props.filters.category,
+    brand: props.filters.brand,
 });
 
 function submit(): void {
@@ -73,6 +82,10 @@ function pageUrl(page: number): string {
 
     if (form.category) {
         params.set('category', form.category);
+    }
+
+    if (form.brand) {
+        params.set('brand', form.brand);
     }
 
     const query = params.toString();
@@ -144,7 +157,7 @@ function addToCart(productId: number): void {
 
                 <form
                     @submit.prevent="submit"
-                    class="grid gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 md:grid-cols-[1fr_220px_auto] dark:bg-gray-900 dark:ring-gray-800"
+                    class="grid gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 md:grid-cols-[1fr_220px_220px_auto] dark:bg-gray-900 dark:ring-gray-800"
                 >
                     <input
                         v-model="form.search"
@@ -163,6 +176,20 @@ function addToCart(productId: number): void {
                             :value="category.slug"
                         >
                             {{ category.name }}
+                        </option>
+                    </select>
+
+                    <select
+                        v-model="form.brand"
+                        class="rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                    >
+                        <option value="">همه برندها</option>
+                        <option
+                            v-for="brand in brands"
+                            :key="brand.id"
+                            :value="brand.slug"
+                        >
+                            {{ brand.name }}
                         </option>
                     </select>
                     <button

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\CartService;
@@ -22,10 +23,12 @@ class ProductController extends Controller
         $validatedFilters = $request->validate([
             'search' => ['nullable', 'string', 'max:200'],
             'category' => ['nullable', 'string', 'max:100'],
+            'brand' => ['nullable', 'string', 'max:100'],
         ]);
 
         $search = trim((string) ($validatedFilters['search'] ?? ''));
         $categorySlug = trim((string) ($validatedFilters['category'] ?? ''));
+        $brandSlug = trim((string) ($validatedFilters['brand'] ?? ''));
 
         $query = Product::query()
             ->with(['brand', 'category', 'images'])
@@ -50,6 +53,14 @@ class ProductController extends Controller
             });
         }
 
+        if ($brandSlug !== '') {
+            $query->whereHas('brand', function ($builder) use ($brandSlug) {
+                $builder
+                    ->where('slug', $brandSlug)
+                    ->where('is_active', true);
+            });
+        }
+
         $paginator = $query->paginate(12)->withQueryString();
 
         $products = collect($paginator->items())->map(function (Product $product) {
@@ -70,6 +81,11 @@ class ProductController extends Controller
                 'available' => $this->inventoryService->isAvailable($product),
             ];
         })->values()->all();
+
+        $brands = Brand::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug']);
 
         $categories = Category::query()
             ->where('is_active', true)
@@ -93,9 +109,11 @@ class ProductController extends Controller
                 'to' => $paginator->lastItem(),
             ],
             'categories' => $categories,
+            'brands' => $brands,
             'filters' => [
                 'search' => $search,
                 'category' => $categorySlug,
+                'brand' => $brandSlug,
             ],
         ]);
     }
