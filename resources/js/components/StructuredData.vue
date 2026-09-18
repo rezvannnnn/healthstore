@@ -11,7 +11,7 @@ const json = computed(() => {
     const data = (page.props as Record<string, unknown>).structuredData as
         StructuredDataProps | undefined;
 
-    return data ? JSON.stringify(data).replace(/</g, '\u003c') : '';
+    return data ? JSON.stringify(data).replace(/</g, '\\u003c') : '';
 });
 </script>
 
