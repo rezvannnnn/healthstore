@@ -20,6 +20,9 @@ class SitemapController extends Controller
                 'loc' => route('products.index'),
             ],
             [
+                'loc' => route('categories.index'),
+            ],
+            [
                 'loc' => route('blog.index'),
             ],
             [
