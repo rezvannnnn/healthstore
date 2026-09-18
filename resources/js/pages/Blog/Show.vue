@@ -17,7 +17,20 @@ interface Article {
     published_at: string | null;
 }
 
-const props = defineProps<{ article: Article }>();
+interface RelatedArticle {
+    id: number;
+    title: string;
+    slug: string;
+    excerpt: string | null;
+    featured_image: string | null;
+    featured_image_alt: string | null;
+    published_at: string | null;
+}
+
+const props = defineProps<{
+    article: Article;
+    relatedArticles: RelatedArticle[];
+}>();
 const structuredData = computed(() => ({
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -134,5 +147,35 @@ const structuredData = computed(() => ({
                 </div>
             </div>
         </article>
+
+        <section v-if="relatedArticles.length" class="space-y-4">
+            <div class="flex items-center justify-between gap-4">
+                <h2 class="text-2xl font-bold">مطالب مرتبط</h2>
+                <Link v-if="article.category" :href="`/blog/category/${article.category.slug}`" class="text-sm underline">
+                    مطالب بیشتر در {{ article.category.name }}
+                </Link>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+                <Link
+                    v-for="related in relatedArticles"
+                    :key="related.id"
+                    :href="`/blog/${related.slug}`"
+                    class="overflow-hidden rounded-2xl border bg-white transition hover:shadow-md"
+                >
+                    <img
+                        v-if="related.featured_image"
+                        :src="related.featured_image"
+                        :alt="related.featured_image_alt || related.title"
+                        class="h-40 w-full object-cover"
+                    />
+                    <div class="space-y-2 p-4">
+                        <h3 class="font-bold leading-7">{{ related.title }}</h3>
+                        <p v-if="related.excerpt" class="line-clamp-2 text-sm leading-6 text-gray-600">
+                            {{ related.excerpt }}
+                        </p>
+                    </div>
+                </Link>
+            </div>
+        </section>
     </div>
 </template>

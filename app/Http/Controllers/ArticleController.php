@@ -111,6 +111,37 @@ class ArticleController extends Controller
         $canonicalUrl = $article->canonical_url ?: url('/blog/'.$article->slug);
         $seoDescription = $article->seo_description ?: $article->excerpt;
 
+        $relatedArticles = [];
+        if ($article->category_id !== null) {
+            $relatedArticles = Article::query()
+                ->where('category_id', $article->category_id)
+                ->whereKeyNot($article->id)
+                ->where('is_active', true)
+                ->whereNotNull('published_at')
+                ->where('published_at', '<=', now())
+                ->orderByDesc('published_at')
+                ->limit(4)
+                ->get([
+                    'id',
+                    'title',
+                    'slug',
+                    'excerpt',
+                    'featured_image',
+                    'featured_image_alt',
+                    'published_at',
+                ])
+                ->map(fn (Article $relatedArticle): array => [
+                    'id' => $relatedArticle->id,
+                    'title' => $relatedArticle->title,
+                    'slug' => $relatedArticle->slug,
+                    'excerpt' => $relatedArticle->excerpt,
+                    'featured_image' => $relatedArticle->featured_image,
+                    'featured_image_alt' => $relatedArticle->featured_image_alt,
+                    'published_at' => $relatedArticle->published_at?->toISOString(),
+                ])
+                ->all();
+        }
+
         return Inertia::render('Blog/Show', [
             'article' => [
                 'id' => $article->id,
@@ -127,6 +158,7 @@ class ArticleController extends Controller
                 'author' => $article->author?->only(['id', 'name']),
                 'published_at' => $article->published_at?->toISOString(),
             ],
+            'relatedArticles' => $relatedArticles,
         ]);
     }
 }
