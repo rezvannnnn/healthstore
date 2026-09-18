@@ -153,7 +153,7 @@ function pageUrl(page: number): string {
                             دسته‌بندی محصولات
                         </p>
                         <h1
-                            class="mt-2 text-3xl font-bold text-gray-900 dark:text-white md:text-4xl"
+                            class="mt-2 text-3xl font-bold text-gray-900 md:text-4xl dark:text-white"
                         >
                             {{ category.name }}
                         </h1>
@@ -178,9 +178,7 @@ function pageUrl(page: number): string {
                 class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-gray-200 md:p-7 dark:bg-gray-900 dark:ring-gray-800"
             >
                 <div class="mb-5">
-                    <h2
-                        class="text-xl font-bold text-gray-900 dark:text-white"
-                    >
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">
                         زیر‌دسته‌ها
                     </h2>
                 </div>
@@ -227,10 +225,7 @@ function pageUrl(page: number): string {
                         :key="product.id"
                         class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:-translate-y-0.5 hover:shadow-md dark:bg-gray-900 dark:ring-gray-800"
                     >
-                        <Link
-                            :href="'/products/' + product.slug"
-                            class="block"
-                        >
+                        <Link :href="'/products/' + product.slug" class="block">
                             <div
                                 class="aspect-square bg-gray-100 dark:bg-gray-800"
                             >
@@ -288,7 +283,9 @@ function pageUrl(page: number): string {
                                 </div>
                             </div>
                             <button
-                                v-if="product.available && product.price !== null"
+                                v-if="
+                                    product.available && product.price !== null
+                                "
                                 type="button"
                                 class="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
                                 @click="addToCart(product.id)"
