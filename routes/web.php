@@ -36,6 +36,7 @@ Route::inertia('/register', 'Auth/Register')->name('register.form');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/categories/{category:slug}', [CategoryController::class, 'show'])->name('categories.show');
+Route::get('/brands', [BrandController::class, 'index'])->name('brands.index');
 Route::get('/brands/{brand:slug}', [BrandController::class, 'show'])->name('brands.show');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/blog', [ArticleController::class, 'index'])->name('blog.index');

@@ -16,6 +16,69 @@ class BrandController extends Controller
         protected InventoryService $inventoryService,
     ) {}
 
+    public function index(): Response
+    {
+        $paginator = Brand::query()
+            ->withCount([
+                'products as active_products_count' => fn ($query) => $query->where('is_active', true),
+            ])
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->paginate(24);
+
+        $brands = collect($paginator->items())
+            ->map(fn (Brand $brand) => [
+                'id' => $brand->id,
+                'name' => $brand->name,
+                'slug' => $brand->slug,
+                'description' => $brand->description,
+                'logo' => $brand->logo,
+                'products_count' => (int) $brand->getAttribute('active_products_count'),
+            ])
+            ->values()
+            ->all();
+
+        $structuredBrands = collect($brands)
+            ->map(fn (array $brand, int $index) => [
+                '@type' => 'ListItem',
+                'position' => ($paginator->currentPage() - 1) * $paginator->perPage() + $index + 1,
+                'url' => route('brands.show', $brand['slug']),
+                'name' => $brand['name'],
+            ])
+            ->all();
+
+        $structuredData = [
+            '@context' => 'https://schema.org',
+            '@type' => 'CollectionPage',
+            'name' => 'برندها | فروشگاه سلامت',
+            'description' => 'مشاهده برندهای فعال و محصولات هر برند در فروشگاه سلامت.',
+            'url' => route('brands.index'),
+        ];
+
+        if ($structuredBrands !== []) {
+            $structuredData['mainEntity'] = [
+                '@type' => 'ItemList',
+                'numberOfItems' => count($structuredBrands),
+                'itemListElement' => $structuredBrands,
+            ];
+        }
+
+        return Inertia::render('Brand/Index', [
+            'seo' => [
+                'title' => 'برندها | فروشگاه سلامت',
+                'description' => 'مشاهده برندهای فعال و محصولات هر برند در فروشگاه سلامت.',
+                'canonical' => route('brands.index'),
+            ],
+            'brands' => $brands,
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'total' => $paginator->total(),
+            ],
+            'structuredData' => $structuredData,
+        ]);
+    }
+
     public function show(Brand $brand): Response
     {
         abort_unless($brand->is_active, 404);
