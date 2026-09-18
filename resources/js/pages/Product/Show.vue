@@ -172,7 +172,7 @@ function addToCart(): void {
                         >
                         <Link
                             v-if="product.category_slug"
-                            :href="`/products?category=${encodeURIComponent(product.category_slug)}`"
+                            :href="'/categories/' + product.category_slug"
                             class="rounded-full bg-gray-100 px-3 py-1 text-gray-600 dark:bg-gray-800 dark:text-gray-300"
                             >{{ product.category }}</Link
                         >
