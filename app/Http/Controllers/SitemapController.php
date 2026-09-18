@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\ArticleCategory;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
@@ -48,6 +49,13 @@ class SitemapController extends Controller
             $urls[] = [
                 'loc' => route('products.show', $product),
                 'lastmod' => $product->updated_at?->toAtomString(),
+            ];
+        }
+
+        foreach (ArticleCategory::query()->where('is_active', true)->get(['slug', 'updated_at']) as $category) {
+            $urls[] = [
+                'loc' => route('blog.categories.show', $category->slug),
+                'lastmod' => $category->updated_at?->toAtomString(),
             ];
         }
 
