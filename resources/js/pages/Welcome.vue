@@ -183,7 +183,7 @@ function addToCart(product: FeaturedProduct): void {
                         <Link
                             v-for="category in props.categories"
                             :key="category.id"
-                            :href="`/products?category=${encodeURIComponent(category.slug)}`"
+                            :href="'/categories/' + category.slug"
                             class="rounded-2xl border border-slate-200 bg-slate-50 p-5 font-semibold transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50"
                             >{{ category.name }}</Link
                         >
