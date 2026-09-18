@@ -22,7 +22,7 @@ interface Pagination {
     total: number;
 }
 
-const props = defineProps<{
+defineProps<{
     seo: Seo;
     brands: Brand[];
     pagination: Pagination;
