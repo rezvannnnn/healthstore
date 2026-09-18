@@ -129,11 +129,59 @@ class ProductController extends Controller
             ->values()
             ->all();
 
+        $images = $product->images
+            ->sortBy([['is_primary', 'desc'], ['sort_order', 'asc']])
+            ->values();
+        $imagePaths = $images->pluck('image_path')->filter()->values();
+        if ($product->main_image && ! $imagePaths->contains($product->main_image)) {
+            $imagePaths->prepend($product->main_image);
+        }
+
+        $productUrl = $product->canonical_url ?: url('/products/'.$product->slug);
+        $structuredData = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Product',
+            'name' => $product->name,
+            'description' => $product->seo_description ?: $product->short_description,
+            'url' => $productUrl,
+        ];
+
+        if ($product->sku) {
+            $structuredData['sku'] = $product->sku;
+        }
+
+        if ($product->brand?->name) {
+            $structuredData['brand'] = [
+                '@type' => 'Brand',
+                'name' => $product->brand->name,
+            ];
+        }
+
+        if ($product->category?->name) {
+            $structuredData['category'] = $product->category->name;
+        }
+
+        if ($imagePaths->isNotEmpty()) {
+            $structuredData['image'] = $imagePaths->map(fn (string $path) => url($path))->all();
+        }
+
+        if ($price?->price !== null) {
+            $structuredData['offers'] = [
+                '@type' => 'Offer',
+                'price' => (float) $price->price,
+                'availability' => $this->inventoryService->isAvailable($product)
+                    ? 'https://schema.org/InStock'
+                    : 'https://schema.org/OutOfStock',
+                'url' => $productUrl,
+            ];
+        }
+
+
         return Inertia::render('Product/Show', [
             'seo' => [
                 'title' => $product->seo_title ?: $product->name,
                 'description' => $product->seo_description ?: $product->short_description,
-                'canonical' => $product->canonical_url ?: url('/products/'.$product->slug),
+                'canonical' => $productUrl,
             ],
             'product' => [
                 'id' => $product->id,
@@ -151,7 +199,7 @@ class ProductController extends Controller
                 'category' => $product->category?->name,
                 'category_slug' => $product->category?->slug,
                 'image' => $product->main_image,
-                'images' => $product->images->sortBy([['is_primary', 'desc'], ['sort_order', 'asc']])->values()->map(fn ($image) => [
+                'images' => $images->map(fn ($image) => [
                     'id' => $image->id,
                     'path' => $image->image_path,
                     'alt' => $image->alt_text ?: $product->name,
@@ -161,6 +209,7 @@ class ProductController extends Controller
                 'available_quantity' => $this->inventoryService->getAvailableQuantity($product),
                 'available' => $this->inventoryService->isAvailable($product),
             ],
+            'structuredData' => $structuredData,
             'relatedProducts' => $relatedProducts,
         ]);
     }

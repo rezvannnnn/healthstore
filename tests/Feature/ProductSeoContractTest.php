@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductPrice;
+use App\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -39,6 +41,53 @@ class ProductSeoContractTest extends TestCase
             ->where('seo.title', $product->name)
             ->where('seo.description', $product->short_description)
             ->where('seo.canonical', url('/products/'.$product->slug))
+        );
+    }
+
+    public function test_product_show_exposes_product_structured_data(): void
+    {
+        $product = $this->createProduct([
+            'name' => 'کرم مرطوب کننده',
+            'slug' => 'structured-data-cream',
+            'sku' => 'SKU-123',
+            'short_description' => 'کرم مناسب پوست خشک.',
+        ]);
+
+        ProductPrice::create([
+            'product_id' => $product->id,
+            'price_type' => 'retail',
+            'price' => 125000,
+            'min_quantity' => 1,
+            'is_active' => true,
+        ]);
+
+        $warehouse = Warehouse::create([
+            'name' => 'Structured Data Warehouse',
+            'code' => 'STRUCTURED-DATA-WH',
+            'is_active' => true,
+        ]);
+
+        Inventory::create([
+            'product_id' => $product->id,
+            'warehouse_id' => $warehouse->id,
+            'quantity' => 10,
+            'minimum_quantity' => 1,
+            'is_active' => true,
+        ]);
+
+        $response = $this->get('/products/'.$product->slug);
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->where('structuredData.@context', 'https://schema.org')
+            ->where('structuredData.@type', 'Product')
+            ->where('structuredData.name', $product->name)
+            ->where('structuredData.description', $product->short_description)
+            ->where('structuredData.url', url('/products/'.$product->slug))
+            ->where('structuredData.sku', $product->sku)
+            ->where('structuredData.offers.@type', 'Offer')
+            ->where('structuredData.offers.price', 125000)
+            ->where('structuredData.offers.availability', 'https://schema.org/InStock')
         );
     }
 
