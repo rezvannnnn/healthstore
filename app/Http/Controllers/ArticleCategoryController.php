@@ -9,6 +9,72 @@ use Inertia\Response;
 
 class ArticleCategoryController extends Controller
 {
+    public function index(): Response
+    {
+        $paginator = ArticleCategory::query()
+            ->withCount([
+                'articles as published_articles_count' => fn ($query) => $query
+                    ->where('is_active', true)
+                    ->whereNotNull('published_at')
+                    ->where('published_at', '<=', now()),
+            ])
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->paginate(24);
+
+        $categories = collect($paginator->items())
+            ->map(fn (ArticleCategory $category) => [
+                'id' => $category->id,
+                'name' => $category->name,
+                'slug' => $category->slug,
+                'description' => $category->description,
+                'articles_count' => (int) $category->getAttribute('published_articles_count'),
+            ])
+            ->values()
+            ->all();
+
+        $structuredCategories = collect($categories)
+            ->map(fn (array $category, int $index) => [
+                '@type' => 'ListItem',
+                'position' => ($paginator->currentPage() - 1) * $paginator->perPage() + $index + 1,
+                'url' => route('blog.categories.show', $category['slug']),
+                'name' => $category['name'],
+            ])
+            ->all();
+
+        $structuredData = [
+            '@context' => 'https://schema.org',
+            '@type' => 'CollectionPage',
+            'name' => 'دسته‌بندی‌های مجله | مجله سلامت',
+            'description' => 'مشاهده دسته‌بندی‌های فعال مجله سلامت و مطالب آموزشی هر دسته.',
+            'url' => route('blog.categories.index'),
+        ];
+
+        if ($structuredCategories !== []) {
+            $structuredData['mainEntity'] = [
+                '@type' => 'ItemList',
+                'numberOfItems' => count($structuredCategories),
+                'itemListElement' => $structuredCategories,
+            ];
+        }
+
+        return Inertia::render('Blog/Categories', [
+            'seo' => [
+                'title' => 'دسته‌بندی‌های مجله | مجله سلامت',
+                'description' => 'مشاهده دسته‌بندی‌های فعال مجله سلامت و مطالب آموزشی هر دسته.',
+                'canonical' => route('blog.categories.index'),
+            ],
+            'categories' => $categories,
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'total' => $paginator->total(),
+            ],
+            'structuredData' => $structuredData,
+        ]);
+    }
+
     public function show(ArticleCategory $articleCategory): Response
     {
         abort_unless($articleCategory->is_active, 404);

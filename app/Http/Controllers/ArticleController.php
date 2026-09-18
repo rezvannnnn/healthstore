@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\ArticleCategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -71,6 +72,12 @@ class ArticleController extends Controller
             ];
         }
 
+        $categories = ArticleCategory::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug']);
+
         return Inertia::render('Blog/Index', [
             'seo' => [
                 'title' => 'مجله سلامت | مطالب آموزشی و کاربردی سلامت',
@@ -84,6 +91,7 @@ class ArticleController extends Controller
                 'total' => $paginator->total(),
             ],
             'structuredData' => $structuredData,
+            'categories' => $categories,
             'filters' => [
                 'search' => $search,
             ],

@@ -42,6 +42,7 @@ Route::get('/brands', [BrandController::class, 'index'])->name('brands.index');
 Route::get('/brands/{brand:slug}', [BrandController::class, 'show'])->name('brands.show');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/blog', [ArticleController::class, 'index'])->name('blog.index');
+Route::get('/blog/categories', [ArticleCategoryController::class, 'index'])->name('blog.categories.index');
 Route::get('/blog/category/{articleCategory:slug}', [ArticleCategoryController::class, 'show'])->name('blog.categories.show');
 Route::get('/blog/{slug}', [ArticleController::class, 'show'])->name('blog.show');
 

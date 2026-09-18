@@ -29,6 +29,9 @@ class SitemapController extends Controller
             [
                 'loc' => route('brands.index'),
             ],
+            [
+                'loc' => route('blog.categories.index'),
+            ],
         ];
 
         foreach (Category::query()->where('is_active', true)->get(['slug', 'updated_at']) as $category) {
