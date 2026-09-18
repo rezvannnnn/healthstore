@@ -33,7 +33,7 @@ class BrandController extends Controller
                 'slug' => $brand->slug,
                 'description' => $brand->description,
                 'logo' => $brand->logo,
-                'products_count' => (int) $brand->active_products_count,
+                'products_count' => (int) $brand->getAttribute('active_products_count'),
             ])
             ->values()
             ->all();
