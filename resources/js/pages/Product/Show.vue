@@ -27,6 +27,7 @@ interface Product {
     description: string | null;
     specifications: Record<string, unknown> | null;
     brand: string | null;
+    brand_slug: string | null;
     category: string | null;
     category_slug: string | null;
     images: ProductImage[];
@@ -165,11 +166,13 @@ function addToCart(): void {
                 </div>
                 <div class="flex flex-col justify-center">
                     <div class="flex flex-wrap gap-2 text-xs">
-                        <span
-                            v-if="product.brand"
-                            class="rounded-full bg-indigo-50 px-3 py-1 font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
-                            >{{ product.brand }}</span
+                        <Link
+                            v-if="product.brand && product.brand_slug"
+                            :href="'/brands/' + product.brand_slug"
+                            class="rounded-full bg-indigo-50 px-3 py-1 font-medium text-indigo-700 hover:underline dark:bg-indigo-950 dark:text-indigo-300"
                         >
+                            {{ product.brand }}
+                        </Link>
                         <Link
                             v-if="product.category_slug"
                             :href="'/categories/' + product.category_slug"

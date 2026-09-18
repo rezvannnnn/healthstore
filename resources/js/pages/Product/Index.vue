@@ -9,6 +9,7 @@ interface Product {
     sku: string | null;
     short_description: string | null;
     brand: string | null;
+    brand_slug: string | null;
     category: string | null;
     image: string | null;
     price: number | null;
@@ -201,11 +202,13 @@ function addToCart(productId: number): void {
                             <div
                                 class="flex items-center justify-between gap-2"
                             >
-                                <span
-                                    v-if="product.brand"
-                                    class="text-xs text-indigo-600"
-                                    >{{ product.brand }}</span
+                                <Link
+                                    v-if="product.brand && product.brand_slug"
+                                    :href="'/brands/' + product.brand_slug"
+                                    class="text-xs text-indigo-600 hover:underline"
                                 >
+                                    {{ product.brand }}
+                                </Link>
                                 <span
                                     v-if="product.category"
                                     class="text-xs text-gray-400"
