@@ -45,7 +45,7 @@ class BlogIndexStructuredDataTest extends TestCase
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
             ->where('structuredData.@type', 'CollectionPage')
-            ->where('structuredData.mainEntity', null)
+            ->missing('structuredData.mainEntity')
         );
     }
 }
