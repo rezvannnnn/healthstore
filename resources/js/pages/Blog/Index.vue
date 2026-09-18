@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 
+interface Category {
+    id: number;
+    name: string;
+    slug: string;
+}
+
 interface Article {
     id: number;
     title: string;
@@ -13,6 +19,7 @@ interface Article {
 }
 
 defineProps<{
+    categories: Category[];
     articles: Article[];
     pagination: { current_page: number; last_page: number; total: number };
     filters: { search: string };
@@ -72,6 +79,25 @@ function pageUrl(page: number): string {
                 مطالب آموزشی و کاربردی درباره سلامت و محصولات بهداشتی
             </p>
         </header>
+        <div
+            v-if="categories.length"
+            class="flex flex-wrap items-center gap-2"
+        >
+            <Link
+                href="/blog/categories"
+                class="rounded-full border px-3 py-1.5 text-sm font-medium hover:bg-gray-50"
+            >
+                همه دسته‌ها
+            </Link>
+            <Link
+                v-for="category in categories"
+                :key="category.id"
+                :href="'/blog/category/' + category.slug"
+                class="rounded-full border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+            >
+                {{ category.name }}
+            </Link>
+        </div>
         <form method="get" action="/blog" class="flex gap-3">
             <input
                 name="search"
