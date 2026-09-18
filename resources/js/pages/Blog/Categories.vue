@@ -62,19 +62,15 @@ function pageUrl(page: number): string {
                     >مجله سلامت</Link
                 >
                 <span>/</span>
-                <span class="text-gray-900 dark:text-white"
-                    >دسته‌بندی‌ها</span
-                >
+                <span class="text-gray-900 dark:text-white">دسته‌بندی‌ها</span>
             </nav>
 
             <header
                 class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-gray-200 md:p-8 dark:bg-gray-900 dark:ring-gray-800"
             >
-                <p class="text-sm font-medium text-indigo-600">
-                    انتخاب موضوع
-                </p>
+                <p class="text-sm font-medium text-indigo-600">انتخاب موضوع</p>
                 <h1
-                    class="mt-2 text-3xl font-bold text-gray-900 dark:text-white md:text-4xl"
+                    class="mt-2 text-3xl font-bold text-gray-900 md:text-4xl dark:text-white"
                 >
                     دسته‌بندی‌های مجله سلامت
                 </h1>
@@ -108,9 +104,7 @@ function pageUrl(page: number): string {
                         {{ category.description }}
                     </p>
                     <p class="mt-4 text-sm font-medium text-gray-500">
-                        {{
-                            category.articles_count.toLocaleString('fa-IR')
-                        }}
+                        {{ category.articles_count.toLocaleString('fa-IR') }}
                         مقاله منتشرشده
                     </p>
                 </Link>

@@ -79,10 +79,7 @@ function pageUrl(page: number): string {
                 مطالب آموزشی و کاربردی درباره سلامت و محصولات بهداشتی
             </p>
         </header>
-        <div
-            v-if="categories.length"
-            class="flex flex-wrap items-center gap-2"
-        >
+        <div v-if="categories.length" class="flex flex-wrap items-center gap-2">
             <Link
                 href="/blog/categories"
                 class="rounded-full border px-3 py-1.5 text-sm font-medium hover:bg-gray-50"
