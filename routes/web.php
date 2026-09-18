@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\ArticleCategoryController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CartController;
@@ -79,8 +80,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
     Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
-    Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
-    Route::put('/products/{product}', [AdminProductController::class, 'update'])->name('products.update');
+    Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])->name('admin.products.edit');
+    Route::put('/products/{product}', [AdminProductController::class, 'update'])->name('admin.products.update');
     Route::get('/categories', [AdminCategoryController::class, 'index'])->name('categories.index');
     Route::get('/categories/create', [AdminCategoryController::class, 'create'])->name('categories.create');
     Route::post('/categories', [AdminCategoryController::class, 'store'])->name('categories.store');
@@ -90,7 +91,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/brands/create', [AdminBrandController::class, 'create'])->name('brands.create');
     Route::post('/brands', [AdminBrandController::class, 'store'])->name('brands.store');
     Route::put('/brands/{brand}', [AdminBrandController::class, 'update'])->name('brands.update');
-    Route::get('/brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('brands.edit');
+    Route::get('/brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('admin.brands.edit');
     Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
     Route::post('/inventory', [AdminInventoryController::class, 'store'])->name('inventory.store');
     Route::post('/inventory/{inventory}/adjust', [AdminInventoryController::class, 'adjust'])->name('inventory.adjust');
@@ -105,7 +106,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/coupons', [AdminCouponController::class, 'index'])->name('coupons.index');
     Route::post('/coupons', [AdminCouponController::class, 'store'])->name('coupons.store');
     Route::put('/coupons/{coupon}', [AdminCouponController::class, 'update'])->name('coupons.update');
-    Route::delete('/coupons/{coupon}', [AdminCouponController::class, 'destroy'])->name('coupons.destroy');
+    Route::delete('/coupons/{coupon}', [AdminCouponController::class, 'destroy'])->name('admin.coupons.destroy');
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
