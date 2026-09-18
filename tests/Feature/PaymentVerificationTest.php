@@ -93,6 +93,11 @@ class PaymentVerificationTest extends TestCase
         };
 
         $service = new PaymentService(new InventoryReservationService, $gateway);
+        $gatewayName = strtolower(class_basename(get_class($gateway)));
+        if (str_ends_with($gatewayName, 'Gateway')) {
+            $gatewayName = substr($gatewayName, 0, -strlen('Gateway'));
+        }
+        $payment->update(['gateway' => $gatewayName]);
         $result = $service->verifyGatewayPayment($payment, [
             'Authority' => 'AUTH-PAID',
             'Status' => 'OK',
@@ -152,6 +157,11 @@ class PaymentVerificationTest extends TestCase
         };
 
         $service = new PaymentService(new InventoryReservationService, $gateway);
+        $gatewayName = strtolower(class_basename(get_class($gateway)));
+        if (str_ends_with($gatewayName, 'Gateway')) {
+            $gatewayName = substr($gatewayName, 0, -strlen('Gateway'));
+        }
+        $payment->update(['gateway' => $gatewayName]);
         $result = $service->verifyGatewayPayment($payment, [
             'Authority' => 'AUTH-PENDING',
             'Status' => 'OK',
