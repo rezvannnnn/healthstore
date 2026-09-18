@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductPrice;
+use App\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -56,6 +58,20 @@ class ProductSeoContractTest extends TestCase
             'price_type' => 'retail',
             'price' => 125000,
             'min_quantity' => 1,
+            'is_active' => true,
+        ]);
+
+        $warehouse = Warehouse::create([
+            'name' => 'Structured Data Warehouse',
+            'code' => 'STRUCTURED-DATA-WH',
+            'is_active' => true,
+        ]);
+
+        Inventory::create([
+            'product_id' => $product->id,
+            'warehouse_id' => $warehouse->id,
+            'quantity' => 10,
+            'minimum_quantity' => 1,
             'is_active' => true,
         ]);
 
