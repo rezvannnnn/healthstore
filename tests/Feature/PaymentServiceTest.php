@@ -377,5 +377,4 @@ class PaymentServiceTest extends TestCase
 
         $service->verifyGatewayPayment($payment, ['Authority' => 'AUTH-MISMATCH', 'Status' => 'OK']);
     }
-
 }

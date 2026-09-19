@@ -273,7 +273,6 @@ class PaymentService
         });
     }
 
-
     protected function assertPaymentGatewayConsistency(Payment $payment, PaymentGatewayInterface $gateway): void
     {
         $gatewayName = $this->gatewayName($gateway);
