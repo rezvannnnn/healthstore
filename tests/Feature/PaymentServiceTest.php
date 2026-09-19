@@ -332,4 +332,50 @@ class PaymentServiceTest extends TestCase
         $this->assertEquals('paid', $payment->status);
         $this->assertEquals('TX-999999', $payment->transaction_id);
     }
+
+    public function test_verification_rejects_payment_recorded_for_a_different_gateway(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->createOrder($user, 360000);
+        $gateway = new class implements PaymentGatewayInterface
+        {
+            public function request(Payment $payment): array
+            {
+                return [
+                    'authority' => 'AUTH-MISMATCH',
+                    'payment_url' => 'https://gateway.test/pay/AUTH-MISMATCH',
+                    'response' => ['code' => 100],
+                ];
+            }
+
+            public function verify(Payment $payment, array $callbackData): array
+            {
+                return [
+                    'success' => true,
+                    'verified' => true,
+                    'transaction_id' => 'TX-MISMATCH',
+                    'reference_number' => 'REF-MISMATCH',
+                    'response' => ['code' => 100],
+                ];
+            }
+
+            public function paymentUrl(array $gatewayData): string
+            {
+                return 'https://gateway.test/pay/'.($gatewayData['authority'] ?? '');
+            }
+        };
+
+        $service = new PaymentService(new InventoryReservationService, $gateway);
+        $payment = $service->create($order);
+        $payment->update([
+            'gateway' => 'different-gateway',
+            'authority' => 'AUTH-MISMATCH',
+        ]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('درگاه پرداخت این تراکنش با درگاه فعال سامانه مطابقت ندارد.');
+
+        $service->verifyGatewayPayment($payment, ['Authority' => 'AUTH-MISMATCH', 'Status' => 'OK']);
+    }
+
 }

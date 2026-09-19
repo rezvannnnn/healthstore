@@ -91,6 +91,7 @@ class PaymentService
                 return ['success' => false, 'verified' => false, 'payment' => $payment, 'message' => 'این پرداخت دیگر در وضعیت pending نیست.'];
             }
             $gateway = $this->gateway ?? app(PaymentGatewayInterface::class);
+            $this->assertPaymentGatewayConsistency($payment, $gateway);
             $payment->loadMissing('order');
             $result = $gateway->verify($payment, $callbackData);
             if (isset($result['response'])) {
@@ -117,6 +118,7 @@ class PaymentService
             }
 
             $gateway = $this->gateway ?? app(PaymentGatewayInterface::class);
+            $this->assertPaymentGatewayConsistency($payment, $gateway);
             $payment->loadMissing('order');
             $result = $gateway->verify($payment, $callbackData);
             $gatewayResponse = $result['response'] ?? null;
@@ -269,6 +271,16 @@ class PaymentService
 
             return true;
         });
+    }
+
+
+    protected function assertPaymentGatewayConsistency(Payment $payment, PaymentGatewayInterface $gateway): void
+    {
+        $gatewayName = $this->gatewayName($gateway);
+
+        if ($payment->gateway !== null && $payment->gateway !== $gatewayName) {
+            throw new RuntimeException('درگاه پرداخت این تراکنش با درگاه فعال سامانه مطابقت ندارد.');
+        }
     }
 
     protected function gatewayName(PaymentGatewayInterface $gateway): string
