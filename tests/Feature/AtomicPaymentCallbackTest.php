@@ -149,7 +149,7 @@ class AtomicPaymentCallbackTest extends TestCase
             $gatewayName = substr($gatewayName, 0, -strlen('Gateway'));
         }
 
-        $payment->update(['gateway' => $gatewayName,
+        $payment->update(['gateway' => $gatewayName]);
 
         $first = $service->verifyAndFinalizeGatewayPayment($payment, [
             'Authority' => 'AUTH-ATOMIC',
