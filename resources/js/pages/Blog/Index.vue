@@ -24,7 +24,7 @@ interface Seo {
     canonical: string;
 }
 
-const props = defineProps<{
+defineProps<{
     seo: Seo;
     categories: Category[];
     articles: Article[];
