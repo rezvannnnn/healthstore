@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Order;
 use App\Models\User;
+use App\Services\InventoryReservationService;
 use App\Services\Payment\PaymentGatewayInterface;
 use App\Services\Payment\ZarinPalGateway;
 use App\Services\PaymentService;
