@@ -70,10 +70,7 @@ function pageUrl(page: number): string {
         />
         <meta property="og:url" :content="seo.canonical" />
         <meta name="twitter:card" content="summary" />
-        <meta
-            name="twitter:title"
-            content="مجله سلامت | مطالب آموزشی و کاربردی سلامت"
-        />
+        <meta name="twitter:title" :content="seo.title" />
         <meta
             name="twitter:description"
             :content="seo.description"
