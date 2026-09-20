@@ -20,7 +20,7 @@ class ZarinPalGateway implements PaymentGatewayInterface
             );
         }
 
-        $amount = (int) round((float) $payment->amount);
+        $amount = $this->toGatewayAmount((float) $payment->amount);
 
         if ($amount <= 0) {
             throw new RuntimeException(
@@ -127,7 +127,7 @@ class ZarinPalGateway implements PaymentGatewayInterface
             ];
         }
 
-        $amount = (int) round((float) $payment->amount);
+        $amount = $this->toGatewayAmount((float) $payment->amount);
 
         if ($amount <= 0) {
             throw new RuntimeException('مبلغ پرداخت برای Verify معتبر نیست.');
@@ -201,6 +201,15 @@ class ZarinPalGateway implements PaymentGatewayInterface
         }
 
         return $baseUrl.'/pg/StartPay/'.$authority;
+    }
+
+    /**
+     * Storefront prices are entered and displayed in toman.
+     * ZarinPal's REST API expects the amount in rial.
+     */
+    private function toGatewayAmount(float $tomanAmount): int
+    {
+        return (int) round($tomanAmount * 10);
     }
 
     private function requestEndpoint(): string
