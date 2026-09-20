@@ -381,6 +381,65 @@ class InventoryReservationTest extends TestCase
         );
     }
 
+    public function test_consumed_reservation_cannot_be_released_again(): void
+    {
+        $user = User::factory()->create();
+
+        $product = $this->createProduct(
+            'Consumed Then Released Product',
+            'consumed-then-released-product',
+            'RES-007'
+        );
+
+        $warehouse = $this->createWarehouse();
+
+        $inventory = $this->createInventory(
+            $product,
+            $warehouse,
+            10
+        );
+
+        $order = $this->createOrder(
+            $user
+        );
+
+        $reservation = InventoryReservation::create([
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+            'inventory_id' => $inventory->id,
+            'quantity' => 2,
+            'status' => 'active',
+            'expires_at' => now()->addMinutes(20),
+            'released_at' => null,
+            'consumed_at' => null,
+        ]);
+
+        $service = new InventoryReservationService;
+
+        $this->assertTrue(
+            $service->consume($reservation)
+        );
+
+        $this->assertFalse(
+            $service->release($reservation)
+        );
+
+        $reservation->refresh();
+
+        $this->assertEquals(
+            'consumed',
+            $reservation->status
+        );
+
+        $this->assertNotNull(
+            $reservation->consumed_at
+        );
+
+        $this->assertNull(
+            $reservation->released_at
+        );
+    }
+
     public function test_expired_reservation_can_be_released_without_changing_physical_stock(): void
     {
         $user = User::factory()->create();
