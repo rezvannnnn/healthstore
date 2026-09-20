@@ -180,7 +180,7 @@ class CategoryController extends Controller
                 'name' => $category->name,
                 'slug' => $category->slug,
                 'description' => $category->description,
-                'image' => $category->image,
+                'image' => $this->absoluteAssetUrl($category->image),
                 'parent' => $category->parent && $category->parent->is_active
                     ? $category->parent->only(['id', 'name', 'slug'])
                     : null,
