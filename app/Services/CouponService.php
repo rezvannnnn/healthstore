@@ -6,10 +6,13 @@ use App\Models\Coupon;
 use App\Models\CouponUsage;
 use App\Models\Order;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class CouponService
 {
+    private const RESERVATION_MINUTES = 20;
+
     /**
      * Validate a coupon and calculate its discount while the coupon row is locked.
      * The caller should invoke this inside the order transaction.
@@ -40,7 +43,23 @@ class CouponService
 
         $globalUsage = CouponUsage::query()
             ->where('coupon_id', $coupon->id)
-            ->whereIn('status', ['reserved', 'consumed'])
+            ->where(function ($query) {
+                $query->where('status', 'consumed')
+                    ->orWhere(function ($query) {
+                        $query->where('status', 'reserved')
+                            ->where(function ($query) {
+                                $query->where('expires_at', '>', now())
+                                    ->orWhere(function ($query) {
+                                        $query->whereNull('expires_at')
+                                            ->where(
+                                                'reserved_at',
+                                                '>',
+                                                now()->subMinutes(self::RESERVATION_MINUTES)
+                                            );
+                                    });
+                            });
+                    });
+            })
             ->count();
 
         if ($coupon->usage_limit !== null && $globalUsage >= (int) $coupon->usage_limit) {
@@ -50,7 +69,23 @@ class CouponService
         $userUsage = CouponUsage::query()
             ->where('coupon_id', $coupon->id)
             ->where('user_id', $userId)
-            ->whereIn('status', ['reserved', 'consumed'])
+            ->where(function ($query) {
+                $query->where('status', 'consumed')
+                    ->orWhere(function ($query) {
+                        $query->where('status', 'reserved')
+                            ->where(function ($query) {
+                                $query->where('expires_at', '>', now())
+                                    ->orWhere(function ($query) {
+                                        $query->whereNull('expires_at')
+                                            ->where(
+                                                'reserved_at',
+                                                '>',
+                                                now()->subMinutes(self::RESERVATION_MINUTES)
+                                            );
+                                    });
+                            });
+                    });
+            })
             ->count();
 
         if (
@@ -74,7 +109,55 @@ class CouponService
             'order_id' => $order->id,
             'status' => 'reserved',
             'reserved_at' => now(),
+            'expires_at' => now()->addMinutes(self::RESERVATION_MINUTES),
         ]);
+    }
+
+    public function releaseExpiredReservations(): int
+    {
+        $now = now();
+        $legacyCutoff = $now->copy()->subMinutes(self::RESERVATION_MINUTES);
+
+        $usageIds = CouponUsage::query()
+            ->where('status', 'reserved')
+            ->where(function ($query) use ($now, $legacyCutoff) {
+                $query->where('expires_at', '<=', $now)
+                    ->orWhere(function ($query) use ($legacyCutoff) {
+                        $query->whereNull('expires_at')
+                            ->whereNotNull('reserved_at')
+                            ->where('reserved_at', '<=', $legacyCutoff);
+                    });
+            })
+            ->pluck('id');
+
+        $releasedCount = 0;
+
+        foreach ($usageIds as $usageId) {
+            $released = DB::transaction(function () use ($usageId): bool {
+                $usage = CouponUsage::query()
+                    ->whereKey($usageId)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $usage || $usage->status !== 'reserved') {
+                    return false;
+                }
+
+                $usage->update([
+                    'status' => 'released',
+                    'released_at' => now(),
+                    'consumed_at' => null,
+                ]);
+
+                return true;
+            });
+
+            if ($released) {
+                $releasedCount++;
+            }
+        }
+
+        return $releasedCount;
     }
 
     public function consumeForOrder(Order $order): bool
