@@ -13,7 +13,11 @@ class ArticleController extends Controller
 {
     public function index(Request $request): Response
     {
-        $search = trim((string) $request->query('search', ''));
+        $validatedFilters = $request->validate([
+            'search' => ['nullable', 'string', 'max:200'],
+        ]);
+
+        $search = trim((string) ($validatedFilters['search'] ?? ''));
 
         $query = Article::query()
             ->with('category:id,name,slug')
