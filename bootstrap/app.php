@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withSchedule(function (Schedule $schedule): void {
         $schedule->command('inventory:release-expired-reservations')->everyMinute();
+        $schedule->command('coupon:release-expired-reservations')->everyMinute();
     })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([

@@ -116,6 +116,92 @@ class CouponServiceTest extends TestCase
         );
     }
 
+    public function test_expired_reserved_coupon_usage_can_be_released(): void
+    {
+        $user = User::factory()->create();
+        $coupon = Coupon::create([
+            'code' => 'EXPIRED10',
+            'type' => 'percent',
+            'value' => 10,
+            'is_active' => true,
+        ]);
+
+        $order = Order::create([
+            'order_number' => 'COUPON-EXPIRED-001',
+            'user_id' => $user->id,
+            'status' => 'pending',
+            'payment_status' => 'pending',
+            'subtotal' => 200000,
+            'discount_amount' => 20000,
+            'shipping_amount' => 0,
+            'total_amount' => 180000,
+            'currency' => 'IRR',
+            'coupon_id' => $coupon->id,
+            'coupon_code' => 'EXPIRED10',
+        ]);
+
+        $usage = CouponUsage::create([
+            'coupon_id' => $coupon->id,
+            'user_id' => $user->id,
+            'order_id' => $order->id,
+            'status' => 'reserved',
+            'reserved_at' => now()->subMinutes(21),
+            'expires_at' => now()->subMinute(),
+        ]);
+
+        $releasedCount = app(CouponService::class)->releaseExpiredReservations();
+
+        $usage->refresh();
+
+        $this->assertSame(1, $releasedCount);
+        $this->assertEquals('released', $usage->status);
+        $this->assertNotNull($usage->released_at);
+    }
+
+    public function test_expired_reserved_usage_does_not_consume_coupon_capacity_before_cleanup(): void
+    {
+        $user = User::factory()->create();
+        $coupon = Coupon::create([
+            'code' => 'STALE10',
+            'type' => 'percent',
+            'value' => 10,
+            'usage_limit' => 1,
+            'is_active' => true,
+        ]);
+
+        $order = Order::create([
+            'order_number' => 'COUPON-STALE-001',
+            'user_id' => $user->id,
+            'status' => 'pending',
+            'payment_status' => 'pending',
+            'subtotal' => 200000,
+            'discount_amount' => 20000,
+            'shipping_amount' => 0,
+            'total_amount' => 180000,
+            'currency' => 'IRR',
+            'coupon_id' => $coupon->id,
+            'coupon_code' => 'STALE10',
+        ]);
+
+        CouponUsage::create([
+            'coupon_id' => $coupon->id,
+            'user_id' => $user->id,
+            'order_id' => $order->id,
+            'status' => 'reserved',
+            'reserved_at' => now()->subMinutes(21),
+            'expires_at' => now()->subMinute(),
+        ]);
+
+        $result = app(CouponService::class)->prepareForOrder(
+            'STALE10',
+            User::factory()->create()->id,
+            200000
+        );
+
+        $this->assertSame($coupon->id, $result['coupon']?->id);
+        $this->assertSame(20000.0, $result['discount_amount']);
+    }
+
     public function test_empty_coupon_code_is_a_no_op(): void
     {
         $user = User::factory()->create();
