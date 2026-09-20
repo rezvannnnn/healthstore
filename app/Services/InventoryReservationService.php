@@ -157,23 +157,32 @@ class InventoryReservationService
         InventoryReservation $reservation
     ): bool {
         return DB::transaction(function () use ($reservation) {
-            $reservation->refresh();
+            $lockedReservation = InventoryReservation::query()
+                ->whereKey($reservation->id)
+                ->lockForUpdate()
+                ->first();
 
-            if ($reservation->status !== 'active') {
+            if (! $lockedReservation) {
+                throw new RuntimeException(
+                    'رزرو موجودی پیدا نشد.'
+                );
+            }
+
+            if ($lockedReservation->status !== 'active') {
                 return false;
             }
 
             /*
              * An expired reservation cannot be consumed.
              */
-            if ($reservation->expires_at->isPast()) {
+            if ($lockedReservation->expires_at->isPast()) {
                 return false;
             }
 
             /*
              * Lock the physical inventory row before reducing stock.
              */
-            $inventory = $reservation->inventory()
+            $inventory = $lockedReservation->inventory()
                 ->lockForUpdate()
                 ->first();
 
@@ -183,7 +192,7 @@ class InventoryReservationService
                 );
             }
 
-            if ($inventory->quantity < $reservation->quantity) {
+            if ($inventory->quantity < $lockedReservation->quantity) {
                 throw new RuntimeException(
                     'موجودی فیزیکی برای مصرف رزرو کافی نیست.'
                 );
@@ -195,10 +204,10 @@ class InventoryReservationService
              */
             $inventory->decrement(
                 'quantity',
-                $reservation->quantity
+                $lockedReservation->quantity
             );
 
-            $reservation->update([
+            $lockedReservation->update([
                 'status' => 'consumed',
                 'consumed_at' => now(),
                 'released_at' => null,
@@ -218,13 +227,22 @@ class InventoryReservationService
         InventoryReservation $reservation
     ): bool {
         return DB::transaction(function () use ($reservation) {
-            $reservation->refresh();
+            $lockedReservation = InventoryReservation::query()
+                ->whereKey($reservation->id)
+                ->lockForUpdate()
+                ->first();
 
-            if ($reservation->status !== 'active') {
+            if (! $lockedReservation) {
+                throw new RuntimeException(
+                    'رزرو موجودی پیدا نشد.'
+                );
+            }
+
+            if ($lockedReservation->status !== 'active') {
                 return false;
             }
 
-            $reservation->update([
+            $lockedReservation->update([
                 'status' => 'released',
                 'released_at' => now(),
                 'consumed_at' => null,
