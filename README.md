@@ -49,6 +49,20 @@ APP_URL=https://your-domain.example
 
 `APP_KEY` باید یک مقدار امن و ثابت باشد و هرگز در repository قرار نگیرد. اطلاعات درگاه پرداخت، پیامک و سایر سرویس‌های خارجی نیز فقط از طریق environment configuration تنظیم شوند.
 
+## Scheduler
+
+برای اجرای cleanup رزروهای منقضی‌شده، scheduler لاراول باید روی سرور فعال باشد. یک cron entry را با کاربر اجرای برنامه تنظیم کنید:
+
+```cron
+* * * * * cd /path/to/healthstore && php artisan schedule:run >> /dev/null 2>&1
+```
+
+این scheduler دستورات release رزرو موجودی و رزرو کوپن منقضی‌شده را هر دقیقه اجرا می‌کند.
+
+## وضعیت سرویس‌های خارجی
+
+در حال حاضر پیاده‌سازی `FakeSmsProvider` برای محیط توسعه/تست استفاده می‌شود. پیش از production باید provider واقعی پیامک و تنظیمات امن آن در environment configuration جایگزین و پیکربندی شود.
+
 ## مسیرهای اصلی
 
 - `/` صفحه اصلی
