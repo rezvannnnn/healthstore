@@ -15,7 +15,6 @@ Artisan::command('inventory:release-expired-reservations', function (InventoryRe
     $this->info("Released {$releasedCount} expired inventory reservation(s).");
 })->purpose('Release expired inventory reservations');
 
-
 Artisan::command('coupon:release-expired-reservations', function (CouponService $service) {
     $releasedCount = $service->releaseExpiredReservations();
 
