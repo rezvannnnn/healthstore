@@ -41,7 +41,7 @@ class ArticleController extends Controller
                 'title' => $article->title,
                 'slug' => $article->slug,
                 'excerpt' => $article->excerpt,
-                'featured_image' => $featuredImage,
+                'featured_image' => $article->featured_image,
                 'featured_image_alt' => $article->featured_image_alt,
                 'category' => $article->category?->only(['id', 'name', 'slug']),
                 'published_at' => $article->published_at?->toISOString(),
@@ -151,7 +151,7 @@ class ArticleController extends Controller
                 'slug' => $article->slug,
                 'excerpt' => $article->excerpt,
                 'content' => $article->content,
-                'featured_image' => $article->featured_image,
+                'featured_image' => $featuredImage,
                 'featured_image_alt' => $article->featured_image_alt,
                 'seo_title' => $article->seo_title,
                 'seo_description' => $seoDescription,
@@ -162,6 +162,8 @@ class ArticleController extends Controller
             ],
             'relatedArticles' => $relatedArticles,
         ]);
+    }
+
     protected function absoluteAssetUrl(?string $path): ?string
     {
         if ($path === null || trim($path) === '') {
@@ -175,7 +177,5 @@ class ArticleController extends Controller
         }
 
         return url(ltrim($path, '/'));
-    }
-
     }
 }
