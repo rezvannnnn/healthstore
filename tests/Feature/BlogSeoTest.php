@@ -45,6 +45,18 @@ class BlogSeoTest extends TestCase
             ->where('article.featured_image', url($article->featured_image)));
     }
 
+    public function test_blog_search_rejects_overlong_input(): void
+    {
+        $this->get('/blog?search='.str_repeat('a', 201))
+            ->assertSessionHasErrors('search');
+    }
+
+    public function test_blog_search_rejects_non_string_input(): void
+    {
+        $this->get('/blog?search[]=health')
+            ->assertSessionHasErrors('search');
+    }
+
     public function test_article_seo_falls_back_to_excerpt_and_slug_canonical(): void
     {
         $article = Article::create([
