@@ -110,7 +110,8 @@ function addToCart(): void {
             v-if="product.image"
             name="twitter:image"
             :content="product.image"
-        />    </Head>
+        />
+    </Head>
 
     <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
         <div class="mx-auto max-w-6xl space-y-8">

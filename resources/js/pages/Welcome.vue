@@ -59,7 +59,8 @@ function addToCart(product: FeaturedProduct): void {
         <meta property="og:url" :content="seo.canonical" />
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" :content="seo.title" />
-        <meta name="twitter:description" :content="seo.description" />    </Head>
+        <meta name="twitter:description" :content="seo.description" />
+    </Head>
 
     <div dir="rtl" class="min-h-screen bg-slate-50 text-slate-900">
         <header class="border-b border-slate-200 bg-white">

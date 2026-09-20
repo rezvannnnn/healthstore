@@ -47,7 +47,8 @@ function pageUrl(page: number): string {
         <meta property="og:url" :content="seo.canonical" />
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" :content="seo.title" />
-        <meta name="twitter:description" :content="seo.description" />    </Head>
+        <meta name="twitter:description" :content="seo.description" />
+    </Head>
 
     <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
         <div class="mx-auto max-w-7xl space-y-8">
