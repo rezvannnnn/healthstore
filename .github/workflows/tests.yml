@@ -37,11 +37,8 @@ jobs:
 
       - name: Setup Application
         run: |
-          composer install --prefer-dist --no-interaction --no-progress
-          cp .env.example .env
-          php artisan key:generate --ansi
-          php artisan migrate --force --ansi
-          npm ci
+          composer update --prefer-dist --no-interaction --no-progress
+          composer setup
 
       - name: Format frontend resources
         run: npm run format
