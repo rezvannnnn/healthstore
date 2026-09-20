@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use App\Models\ArticleCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -40,7 +41,7 @@ class ArticleController extends Controller
                 'title' => $article->title,
                 'slug' => $article->slug,
                 'excerpt' => $article->excerpt,
-                'featured_image' => $article->featured_image,
+                'featured_image' => $featuredImage,
                 'featured_image_alt' => $article->featured_image_alt,
                 'category' => $article->category?->only(['id', 'name', 'slug']),
                 'published_at' => $article->published_at?->toISOString(),
@@ -110,6 +111,7 @@ class ArticleController extends Controller
 
         $canonicalUrl = $article->canonical_url ?: url('/blog/'.$article->slug);
         $seoDescription = $article->seo_description ?: $article->excerpt;
+        $featuredImage = $this->absoluteAssetUrl($article->featured_image);
 
         $relatedArticles = [];
         if ($article->category_id !== null) {
@@ -160,5 +162,20 @@ class ArticleController extends Controller
             ],
             'relatedArticles' => $relatedArticles,
         ]);
+    protected function absoluteAssetUrl(?string $path): ?string
+    {
+        if ($path === null || trim($path) === '') {
+            return null;
+        }
+
+        $path = trim($path);
+
+        if (Str::startsWith($path, ['http://', 'https://'])) {
+            return $path;
+        }
+
+        return url(ltrim($path, '/'));
+    }
+
     }
 }
