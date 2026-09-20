@@ -105,30 +105,80 @@ class PaymentService
 
     public function verifyAndFinalizeGatewayPayment(Payment $payment, array $callbackData): array
     {
-        return DB::transaction(function () use ($payment, $callbackData): array {
-            $payment = Payment::query()->whereKey($payment->id)->lockForUpdate()->first();
-            if (! $payment) {
+        $gateway = $this->gateway ?? app(PaymentGatewayInterface::class);
+
+        $payment = DB::transaction(function () use ($payment, $gateway): Payment {
+            $lockedPayment = Payment::query()->whereKey($payment->id)->lockForUpdate()->first();
+            if (! $lockedPayment) {
                 throw new RuntimeException('پرداخت پیدا نشد.');
             }
-            if ($payment->status === 'paid') {
-                return ['status' => 'already_paid', 'payment' => $payment, 'transaction_id' => $payment->transaction_id, 'gateway_response' => $payment->gateway_response];
+            if ($lockedPayment->status !== 'pending') {
+                return $lockedPayment;
             }
-            if ($payment->status !== 'pending') {
-                return ['status' => 'not_pending', 'payment' => $payment, 'transaction_id' => $payment->transaction_id, 'gateway_response' => $payment->gateway_response];
+
+            $this->assertPaymentGatewayConsistency($lockedPayment, $gateway);
+            $lockedPayment->loadMissing('order');
+
+            return $lockedPayment;
+        });
+
+        if ($payment->status === 'paid') {
+            return [
+                'status' => 'already_paid',
+                'payment' => $payment,
+                'transaction_id' => $payment->transaction_id,
+                'gateway_response' => $payment->gateway_response,
+            ];
+        }
+
+        if ($payment->status !== 'pending') {
+            return [
+                'status' => 'not_pending',
+                'payment' => $payment,
+                'transaction_id' => $payment->transaction_id,
+                'gateway_response' => $payment->gateway_response,
+            ];
+        }
+
+        $authority = $payment->authority;
+        $result = $gateway->verify($payment, $callbackData);
+
+        return DB::transaction(function () use ($payment, $authority, $result): array {
+            $lockedPayment = Payment::query()->whereKey($payment->id)->lockForUpdate()->first();
+            if (! $lockedPayment) {
+                throw new RuntimeException('پرداخت پیدا نشد.');
+            }
+            if ($lockedPayment->status === 'paid') {
+                return [
+                    'status' => 'already_paid',
+                    'payment' => $lockedPayment,
+                    'transaction_id' => $lockedPayment->transaction_id,
+                    'gateway_response' => $lockedPayment->gateway_response,
+                ];
+            }
+            if ($lockedPayment->status !== 'pending') {
+                return [
+                    'status' => 'not_pending',
+                    'payment' => $lockedPayment,
+                    'transaction_id' => $lockedPayment->transaction_id,
+                    'gateway_response' => $lockedPayment->gateway_response,
+                ];
+            }
+            if ((string) $lockedPayment->authority !== (string) $authority) {
+                throw new RuntimeException('اطلاعات پرداخت در زمان تأیید تغییر کرده است.');
             }
 
             $gateway = $this->gateway ?? app(PaymentGatewayInterface::class);
-            $this->assertPaymentGatewayConsistency($payment, $gateway);
-            $payment->loadMissing('order');
-            $result = $gateway->verify($payment, $callbackData);
+            $this->assertPaymentGatewayConsistency($lockedPayment, $gateway);
+
             $gatewayResponse = $result['response'] ?? null;
             if ($gatewayResponse !== null) {
-                $payment->update(['gateway_response' => $gatewayResponse]);
+                $lockedPayment->update(['gateway_response' => $gatewayResponse]);
             }
 
             $verified = (bool) ($result['verified'] ?? false);
             $transactionId = $result['transaction_id'] ?? null;
-            $order = $payment->order()->lockForUpdate()->first();
+            $order = $lockedPayment->order()->lockForUpdate()->first();
             if (! $order) {
                 throw new RuntimeException('سفارش مربوط به این پرداخت پیدا نشد.');
             }
@@ -142,10 +192,18 @@ class PaymentService
                     }
                 }
                 $couponService->releaseForOrder($order);
-                $payment->update(['status' => 'failed']);
-                $payment->refresh();
+                $lockedPayment->update(['status' => 'failed']);
+                $lockedPayment->refresh();
 
-                return ['status' => 'failed', 'success' => (bool) ($result['success'] ?? false), 'verified' => false, 'payment' => $payment, 'transaction_id' => null, 'reference_number' => $result['reference_number'] ?? null, 'gateway_response' => $gatewayResponse];
+                return [
+                    'status' => 'failed',
+                    'success' => (bool) ($result['success'] ?? false),
+                    'verified' => false,
+                    'payment' => $lockedPayment,
+                    'transaction_id' => null,
+                    'reference_number' => $result['reference_number'] ?? null,
+                    'gateway_response' => $gatewayResponse,
+                ];
             }
 
             if ($order->status === 'cancelled') {
@@ -156,10 +214,22 @@ class PaymentService
                     }
                 }
                 $couponService->releaseForOrder($order);
-                $payment->update(['status' => 'cancelled', 'transaction_id' => (string) $transactionId, 'reference_number' => $result['reference_number'] ?? null]);
-                $payment->refresh();
+                $lockedPayment->update([
+                    'status' => 'cancelled',
+                    'transaction_id' => (string) $transactionId,
+                    'reference_number' => $result['reference_number'] ?? null,
+                ]);
+                $lockedPayment->refresh();
 
-                return ['status' => 'cancelled', 'success' => false, 'verified' => false, 'payment' => $payment, 'transaction_id' => $transactionId, 'reference_number' => $result['reference_number'] ?? null, 'gateway_response' => $gatewayResponse];
+                return [
+                    'status' => 'cancelled',
+                    'success' => false,
+                    'verified' => false,
+                    'payment' => $lockedPayment,
+                    'transaction_id' => $transactionId,
+                    'reference_number' => $result['reference_number'] ?? null,
+                    'gateway_response' => $gatewayResponse,
+                ];
             }
 
             $reservations = $order->inventoryReservations()->where('status', 'active')->get();
@@ -170,11 +240,29 @@ class PaymentService
             }
             $couponService->consumeForOrder($order);
             $now = now();
-            $payment->update(['status' => 'paid', 'transaction_id' => (string) $transactionId, 'reference_number' => $result['reference_number'] ?? null, 'paid_at' => $now]);
-            $order->update(['status' => 'paid', 'payment_status' => 'paid', 'paid_at' => $now, 'confirmed_at' => $order->confirmed_at ?? $now]);
-            $payment->refresh();
+            $lockedPayment->update([
+                'status' => 'paid',
+                'transaction_id' => (string) $transactionId,
+                'reference_number' => $result['reference_number'] ?? null,
+                'paid_at' => $now,
+            ]);
+            $order->update([
+                'status' => 'paid',
+                'payment_status' => 'paid',
+                'paid_at' => $now,
+                'confirmed_at' => $order->confirmed_at ?? $now,
+            ]);
+            $lockedPayment->refresh();
 
-            return ['status' => 'paid', 'success' => (bool) ($result['success'] ?? false), 'verified' => true, 'payment' => $payment, 'transaction_id' => (string) $transactionId, 'reference_number' => $result['reference_number'] ?? null, 'gateway_response' => $gatewayResponse];
+            return [
+                'status' => 'paid',
+                'success' => (bool) ($result['success'] ?? false),
+                'verified' => true,
+                'payment' => $lockedPayment,
+                'transaction_id' => (string) $transactionId,
+                'reference_number' => $result['reference_number'] ?? null,
+                'gateway_response' => $gatewayResponse,
+            ];
         });
     }
 
