@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Inventory;
 use App\Models\InventoryMovement;
+use App\Models\InventoryReservation;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -26,6 +27,14 @@ class AdminInventoryService
 
             if ($after < 0) {
                 throw new RuntimeException('موجودی فیزیکی نمی‌تواند منفی شود.');
+            }
+
+            if ($after < (int) InventoryReservation::query()
+                ->where('inventory_id', $inventory->id)
+                ->where('status', 'active')
+                ->where('expires_at', '>', now())
+                ->sum('quantity')) {
+                throw new RuntimeException('موجودی فیزیکی نمی‌تواند کمتر از مقدار رزروشده فعال باشد.');
             }
 
             $inventory->update(['quantity' => $after]);
