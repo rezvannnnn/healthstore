@@ -199,6 +199,7 @@ class CategoryController extends Controller
             'structuredData' => $structuredData,
         ]);
     }
+
     protected function absoluteAssetUrl(?string $path): ?string
     {
         if ($path === null || trim($path) === '') {
@@ -213,5 +214,4 @@ class CategoryController extends Controller
 
         return url(ltrim($path, '/'));
     }
-
 }

@@ -164,6 +164,7 @@ class BrandController extends Controller
             'structuredData' => $structuredData,
         ]);
     }
+
     protected function absoluteAssetUrl(?string $path): ?string
     {
         if ($path === null || trim($path) === '') {
@@ -178,5 +179,4 @@ class BrandController extends Controller
 
         return url(ltrim($path, '/'));
     }
-
 }

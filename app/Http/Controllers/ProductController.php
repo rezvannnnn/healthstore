@@ -233,6 +233,7 @@ class ProductController extends Controller
             'relatedProducts' => $relatedProducts,
         ]);
     }
+
     protected function absoluteAssetUrl(?string $path): ?string
     {
         if ($path === null || trim($path) === '') {
@@ -247,5 +248,4 @@ class ProductController extends Controller
 
         return url(ltrim($path, '/'));
     }
-
 }
