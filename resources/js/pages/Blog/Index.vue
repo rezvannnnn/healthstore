@@ -18,7 +18,14 @@ interface Article {
     published_at: string | null;
 }
 
+interface Seo {
+    title: string;
+    description: string;
+    canonical: string;
+}
+
 defineProps<{
+    seo: Seo;
     categories: Category[];
     articles: Article[];
     pagination: { current_page: number; last_page: number; total: number };
@@ -46,30 +53,27 @@ function pageUrl(page: number): string {
 
 <template>
     <Head>
-        <title>مجله سلامت | مطالب آموزشی و کاربردی سلامت</title>
+        <title>{{ seo.title }}</title>
         <meta
             name="description"
-            content="مطالب آموزشی و کاربردی درباره سلامت، محصولات بهداشتی و مراقبت از خود."
+            :content="seo.description"
         />
-        <link rel="canonical" href="/blog" />
+        <link rel="canonical" :href="seo.canonical" />
         <meta property="og:type" content="website" />
         <meta
             property="og:title"
-            content="مجله سلامت | مطالب آموزشی و کاربردی سلامت"
+            :content="seo.title"
         />
         <meta
             property="og:description"
-            content="مطالب آموزشی و کاربردی درباره سلامت، محصولات بهداشتی و مراقبت از خود."
+            :content="seo.description"
         />
-        <meta property="og:url" content="/blog" />
+        <meta property="og:url" :content="seo.canonical" />
         <meta name="twitter:card" content="summary" />
-        <meta
-            name="twitter:title"
-            content="مجله سلامت | مطالب آموزشی و کاربردی سلامت"
-        />
+        <meta name="twitter:title" :content="seo.title" />
         <meta
             name="twitter:description"
-            content="مطالب آموزشی و کاربردی درباره سلامت، محصولات بهداشتی و مراقبت از خود."
+            :content="seo.description"
         />
     </Head>
     <div class="mx-auto max-w-7xl space-y-8 p-6" dir="rtl">
