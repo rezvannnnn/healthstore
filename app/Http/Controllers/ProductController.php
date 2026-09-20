@@ -188,6 +188,7 @@ class ProductController extends Controller
             $structuredData['offers'] = [
                 '@type' => 'Offer',
                 'price' => (float) $price->price,
+                'priceCurrency' => 'IRR',
                 'availability' => $this->inventoryService->isAvailable($product)
                     ? 'https://schema.org/InStock'
                     : 'https://schema.org/OutOfStock',
