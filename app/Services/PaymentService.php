@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Services\Payment\PaymentGatewayInterface;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -51,19 +52,39 @@ class PaymentService
 
     public function requestGatewayPayment(Payment $payment): array
     {
-        return DB::transaction(function () use ($payment): array {
-            $payment = Payment::query()->whereKey($payment->id)->lockForUpdate()->first();
-            if (! $payment) {
-                throw new RuntimeException('پرداخت پیدا نشد.');
-            }
-            if ($payment->status !== 'pending') {
-                throw new RuntimeException('فقط پرداخت‌های در انتظار می‌توانند به درگاه ارسال شوند.');
-            }
-            $gateway = $this->gateway ?? app(PaymentGatewayInterface::class);
-            $payment->loadMissing('order');
+        $gateway = $this->gateway ?? app(PaymentGatewayInterface::class);
+        $lock = Cache::lock("payment:gateway-request:{$payment->id}", 30);
+
+        if (! $lock->get()) {
+            throw new RuntimeException('درخواست پرداخت دیگری برای این تراکنش در حال انجام است.');
+        }
+
+        try {
+            $payment = DB::transaction(function () use ($payment, $gateway): Payment {
+                $lockedPayment = Payment::query()->whereKey($payment->id)->lockForUpdate()->first();
+                if (! $lockedPayment) {
+                    throw new RuntimeException('پرداخت پیدا نشد.');
+                }
+                if ($lockedPayment->status !== 'pending') {
+                    throw new RuntimeException('فقط پرداخت‌های در انتظار می‌توانند به درگاه ارسال شوند.');
+                }
+
+                $this->assertPaymentGatewayConsistency($lockedPayment, $gateway);
+                $lockedPayment->loadMissing('order');
+
+                return $lockedPayment;
+            });
+
             if ($payment->authority !== null && $payment->authority !== '') {
-                return ['payment' => $payment, 'gateway' => $payment->gateway, 'authority' => $payment->authority, 'payment_url' => $gateway->paymentUrl(['authority' => $payment->authority]), 'gateway_response' => $payment->gateway_response];
+                return [
+                    'payment' => $payment,
+                    'gateway' => $payment->gateway,
+                    'authority' => $payment->authority,
+                    'payment_url' => $gateway->paymentUrl(['authority' => $payment->authority]),
+                    'gateway_response' => $payment->gateway_response,
+                ];
             }
+
             $result = $gateway->request($payment);
             $authority = (string) ($result['authority'] ?? '');
             $paymentUrl = (string) ($result['payment_url'] ?? '');
@@ -73,11 +94,46 @@ class PaymentService
             if ($paymentUrl === '') {
                 throw new RuntimeException('درگاه پرداخت URL معتبری برای ادامه پرداخت برنگرداند.');
             }
-            $payment->update(['gateway' => $this->gatewayName($gateway), 'authority' => $authority, 'gateway_response' => $result['response'] ?? null]);
-            $payment->refresh();
 
-            return ['payment' => $payment, 'gateway' => $payment->gateway, 'authority' => $payment->authority, 'payment_url' => $paymentUrl, 'gateway_response' => $payment->gateway_response];
-        });
+            return DB::transaction(function () use ($payment, $gateway, $authority, $paymentUrl, $result): array {
+                $lockedPayment = Payment::query()->whereKey($payment->id)->lockForUpdate()->first();
+                if (! $lockedPayment) {
+                    throw new RuntimeException('پرداخت پیدا نشد.');
+                }
+                if ($lockedPayment->status !== 'pending') {
+                    throw new RuntimeException('فقط پرداخت‌های در انتظار می‌توانند به درگاه ارسال شوند.');
+                }
+
+                $this->assertPaymentGatewayConsistency($lockedPayment, $gateway);
+
+                if ($lockedPayment->authority !== null && $lockedPayment->authority !== '') {
+                    return [
+                        'payment' => $lockedPayment,
+                        'gateway' => $lockedPayment->gateway,
+                        'authority' => $lockedPayment->authority,
+                        'payment_url' => $gateway->paymentUrl(['authority' => $lockedPayment->authority]),
+                        'gateway_response' => $lockedPayment->gateway_response,
+                    ];
+                }
+
+                $lockedPayment->update([
+                    'gateway' => $this->gatewayName($gateway),
+                    'authority' => $authority,
+                    'gateway_response' => $result['response'] ?? null,
+                ]);
+                $lockedPayment->refresh();
+
+                return [
+                    'payment' => $lockedPayment,
+                    'gateway' => $lockedPayment->gateway,
+                    'authority' => $lockedPayment->authority,
+                    'payment_url' => $paymentUrl,
+                    'gateway_response' => $lockedPayment->gateway_response,
+                ];
+            });
+        } finally {
+            $lock->release();
+        }
     }
 
     public function verifyGatewayPayment(Payment $payment, array $callbackData): array
