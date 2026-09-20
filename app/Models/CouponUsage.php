@@ -16,6 +16,7 @@ class CouponUsage extends Model
         'order_id',
         'status',
         'reserved_at',
+        'expires_at',
         'consumed_at',
         'released_at',
     ];
@@ -24,6 +25,7 @@ class CouponUsage extends Model
     {
         return [
             'reserved_at' => 'datetime',
+            'expires_at' => 'datetime',
             'consumed_at' => 'datetime',
             'released_at' => 'datetime',
         ];
