@@ -30,7 +30,6 @@ defineProps<{
     articles: Article[];
     pagination: { current_page: number; last_page: number; total: number };
     filters: { search: string };
-    structuredData: Record<string, unknown>;
 }>();
 
 function pageUrl(page: number): string {
@@ -63,11 +62,7 @@ function pageUrl(page: number): string {
         <meta property="og:url" :content="seo.canonical" />
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" :content="seo.title" />
-        <meta name="twitter:description" :content="seo.description" />
-        <script type="application/ld+json">
-            {{ JSON.stringify(structuredData) }}
-        </script>
-    </Head>
+        <meta name="twitter:description" :content="seo.description" />    </Head>
     <div class="mx-auto max-w-7xl space-y-8 p-6" dir="rtl">
         <header>
             <h1 class="text-3xl font-bold">مجله سلامت</h1>
