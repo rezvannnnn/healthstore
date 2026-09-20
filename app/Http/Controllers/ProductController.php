@@ -218,7 +218,7 @@ class ProductController extends Controller
                 'brand_slug' => $product->brand?->slug,
                 'category' => $product->category?->name,
                 'category_slug' => $product->category?->slug,
-                'image' => $product->main_image,
+                'image' => $this->absoluteAssetUrl($product->main_image),
                 'images' => $images->map(fn ($image) => [
                     'id' => $image->id,
                     'path' => $image->image_path,
@@ -233,4 +233,19 @@ class ProductController extends Controller
             'relatedProducts' => $relatedProducts,
         ]);
     }
+    protected function absoluteAssetUrl(?string $path): ?string
+    {
+        if ($path === null || trim($path) === '') {
+            return null;
+        }
+
+        $path = trim($path);
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        return url(ltrim($path, '/'));
+    }
+
 }
