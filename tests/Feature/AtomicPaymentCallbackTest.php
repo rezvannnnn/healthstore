@@ -13,6 +13,7 @@ use App\Services\InventoryReservationService;
 use App\Services\Payment\PaymentGatewayInterface;
 use App\Services\PaymentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class AtomicPaymentCallbackTest extends TestCase
@@ -117,7 +118,8 @@ class AtomicPaymentCallbackTest extends TestCase
 
         $gateway = new class implements PaymentGatewayInterface
         {
-            public int $verifyCalls = 0;
+                public int $verifyCalls = 0;
+            public int $verifyTransactionLevel = -1;
 
             public function request(Payment $payment): array
             {
@@ -127,6 +129,7 @@ class AtomicPaymentCallbackTest extends TestCase
             public function verify(Payment $payment, array $callbackData): array
             {
                 $this->verifyCalls++;
+                $this->verifyTransactionLevel = DB::transactionLevel();
 
                 return [
                     'success' => true,
@@ -150,6 +153,7 @@ class AtomicPaymentCallbackTest extends TestCase
         }
 
         $payment->update(['gateway' => $gatewayName]);
+        $transactionLevelBeforeVerification = DB::transactionLevel();
 
         $first = $service->verifyAndFinalizeGatewayPayment($payment, [
             'Authority' => 'AUTH-ATOMIC',
@@ -168,6 +172,7 @@ class AtomicPaymentCallbackTest extends TestCase
         $this->assertSame('consumed', $reservation->status);
         $this->assertSame(8, $inventory->quantity);
         $this->assertSame('TX-ATOMIC-123', $payment->transaction_id);
+        $this->assertSame($transactionLevelBeforeVerification, $gateway->verifyTransactionLevel);
 
         $second = $service->verifyAndFinalizeGatewayPayment($payment, [
             'Authority' => 'AUTH-ATOMIC',
