@@ -153,7 +153,7 @@ class BrandController extends Controller
                 'name' => $brand->name,
                 'slug' => $brand->slug,
                 'description' => $brand->description,
-                'logo' => $brand->logo,
+                'logo' => $this->absoluteAssetUrl($brand->logo),
             ],
             'products' => $products,
             'pagination' => [
