@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\User;
 use App\Services\InventoryReservationService;
 use App\Services\Payment\PaymentGatewayInterface;
@@ -182,7 +183,7 @@ class PaymentGatewayIntegrationTest extends TestCase
         {
             public int $transactionLevel = -1;
 
-            public function request(\App\Models\Payment $payment): array
+            public function request(Payment $payment): array
             {
                 $this->transactionLevel = DB::transactionLevel();
 
@@ -193,7 +194,7 @@ class PaymentGatewayIntegrationTest extends TestCase
                 ];
             }
 
-            public function verify(\App\Models\Payment $payment, array $callbackData): array
+            public function verify(Payment $payment, array $callbackData): array
             {
                 return [];
             }
@@ -221,7 +222,7 @@ class PaymentGatewayIntegrationTest extends TestCase
         {
             public int $requestCalls = 0;
 
-            public function request(\App\Models\Payment $payment): array
+            public function request(Payment $payment): array
             {
                 $this->requestCalls++;
 
@@ -232,7 +233,7 @@ class PaymentGatewayIntegrationTest extends TestCase
                 ];
             }
 
-            public function verify(\App\Models\Payment $payment, array $callbackData): array
+            public function verify(Payment $payment, array $callbackData): array
             {
                 return [];
             }
