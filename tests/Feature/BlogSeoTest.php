@@ -42,7 +42,7 @@ class BlogSeoTest extends TestCase
             ->where('article.seo_title', $article->seo_title)
             ->where('article.seo_description', $article->seo_description)
             ->where('article.canonical_url', $article->canonical_url)
-            ->where('article.featured_image', $article->featured_image));
+            ->where('article.featured_image', url($article->featured_image)));
     }
 
     public function test_article_seo_falls_back_to_excerpt_and_slug_canonical(): void
