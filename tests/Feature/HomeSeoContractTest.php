@@ -16,6 +16,9 @@ class HomeSeoContractTest extends TestCase
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
             ->component('Welcome')
+            ->where('seo.title', 'HealthStore | فروشگاه آنلاین محصولات سلامت')
+            ->where('seo.description', 'خرید آنلاین محصولات بهداشتی و سلامت با مشاهده محصولات منتخب، دسته‌بندی‌ها، موجودی و مسیر پرداخت یکپارچه.')
+            ->where('seo.canonical', url('/'))
             ->where('structuredData.@context', 'https://schema.org')
             ->where('structuredData.@type', 'WebSite')
             ->where('structuredData.name', config('app.name', 'HealthStore'))
