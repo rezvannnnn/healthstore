@@ -32,7 +32,6 @@ const props = defineProps<{
     category: Category;
     articles: Article[];
     pagination: Pagination;
-    structuredData: Record<string, unknown>;
 }>();
 
 function pageUrl(page: number): string {
@@ -53,11 +52,7 @@ function pageUrl(page: number): string {
         <meta property="og:url" :content="seo.canonical" />
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" :content="seo.title" />
-        <meta name="twitter:description" :content="seo.description" />
-        <script type="application/ld+json">
-            {{ JSON.stringify(structuredData) }}
-        </script>
-    </Head>
+        <meta name="twitter:description" :content="seo.description" />    </Head>
 
     <main dir="rtl" class="mx-auto max-w-7xl space-y-8 p-6">
         <nav
