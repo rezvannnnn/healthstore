@@ -79,7 +79,7 @@ class ZarinPalGatewayTest extends TestCase
         ]);
     }
 
-    public function test_gateway_request_sends_correct_payload_and_returns_authority(): void
+    public function test_gateway_request_converts_toman_amount_to_rial(): void
     {
         Http::fake([
             'https://api.zarinpal.com/pg/v4/payment/request.json' => Http::response([
@@ -133,7 +133,7 @@ class ZarinPalGatewayTest extends TestCase
                 &&
                 ($data['merchant_id'] ?? null) === 'TEST-MERCHANT-ID'
                 &&
-                ($data['amount'] ?? null) === 220000
+                ($data['amount'] ?? null) === 2200000
                 &&
                 ($data['description'] ?? null) ===
                     'پرداخت سفارش '.$order->order_number
@@ -143,7 +143,7 @@ class ZarinPalGatewayTest extends TestCase
         });
     }
 
-    public function test_gateway_verify_returns_reference_number_for_successful_payment(): void
+    public function test_gateway_verify_converts_toman_amount_to_rial(): void
     {
         Http::fake([
             'https://api.zarinpal.com/pg/v4/payment/verify.json' => Http::response([
@@ -213,7 +213,7 @@ class ZarinPalGatewayTest extends TestCase
                 &&
                 ($data['merchant_id'] ?? null) === 'TEST-MERCHANT-ID'
                 &&
-                ($data['amount'] ?? null) === 220000
+                ($data['amount'] ?? null) === 2200000
                 &&
                 ($data['authority'] ?? null) ===
                     'S000000000000000000000000000001234';

@@ -241,7 +241,7 @@ class ZarinPalCallbackTest extends TestCase
                 ($data['merchant_id'] ?? null) ===
                     'TEST-MERCHANT-ID'
                 &&
-                ($data['amount'] ?? null) === 220000
+                ($data['amount'] ?? null) === 2200000
                 &&
                 ($data['authority'] ?? null) === $authority;
         });
