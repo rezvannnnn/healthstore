@@ -8,6 +8,8 @@ use App\Services\Payment\PaymentGatewayInterface;
 use App\Services\Payment\ZarinPalGateway;
 use App\Services\PaymentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -169,6 +171,95 @@ class PaymentGatewayIntegrationTest extends TestCase
         );
 
         Http::assertSentCount(1);
+    }
+
+    public function test_payment_service_calls_gateway_request_outside_database_transaction(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->createOrder($user, 220000);
+        $gateway = new class implements PaymentGatewayInterface
+        {
+            public int $transactionLevel = -1;
+
+            public function request(\App\Models\Payment $payment): array
+            {
+                $this->transactionLevel = DB::transactionLevel();
+
+                return [
+                    'authority' => 'AUTH-OUTSIDE-TX',
+                    'payment_url' => 'https://gateway.test/pay/AUTH-OUTSIDE-TX',
+                    'response' => ['code' => 100],
+                ];
+            }
+
+            public function verify(\App\Models\Payment $payment, array $callbackData): array
+            {
+                return [];
+            }
+
+            public function paymentUrl(array $gatewayData): string
+            {
+                return 'https://gateway.test/pay/'.($gatewayData['authority'] ?? '');
+            }
+        };
+
+        $payment = (new PaymentService(new InventoryReservationService))->create($order);
+        $baselineTransactionLevel = DB::transactionLevel();
+
+        $service = new PaymentService(new InventoryReservationService, $gateway);
+        $service->requestGatewayPayment($payment);
+
+        $this->assertSame($baselineTransactionLevel, $gateway->transactionLevel);
+    }
+
+    public function test_payment_request_lock_rejects_parallel_gateway_request(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->createOrder($user, 220000);
+        $gateway = new class implements PaymentGatewayInterface
+        {
+            public int $requestCalls = 0;
+
+            public function request(\App\Models\Payment $payment): array
+            {
+                $this->requestCalls++;
+
+                return [
+                    'authority' => 'AUTH-LOCK',
+                    'payment_url' => 'https://gateway.test/pay/AUTH-LOCK',
+                    'response' => ['code' => 100],
+                ];
+            }
+
+            public function verify(\App\Models\Payment $payment, array $callbackData): array
+            {
+                return [];
+            }
+
+            public function paymentUrl(array $gatewayData): string
+            {
+                return 'https://gateway.test/pay/'.($gatewayData['authority'] ?? '');
+            }
+        };
+
+        $payment = (new PaymentService(new InventoryReservationService))->create($order);
+        $lock = Cache::lock("payment:gateway-request:{$payment->id}", 30);
+        $this->assertTrue($lock->get());
+
+        try {
+            $service = new PaymentService(new InventoryReservationService, $gateway);
+
+            try {
+                $service->requestGatewayPayment($payment);
+                $this->fail('Expected the gateway request lock to reject a parallel request.');
+            } catch (\RuntimeException $e) {
+                $this->assertSame('درخواست پرداخت دیگری برای این تراکنش در حال انجام است.', $e->getMessage());
+            }
+        } finally {
+            $lock->release();
+        }
+
+        $this->assertSame(0, $gateway->requestCalls);
     }
 
     public function test_gateway_payment_request_keeps_payment_pending(): void
