@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Inventory;
 use App\Models\InventoryMovement;
+use App\Models\InventoryReservation;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -104,6 +106,60 @@ class AdminInventoryTest extends TestCase
         $response->assertRedirect();
         $this->assertDatabaseHas('inventories', ['id' => $inventory->id, 'quantity' => 17]);
         $this->assertDatabaseHas('inventory_movements', ['inventory_id' => $inventory->id, 'user_id' => $admin->id, 'type' => 'increase', 'quantity_delta' => 7, 'quantity_before' => 10, 'quantity_after' => 17]);
+    }
+
+    public function test_admin_cannot_reduce_inventory_below_active_reservations(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $product = $this->product();
+        $warehouse = $this->warehouse();
+        $inventory = Inventory::create([
+            'product_id' => $product->id,
+            'warehouse_id' => $warehouse->id,
+            'quantity' => 10,
+            'minimum_quantity' => 1,
+            'is_active' => true,
+        ]);
+
+        $order = Order::create([
+            'order_number' => 'ORD-ADMIN-RES-'.$inventory->id,
+            'user_id' => $admin->id,
+            'address_id' => null,
+            'customer_type' => 'b2c',
+            'business_profile_id' => null,
+            'status' => 'pending',
+            'payment_status' => 'pending',
+            'subtotal' => 200000,
+            'discount_amount' => 0,
+            'shipping_amount' => 0,
+            'total_amount' => 200000,
+            'currency' => 'IRR',
+            'recipient_name' => $admin->name,
+            'recipient_phone' => $admin->phone,
+            'shipping_address' => null,
+        ]);
+
+        InventoryReservation::create([
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+            'inventory_id' => $inventory->id,
+            'quantity' => 7,
+            'status' => 'active',
+            'expires_at' => now()->addMinutes(20),
+            'released_at' => null,
+            'consumed_at' => null,
+        ]);
+
+        $response = $this->actingAs($admin)->post("/admin/inventory/{$inventory->id}/adjust", [
+            'quantity_delta' => -4,
+        ]);
+
+        $response->assertSessionHasErrors('quantity_delta');
+        $this->assertDatabaseHas('inventories', [
+            'id' => $inventory->id,
+            'quantity' => 10,
+        ]);
+        $this->assertDatabaseCount('inventory_movements', 0);
     }
 
     public function test_admin_cannot_reduce_inventory_below_zero(): void
