@@ -47,7 +47,6 @@ const props = defineProps<{
     product: Product;
     relatedProducts: RelatedProduct[];
     seo: Seo;
-    structuredData: Record<string, unknown>;
 }>();
 const selectedImage = ref(
     props.product.images[0]?.path || props.product.image || null,
@@ -111,11 +110,7 @@ function addToCart(): void {
             v-if="product.image"
             name="twitter:image"
             :content="product.image"
-        />
-        <script type="application/ld+json">
-            {{ JSON.stringify(structuredData) }}
-        </script>
-    </Head>
+        />    </Head>
 
     <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
         <div class="mx-auto max-w-6xl space-y-8">
