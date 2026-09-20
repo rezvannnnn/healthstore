@@ -51,6 +51,7 @@ class ProductSeoContractTest extends TestCase
             'slug' => 'structured-data-cream',
             'sku' => 'SKU-123',
             'short_description' => 'کرم مناسب پوست خشک.',
+            'main_image' => '/images/structured-product.jpg',
         ]);
 
         ProductPrice::create([
@@ -87,6 +88,7 @@ class ProductSeoContractTest extends TestCase
             ->where('structuredData.sku', $product->sku)
             ->where('structuredData.offers.@type', 'Offer')
             ->where('structuredData.offers.price', 125000)
+            ->where('product.image', url('/images/structured-product.jpg'))
             ->where('structuredData.offers.priceCurrency', 'IRR')
             ->where('structuredData.offers.availability', 'https://schema.org/InStock')
         );
