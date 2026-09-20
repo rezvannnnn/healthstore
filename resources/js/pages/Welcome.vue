@@ -28,6 +28,7 @@ const props = defineProps<{
     seo: Seo;
     featuredProducts: FeaturedProduct[];
     categories: Category[];
+    structuredData: Record<string, unknown>;
 }>();
 
 function formatPrice(value: number | null): string {
@@ -60,6 +61,9 @@ function addToCart(product: FeaturedProduct): void {
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" :content="seo.title" />
         <meta name="twitter:description" :content="seo.description" />
+        <script type="application/ld+json">
+            {{ JSON.stringify(structuredData) }}
+        </script>
     </Head>
 
     <div dir="rtl" class="min-h-screen bg-slate-50 text-slate-900">
