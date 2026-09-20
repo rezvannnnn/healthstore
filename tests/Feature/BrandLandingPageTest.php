@@ -18,6 +18,7 @@ class BrandLandingPageTest extends TestCase
             'name' => 'برند سلامت',
             'slug' => 'salamat-brand',
             'description' => 'محصولات برند سلامت.',
+            'logo' => '/images/salamat-brand.png',
             'is_active' => true,
         ]);
 
@@ -46,6 +47,7 @@ class BrandLandingPageTest extends TestCase
             ->where('seo.title', 'برند سلامت | فروشگاه سلامت')
             ->where('seo.canonical', url('/brands/'.$brand->slug))
             ->where('brand.name', $brand->name)
+            ->where('brand.logo', url('/images/salamat-brand.png'))
             ->where('pagination.total', 1)
             ->where('products.0.slug', $product->slug)
             ->where('structuredData.@type', 'CollectionPage')

@@ -32,7 +32,7 @@ class BrandController extends Controller
                 'name' => $brand->name,
                 'slug' => $brand->slug,
                 'description' => $brand->description,
-                'logo' => $brand->logo,
+                'logo' => $this->absoluteAssetUrl($brand->logo),
                 'products_count' => (int) $brand->getAttribute('active_products_count'),
             ])
             ->values()
@@ -153,7 +153,7 @@ class BrandController extends Controller
                 'name' => $brand->name,
                 'slug' => $brand->slug,
                 'description' => $brand->description,
-                'logo' => $brand->logo,
+                'logo' => $this->absoluteAssetUrl($brand->logo),
             ],
             'products' => $products,
             'pagination' => [
@@ -164,4 +164,19 @@ class BrandController extends Controller
             'structuredData' => $structuredData,
         ]);
     }
+    protected function absoluteAssetUrl(?string $path): ?string
+    {
+        if ($path === null || trim($path) === '') {
+            return null;
+        }
+
+        $path = trim($path);
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        return url(ltrim($path, '/'));
+    }
+
 }

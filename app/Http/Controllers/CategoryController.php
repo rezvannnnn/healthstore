@@ -41,7 +41,7 @@ class CategoryController extends Controller
                 'name' => $category->name,
                 'slug' => $category->slug,
                 'description' => $category->description,
-                'image' => $category->image,
+                'image' => $this->absoluteAssetUrl($category->image),
                 'products_count' => (int) $category->getAttribute('active_products_count'),
                 'parent' => $category->parent && $category->parent->is_active
                     ? $category->parent->only(['id', 'name', 'slug'])
@@ -180,7 +180,7 @@ class CategoryController extends Controller
                 'name' => $category->name,
                 'slug' => $category->slug,
                 'description' => $category->description,
-                'image' => $category->image,
+                'image' => $this->absoluteAssetUrl($category->image),
                 'parent' => $category->parent && $category->parent->is_active
                     ? $category->parent->only(['id', 'name', 'slug'])
                     : null,
@@ -199,4 +199,19 @@ class CategoryController extends Controller
             'structuredData' => $structuredData,
         ]);
     }
+    protected function absoluteAssetUrl(?string $path): ?string
+    {
+        if ($path === null || trim($path) === '') {
+            return null;
+        }
+
+        $path = trim($path);
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        return url(ltrim($path, '/'));
+    }
+
 }
