@@ -48,13 +48,13 @@ class BlogSeoTest extends TestCase
     public function test_blog_search_rejects_overlong_input(): void
     {
         $this->get('/blog?search='.str_repeat('a', 201))
-            ->assertStatus(422);
+            ->assertSessionHasErrors('search');
     }
 
     public function test_blog_search_rejects_non_string_input(): void
     {
         $this->get('/blog?search[]=health')
-            ->assertStatus(422);
+            ->assertSessionHasErrors('search');
     }
 
     public function test_article_seo_falls_back_to_excerpt_and_slug_canonical(): void
