@@ -47,6 +47,7 @@ const props = defineProps<{
     product: Product;
     relatedProducts: RelatedProduct[];
     seo: Seo;
+    structuredData: Record<string, unknown>;
 }>();
 const selectedImage = ref(
     props.product.images[0]?.path || props.product.image || null,
@@ -111,6 +112,9 @@ function addToCart(): void {
             name="twitter:image"
             :content="product.image"
         />
+        <script type="application/ld+json">
+            {{ JSON.stringify(structuredData) }}
+        </script>
     </Head>
 
     <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">

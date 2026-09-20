@@ -25,6 +25,7 @@ defineProps<{
     seo: Seo;
     categories: Category[];
     pagination: Pagination;
+    structuredData: Record<string, unknown>;
 }>();
 
 function pageUrl(page: number): string {
@@ -48,6 +49,9 @@ function pageUrl(page: number): string {
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" :content="seo.title" />
         <meta name="twitter:description" :content="seo.description" />
+        <script type="application/ld+json">
+            {{ JSON.stringify(structuredData) }}
+        </script>
     </Head>
 
     <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
