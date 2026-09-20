@@ -60,6 +60,12 @@ class HomeController extends Controller
             ->values()
             ->all();
 
+        $seo = [
+            'title' => 'HealthStore | فروشگاه آنلاین محصولات سلامت',
+            'description' => 'خرید آنلاین محصولات بهداشتی و سلامت با مشاهده محصولات منتخب، دسته‌بندی‌ها، موجودی و مسیر پرداخت یکپارچه.',
+            'canonical' => route('home'),
+        ];
+
         $structuredData = [
             '@context' => 'https://schema.org',
             '@type' => 'WebSite',
@@ -74,6 +80,7 @@ class HomeController extends Controller
         ];
 
         return Inertia::render('Welcome', [
+            'seo' => $seo,
             'structuredData' => $structuredData,
             'featuredProducts' => $featuredProducts,
             'categories' => $categories,
