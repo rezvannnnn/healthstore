@@ -54,27 +54,15 @@ function pageUrl(page: number): string {
 <template>
     <Head>
         <title>{{ seo.title }}</title>
-        <meta
-            name="description"
-            :content="seo.description"
-        />
+        <meta name="description" :content="seo.description" />
         <link rel="canonical" :href="seo.canonical" />
         <meta property="og:type" content="website" />
-        <meta
-            property="og:title"
-            :content="seo.title"
-        />
-        <meta
-            property="og:description"
-            :content="seo.description"
-        />
+        <meta property="og:title" :content="seo.title" />
+        <meta property="og:description" :content="seo.description" />
         <meta property="og:url" :content="seo.canonical" />
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" :content="seo.title" />
-        <meta
-            name="twitter:description"
-            :content="seo.description"
-        />
+        <meta name="twitter:description" :content="seo.description" />
     </Head>
     <div class="mx-auto max-w-7xl space-y-8 p-6" dir="rtl">
         <header>
