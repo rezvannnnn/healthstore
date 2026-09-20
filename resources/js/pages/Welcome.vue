@@ -7,6 +7,12 @@ interface Category {
     slug: string;
 }
 
+interface Seo {
+    title: string;
+    description: string;
+    canonical: string;
+}
+
 interface FeaturedProduct {
     id: number;
     name: string;
@@ -19,6 +25,7 @@ interface FeaturedProduct {
 }
 
 const props = defineProps<{
+    seo: Seo;
     featuredProducts: FeaturedProduct[];
     categories: Category[];
 }>();
@@ -43,22 +50,16 @@ function addToCart(product: FeaturedProduct): void {
 
 <template>
     <Head>
-        <title>HealthStore | فروشگاه آنلاین محصولات سلامت</title>
-        <meta
-            name="description"
-            content="خرید آنلاین محصولات بهداشتی و سلامت با مشاهده محصولات منتخب، دسته‌بندی‌ها، موجودی و مسیر پرداخت یکپارچه."
-        />
-        <link rel="canonical" href="/" />
-        <meta
-            property="og:title"
-            content="HealthStore | فروشگاه آنلاین محصولات سلامت"
-        />
-        <meta
-            property="og:description"
-            content="محصولات سلامت و بهداشتی را جستجو، بررسی و آنلاین خرید کنید."
-        />
+        <title>{{ seo.title }}</title>
+        <meta name="description" :content="seo.description" />
+        <link rel="canonical" :href="seo.canonical" />
+        <meta property="og:title" :content="seo.title" />
+        <meta property="og:description" :content="seo.description" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="/" />
+        <meta property="og:url" :content="seo.canonical" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" :content="seo.title" />
+        <meta name="twitter:description" :content="seo.description" />
     </Head>
 
     <div dir="rtl" class="min-h-screen bg-slate-50 text-slate-900">
