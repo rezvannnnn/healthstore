@@ -118,7 +118,7 @@ class AtomicPaymentCallbackTest extends TestCase
 
         $gateway = new class implements PaymentGatewayInterface
         {
-                public int $verifyCalls = 0;
+            public int $verifyCalls = 0;
             public int $verifyTransactionLevel = -1;
 
             public function request(Payment $payment): array
