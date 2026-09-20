@@ -18,6 +18,7 @@ class CategoryLandingPageTest extends TestCase
             'name' => 'مراقبت پوست',
             'slug' => 'skin-care',
             'description' => 'محصولات مراقبت از پوست.',
+            'image' => '/images/skin-care.jpg',
             'is_active' => true,
             'sort_order' => 1,
         ]);
@@ -47,6 +48,7 @@ class CategoryLandingPageTest extends TestCase
             ->where('seo.title', 'مراقبت پوست | فروشگاه سلامت')
             ->where('seo.canonical', url('/categories/'.$category->slug))
             ->where('category.name', $category->name)
+            ->where('category.image', url('/images/skin-care.jpg'))
             ->where('pagination.total', 1)
             ->where('products.0.slug', $product->slug)
             ->where('structuredData.@type', 'CollectionPage')
