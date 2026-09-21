@@ -105,580 +105,99 @@ const goBackToCart = () => {
 </script>
 
 <template>
-    <div class="checkout-page" dir="rtl">
-        <div class="checkout-container">
-            <header class="checkout-header">
-                <div>
-                    <h1>تکمیل سفارش</h1>
-                    <p>لطفاً اطلاعات، آدرس و قیمت نهایی سفارش را بررسی کنید.</p>
-                </div>
+    <div dir="rtl" class="min-h-screen bg-dh-surface pb-10 text-dh-ink">
+        <header class="sticky top-0 z-30 border-b border-dh-100/70 bg-white/95 backdrop-blur">
+            <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 md:px-6">
+                <Link href="/" class="flex items-center gap-3" aria-label="داروخونه">
+                    <span class="flex size-11 items-center justify-center rounded-2xl bg-dh-50 text-dh-700"><svg viewBox="0 0 48 48" class="size-8" fill="none"><path d="M10 19h28l-3 16H13l-3-16Z" stroke="currentColor" stroke-width="2.5"/><path d="M15 19c1-5 4-8 9-8s8 3 9 8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M25 13c-3 1-5 4-5 7 4 0 7-2 8-6" stroke="#63b95b" stroke-width="2.5" stroke-linecap="round"/></svg></span>
+                    <span><span class="block text-lg font-black text-dh-800">داروخونه</span><span class="hidden text-[10px] text-dh-muted sm:block">دارو و محصولات بهداشتی</span></span>
+                </Link>
+                <Link href="/cart" class="rounded-xl border border-dh-100 px-4 py-2.5 text-sm font-bold text-dh-700 hover:bg-dh-50">بازگشت به سبد</Link>
+            </div>
+        </header>
+
+        <main class="mx-auto max-w-6xl space-y-6 px-4 py-6 md:px-6 md:py-10">
+            <header>
+                <p class="text-xs font-bold text-dh-600">مرحله نهایی</p>
+                <h1 class="mt-1 text-3xl font-black text-dh-800 md:text-4xl">تکمیل سفارش</h1>
+                <p class="mt-2 text-sm leading-7 text-dh-muted">آدرس، اقلام و مبلغ نهایی را بررسی کنید؛ سپس برای پرداخت ادامه دهید.</p>
             </header>
 
-            <div v-if="message" class="feedback-message">
-                {{ message }}
-            </div>
+            <div v-if="message" class="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-700">{{ message }}</div>
 
-            <section class="address-section">
-                <div class="section-heading">
-                    <div>
-                        <h2>آدرس تحویل</h2>
-                        <p>
-                            آدرسی را که می‌خواهید سفارش به آن ارسال شود انتخاب
-                            کنید.
-                        </p>
-                    </div>
-                    <Link href="/account/addresses">مدیریت آدرس‌ها</Link>
-                </div>
-
-                <div v-if="addresses.length === 0" class="no-addresses">
-                    <strong>هنوز آدرسی ثبت نکرده‌اید.</strong>
-                    <p>برای ادامه سفارش، ابتدا یک آدرس ثبت کنید.</p>
-                    <Link class="btn btn-secondary" href="/account/addresses"
-                        >ثبت آدرس جدید</Link
-                    >
-                </div>
-
-                <div v-else class="address-list">
-                    <label
-                        v-for="address in addresses"
-                        :key="address.id"
-                        class="address-card"
-                        :class="{
-                            'is-selected': selectedAddressId === address.id,
-                        }"
-                    >
-                        <input
-                            v-model="selectedAddressId"
-                            type="radio"
-                            name="checkout-address"
-                            :value="address.id"
-                        />
-
-                        <div class="address-content">
-                            <div class="address-title-row">
-                                <strong>{{ address.title || 'آدرس' }}</strong>
-                                <span
-                                    v-if="address.is_default"
-                                    class="default-badge"
-                                    >پیش‌فرض</span
-                                >
-                            </div>
-                            <div>
-                                {{ address.recipient_name }} -
-                                {{ address.phone }}
-                            </div>
-                            <div class="address-text">
-                                {{ address.province
-                                }}{{
-                                    address.province && address.city
-                                        ? '، '
-                                        : ''
-                                }}{{ address.city }}
-                                <span v-if="address.province || address.city"
-                                    >، </span
-                                >{{ address.address }}
-                            </div>
-                            <div v-if="address.postal_code" class="postal-code">
-                                کد پستی: {{ address.postal_code }}
-                            </div>
+            <section class="grid gap-6 lg:grid-cols-[1fr_350px]">
+                <div class="space-y-5">
+                    <section class="rounded-3xl border border-dh-100 bg-white p-5 shadow-sm md:p-6">
+                        <div class="mb-5 flex items-start justify-between gap-4">
+                            <div><span class="flex size-9 items-center justify-center rounded-xl bg-dh-50 text-sm font-black text-dh-700">۱</span><h2 class="mt-3 text-xl font-black text-dh-800">آدرس تحویل</h2><p class="mt-1 text-sm leading-6 text-dh-muted">آدرسی را که می‌خواهید سفارش به آن ارسال شود انتخاب کنید.</p></div>
+                            <Link href="/account/addresses" class="shrink-0 text-xs font-bold text-dh-700">مدیریت آدرس‌ها</Link>
                         </div>
-                    </label>
-                </div>
-            </section>
-
-            <section v-if="hasPayableItems" class="coupon-section">
-                <div class="section-heading">
-                    <div>
-                        <h2>کد تخفیف</h2>
-                        <p>
-                            در صورت داشتن کد تخفیف، آن را پیش از ثبت سفارش وارد
-                            کنید.
-                        </p>
-                    </div>
-                </div>
-                <div class="coupon-form">
-                    <input
-                        v-model="couponCode"
-                        type="text"
-                        maxlength="64"
-                        autocomplete="off"
-                        placeholder="کد تخفیف"
-                        class="coupon-input"
-                    />
-                    <span v-if="props.appliedCoupon" class="coupon-applied">
-                        تخفیف اعمال شده
-                        <template v-if="Number(props.discountAmount || 0) > 0">
-                            - {{ formatPrice(props.discountAmount || 0) }}
-                        </template>
-                    </span>
-                </div>
-                <p class="coupon-note">
-                    اعتبار و میزان تخفیف هنگام ثبت سفارش در سمت سرور بررسی
-                    می‌شود.
-                </p>
-            </section>
-
-            <div v-if="hasChanges" class="changes-notice">
-                <h2>تغییرات سبد خرید</h2>
-                <p>
-                    از آخرین مراجعه شما، وضعیت یکی یا چند محصول تغییر کرده است.
-                    لطفاً موارد زیر را بررسی کنید.
-                </p>
-
-                <div v-if="hasPriceChanges" class="change-section">
-                    <h3>تغییر قیمت</h3>
-                    <div
-                        v-for="change in priceChanges"
-                        :key="`price-${change.product_id}`"
-                        class="change-row"
-                    >
-                        <div>
-                            <strong>{{ change.product_name }}</strong>
+                        <div v-if="addresses.length === 0" class="rounded-2xl border border-dashed border-dh-200 bg-dh-surface p-6">
+                            <strong class="text-dh-800">هنوز آدرسی ثبت نکرده‌اید.</strong><p class="mt-2 text-sm text-dh-muted">برای ادامه سفارش، ابتدا یک آدرس ثبت کنید.</p>
+                            <Link class="mt-4 inline-flex rounded-xl bg-dh-700 px-4 py-2.5 text-sm font-bold text-white" href="/account/addresses">ثبت آدرس جدید</Link>
                         </div>
-                        <div class="price-change">
-                            <span class="old-price">{{
-                                formatPrice(change.old_price)
-                            }}</span>
-                            <span class="arrow">←</span>
-                            <span class="new-price">{{
-                                formatPrice(change.new_price ?? 0)
-                            }}</span>
+                        <div v-else class="grid gap-3">
+                            <label v-for="address in addresses" :key="address.id" class="flex cursor-pointer gap-3 rounded-2xl border p-4 transition" :class="selectedAddressId === address.id ? 'border-dh-600 bg-dh-50/50 ring-2 ring-dh-100' : 'border-dh-100 bg-white hover:border-dh-200'">
+                                <input v-model="selectedAddressId" type="radio" name="checkout-address" :value="address.id" class="mt-1 accent-dh-700" />
+                                <span class="min-w-0 flex-1">
+                                    <span class="flex flex-wrap items-center gap-2"><strong class="text-sm text-dh-800">{{ address.title || 'آدرس' }}</strong><span v-if="address.is_default" class="rounded-full bg-dh-green-50 px-2 py-0.5 text-[10px] font-bold text-dh-green-700">پیش‌فرض</span></span>
+                                    <span class="mt-2 block text-sm text-dh-800">{{ address.recipient_name }} · {{ address.phone }}</span>
+                                    <span class="mt-1 block text-sm leading-7 text-dh-muted">{{ address.province }}{{ address.province && address.city ? '، ' : '' }}{{ address.city }}{{ address.province || address.city ? '، ' : '' }}{{ address.address }}</span>
+                                    <span v-if="address.postal_code" class="mt-1 block text-xs text-dh-muted">کد پستی: {{ address.postal_code }}</span>
+                                </span>
+                            </label>
                         </div>
-                    </div>
-                </div>
+                    </section>
 
-                <div v-if="hasOutOfStockItems" class="change-section">
-                    <h3>محصولات ناموجود</h3>
-                    <div
-                        v-for="change in availabilityChanges"
-                        :key="`stock-${change.product_id}`"
-                        class="change-row out-of-stock-row"
-                    >
-                        <div>
-                            <strong>{{ change.product_name }}</strong>
+                    <section v-if="hasPayableItems" class="rounded-3xl border border-dh-100 bg-white p-5 shadow-sm md:p-6">
+                        <div class="flex items-start gap-3"><span class="flex size-9 items-center justify-center rounded-xl bg-dh-50 text-sm font-black text-dh-700">۲</span><div><h2 class="text-xl font-black text-dh-800">کد تخفیف</h2><p class="mt-1 text-sm leading-6 text-dh-muted">در صورت داشتن کد، آن را وارد کنید.</p></div></div>
+                        <div class="mt-5 flex flex-wrap items-center gap-3">
+                            <input v-model="couponCode" type="text" maxlength="64" autocomplete="off" placeholder="کد تخفیف" class="w-full rounded-xl border border-dh-100 bg-dh-surface px-4 py-3 text-sm outline-none focus:border-dh-500 sm:max-w-sm" />
+                            <span v-if="props.appliedCoupon" class="rounded-xl bg-dh-green-50 px-3 py-2 text-xs font-bold text-dh-green-700">تخفیف اعمال شده <template v-if="Number(props.discountAmount || 0) > 0">· {{ formatPrice(props.discountAmount || 0) }}</template></span>
                         </div>
-                        <div class="stock-status">
-                            <span class="strikethrough-price">{{
-                                formatPrice(change.old_price)
-                            }}</span>
-                            <span>ناموجود</span>
+                        <p class="mt-3 text-xs leading-6 text-dh-muted">اعتبار و میزان تخفیف هنگام ثبت سفارش در سمت سرور بررسی می‌شود.</p>
+                    </section>
+
+                    <section v-if="hasChanges" class="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm md:p-6">
+                        <h2 class="text-xl font-black text-amber-900">تغییرات سبد خرید</h2>
+                        <p class="mt-1 text-sm leading-7 text-amber-800">از آخرین مراجعه شما، وضعیت یکی یا چند محصول تغییر کرده است. موارد زیر را بررسی کنید.</p>
+                        <div v-if="hasPriceChanges" class="mt-5 space-y-2"><h3 class="text-sm font-black text-amber-900">تغییر قیمت</h3><div v-for="change in priceChanges" :key="`price-${change.product_id}`" class="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/70 p-3 text-sm"><strong>{{ change.product_name }}</strong><span><span class="text-gray-400 line-through">{{ formatPrice(change.old_price) }}</span><span class="mx-2">←</span><strong>{{ formatPrice(change.new_price ?? 0) }}</strong></span></div></div>
+                        <div v-if="hasOutOfStockItems" class="mt-5 space-y-2"><h3 class="text-sm font-black text-amber-900">محصولات ناموجود</h3><div v-for="change in availabilityChanges" :key="`stock-${change.product_id}`" class="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/70 p-3 text-sm"><strong>{{ change.product_name }}</strong><span class="font-bold text-red-600">ناموجود · <span class="font-normal text-gray-400 line-through">{{ formatPrice(change.old_price) }}</span></span></div></div>
+                    </section>
+
+                    <section class="rounded-3xl border border-dh-100 bg-white p-5 shadow-sm md:p-6">
+                        <div class="flex items-start gap-3"><span class="flex size-9 items-center justify-center rounded-xl bg-dh-50 text-sm font-black text-dh-700">۳</span><div><h2 class="text-xl font-black text-dh-800">اقلام سبد خرید</h2><p class="mt-1 text-sm text-dh-muted">{{ cart.items.length.toLocaleString('fa-IR') }} قلم در سفارش</p></div></div>
+                        <div v-if="cart.items.length === 0" class="mt-5 rounded-2xl bg-dh-surface p-5 text-center text-sm text-dh-muted">سبد خرید شما خالی است.</div>
+                        <div v-for="item in cart.items" :key="item.id" class="flex items-center justify-between gap-4 border-b border-dh-100 py-4 last:border-0 last:pb-0">
+                            <div class="min-w-0"><h3 class="line-clamp-2 text-sm font-black leading-6 text-dh-800">{{ item.product.name }}</h3><div class="mt-1 flex flex-wrap gap-3 text-xs text-dh-muted"><span v-if="item.product.sku">کد کالا: {{ item.product.sku }}</span><span>تعداد: {{ item.quantity.toLocaleString('fa-IR') }}</span></div></div>
+                            <div class="shrink-0 text-left text-sm font-black text-dh-800"><template v-if="Number(item.unit_price) > 0">{{ formatPrice(item.unit_price) }}</template><template v-else><span class="block text-red-600">ناموجود</span><span class="mt-1 block text-xs font-normal text-dh-muted">۰ تومان</span></template></div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <section class="cart-section">
-                <h2>اقلام سبد خرید</h2>
-
-                <div v-if="cart.items.length === 0" class="empty-cart">
-                    سبد خرید شما خالی است.
+                    </section>
                 </div>
 
-                <div
-                    v-for="item in cart.items"
-                    :key="item.id"
-                    class="cart-item"
-                    :class="{ 'is-unavailable': Number(item.unit_price) === 0 }"
-                >
-                    <div class="item-info">
-                        <h3>{{ item.product.name }}</h3>
-                        <span v-if="item.product.sku"
-                            >کد کالا: {{ item.product.sku }}</span
-                        >
-                        <span>تعداد: {{ item.quantity }}</span>
-                    </div>
-                    <div class="item-price">
-                        <template v-if="Number(item.unit_price) > 0">{{
-                            formatPrice(item.unit_price)
-                        }}</template>
-                        <template v-else>
-                            <span class="unavailable-label">ناموجود</span>
-                            <span class="zero-price">۰ تومان</span>
-                        </template>
-                    </div>
-                </div>
+                <aside class="h-fit rounded-3xl border border-dh-100 bg-white p-6 shadow-sm lg:sticky lg:top-24">
+                    <h2 class="text-lg font-black text-dh-800">خلاصه سفارش</h2>
+                    <div class="mt-5 flex items-center justify-between text-sm text-dh-muted"><span>جمع محصولات</span><span>{{ formatPrice(subtotal) }}</span></div>
+                    <div v-if="Number(discountAmount || 0) > 0" class="mt-3 flex items-center justify-between text-sm text-dh-green-700"><span>تخفیف</span><strong>- {{ formatPrice(discountAmount || 0) }}</strong></div>
+                    <div class="my-5 border-t border-dh-100"></div>
+                    <div class="flex items-end justify-between gap-3"><span class="text-sm font-bold text-dh-800">مبلغ قابل پرداخت</span><strong class="text-xl font-black text-dh-700">{{ formatPrice(totalAmount ?? subtotal) }}</strong></div>
+
+                    <section v-if="!hasPayableItems" class="mt-6 rounded-2xl bg-amber-50 p-4"><div class="font-black text-amber-900">کالای قابل خریدی باقی نمانده است.</div><p class="mt-1 text-xs leading-6 text-amber-800">محصولات ناموجود پس از تأیید از سبد حذف خواهند شد.</p><button type="button" class="mt-4 w-full rounded-xl bg-white px-4 py-3 text-sm font-bold text-dh-700 ring-1 ring-dh-100" @click="goBackToCart">بازگشت به سبد خرید</button></section>
+
+                    <section v-else-if="addresses.length === 0" class="mt-6 rounded-2xl bg-dh-surface p-4"><div class="font-black text-dh-800">آدرس تحویل لازم است</div><p class="mt-1 text-xs leading-6 text-dh-muted">برای ثبت سفارش، ابتدا یک آدرس ثبت کنید.</p></section>
+
+                    <section v-else-if="requiresPriceConfirmation" class="mt-6">
+                        <div class="rounded-2xl bg-dh-50 p-4"><div class="font-black text-dh-800">تأیید تغییرات</div><p class="mt-1 text-xs leading-6 text-dh-muted">برای ادامه، تغییرات سبد و آدرس تحویل را تأیید کنید.</p></div>
+                        <button type="button" class="mt-3 w-full rounded-2xl bg-dh-700 px-5 py-3.5 text-sm font-black text-white shadow-sm hover:bg-dh-800 disabled:cursor-not-allowed disabled:opacity-50" :disabled="!canProceedToPayment || !hasAddress" @click="submitCheckout">تأیید تغییرات و ادامه پرداخت</button>
+                        <button type="button" class="mt-2 w-full rounded-2xl border border-dh-100 bg-white px-5 py-3 text-sm font-bold text-dh-700 hover:bg-dh-50" @click="rejectChanges">عدم تأیید و بازگشت به سبد</button>
+                    </section>
+
+                    <section v-else class="mt-6">
+                        <div class="rounded-2xl bg-dh-green-50 p-4"><div class="font-black text-dh-green-700">سفارش آماده است</div><p class="mt-1 text-xs leading-6 text-dh-green-700/80">آدرس و قیمت سفارش را بررسی کرده‌اید.</p></div>
+                        <button type="button" class="mt-3 w-full rounded-2xl bg-dh-700 px-5 py-3.5 text-sm font-black text-white shadow-sm hover:bg-dh-800 disabled:cursor-not-allowed disabled:opacity-50" :disabled="!canProceedToPayment || !hasAddress" @click="submitCheckout">ثبت سفارش و ادامه به پرداخت</button>
+                    </section>
+                </aside>
             </section>
-
-            <section class="summary-section">
-                <div class="summary-row">
-                    <span>مبلغ قابل پرداخت</span>
-                    <strong>{{ formatPrice(totalAmount ?? subtotal) }}</strong>
-                </div>
-                <div
-                    v-if="Number(discountAmount || 0) > 0"
-                    class="summary-row discount-row"
-                >
-                    <span>تخفیف</span>
-                    <strong>- {{ formatPrice(discountAmount || 0) }}</strong>
-                </div>
-            </section>
-
-            <section v-if="!hasPayableItems" class="zero-total-section">
-                <div class="zero-total-icon">!</div>
-                <h2>هیچ کالای قابل خریدی در سبد شما باقی نمانده است.</h2>
-                <p>محصولات ناموجود پس از تأیید از سبد حذف خواهند شد.</p>
-                <div class="actions">
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        @click="goBackToCart"
-                    >
-                        بازگشت به سبد خرید
-                    </button>
-                </div>
-            </section>
-
-            <section
-                v-else-if="addresses.length === 0"
-                class="confirmation-section"
-            >
-                <h2>آدرس تحویل لازم است</h2>
-                <p>برای ثبت سفارش، ابتدا یک آدرس برای تحویل سفارش ثبت کنید.</p>
-            </section>
-
-            <section
-                v-else-if="requiresPriceConfirmation"
-                class="confirmation-section"
-            >
-                <h2>تأیید تغییرات</h2>
-                <p>
-                    برای ادامه، باید تغییرات سبد خرید و آدرس تحویل را تأیید
-                    کنید.
-                </p>
-                <div class="actions">
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        :disabled="!canProceedToPayment || !hasAddress"
-                        @click="submitCheckout"
-                    >
-                        تأیید تغییرات و ادامه پرداخت
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        @click="rejectChanges"
-                    >
-                        عدم تأیید و بازگشت به سبد
-                    </button>
-                </div>
-            </section>
-
-            <section v-else class="confirmation-section">
-                <h2>سفارش آماده است</h2>
-                <p>
-                    آدرس و قیمت سفارش را بررسی کرده‌اید. برای ایجاد سفارش ادامه
-                    دهید.
-                </p>
-                <div class="actions">
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        :disabled="!canProceedToPayment || !hasAddress"
-                        @click="submitCheckout"
-                    >
-                        ثبت سفارش و ادامه به پرداخت
-                    </button>
-                </div>
-            </section>
-        </div>
+        </main>
     </div>
 </template>
-
-<style scoped>
-.checkout-page {
-    min-height: 100vh;
-    background: #f8f9fa;
-    padding: 40px 20px;
-}
-.checkout-container {
-    width: min(100%, 1000px);
-    margin: 0 auto;
-}
-.checkout-header {
-    margin-bottom: 30px;
-}
-.checkout-header h1 {
-    margin: 0 0 8px;
-    font-size: 30px;
-}
-.checkout-header p,
-.section-heading p,
-.confirmation-section p,
-.zero-total-section p {
-    margin: 0;
-    color: #666;
-}
-.feedback-message {
-    margin-bottom: 25px;
-    padding: 14px 18px;
-    border: 1px solid #b7d7c1;
-    border-radius: 12px;
-    background: #effaf2;
-    color: #25643a;
-}
-.address-section,
-.coupon-section,
-.cart-section,
-.summary-section,
-.confirmation-section,
-.zero-total-section {
-    margin-bottom: 25px;
-    padding: 24px;
-    border-radius: 16px;
-    background: #fff;
-}
-.section-heading {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    align-items: flex-start;
-    margin-bottom: 20px;
-}
-.section-heading h2,
-.cart-section h2,
-.confirmation-section h2,
-.zero-total-section h2 {
-    margin-top: 0;
-}
-.section-heading a {
-    white-space: nowrap;
-}
-.address-list {
-    display: grid;
-    gap: 12px;
-}
-.address-card {
-    display: flex;
-    gap: 14px;
-    padding: 18px;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    cursor: pointer;
-}
-.address-card.is-selected {
-    border-color: #111;
-    box-shadow: 0 0 0 1px #111;
-}
-.address-card input {
-    margin-top: 4px;
-}
-.address-content {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-.address-title-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-.default-badge {
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: #eee;
-    font-size: 12px;
-}
-.address-text {
-    color: #444;
-    line-height: 1.8;
-}
-.postal-code {
-    color: #777;
-    font-size: 14px;
-}
-.no-addresses {
-    padding: 20px;
-    border: 1px dashed #ccc;
-    border-radius: 12px;
-}
-.no-addresses p {
-    color: #666;
-}
-.coupon-form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: center;
-}
-.coupon-input {
-    width: min(100%, 360px);
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 12px 14px;
-    outline: none;
-}
-.coupon-input:focus {
-    border-color: #111;
-}
-.coupon-applied {
-    color: #25643a;
-    font-size: 14px;
-    font-weight: 600;
-}
-.coupon-note {
-    margin: 10px 0 0;
-    color: #777;
-    font-size: 13px;
-}
-.changes-notice {
-    margin-bottom: 25px;
-    padding: 24px;
-    border: 1px solid #f0c36d;
-    border-radius: 16px;
-    background: #fff9e8;
-}
-.changes-notice h2 {
-    margin-top: 0;
-}
-.change-section {
-    margin-top: 20px;
-}
-.change-section h3 {
-    margin-bottom: 12px;
-}
-.change-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    padding: 14px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-.change-row:last-child {
-    border-bottom: 0;
-}
-.price-change,
-.stock-status {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.old-price,
-.strikethrough-price {
-    color: #999;
-    text-decoration: line-through;
-}
-.new-price,
-.stock-status {
-    font-weight: 700;
-}
-.cart-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    padding: 18px 0;
-    border-bottom: 1px solid #eee;
-}
-.cart-item:last-child {
-    border-bottom: 0;
-}
-.item-info {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.item-info h3 {
-    margin: 0;
-}
-.item-info span {
-    color: #777;
-    font-size: 14px;
-}
-.item-price {
-    font-weight: 700;
-    white-space: nowrap;
-}
-.is-unavailable {
-    opacity: 0.7;
-}
-.unavailable-label {
-    display: block;
-    color: #c62828;
-}
-.zero-price {
-    display: block;
-    margin-top: 5px;
-    color: #777;
-    font-size: 14px;
-}
-.summary-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 18px;
-}
-.discount-row {
-    margin-top: 10px;
-    color: #25643a;
-    font-size: 15px;
-}
-.zero-total-section {
-    border: 1px solid #e0e0e0;
-    text-align: center;
-}
-.zero-total-icon {
-    width: 42px;
-    height: 42px;
-    margin: 0 auto 15px;
-    border-radius: 50%;
-    background: #eee;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-}
-.actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 20px;
-}
-.btn {
-    display: inline-block;
-    border: 0;
-    border-radius: 10px;
-    padding: 12px 20px;
-    cursor: pointer;
-    font-size: 15px;
-    text-decoration: none;
-}
-.btn-primary {
-    background: #111;
-    color: #fff;
-}
-.btn-secondary {
-    background: #e9ecef;
-    color: #222;
-}
-.btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-.empty-cart {
-    padding: 30px 0;
-    color: #777;
-    text-align: center;
-}
-@media (max-width: 700px) {
-    .change-row,
-    .cart-item,
-    .summary-row,
-    .section-heading {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-    .price-change,
-    .stock-status {
-        align-items: flex-start;
-    }
-    .btn {
-        width: 100%;
-        text-align: center;
-    }
-    .coupon-input {
-        width: 100%;
-    }
-}
-</style>
