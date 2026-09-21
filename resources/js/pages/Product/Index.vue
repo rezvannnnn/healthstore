@@ -64,6 +64,26 @@ const form = reactive({
 const filtering = ref(false);
 const addingProductId = ref<number | null>(null);
 
+function addToCart(product: Product): void {
+    if (
+        addingProductId.value !== null ||
+        !product.available ||
+        product.price === null
+    ) {
+        return;
+    }
+
+    router.post(
+        '/cart/items',
+        { product_id: product.id, quantity: 1 },
+        {
+            preserveScroll: true,
+            onStart: () => { addingProductId.value = product.id; },
+            onFinish: () => { addingProductId.value = null; },
+        },
+    );
+}
+
 function submit(): void {
     router.get('/products', form, {
         preserveState: true,
@@ -239,7 +259,7 @@ function formatPrice(value: number | null): string {
 
                         <div class="space-y-3 p-4">
                             <div class="flex items-center justify-between gap-2 text-xs">
-                                <Link v-if="product.brand && product.brand_slug" :href="'/brands/' + product.brand_slug" class="font-bold text-dh-600 hover:text-dh-700 hover:underline">{{ product.brand }}</Link>
+                                <span v-if="product.brand" class="font-bold text-dh-600">{{ product.brand }}</span>
                                 <span v-if="product.category" class="text-dh-muted">{{ product.category }}</span>
                             </div>
                             <h2 class="line-clamp-2 min-h-12 text-sm font-extrabold leading-6 text-dh-900">{{ product.name }}</h2>
@@ -260,8 +280,10 @@ function formatPrice(value: number | null): string {
                         <button
                             v-if="product.available && product.price !== null"
                             type="button"
-                            class="mt-4 w-full rounded-xl bg-dh-600 px-4 py-3 text-sm font-extrabold text-white transition hover:bg-dh-700"
-                            @click="router.post('/cart/items', { product_id: product.id, quantity: 1 }, { preserveScroll: true, onStart: () => { addingProductId = product.id; }, onFinish: () => { addingProductId = null; } })"
+                            class="mt-4 w-full rounded-xl bg-dh-600 px-4 py-3 text-sm font-extrabold text-white transition hover:bg-dh-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            :disabled="addingProductId !== null"
+                            :aria-busy="addingProductId === product.id"
+                            @click="addToCart(product)"
                         >
                             <span v-if="addingProductId === product.id" class="inline-flex items-center gap-2"><svg viewBox="0 0 24 24" class="size-4 animate-spin" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" opacity="0.25"/><path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>در حال افزودن…</span><span v-else>افزودن به سبد خرید</span>
                         </button>
