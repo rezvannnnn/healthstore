@@ -63,6 +63,7 @@ const form = reactive({
 });
 const filtering = ref(false);
 const addingProductId = ref<number | null>(null);
+const addedProductId = ref<number | null>(null);
 
 function addToCart(product: Product): void {
     if (
@@ -78,7 +79,13 @@ function addToCart(product: Product): void {
         { product_id: product.id, quantity: 1 },
         {
             preserveScroll: true,
-            onStart: () => { addingProductId.value = product.id; },
+            onStart: () => {
+                addingProductId.value = product.id;
+                addedProductId.value = null;
+            },
+            onSuccess: () => {
+                addedProductId.value = product.id;
+            },
             onFinish: () => { addingProductId.value = null; },
         },
     );
@@ -292,6 +299,9 @@ function formatPrice(value: number | null): string {
                         >
                             <span v-if="addingProductId === product.id" class="inline-flex items-center gap-2"><svg viewBox="0 0 24 24" class="size-4 animate-spin" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" opacity="0.25"/><path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>در حال افزودن…</span><span v-else>افزودن به سبد خرید</span>
                         </button>
+                        <div v-if="addedProductId === product.id" class="mt-2 rounded-xl bg-dh-green-50 px-3 py-2 text-center text-xs font-bold text-dh-green-700" role="status">
+                            به سبد خرید اضافه شد.
+                        </div>
                     </div>
                 </article>
             </section>
