@@ -179,13 +179,13 @@ function pageUrl(page: number): string {
                         >محصولات</Link
                     >
                     <span>/</span>
-                    <span class="text-dh-900 dark:text-white">{{
+                    <span class="text-dh-900 text-dh-900">{{
                         brand.name
                     }}</span>
                 </nav>
 
                 <header
-                    class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-dh-100 dark:bg-white dark:ring-gray-800"
+                    class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-dh-100 bg-white ring-dh-100"
                 >
                     <div
                         class="grid gap-6 p-6 md:p-8"
@@ -197,7 +197,7 @@ function pageUrl(page: number): string {
                     >
                         <div
                             v-if="brand.logo"
-                            class="flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-dh-50 p-6 dark:bg-gray-800"
+                            class="flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-dh-50 p-6 bg-dh-50"
                         >
                             <img
                                 :src="brand.logo"
@@ -210,19 +210,19 @@ function pageUrl(page: number): string {
                                 محصولات برند
                             </p>
                             <h1
-                                class="mt-2 text-3xl font-bold text-dh-900 md:text-4xl dark:text-white"
+                                class="mt-2 text-3xl font-bold text-dh-900 md:text-4xl text-dh-900"
                             >
                                 {{ brand.name }}
                             </h1>
                             <p
                                 v-if="brand.description"
-                                class="mt-4 max-w-3xl leading-8 text-dh-muted dark:text-gray-300"
+                                class="mt-4 max-w-3xl leading-8 text-dh-muted text-dh-muted"
                             >
                                 {{ brand.description }}
                             </p>
                             <p
                                 v-else
-                                class="mt-4 max-w-3xl leading-8 text-dh-muted dark:text-gray-300"
+                                class="mt-4 max-w-3xl leading-8 text-dh-muted text-dh-muted"
                             >
                                 محصولات فعال این برند را مشاهده و بررسی کنید.
                             </p>
@@ -236,7 +236,7 @@ function pageUrl(page: number): string {
                     >
                         <div>
                             <h2
-                                class="text-2xl font-bold text-dh-900 dark:text-white"
+                                class="text-2xl font-bold text-dh-900 text-dh-900"
                             >
                                 محصولات {{ brand.name }}
                             </h2>
@@ -262,14 +262,14 @@ function pageUrl(page: number): string {
                         <article
                             v-for="product in products"
                             :key="product.id"
-                            class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-dh-100 transition hover:-translate-y-0.5 hover:shadow-md dark:bg-white dark:ring-gray-800"
+                            class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-dh-100 transition hover:-translate-y-0.5 hover:shadow-md bg-white ring-dh-100"
                         >
                             <Link
                                 :href="'/products/' + product.slug"
                                 class="block"
                             >
                                 <div
-                                    class="aspect-square bg-dh-50 dark:bg-gray-800"
+                                    class="aspect-square bg-dh-50 bg-dh-50"
                                 >
                                     <img
                                         v-if="product.image"
@@ -286,7 +286,7 @@ function pageUrl(page: number): string {
                                 </div>
                                 <div class="space-y-3 p-4">
                                     <h3
-                                        class="line-clamp-2 font-semibold text-dh-900 dark:text-white"
+                                        class="line-clamp-2 font-semibold text-dh-900 text-dh-900"
                                     >
                                         {{ product.name }}
                                     </h3>
@@ -299,11 +299,11 @@ function pageUrl(page: number): string {
                                 </div>
                             </Link>
                             <div
-                                class="flex items-center justify-between gap-3 border-t border-dh-100 p-4 dark:border-gray-800"
+                                class="flex items-center justify-between gap-3 border-t border-dh-100 p-4 border-dh-100"
                             >
                                 <div>
                                     <div
-                                        class="font-bold text-dh-900 dark:text-white"
+                                        class="font-bold text-dh-900 text-dh-900"
                                     >
                                         {{ formatPrice(product.price) }}
                                     </div>
@@ -328,7 +328,7 @@ function pageUrl(page: number): string {
                                         product.price !== null
                                     "
                                     type="button"
-                                    class="rounded-xl bg-dh-700 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
+                                    class="rounded-xl bg-dh-700 px-3 py-2 text-xs font-semibold text-white hover:bg-dh-800"
                                     @click="addToCart(product.id)"
                                 >
                                     افزودن به سبد
@@ -345,7 +345,7 @@ function pageUrl(page: number): string {
 
                     <div
                         v-else
-                        class="rounded-2xl border border-dashed border-dh-200 p-12 text-center text-dh-muted dark:border-gray-700"
+                        class="rounded-2xl border border-dashed border-dh-200 p-12 text-center text-dh-muted border-dh-200"
                     >
                         در این برند هنوز محصول فعالی ثبت نشده است.
                     </div>
@@ -361,7 +361,7 @@ function pageUrl(page: number): string {
                         :href="pageUrl(pagination.current_page - 1)"
                         preserve-scroll
                         aria-label="صفحه قبلی"
-                        class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-dh-700 ring-1 ring-dh-100 hover:bg-dh-surface dark:bg-white dark:text-gray-300 dark:ring-gray-800"
+                        class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-dh-700 ring-1 ring-dh-100 hover:bg-dh-surface bg-white text-dh-muted ring-dh-100"
                     >
                         قبلی
                     </Link>
@@ -380,7 +380,7 @@ function pageUrl(page: number): string {
                         :class="
                             page === pagination.current_page
                                 ? 'bg-dh-700 text-white'
-                                : 'bg-white text-dh-700 ring-1 ring-dh-100 hover:bg-dh-surface dark:bg-white dark:text-gray-300 dark:ring-gray-800'
+                                : 'bg-white text-dh-700 ring-1 ring-dh-100 hover:bg-dh-surface bg-white text-dh-muted ring-dh-100'
                         "
                     >
                         {{ page.toLocaleString('fa-IR') }}
@@ -390,7 +390,7 @@ function pageUrl(page: number): string {
                         :href="pageUrl(pagination.current_page + 1)"
                         preserve-scroll
                         aria-label="صفحه بعدی"
-                        class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-dh-700 ring-1 ring-dh-100 hover:bg-dh-surface dark:bg-white dark:text-gray-300 dark:ring-gray-800"
+                        class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-dh-700 ring-1 ring-dh-100 hover:bg-dh-surface bg-white text-dh-muted ring-dh-100"
                     >
                         بعدی
                     </Link>
