@@ -75,7 +75,7 @@ function removeAddress(id: number): void {
 <template>
     <Head title="آدرس‌های من" />
 
-    <main dir="rtl" class="min-h-screen bg-dh-50 px-4 py-6 sm:px-6 lg:px-8">
+    <main dir="rtl" class="min-h-screen bg-dh-50 px-4 py-6 pb-24 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-5xl">
             <header class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-dh-100">
                 <Link href="/products" class="flex items-center gap-3">
@@ -343,5 +343,11 @@ function removeAddress(id: number): void {
                 </div>
             </section>
         </div>
-    </main>
+    
+            <nav class="fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-md items-center justify-around rounded-2xl border border-dh-100 bg-white/95 p-2 shadow-lg backdrop-blur sm:hidden">
+                <Link href="/products" class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-muted hover:bg-dh-50 hover:text-dh-700"><span class="text-base">⌂</span>فروشگاه</Link>
+                <Link href="/account/orders" class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-muted hover:bg-dh-50 hover:text-dh-700"><span class="text-base">◷</span>سفارش‌ها</Link>
+                <Link href="/account/addresses" class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-muted hover:bg-dh-50 hover:text-dh-700"><span class="text-base">⌖</span>آدرس‌ها</Link>
+                <Link href="/cart" class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-700 hover:bg-dh-50"><span class="text-base">▢</span>سبد</Link>
+            </nav></main>
 </template>
