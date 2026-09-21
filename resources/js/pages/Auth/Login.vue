@@ -33,18 +33,18 @@ function login(): void {
 
     <main
         dir="rtl"
-        class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-10 dark:bg-gray-950"
+        class="flex min-h-screen items-center justify-center bg-dh-surface px-4 py-10 dark:bg-dh-surface"
     >
         <section
-            class="w-full max-w-md rounded-3xl bg-white p-7 shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800"
+            class="relative w-full max-w-md rounded-3xl bg-white p-7 shadow-sm ring-1 ring-dh-100 dark:bg-white dark:ring-dh-100"
         >
-            <Link href="/" class="text-sm font-medium text-indigo-600"
-                >فروشگاه سلامت</Link
+            <Link href="/" class="text-sm font-medium text-dh-700"
+                ><span class="font-black text-dh-800">داروخونه</span></Link
             >
-            <h1 class="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 class="mt-4 text-2xl font-bold text-dh-ink dark:text-dh-ink">
                 ورود به حساب
             </h1>
-            <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">
+            <p class="mt-2 text-sm leading-6 text-dh-muted dark:text-dh-muted">
                 برای ورود، کد تأیید به شماره موبایل شما ارسال می‌شود.
             </p>
 
@@ -54,7 +54,7 @@ function login(): void {
                 @submit.prevent="sendCode"
             >
                 <label
-                    class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    class="block text-sm font-medium text-dh-ink dark:text-dh-ink"
                 >
                     شماره موبایل
                     <input
@@ -62,7 +62,7 @@ function login(): void {
                         type="tel"
                         inputmode="numeric"
                         autocomplete="tel"
-                        class="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 outline-none focus:border-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                        class="mt-2 w-full rounded-xl border border-dh-200 bg-white px-4 py-3 outline-none focus:border-dh-500 dark:border-dh-200 dark:bg-dh-surface dark:text-dh-ink"
                         placeholder="09121234567"
                         required
                     />
@@ -73,7 +73,7 @@ function login(): void {
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="w-full rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
+                    class="w-full rounded-xl bg-dh-700 px-5 py-3 text-sm font-semibold text-white hover:bg-dh-800 disabled:opacity-60"
                 >
                     ارسال کد تأیید
                 </button>
@@ -81,7 +81,7 @@ function login(): void {
 
             <form v-else class="mt-7 space-y-4" @submit.prevent="login">
                 <label
-                    class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    class="block text-sm font-medium text-dh-ink dark:text-dh-ink"
                 >
                     کد تأیید
                     <input
@@ -90,7 +90,7 @@ function login(): void {
                         inputmode="numeric"
                         autocomplete="one-time-code"
                         maxlength="6"
-                        class="mt-2 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-center text-lg tracking-[0.4em] outline-none focus:border-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                        class="mt-2 w-full rounded-xl border border-dh-200 bg-white px-4 py-3 text-center text-lg tracking-[0.4em] outline-none focus:border-dh-500 dark:border-dh-200 dark:bg-dh-surface dark:text-dh-ink"
                         placeholder="۱۲۳۴۵۶"
                         required
                     />
@@ -101,24 +101,24 @@ function login(): void {
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="w-full rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
+                    class="w-full rounded-xl bg-dh-700 px-5 py-3 text-sm font-semibold text-white hover:bg-dh-800 disabled:opacity-60"
                 >
                     ورود
                 </button>
                 <button
                     type="button"
-                    class="w-full rounded-xl border border-gray-300 px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                    class="w-full rounded-xl border border-dh-200 px-5 py-3 text-sm font-semibold text-dh-ink hover:bg-dh-surface dark:border-dh-200 dark:text-dh-ink dark:hover:bg-dh-50"
                     @click="step = 'phone'"
                 >
                     تغییر شماره موبایل
                 </button>
             </form>
 
-            <p class="mt-7 text-center text-sm text-gray-500">
+            <p class="mt-7 text-center text-sm text-dh-muted">
                 حساب ندارید؟
                 <Link
                     href="/register"
-                    class="font-semibold text-indigo-600 hover:underline"
+                    class="font-semibold text-dh-700 hover:underline"
                     >ثبت‌نام کنید</Link
                 >
             </p>
