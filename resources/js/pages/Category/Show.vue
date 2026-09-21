@@ -273,7 +273,7 @@ function pageUrl(page: number): string {
                             v-for="child in category.children"
                             :key="child.id"
                             :href="'/categories/' + child.slug"
-                            class="rounded-2xl border border-dh-100 bg-dh-surface p-4 font-semibold text-dh-800 transition hover:-translate-y-0.5 hover:border-dh-300 hover:bg-dh-50 border-dh-100 dark:bg-dh-surface dark:text-gray-200 dark:hover:bg-white"
+                            class="rounded-2xl border border-dh-100 bg-dh-surface p-4 font-semibold text-dh-800 transition hover:-translate-y-0.5 hover:border-dh-300 hover:bg-dh-50 border-dh-100 dark:bg-dh-surface text-dh-muted dark:hover:bg-white"
                         >
                             {{ child.name }}
                         </Link>
