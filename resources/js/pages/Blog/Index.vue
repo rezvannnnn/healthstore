@@ -34,10 +34,10 @@ defineProps<{
 
 function pageUrl(page: number): string {
     const params = new URLSearchParams();
-    if (page > 1) params.set('page', String(page));
+    if (page > 1) { params.set('page', String(page)); }
 
     const currentSearch = new URLSearchParams(window.location.search).get('search');
-    if (currentSearch) params.set('search', currentSearch);
+    if (currentSearch) { params.set('search', currentSearch); }
 
     const query = params.toString();
     return query ? `/blog?${query}` : '/blog';
