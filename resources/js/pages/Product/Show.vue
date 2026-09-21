@@ -52,6 +52,7 @@ const selectedImage = ref(
     props.product.images[0]?.path || props.product.image || null,
 );
 const quantity = ref(1);
+const addingToCart = ref(false);
 const gallery = computed(() => {
     const images = props.product.images.map((image) => image.path);
     if (props.product.image && !images.includes(props.product.image)) {
@@ -70,10 +71,22 @@ function formatPrice(value: number | null): string {
         : `${value.toLocaleString('fa-IR')} تومان`;
 }
 function addToCart(): void {
+    if (
+        addingToCart.value ||
+        props.product.available_quantity < 1 ||
+        props.product.price === null
+    ) {
+        return;
+    }
+
     router.post(
         '/cart/items',
         { product_id: props.product.id, quantity: quantity.value },
-        { preserveScroll: true },
+        {
+            preserveScroll: true,
+            onStart: () => { addingToCart.value = true; },
+            onFinish: () => { addingToCart.value = false; },
+        },
     );
 }
 </script>
@@ -238,8 +251,9 @@ function addToCart(): void {
                                 <div class="flex h-12 items-center rounded-xl border border-dh-100 bg-white">
                                     <button
                                         type="button"
-                                        class="flex h-full w-10 items-center justify-center text-xl text-dh-700 transition hover:bg-dh-50"
+                                        class="flex h-full w-10 items-center justify-center text-xl text-dh-700 transition hover:bg-dh-50 disabled:cursor-not-allowed disabled:opacity-40"
                                         aria-label="کاهش تعداد"
+                                        :disabled="addingToCart"
                                         @click="quantity = Math.max(1, quantity - 1)"
                                     >
                                         −
@@ -247,8 +261,9 @@ function addToCart(): void {
                                     <span class="w-9 text-center text-sm font-bold">{{ quantity }}</span>
                                     <button
                                         type="button"
-                                        class="flex h-full w-10 items-center justify-center text-xl text-dh-700 transition hover:bg-dh-50"
+                                        class="flex h-full w-10 items-center justify-center text-xl text-dh-700 transition hover:bg-dh-50 disabled:cursor-not-allowed disabled:opacity-40"
                                         aria-label="افزایش تعداد"
+                                        :disabled="addingToCart"
                                         @click="quantity = Math.min(product.available_quantity, quantity + 1)"
                                     >
                                         +
@@ -257,15 +272,20 @@ function addToCart(): void {
                                 <button
                                     type="button"
                                     class="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-dh-700 px-5 font-bold text-white shadow-lg shadow-dh-700/15 transition hover:-translate-y-0.5 hover:bg-dh-800 disabled:cursor-not-allowed disabled:opacity-50"
-                                    :disabled="product.available_quantity < 1"
+                                    :disabled="addingToCart || product.available_quantity < 1 || product.price === null"
+                                    :aria-busy="addingToCart"
                                     @click="addToCart"
                                 >
-                                    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                    <svg v-if="addingToCart" viewBox="0 0 24 24" class="h-5 w-5 animate-spin" fill="none" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" opacity="0.25" />
+                                        <path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                    </svg>
+                                    <svg v-else viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                         <path d="M4 5h2l1.5 10.2a2 2 0 0 0 2 1.8h7.6a2 2 0 0 0 1.9-1.5L21 8H7" stroke-linecap="round" stroke-linejoin="round" />
                                         <circle cx="10" cy="20" r="1" />
                                         <circle cx="18" cy="20" r="1" />
                                     </svg>
-                                    افزودن به سبد خرید
+                                    {{ addingToCart ? 'در حال افزودن…' : 'افزودن به سبد خرید' }}
                                 </button>
                             </div>
                             <p class="mt-2 text-center text-[11px] text-dh-muted">
