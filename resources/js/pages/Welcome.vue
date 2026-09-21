@@ -32,6 +32,7 @@ const props = defineProps<{
 }>();
 
 const searchQuery = ref('');
+const addingProductId = ref<number | null>(null);
 
 function formatPrice(value: number | null): string {
     return value === null
@@ -53,14 +54,22 @@ function searchProducts(): void {
 }
 
 function addToCart(product: FeaturedProduct): void {
-    if (!product.available || product.price === null) {
+    if (
+        !product.available ||
+        product.price === null ||
+        addingProductId.value !== null
+    ) {
         return;
     }
 
     router.post(
         '/cart/items',
         { product_id: product.id, quantity: 1 },
-        { preserveScroll: true },
+        {
+            preserveScroll: true,
+            onStart: () => { addingProductId.value = product.id; },
+            onFinish: () => { addingProductId.value = null; },
+        },
     );
 }
 </script>
@@ -352,11 +361,19 @@ function addToCart(product: FeaturedProduct): void {
                             <div class="px-4 pb-4">
                                 <button
                                     type="button"
-                                    :disabled="!product.available || product.price === null"
+                                    :disabled="!product.available || product.price === null || addingProductId !== null"
+                                    :aria-busy="addingProductId === product.id"
                                     class="w-full rounded-xl bg-dh-600 px-4 py-3 text-sm font-extrabold text-white transition hover:bg-dh-700 disabled:cursor-not-allowed disabled:bg-dh-100 disabled:text-dh-muted"
                                     @click="addToCart(product)"
                                 >
-                                    افزودن به سبد خرید
+                                    <span v-if="addingProductId === product.id" class="inline-flex items-center gap-2">
+                                        <svg viewBox="0 0 24 24" class="size-4 animate-spin" fill="none" aria-hidden="true">
+                                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" opacity="0.25" />
+                                            <path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                        </svg>
+                                        در حال افزودن…
+                                    </span>
+                                    <span v-else>افزودن به سبد خرید</span>
                                 </button>
                             </div>
                         </article>
