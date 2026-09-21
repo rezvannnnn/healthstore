@@ -19,10 +19,7 @@ interface PagePropsWithFlash {
     };
 }
 
-const props = defineProps<{
-    user: User;
-}>();
-
+const props = defineProps<{ user: User }>();
 const page = usePage<PagePropsWithFlash>();
 const form = useForm({
     name: props.user.name,
@@ -30,143 +27,90 @@ const form = useForm({
 });
 
 function submit(): void {
-    form.put('/account/profile', {
-        preserveScroll: true,
-    });
+    form.put('/account/profile', { preserveScroll: true });
 }
 </script>
 
 <template>
     <Head title="پروفایل من" />
-
-    <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
-        <div class="mx-auto max-w-2xl space-y-6">
-            <header>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                    پروفایل من
-                </h1>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    اطلاعات حساب کاربری خود را مدیریت کنید.
-                </p>
+    <main dir="rtl" class="min-h-screen bg-dh-50 px-4 py-6 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-5xl">
+            <header class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-dh-100">
+                <Link href="/products" class="flex items-center gap-3">
+                    <span class="grid size-11 place-items-center rounded-2xl bg-dh-700 text-white shadow-sm">
+                        <svg viewBox="0 0 48 48" class="size-7" fill="none" aria-hidden="true">
+                            <path d="M11 16h26l-3 17H14l-3-17Z" stroke="currentColor" stroke-width="3" />
+                            <path d="M17 16c0-5 3-8 7-8s7 3 7 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                            <path d="m22 24 3 3 7-7" stroke="#77c8a0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </span>
+                    <span>
+                        <strong class="block text-lg font-black text-dh-800">داروخونه</strong>
+                        <span class="text-xs text-dh-muted">دارو و محصولات بهداشتی</span>
+                    </span>
+                </Link>
+                <nav class="flex items-center gap-2 text-sm">
+                    <Link href="/account/orders" class="rounded-xl px-3 py-2 font-semibold text-dh-700 hover:bg-dh-50">سفارش‌ها</Link>
+                    <Link href="/account/addresses" class="rounded-xl px-3 py-2 font-semibold text-dh-700 hover:bg-dh-50">آدرس‌ها</Link>
+                    <Link href="/cart" class="rounded-xl bg-dh-700 px-4 py-2 font-semibold text-white hover:bg-dh-800">سبد خرید</Link>
+                </nav>
             </header>
 
-            <div
-                v-if="page.props.flash?.success || page.props.flash?.status"
-                class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700"
-                role="status"
-            >
-                {{ page.props.flash.success || page.props.flash.status }}
-            </div>
-            <div
-                v-if="page.props.flash?.error"
-                class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
-                role="alert"
-            >
-                {{ page.props.flash.error }}
-            </div>
-            <div
-                v-if="page.props.flash?.info"
-                class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700"
-                role="status"
-            >
-                {{ page.props.flash.info }}
-            </div>
+            <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+                <section class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-7">
+                    <div class="mb-7">
+                        <p class="mb-2 text-sm font-bold text-dh-green-600">حساب کاربری</p>
+                        <h1 class="text-2xl font-black text-dh-900">پروفایل من</h1>
+                        <p class="mt-2 text-sm text-dh-muted">اطلاعات حساب خود را مدیریت و به‌روز کنید.</p>
+                    </div>
 
-            <section
-                class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800"
-            >
-                <form class="space-y-5" @submit.prevent="submit">
-                    <div>
-                        <label
-                            class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >
-                            نام
-                        </label>
-                        <input
-                            v-model="form.name"
-                            required
-                            class="w-full rounded-xl border-gray-300"
-                        />
-                        <p
-                            v-if="form.errors.name"
-                            class="mt-1 text-sm text-red-500"
-                        >
-                            {{ form.errors.name }}
-                        </p>
+                    <div v-if="page.props.flash?.success || page.props.flash?.status" class="mb-5 rounded-2xl border border-dh-green-100 bg-dh-green-50 p-4 text-sm text-dh-green-700" role="status">
+                        {{ page.props.flash.success || page.props.flash.status }}
                     </div>
-                    <div>
-                        <label
-                            class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >
-                            ایمیل
-                        </label>
-                        <input
-                            v-model="form.email"
-                            type="email"
-                            class="w-full rounded-xl border-gray-300"
-                        />
-                        <p
-                            v-if="form.errors.email"
-                            class="mt-1 text-sm text-red-500"
-                        >
-                            {{ form.errors.email }}
-                        </p>
+                    <div v-if="page.props.flash?.error" class="mb-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+                        {{ page.props.flash.error }}
                     </div>
-                    <div>
-                        <label
-                            class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >
-                            موبایل
-                        </label>
-                        <input
-                            :value="user.phone"
-                            disabled
-                            class="w-full rounded-xl border-gray-200 bg-gray-100 text-gray-500"
-                        />
-                        <p class="mt-1 text-xs text-gray-500">
-                            {{
-                                user.phone_verified_at
-                                    ? 'شماره موبایل تأیید شده است.'
-                                    : 'شماره موبایل هنوز تأیید نشده است.'
-                            }}
-                        </p>
+                    <div v-if="page.props.flash?.info" class="mb-5 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700" role="status">
+                        {{ page.props.flash.info }}
                     </div>
-                    <div
-                        v-if="form.hasErrors"
-                        class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-                        role="alert"
-                    >
-                        لطفاً خطاهای فرم را بررسی و اصلاح کنید.
-                    </div>
-                    <button
-                        type="submit"
-                        :disabled="form.processing"
-                        class="rounded-xl bg-indigo-600 px-5 py-3 font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
-                    >
-                        {{
-                            form.processing
-                                ? 'در حال ذخیره...'
-                                : 'ذخیره اطلاعات'
-                        }}
-                    </button>
-                </form>
-            </section>
 
-            <nav class="flex flex-wrap gap-4 text-sm">
-                <Link
-                    href="/account/orders"
-                    class="text-indigo-600 hover:underline"
-                    >سفارش‌های من</Link
-                >
-                <Link
-                    href="/account/addresses"
-                    class="text-indigo-600 hover:underline"
-                    >آدرس‌های من</Link
-                >
-                <Link href="/products" class="text-indigo-600 hover:underline"
-                    >بازگشت به فروشگاه</Link
-                >
-            </nav>
+                    <form class="space-y-5" @submit.prevent="submit">
+                        <div>
+                            <label class="mb-2 block text-sm font-bold text-dh-800">نام</label>
+                            <input v-model="form.name" required class="w-full rounded-2xl border-dh-100 bg-dh-50/40 px-4 py-3.5 text-dh-900 outline-none transition focus:border-dh-400 focus:ring-4 focus:ring-dh-100" />
+                            <p v-if="form.errors.name" class="mt-1.5 text-sm text-red-500">{{ form.errors.name }}</p>
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-bold text-dh-800">ایمیل</label>
+                            <input v-model="form.email" type="email" class="w-full rounded-2xl border-dh-100 bg-dh-50/40 px-4 py-3.5 text-dh-900 outline-none transition focus:border-dh-400 focus:ring-4 focus:ring-dh-100" />
+                            <p v-if="form.errors.email" class="mt-1.5 text-sm text-red-500">{{ form.errors.email }}</p>
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-bold text-dh-800">موبایل</label>
+                            <input :value="user.phone" disabled class="w-full rounded-2xl border-dh-100 bg-dh-100/60 px-4 py-3.5 text-dh-muted" />
+                            <p class="mt-1.5 text-xs text-dh-muted">
+                                {{ user.phone_verified_at ? 'شماره موبایل تأیید شده است.' : 'شماره موبایل هنوز تأیید نشده است.' }}
+                            </p>
+                        </div>
+                        <div v-if="form.hasErrors" class="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+                            لطفاً خطاهای فرم را بررسی و اصلاح کنید.
+                        </div>
+                        <button type="submit" :disabled="form.processing" class="rounded-2xl bg-dh-700 px-6 py-3.5 font-bold text-white shadow-sm transition hover:bg-dh-800 disabled:opacity-60">
+                            {{ form.processing ? 'در حال ذخیره...' : 'ذخیره اطلاعات' }}
+                        </button>
+                    </form>
+                </section>
+
+                <aside class="h-fit rounded-3xl bg-dh-800 p-6 text-white shadow-sm">
+                    <p class="text-sm font-bold text-dh-green-100">مدیریت حساب</p>
+                    <h2 class="mt-2 text-xl font-black">همه‌چیز یک‌جا</h2>
+                    <p class="mt-3 text-sm leading-7 text-dh-100">از این بخش می‌توانید اطلاعات شخصی، سفارش‌ها و آدرس‌های ارسال را مدیریت کنید.</p>
+                    <div class="mt-6 space-y-2">
+                        <Link href="/account/orders" class="block rounded-2xl bg-white/10 px-4 py-3 text-sm font-bold hover:bg-white/15">مشاهده سفارش‌ها</Link>
+                        <Link href="/account/addresses" class="block rounded-2xl bg-white/10 px-4 py-3 text-sm font-bold hover:bg-white/15">مدیریت آدرس‌ها</Link>
+                    </div>
+                </aside>
+            </div>
         </div>
     </main>
 </template>
