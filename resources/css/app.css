@@ -5,6 +5,14 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+:root {
+    --brand-blue: #04547b;
+    --brand-teal: #0c98a4;
+    --brand-green: #69b84a;
+    --brand-surface: #f6fafb;
+    --brand-border: #dce9ec;
+}
+
 @theme inline {
     --font-sans:
         Vazirmatn, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
