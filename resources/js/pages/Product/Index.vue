@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 
 interface Product {
     id: number;
@@ -61,11 +61,15 @@ const form = reactive({
     category: props.filters.category,
     brand: props.filters.brand,
 });
+const filtering = ref(false);
+const addingProductId = ref<number | null>(null);
 
 function submit(): void {
     router.get('/products', form, {
         preserveState: true,
         replace: true,
+        onStart: () => { filtering.value = true; },
+        onFinish: () => { filtering.value = false; },
     });
 }
 
@@ -80,6 +84,8 @@ function clearFilters(): void {
         {
             preserveState: true,
             replace: true,
+            onStart: () => { filtering.value = true; },
+            onFinish: () => { filtering.value = false; },
         },
     );
 }
@@ -128,7 +134,7 @@ function formatPrice(value: number | null): string {
         <meta name="twitter:description" :content="seo.description" />
     </Head>
 
-    <div dir="rtl" class="min-h-screen bg-dh-surface text-dh-ink">
+    <div dir="rtl" class="min-h-screen bg-dh-surface pb-24 text-dh-ink lg:pb-10">
         <header class="border-b border-dh-100 bg-white">
             <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between gap-4">
@@ -176,6 +182,7 @@ function formatPrice(value: number | null): string {
                         <input
                             v-model="form.search"
                             type="search"
+                            enterkeyhint="search"
                             placeholder="نام محصول، SKU یا بارکد..."
                             class="h-12 w-full rounded-2xl border border-dh-100 bg-dh-50/60 pr-12 pl-4 text-sm outline-none transition placeholder:text-dh-muted focus:border-dh-300 focus:bg-white focus:ring-4 focus:ring-dh-100"
                         />
@@ -198,8 +205,8 @@ function formatPrice(value: number | null): string {
                     </label>
 
                     <div class="flex gap-2">
-                        <button type="submit" class="h-12 flex-1 rounded-2xl bg-dh-600 px-5 text-sm font-extrabold text-white transition hover:bg-dh-700">جستجو</button>
-                        <button type="button" class="h-12 rounded-2xl border border-dh-100 px-4 text-sm font-bold text-dh-700 transition hover:bg-dh-50" @click="clearFilters">حذف فیلتر</button>
+                        <button type="submit" class="h-12 flex-1 rounded-2xl bg-dh-600 px-5 text-sm font-extrabold text-white transition hover:bg-dh-700 disabled:cursor-not-allowed disabled:opacity-60" :disabled="filtering"><span v-if="filtering" class="inline-flex items-center gap-2"><svg viewBox="0 0 24 24" class="size-4 animate-spin" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" opacity="0.25"/><path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>در حال جستجو…</span><span v-else>جستجو</span></button>
+                        <button type="button" class="h-12 rounded-2xl border border-dh-100 px-4 text-sm font-bold text-dh-700 transition hover:bg-dh-50 disabled:cursor-not-allowed disabled:opacity-60" :disabled="filtering" @click="clearFilters">حذف فیلتر</button>
                     </div>
                 </form>
 
@@ -254,9 +261,9 @@ function formatPrice(value: number | null): string {
                             v-if="product.available && product.price !== null"
                             type="button"
                             class="mt-4 w-full rounded-xl bg-dh-600 px-4 py-3 text-sm font-extrabold text-white transition hover:bg-dh-700"
-                            @click="router.post('/cart/items', { product_id: product.id, quantity: 1 }, { preserveScroll: true })"
+                            @click="router.post('/cart/items', { product_id: product.id, quantity: 1 }, { preserveScroll: true, onStart: () => { addingProductId = product.id; }, onFinish: () => { addingProductId = null; } })"
                         >
-                            افزودن به سبد خرید
+                            <span v-if="addingProductId === product.id" class="inline-flex items-center gap-2"><svg viewBox="0 0 24 24" class="size-4 animate-spin" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" opacity="0.25"/><path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>در حال افزودن…</span><span v-else>افزودن به سبد خرید</span>
                         </button>
                     </div>
                 </article>
@@ -309,5 +316,7 @@ function formatPrice(value: number | null): string {
                 </Link>
             </nav>
         </main>
+
+        <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-dh-100 bg-white/95 px-3 py-2 backdrop-blur lg:hidden" aria-label="ناوبری موبایل"><div class="mx-auto grid max-w-md grid-cols-3 gap-2 text-center text-[11px] font-bold text-dh-muted"><Link href="/" class="rounded-xl px-2 py-2">خانه</Link><Link href="/products" class="rounded-xl bg-dh-50 px-2 py-2 text-dh-700">فروشگاه</Link><Link href="/cart" class="rounded-xl px-2 py-2">سبد خرید</Link></div></nav>
     </div>
 </template>
