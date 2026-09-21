@@ -65,6 +65,7 @@ const selectedAddressId = ref<number | null>(
     props.selectedAddressId ?? props.addresses[0]?.id ?? null,
 );
 const couponCode = ref(props.couponCode ?? '');
+const submitting = ref(false);
 
 const priceFormatter = new Intl.NumberFormat('fa-IR');
 
@@ -91,12 +92,19 @@ const submitCheckout = () => {
         },
         {
             preserveScroll: true,
+            onStart: () => { submitting.value = true; },
+            onFinish: () => { submitting.value = false; },
         },
     );
 };
 
 const rejectChanges = () => {
-    router.post('/checkout/reject', {}, { preserveScroll: true });
+    if (submitting.value) return;
+    router.post('/checkout/reject', {}, {
+        preserveScroll: true,
+        onStart: () => { submitting.value = true; },
+        onFinish: () => { submitting.value = false; },
+    });
 };
 
 const goBackToCart = () => {
@@ -188,13 +196,13 @@ const goBackToCart = () => {
 
                     <section v-else-if="requiresPriceConfirmation" class="mt-6">
                         <div class="rounded-2xl bg-dh-50 p-4"><div class="font-black text-dh-800">تأیید تغییرات</div><p class="mt-1 text-xs leading-6 text-dh-muted">برای ادامه، تغییرات سبد و آدرس تحویل را تأیید کنید.</p></div>
-                        <button type="button" class="mt-3 w-full rounded-2xl bg-dh-700 px-5 py-3.5 text-sm font-black text-white shadow-sm hover:bg-dh-800 disabled:cursor-not-allowed disabled:opacity-50" :disabled="!canProceedToPayment || !hasAddress" @click="submitCheckout">تأیید تغییرات و ادامه پرداخت</button>
-                        <button type="button" class="mt-2 w-full rounded-2xl border border-dh-100 bg-white px-5 py-3 text-sm font-bold text-dh-700 hover:bg-dh-50" @click="rejectChanges">عدم تأیید و بازگشت به سبد</button>
+                        <button type="button" class="mt-3 w-full rounded-2xl bg-dh-700 px-5 py-3.5 text-sm font-black text-white shadow-sm hover:bg-dh-800 disabled:cursor-not-allowed disabled:opacity-50" :disabled="submitting || !canProceedToPayment || !hasAddress" @click="submitCheckout">{{ submitting ? 'در حال پردازش…' : 'تأیید تغییرات و ادامه پرداخت' }}</button>
+                        <button type="button" class="mt-2 w-full rounded-2xl border border-dh-100 bg-white px-5 py-3 text-sm font-bold text-dh-700 hover:bg-dh-50" :disabled="submitting" @click="rejectChanges">{{ submitting ? 'در حال پردازش…' : 'عدم تأیید و بازگشت به سبد' }}</button>
                     </section>
 
                     <section v-else class="mt-6">
                         <div class="rounded-2xl bg-dh-green-50 p-4"><div class="font-black text-dh-green-700">سفارش آماده است</div><p class="mt-1 text-xs leading-6 text-dh-green-700/80">آدرس و قیمت سفارش را بررسی کرده‌اید.</p></div>
-                        <button type="button" class="mt-3 w-full rounded-2xl bg-dh-700 px-5 py-3.5 text-sm font-black text-white shadow-sm hover:bg-dh-800 disabled:cursor-not-allowed disabled:opacity-50" :disabled="!canProceedToPayment || !hasAddress" @click="submitCheckout">ثبت سفارش و ادامه به پرداخت</button>
+                        <button type="button" class="mt-3 w-full rounded-2xl bg-dh-700 px-5 py-3.5 text-sm font-black text-white shadow-sm hover:bg-dh-800 disabled:cursor-not-allowed disabled:opacity-50" :disabled="submitting || !canProceedToPayment || !hasAddress" @click="submitCheckout">{{ submitting ? 'در حال پردازش…' : 'ثبت سفارش و ادامه به پرداخت' }}</button>
                     </section>
                 </aside>
             </section>
