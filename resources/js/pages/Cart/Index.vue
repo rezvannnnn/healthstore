@@ -51,7 +51,7 @@ function removeItem(item: CartItem): void {
 
             <section v-if="cart.items.length" class="grid gap-6 lg:grid-cols-[1fr_350px]">
                 <div class="space-y-3">
-                    <article v-for="item in cart.items" :key="item.id" class="rounded-3xl border border-dh-100 bg-white p-4 shadow-sm sm:p-5">
+                    <article v-for="item in cart.items" :key="item.id" class="relative rounded-3xl border border-dh-100 bg-white p-4 shadow-sm transition sm:p-5" :class="busyItem === item.id ? 'opacity-80' : ''" :aria-busy="busyItem === item.id">
                         <div class="flex gap-4">
                             <Link :href="`/products/${item.product.slug}`" :aria-label="`مشاهده ${item.product.name}`" class="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-dh-50 sm:size-28">
                                 <img v-if="item.product.image" :src="item.product.image" :alt="item.product.name" class="h-full w-full object-contain p-2" />
@@ -63,11 +63,11 @@ function removeItem(item: CartItem): void {
                                 <div class="mt-3 text-xs text-dh-muted">{{ formatPrice(item.unit_price) }} برای هر واحد</div>
                                 <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
                                     <div class="flex items-center rounded-xl border border-dh-100 bg-dh-surface" :aria-label="`تغییر تعداد ${item.product.name}`">
-                                        <button type="button" class="px-3 py-2 text-lg text-dh-700 disabled:opacity-40" :disabled="busyItem === item.id" :aria-label="`کاهش تعداد ${item.product.name}`" @click="updateQuantity(item, item.quantity - 1)">−</button>
+                                        <button type="button" class="px-3 py-2 text-lg text-dh-700 disabled:opacity-40" :disabled="busyItem !== null" :aria-label="`کاهش تعداد ${item.product.name}`" @click="updateQuantity(item, item.quantity - 1)">−</button>
                                         <span class="min-w-9 text-center text-sm font-black" aria-live="polite">{{ item.quantity.toLocaleString('fa-IR') }}</span>
-                                        <button type="button" class="px-3 py-2 text-lg text-dh-700 disabled:opacity-40" :disabled="busyItem === item.id" :aria-label="`افزایش تعداد ${item.product.name}`" @click="updateQuantity(item, item.quantity + 1)">+</button>
+                                        <button type="button" class="px-3 py-2 text-lg text-dh-700 disabled:opacity-40" :disabled="busyItem !== null" :aria-label="`افزایش تعداد ${item.product.name}`" @click="updateQuantity(item, item.quantity + 1)">+</button>
                                     </div>
-                                    <button type="button" class="text-xs font-bold text-red-500 hover:text-red-600 disabled:opacity-40" :disabled="busyItem === item.id" :aria-label="`حذف ${item.product.name} از سبد خرید`" @click="removeItem(item)">حذف محصول</button>
+                                    <button type="button" class="inline-flex items-center gap-1.5 text-xs font-bold text-red-500 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40" :disabled="busyItem !== null" :aria-label="`حذف ${item.product.name} از سبد خرید`" @click="removeItem(item)"><svg v-if="busyItem === item.id" viewBox="0 0 24 24" class="size-3.5 animate-spin" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" opacity="0.25"/><path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>{{ busyItem === item.id ? 'در حال بروزرسانی…' : 'حذف محصول' }}</span></button>
                                 </div>
                             </div>
                             <div class="hidden shrink-0 text-left text-sm font-black text-dh-800 sm:block">{{ formatPrice(item.line_total) }}</div>
@@ -81,7 +81,8 @@ function removeItem(item: CartItem): void {
                     <div class="mt-6 flex items-center justify-between text-sm text-dh-muted"><span>جمع محصولات</span><span>{{ formatPrice(cart.subtotal) }}</span></div>
                     <div class="my-5 border-t border-dh-100"></div>
                     <div class="flex items-end justify-between gap-4"><span class="text-sm font-bold text-dh-800">مبلغ قابل پرداخت</span><span class="text-xl font-black text-dh-700">{{ formatPrice(cart.subtotal) }}</span></div>
-                    <Link href="/checkout" class="mt-6 block rounded-2xl bg-dh-700 px-5 py-3.5 text-center text-sm font-black text-white shadow-sm hover:bg-dh-800">ادامه و انتخاب آدرس</Link>
+                    <div v-if="busyItem !== null" class="mt-5 rounded-xl bg-dh-50 px-3 py-2 text-center text-xs font-bold text-dh-700" role="status">در حال بروزرسانی سبد خرید…</div>
+                    <Link href="/checkout" class="mt-6 block rounded-2xl bg-dh-700 px-5 py-3.5 text-center text-sm font-black text-white shadow-sm transition hover:bg-dh-800" :class="busyItem !== null ? 'pointer-events-none opacity-50' : ''" :aria-disabled="busyItem !== null" @click="busyItem !== null && $event.preventDefault()">ادامه و انتخاب آدرس</Link>
                     <div class="mt-4 flex items-center gap-2 text-xs leading-6 text-dh-muted"><span class="size-2 shrink-0 rounded-full bg-dh-green-500"></span>قبل از پرداخت، جزئیات سفارش را یک بار دیگر بررسی کنید.</div>
                 </aside>
             </section>
