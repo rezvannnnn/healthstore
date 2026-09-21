@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import { reactive } from 'vue';
+import ProductCard from '../../components/ProductCard.vue';
+import StorefrontLayout from '../../components/StorefrontLayout.vue';
 
 interface Product {
     id: number;
@@ -9,8 +11,6 @@ interface Product {
     sku: string | null;
     short_description: string | null;
     brand: string | null;
-    brand_slug: string | null;
-    category: string | null;
     image: string | null;
     price: number | null;
     compare_at_price: number | null;
@@ -92,12 +92,6 @@ function pageUrl(page: number): string {
     return query ? `/products?${query}` : '/products';
 }
 
-function formatPrice(value: number | null): string {
-    return value === null
-        ? 'تماس بگیرید'
-        : `${value.toLocaleString('fa-IR')} تومان`;
-}
-
 function addToCart(productId: number): void {
     router.post(
         '/cart/items',
@@ -126,48 +120,74 @@ function addToCart(productId: number): void {
         <meta name="twitter:description" :content="seo.description" />
     </Head>
 
-    <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
-        <div class="mx-auto max-w-7xl space-y-8">
-            <header class="space-y-4">
-                <div
-                    class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
-                >
+    <StorefrontLayout>
+        <section class="border-b border-[#dce9ec] bg-white">
+            <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <p class="text-sm font-medium text-indigo-600">
-                            فروشگاه سلامت
-                        </p>
-                        <h1
-                            class="mt-1 text-3xl font-bold text-gray-900 dark:text-white"
+                        <span class="text-xs font-bold text-[#0a8d9f]"
+                            >فروشگاه داروخونه</span
                         >
+                        <h1 class="mt-1 text-3xl font-black text-[#04547b]">
                             محصولات
                         </h1>
-                        <p
-                            class="mt-2 text-sm text-gray-500 dark:text-gray-400"
-                        >
-                            محصولات فعال فروشگاه را جستجو و بررسی کنید.
+                        <p class="mt-2 text-sm leading-7 text-slate-500">
+                            محصول موردنظرت را بر اساس نام، برند یا دسته‌بندی
+                            پیدا کن.
                         </p>
                     </div>
                     <Link
                         href="/cart"
-                        class="inline-flex items-center justify-center rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900"
+                        class="inline-flex w-fit items-center rounded-xl border border-[#cfe0e5] bg-white px-4 py-2.5 text-sm font-bold text-[#04547b] transition hover:bg-[#f5fbfb]"
                     >
                         مشاهده سبد خرید
                     </Link>
                 </div>
+            </div>
+        </section>
 
-                <form
-                    @submit.prevent="submit"
-                    class="grid gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 md:grid-cols-[1fr_220px_220px_auto] dark:bg-gray-900 dark:ring-gray-800"
-                >
-                    <input
-                        v-model="form.search"
-                        type="search"
-                        placeholder="نام محصول، SKU یا بارکد..."
-                        class="rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
-                    />
+        <section class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            <form
+                @submit.prevent="submit"
+                class="rounded-3xl border border-[#dce9ec] bg-white p-4 shadow-[0_10px_35px_rgba(4,84,123,0.06)]"
+            >
+                <div class="grid gap-3 lg:grid-cols-[1fr_210px_210px_auto]">
+                    <div
+                        class="relative rounded-2xl border border-[#cfe0e5] bg-[#f7fbfc] focus-within:border-[#0c93a4] focus-within:ring-4 focus-within:ring-[#0c93a4]/10"
+                    >
+                        <label class="sr-only" for="product-search"
+                            >جستجوی محصول</label
+                        >
+                        <svg
+                            class="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#0a8d9f]"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                        >
+                            <circle
+                                cx="11"
+                                cy="11"
+                                r="6.8"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                            />
+                            <path
+                                d="m16 16 4.5 4.5"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                            />
+                        </svg>
+                        <input
+                            id="product-search"
+                            v-model="form.search"
+                            type="search"
+                            placeholder="نام محصول، برند، SKU یا بارکد..."
+                            class="w-full rounded-2xl bg-transparent py-3.5 pr-12 pl-4 text-sm outline-none placeholder:text-slate-400"
+                        />
+                    </div>
                     <select
                         v-model="form.category"
-                        class="rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                        class="rounded-2xl border border-[#cfe0e5] bg-white px-4 py-3.5 text-sm text-slate-700 outline-none focus:border-[#0c93a4] focus:ring-4 focus:ring-[#0c93a4]/10"
                     >
                         <option value="">همه دسته‌ها</option>
                         <option
@@ -181,7 +201,7 @@ function addToCart(productId: number): void {
 
                     <select
                         v-model="form.brand"
-                        class="rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                        class="rounded-2xl border border-[#cfe0e5] bg-white px-4 py-3.5 text-sm text-slate-700 outline-none focus:border-[#0c93a4] focus:ring-4 focus:ring-[#0c93a4]/10"
                     >
                         <option value="">همه برندها</option>
                         <option
@@ -194,120 +214,87 @@ function addToCart(productId: number): void {
                     </select>
                     <button
                         type="submit"
-                        class="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-700"
+                        class="rounded-2xl bg-[#04547b] px-6 py-3.5 text-sm font-bold text-white transition hover:bg-[#034664]"
                     >
-                        جستجو
+                        جستجوی محصولات
                     </button>
-                </form>
-            </header>
+                </div>
+            </form>
+        </section>
+
+        <section class="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
+            <div
+                class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+            >
+                <div class="text-sm text-slate-500">
+                    نمایش
+                    <span class="font-bold text-slate-700">{{
+                        pagination.from?.toLocaleString('fa-IR') || '۰'
+                    }}</span>
+                    تا
+                    <span class="font-bold text-slate-700">{{
+                        pagination.to?.toLocaleString('fa-IR') || '۰'
+                    }}</span>
+                    از
+                    <span class="font-bold text-slate-700">{{
+                        pagination.total.toLocaleString('fa-IR')
+                    }}</span>
+                    محصول
+                </div>
+                <div
+                    v-if="form.search || form.category || form.brand"
+                    class="text-xs font-semibold text-[#0a8d9f]"
+                >
+                    فیلتر فعال است
+                </div>
+            </div>
 
             <section
                 v-if="products.length"
                 class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
             >
-                <article
+                <ProductCard
                     v-for="product in products"
                     :key="product.id"
-                    class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:-translate-y-0.5 hover:shadow-md dark:bg-gray-900 dark:ring-gray-800"
-                >
-                    <Link :href="`/products/${product.slug}`" class="block">
-                        <div class="aspect-square bg-gray-100 dark:bg-gray-800">
-                            <img
-                                v-if="product.image"
-                                :src="product.image"
-                                :alt="product.name"
-                                class="h-full w-full object-contain p-6"
-                            />
-                            <div
-                                v-else
-                                class="flex h-full items-center justify-center text-sm text-gray-400"
-                            >
-                                بدون تصویر
-                            </div>
-                        </div>
-                        <div class="space-y-3 p-4">
-                            <div
-                                class="flex items-center justify-between gap-2"
-                            >
-                                <Link
-                                    v-if="product.brand && product.brand_slug"
-                                    :href="'/brands/' + product.brand_slug"
-                                    class="text-xs text-indigo-600 hover:underline"
-                                >
-                                    {{ product.brand }}
-                                </Link>
-                                <span
-                                    v-if="product.category"
-                                    class="text-xs text-gray-400"
-                                    >{{ product.category }}</span
-                                >
-                            </div>
-                            <h2
-                                class="line-clamp-2 font-semibold text-gray-900 dark:text-white"
-                            >
-                                {{ product.name }}
-                            </h2>
-                            <p
-                                v-if="product.short_description"
-                                class="line-clamp-2 text-sm text-gray-500 dark:text-gray-400"
-                            >
-                                {{ product.short_description }}
-                            </p>
-                        </div>
-                    </Link>
-                    <div
-                        class="flex items-center justify-between gap-3 border-t border-gray-100 p-4 dark:border-gray-800"
-                    >
-                        <div>
-                            <div
-                                class="font-bold text-gray-900 dark:text-white"
-                            >
-                                {{ formatPrice(product.price) }}
-                            </div>
-                            <div
-                                v-if="
-                                    product.compare_at_price &&
-                                    product.compare_at_price >
-                                        (product.price ?? 0)
-                                "
-                                class="text-xs text-gray-400 line-through"
-                            >
-                                {{ formatPrice(product.compare_at_price) }}
-                            </div>
-                        </div>
-                        <button
-                            v-if="product.available && product.price !== null"
-                            type="button"
-                            class="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
-                            @click="addToCart(product.id)"
-                        >
-                            افزودن به سبد
-                        </button>
-                        <span v-else class="text-xs font-medium text-red-500"
-                            >ناموجود</span
-                        >
-                    </div>
-                </article>
+                    :product="product"
+                    @add-to-cart="addToCart"
+                />
             </section>
 
             <section
                 v-else
-                class="rounded-2xl border border-dashed border-gray-300 p-12 text-center text-gray-500 dark:border-gray-700"
+                class="rounded-[2rem] border border-dashed border-[#bcd5da] bg-white px-6 py-16 text-center"
             >
-                محصولی مطابق جستجوی شما پیدا نشد.
+                <div
+                    class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eef8f8] text-xl font-black text-[#0a8d9f]"
+                >
+                    ?
+                </div>
+                <h2 class="mt-5 text-xl font-black text-slate-800">
+                    محصولی پیدا نشد
+                </h2>
+                <p class="mx-auto mt-2 max-w-lg text-sm leading-7 text-slate-500">
+                    عبارت جستجو یا فیلترها را تغییر بده و دوباره امتحان کن.
+                </p>
+                <Link
+                    href="/products"
+                    class="mt-5 inline-flex rounded-2xl bg-[#04547b] px-5 py-3 text-sm font-bold text-white"
+                >
+                    نمایش همه محصولات
+                </Link>
             </section>
 
             <nav
                 v-if="pagination.last_page > 1"
                 aria-label="صفحات محصولات"
-                class="flex flex-wrap items-center justify-center gap-2"
+                class="mt-8 flex flex-wrap items-center justify-center gap-2"
             >
                 <Link
                     v-if="pagination.current_page > 1"
                     :href="pageUrl(pagination.current_page - 1)"
                     preserve-scroll
                     aria-label="صفحه قبلی"
-                    class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800"
+                    class="rounded-xl border border-[#dce9ec] bg-white px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-[#f6fbfb]"
                 >
                     قبلی
                 </Link>
@@ -320,11 +307,11 @@ function addToCart(productId: number): void {
                         page === pagination.current_page ? 'page' : undefined
                     "
                     :aria-label="`صفحه ${page.toLocaleString('fa-IR')}`"
-                    class="min-w-10 rounded-xl px-3 py-2 text-center text-sm font-medium"
+                    class="min-w-10 rounded-xl px-3 py-2.5 text-center text-sm font-bold"
                     :class="
                         page === pagination.current_page
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800'
+                            ? 'bg-[#04547b] text-white'
+                            : 'border border-[#dce9ec] bg-white text-slate-600 hover:bg-[#f6fbfb]'
                     "
                 >
                     {{ page.toLocaleString('fa-IR') }}
@@ -334,11 +321,11 @@ function addToCart(productId: number): void {
                     :href="pageUrl(pagination.current_page + 1)"
                     preserve-scroll
                     aria-label="صفحه بعدی"
-                    class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800"
+                    class="rounded-xl border border-[#dce9ec] bg-white px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-[#f6fbfb]"
                 >
                     بعدی
                 </Link>
             </nav>
-        </div>
-    </main>
+        </section>
+    </StorefrontLayout>
 </template>
