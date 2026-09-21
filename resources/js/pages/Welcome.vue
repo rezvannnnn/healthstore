@@ -343,7 +343,7 @@ function addToCart(product: FeaturedProduct): void {
                                             <div class="font-extrabold text-dh-900">{{ formatPrice(product.price) }}</div>
                                             <div v-if="product.compare_at_price && product.compare_at_price > (product.price ?? 0)" class="mt-1 text-xs text-dh-muted line-through">{{ formatPrice(product.compare_at_price) }}</div>
                                         </div>
-                                        <span class="rounded-full px-2.5 py-1 text-[11px] font-bold" :class="product.available ? 'bg-dh-green-50 text-dh-green-700' : 'bg-gray-100 text-gray-500'">
+                                        <span class="rounded-full px-2.5 py-1 text-[11px] font-bold" :class="product.available ? 'bg-dh-green-50 text-dh-green-700' : 'bg-dh-100 text-dh-muted'">
                                             {{ product.available ? 'موجود' : 'ناموجود' }}
                                         </span>
                                     </div>
@@ -353,7 +353,7 @@ function addToCart(product: FeaturedProduct): void {
                                 <button
                                     type="button"
                                     :disabled="!product.available || product.price === null"
-                                    class="w-full rounded-xl bg-dh-600 px-4 py-3 text-sm font-extrabold text-white transition hover:bg-dh-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
+                                    class="w-full rounded-xl bg-dh-600 px-4 py-3 text-sm font-extrabold text-white transition hover:bg-dh-700 disabled:cursor-not-allowed disabled:bg-dh-100 disabled:text-dh-muted"
                                     @click="addToCart(product)"
                                 >
                                     افزودن به سبد خرید
