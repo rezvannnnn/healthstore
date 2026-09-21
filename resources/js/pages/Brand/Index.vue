@@ -51,86 +51,79 @@ function pageUrl(page: number): string {
         <meta name="twitter:description" :content="seo.description" />
     </Head>
 
-    <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
-        <div class="mx-auto max-w-7xl space-y-8">
-            <nav
-                aria-label="مسیر صفحه"
-                class="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400"
-            >
-                <Link href="/" class="hover:text-indigo-600">خانه</Link>
+    <div dir="rtl" class="min-h-screen bg-dh-surface pb-24 text-dh-ink lg:pb-10">
+        <header class="sticky top-0 z-40 border-b border-dh-100/70 bg-white/95 backdrop-blur">
+            <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-6">
+                <Link href="/" class="flex items-center gap-3" aria-label="داروخونه">
+                    <span class="flex size-11 items-center justify-center rounded-2xl bg-dh-700 text-white">
+                        <svg viewBox="0 0 48 48" class="size-8" aria-hidden="true">
+                            <path d="M10 22.5h28v6.2c0 5.1-4.1 9.3-9.3 9.3H19.3A9.3 9.3 0 0 1 10 28.7v-6.2Z" fill="currentColor" />
+                            <path d="M14.5 20.5c1.4-6.1 5.2-9.1 9.5-9.1s8.1 3 9.5 9.1" fill="none" stroke="#63b95b" stroke-width="3.4" stroke-linecap="round" />
+                            <path d="M25 12.7c3.8-.1 6.3 1.2 7.7 3.7-3.6 1.1-6.5-.1-7.7-3.7Z" fill="#63b95b" />
+                        </svg>
+                    </span>
+                    <span>
+                        <span class="block text-lg font-black leading-none text-dh-800">داروخونه</span>
+                        <span class="mt-1 hidden text-[10px] font-medium text-dh-muted sm:block">دارو و محصولات بهداشتی</span>
+                    </span>
+                </Link>
+                <div class="flex items-center gap-2">
+                    <Link href="/products" class="rounded-xl bg-dh-50 px-4 py-2 text-sm font-bold text-dh-700 hover:bg-dh-100">محصولات</Link>
+                    <Link href="/cart" class="rounded-xl bg-dh-700 px-4 py-2 text-sm font-bold text-white hover:bg-dh-800">سبد خرید</Link>
+                </div>
+            </div>
+        </header>
+
+        <main class="mx-auto max-w-7xl space-y-8 px-4 py-6 md:px-6 md:py-10">
+            <nav aria-label="مسیر صفحه" class="flex flex-wrap items-center gap-2 text-sm text-dh-muted">
+                <Link href="/" class="hover:text-dh-700">خانه</Link>
                 <span>/</span>
-                <span class="text-gray-900 dark:text-white">برندها</span>
+                <span class="font-semibold text-dh-800">برندها</span>
             </nav>
 
-            <header
-                class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-gray-200 md:p-8 dark:bg-gray-900 dark:ring-gray-800"
-            >
-                <p class="text-sm font-medium text-indigo-600">
-                    انتخاب بر اساس برند
+            <section class="rounded-[2rem] bg-dh-800 p-7 text-white shadow-xl shadow-dh-900/10 md:p-10">
+                <p class="text-xs font-bold text-dh-100">انتخاب بر اساس برند</p>
+                <h1 class="mt-3 text-3xl font-black md:text-5xl">برند مورد علاقه‌تان را پیدا کنید.</h1>
+                <p class="mt-4 max-w-2xl text-sm leading-7 text-dh-50/85 md:text-base">
+                    برندهای فعال داروخونه را ببینید و محصولات هر برند را جداگانه بررسی کنید.
                 </p>
-                <h1
-                    class="mt-2 text-3xl font-bold text-gray-900 md:text-4xl dark:text-white"
-                >
-                    برندهای فروشگاه
-                </h1>
-                <p
-                    class="mt-4 max-w-3xl leading-8 text-gray-600 dark:text-gray-300"
-                >
-                    برندهای فعال فروشگاه را مشاهده کنید و محصولات هر برند را
-                    جداگانه بررسی کنید.
-                </p>
-            </header>
+                <div class="mt-6 inline-flex rounded-full bg-white/10 px-4 py-2 text-xs font-bold text-dh-50">
+                    {{ pagination.total.toLocaleString('fa-IR') }} برند
+                </div>
+            </section>
 
-            <section
-                v-if="brands.length"
-                class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-            >
+            <section v-if="brands.length" class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 <Link
                     v-for="brand in brands"
                     :key="brand.id"
                     :href="'/brands/' + brand.slug"
-                    class="group overflow-hidden rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 transition hover:-translate-y-0.5 hover:shadow-md dark:bg-gray-900 dark:ring-gray-800"
+                    class="group overflow-hidden rounded-3xl border border-dh-100 bg-white shadow-sm transition hover:-translate-y-1 hover:border-dh-200 hover:shadow-lg"
                 >
-                    <div
-                        class="flex aspect-[16/9] items-center justify-center rounded-2xl bg-gray-100 p-6 dark:bg-gray-800"
-                    >
+                    <div class="flex aspect-[16/9] items-center justify-center bg-dh-50 p-8">
                         <img
                             v-if="brand.logo"
                             :src="brand.logo"
                             :alt="brand.name"
                             loading="lazy"
                             decoding="async"
-                            class="max-h-full max-w-full object-contain"
+                            class="max-h-full max-w-full object-contain transition duration-300 group-hover:scale-105"
                         />
-                        <span v-else class="text-2xl font-bold text-gray-400">
-                            {{ brand.name }}
-                        </span>
+                        <span v-else class="text-center text-2xl font-black text-dh-700">{{ brand.name }}</span>
                     </div>
-
-                    <div class="mt-4">
-                        <h2
-                            class="text-xl font-semibold text-gray-900 group-hover:text-indigo-600 dark:text-white"
-                        >
-                            {{ brand.name }}
-                        </h2>
-                        <p
-                            v-if="brand.description"
-                            class="mt-2 line-clamp-2 text-sm leading-6 text-gray-500 dark:text-gray-400"
-                        >
+                    <div class="p-5">
+                        <h2 class="text-xl font-black text-dh-800 group-hover:text-dh-700">{{ brand.name }}</h2>
+                        <p v-if="brand.description" class="mt-2 line-clamp-2 text-sm leading-7 text-dh-muted">
                             {{ brand.description }}
                         </p>
-                        <p class="mt-4 text-sm font-medium text-gray-500">
-                            {{ brand.products_count.toLocaleString('fa-IR') }}
-                            محصول فعال
-                        </p>
+                        <div class="mt-5 flex items-center justify-between border-t border-dh-100 pt-4">
+                            <span class="text-xs text-dh-muted">{{ brand.products_count.toLocaleString('fa-IR') }} محصول فعال</span>
+                            <span class="text-sm font-black text-dh-700">مشاهده ←</span>
+                        </div>
                     </div>
                 </Link>
             </section>
 
-            <section
-                v-else
-                class="rounded-2xl border border-dashed border-gray-300 p-12 text-center text-gray-500 dark:border-gray-700"
-            >
+            <section v-else class="rounded-3xl border border-dashed border-dh-200 bg-white p-12 text-center text-dh-muted">
                 هنوز برند فعالی ثبت نشده است.
             </section>
 
@@ -143,8 +136,7 @@ function pageUrl(page: number): string {
                     v-if="pagination.current_page > 1"
                     :href="pageUrl(pagination.current_page - 1)"
                     preserve-scroll
-                    aria-label="صفحه قبلی"
-                    class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800"
+                    class="rounded-xl border border-dh-100 bg-white px-4 py-2.5 text-sm font-bold text-dh-700 hover:bg-dh-50"
                 >
                     قبلی
                 </Link>
@@ -153,16 +145,10 @@ function pageUrl(page: number): string {
                     :key="page"
                     :href="pageUrl(page)"
                     preserve-scroll
-                    :aria-current="
-                        page === pagination.current_page ? 'page' : undefined
-                    "
+                    :aria-current="page === pagination.current_page ? 'page' : undefined"
                     :aria-label="'صفحه ' + page.toLocaleString('fa-IR')"
-                    class="min-w-10 rounded-xl px-3 py-2 text-center text-sm font-medium"
-                    :class="
-                        page === pagination.current_page
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800'
-                    "
+                    class="min-w-10 rounded-xl px-3 py-2.5 text-center text-sm font-bold"
+                    :class="page === pagination.current_page ? 'bg-dh-700 text-white' : 'border border-dh-100 bg-white text-dh-muted hover:bg-dh-50'"
                 >
                     {{ page.toLocaleString('fa-IR') }}
                 </Link>
@@ -170,12 +156,19 @@ function pageUrl(page: number): string {
                     v-if="pagination.current_page < pagination.last_page"
                     :href="pageUrl(pagination.current_page + 1)"
                     preserve-scroll
-                    aria-label="صفحه بعدی"
-                    class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800"
+                    class="rounded-xl border border-dh-100 bg-white px-4 py-2.5 text-sm font-bold text-dh-700 hover:bg-dh-50"
                 >
                     بعدی
                 </Link>
             </nav>
-        </div>
-    </main>
+        </main>
+
+        <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-dh-100 bg-white/95 px-3 py-2 backdrop-blur lg:hidden">
+            <div class="mx-auto grid max-w-md grid-cols-3 gap-2 text-center text-[11px] font-bold text-dh-muted">
+                <Link href="/" class="rounded-xl px-2 py-2">خانه</Link>
+                <Link href="/products" class="rounded-xl px-2 py-2">فروشگاه</Link>
+                <Link href="/brands" class="rounded-xl bg-dh-50 px-2 py-2 text-dh-700">برندها</Link>
+            </div>
+        </nav>
+    </div>
 </template>
