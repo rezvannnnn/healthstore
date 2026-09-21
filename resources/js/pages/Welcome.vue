@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 interface Category {
     id: number;
@@ -30,16 +31,32 @@ const props = defineProps<{
     categories: Category[];
 }>();
 
+const searchQuery = ref('');
+
 function formatPrice(value: number | null): string {
     return value === null
         ? 'تماس بگیرید'
         : `${value.toLocaleString('fa-IR')} تومان`;
 }
 
+function searchProducts(): void {
+    const query = searchQuery.value.trim();
+
+    router.get(
+        '/products',
+        query ? { search: query } : {},
+        {
+            preserveState: true,
+            replace: true,
+        },
+    );
+}
+
 function addToCart(product: FeaturedProduct): void {
     if (!product.available || product.price === null) {
         return;
     }
+
     router.post(
         '/cart/items',
         { product_id: product.id, quantity: 1 },
@@ -62,301 +79,390 @@ function addToCart(product: FeaturedProduct): void {
         <meta name="twitter:description" :content="seo.description" />
     </Head>
 
-    <div dir="rtl" class="min-h-screen bg-slate-50 text-slate-900">
-        <header class="border-b border-slate-200 bg-white">
-            <div
-                class="mx-auto flex max-w-6xl items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-8"
-            >
-                <Link href="/" class="text-2xl font-bold text-slate-900"
-                    >Health<span class="text-emerald-600">Store</span></Link
-                >
-                <nav
-                    class="hidden items-center gap-6 text-sm font-medium sm:flex"
-                >
-                    <Link href="/" class="hover:text-emerald-600">خانه</Link>
-                    <Link href="/products" class="hover:text-emerald-600"
-                        >محصولات</Link
-                    >
-                    <Link href="/categories" class="hover:text-emerald-600"
-                        >دسته‌بندی‌ها</Link
-                    >
-                    <Link href="/brands" class="hover:text-emerald-600"
-                        >برندها</Link
-                    >
-                    <Link href="/blog" class="hover:text-emerald-600"
-                        >مجله سلامت</Link
-                    >
-                    <Link href="/cart" class="hover:text-emerald-600"
-                        >سبد خرید</Link
-                    >
-                </nav>
-                <div class="flex items-center gap-2 text-sm font-medium">
-                    <Link
-                        href="/login"
-                        class="rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-100"
-                        >ورود</Link
-                    >
-                    <Link
-                        href="/register"
-                        class="rounded-lg bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700"
-                        >ثبت‌نام</Link
-                    >
+    <div dir="rtl" class="min-h-screen bg-dh-surface text-dh-ink">
+        <header class="sticky top-0 z-40 border-b border-dh-100/80 bg-white/95 backdrop-blur">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex min-h-20 items-center gap-4">
+                    <Link href="/" class="flex shrink-0 items-center gap-3" aria-label="داروخونه">
+                        <span class="flex size-11 items-center justify-center rounded-2xl bg-dh-50 ring-1 ring-dh-100">
+                            <svg viewBox="0 0 48 48" class="size-7 text-dh-600" fill="none" aria-hidden="true">
+                                <path d="M13 27.5 27.5 13a7.5 7.5 0 0 1 10.6 10.6L23.6 38.1A7.5 7.5 0 0 1 13 27.5Z" fill="currentColor" opacity=".16"/>
+                                <path d="M16.2 31.8 31.8 16.2M19.7 28.3l10 10M28.3 19.7l-10-10" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                                <path d="M15.1 21.5c-3.4-2.4-4.1-6.8-1.8-9.4 2.5-2.8 6.9-2.3 9.3 1.1" stroke="#63b95b" stroke-width="2.6" stroke-linecap="round"/>
+                            </svg>
+                        </span>
+                        <span class="leading-none">
+                            <span class="block text-xl font-extrabold tracking-tight text-dh-800">داروخونه</span>
+                            <span class="mt-1 block text-[10px] font-medium text-dh-muted">دارو و محصولات بهداشتی</span>
+                        </span>
+                    </Link>
+
+                    <form class="hidden min-w-0 flex-1 md:block" @submit.prevent="searchProducts">
+                        <label for="site-search" class="sr-only">جستجوی محصولات</label>
+                        <div class="relative">
+                            <svg viewBox="0 0 24 24" class="pointer-events-none absolute top-1/2 right-4 size-5 -translate-y-1/2 text-dh-500" fill="none" aria-hidden="true">
+                                <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/>
+                                <path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            </svg>
+                            <input
+                                id="site-search"
+                                v-model="searchQuery"
+                                type="search"
+                                placeholder="نام محصول، برند یا بارکد را جستجو کنید..."
+                                class="h-12 w-full rounded-2xl border border-dh-100 bg-dh-50/70 pr-12 pl-28 text-sm text-dh-900 outline-none transition placeholder:text-dh-muted focus:border-dh-300 focus:bg-white focus:ring-4 focus:ring-dh-100"
+                            />
+                            <button
+                                type="submit"
+                                class="absolute top-1/2 left-1.5 -translate-y-1/2 rounded-xl bg-dh-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-dh-700"
+                            >
+                                جستجو
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="mr-auto flex items-center gap-1">
+                        <Link
+                            href="/login"
+                            class="hidden rounded-xl px-3 py-2 text-sm font-semibold text-dh-700 transition hover:bg-dh-50 sm:block"
+                        >
+                            ورود
+                        </Link>
+                        <Link
+                            href="/register"
+                            class="hidden rounded-xl bg-dh-green-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-dh-green-600 sm:block"
+                        >
+                            ثبت‌نام
+                        </Link>
+                        <Link
+                            href="/cart"
+                            class="relative flex size-11 items-center justify-center rounded-2xl border border-dh-100 bg-white text-dh-700 transition hover:border-dh-300 hover:bg-dh-50"
+                            aria-label="سبد خرید"
+                        >
+                            <svg viewBox="0 0 24 24" class="size-5" fill="none" aria-hidden="true">
+                                <path d="M4 5h2l1.5 10.2a2 2 0 0 0 2 1.8h7.6a2 2 0 0 0 2-1.7L20 8H7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                <circle cx="10" cy="20" r="1.25" fill="currentColor"/>
+                                <circle cx="18" cy="20" r="1.25" fill="currentColor"/>
+                            </svg>
+                        </Link>
+                    </div>
                 </div>
+
+                <div class="border-t border-dh-50 md:hidden">
+                    <form class="py-3" @submit.prevent="searchProducts">
+                        <label for="mobile-site-search" class="sr-only">جستجوی محصولات</label>
+                        <div class="relative">
+                            <input
+                                id="mobile-site-search"
+                                v-model="searchQuery"
+                                type="search"
+                                placeholder="جستجوی محصول یا برند..."
+                                class="h-11 w-full rounded-xl border border-dh-100 bg-dh-50/70 px-4 pl-20 text-sm outline-none focus:border-dh-300 focus:bg-white focus:ring-4 focus:ring-dh-100"
+                            />
+                            <button type="submit" class="absolute top-1/2 left-1 -translate-y-1/2 rounded-lg bg-dh-600 px-3 py-2 text-xs font-bold text-white">
+                                جستجو
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <nav class="hidden h-12 items-center gap-7 text-sm font-semibold text-dh-700 md:flex">
+                    <Link href="/" class="relative flex h-full items-center text-dh-800 after:absolute after:right-0 after:bottom-0 after:left-0 after:h-0.5 after:rounded-full after:bg-dh-500">خانه</Link>
+                    <Link href="/products" class="transition hover:text-dh-500">محصولات</Link>
+                    <Link href="/categories" class="transition hover:text-dh-500">دسته‌بندی‌ها</Link>
+                    <Link href="/brands" class="transition hover:text-dh-500">برندها</Link>
+                    <Link href="/blog" class="transition hover:text-dh-500">مجله سلامت</Link>
+                </nav>
             </div>
         </header>
 
         <main>
-            <section
-                class="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20"
-            >
-                <div
-                    class="grid items-center gap-10 rounded-3xl bg-slate-900 p-8 text-white shadow-xl lg:grid-cols-[1.15fr_0.85fr] lg:p-12"
-                >
-                    <div>
-                        <p
-                            class="mb-4 inline-flex rounded-full bg-emerald-400/15 px-3 py-1 text-sm font-medium text-emerald-300"
-                        >
-                            فروشگاه آنلاین سلامت
-                        </p>
-                        <h1
-                            class="text-4xl leading-tight font-bold tracking-tight sm:text-5xl"
-                        >
-                            محصولات سلامت را ساده و مطمئن پیدا کنید.
-                        </h1>
-                        <p
-                            class="mt-5 max-w-2xl text-lg leading-8 text-slate-300"
-                        >
-                            از بین محصولات و دسته‌بندی‌های موجود جستجو کنید،
-                            جزئیات و موجودی را ببینید و خریدتان را تا پرداخت
-                            آنلاین ادامه دهید.
-                        </p>
-                        <div class="mt-8 flex flex-wrap gap-3">
-                            <Link
-                                href="/products"
-                                class="rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-white hover:bg-emerald-600"
-                                >مشاهده محصولات</Link
-                            >
-                            <Link
-                                href="/blog"
-                                class="rounded-xl border border-white/20 px-6 py-3 font-semibold text-white hover:bg-white/10"
-                                >مطالب سلامت</Link
-                            >
+            <section class="relative overflow-hidden border-b border-dh-100 bg-white">
+                <div class="absolute inset-0 opacity-70 [background-image:radial-gradient(circle_at_12%_20%,rgba(29,166,169,0.14),transparent_28%),radial-gradient(circle_at_85%_70%,rgba(99,185,91,0.13),transparent_30%)]"></div>
+                <div class="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+                    <div class="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
+                        <div class="max-w-2xl">
+                            <span class="inline-flex items-center gap-2 rounded-full border border-dh-100 bg-dh-50 px-3.5 py-2 text-xs font-bold text-dh-700">
+                                <span class="size-2 rounded-full bg-dh-green-500"></span>
+                                فروشگاه آنلاین سلامت
+                            </span>
+                            <h1 class="mt-5 text-4xl font-extrabold leading-[1.25] tracking-tight text-dh-900 sm:text-5xl lg:text-6xl">
+                                سلامت، ساده‌تر از چیزی که فکر می‌کنید.
+                            </h1>
+                            <p class="mt-5 max-w-xl text-base leading-8 text-dh-muted sm:text-lg">
+                                دارو، مکمل و محصولات بهداشتی را با اطلاعات کامل پیدا کنید و خریدتان را با خیال راحت انجام دهید.
+                            </p>
+                            <form class="mt-8" @submit.prevent="searchProducts">
+                                <div class="flex rounded-2xl border border-dh-200 bg-white p-1.5 shadow-[0_12px_35px_rgba(20,108,114,0.10)]">
+                                    <input
+                                        v-model="searchQuery"
+                                        type="search"
+                                        placeholder="مثلاً: ویتامین D، ضدآفتاب، شامپو..."
+                                        class="min-w-0 flex-1 bg-transparent px-4 text-sm outline-none sm:text-base"
+                                        aria-label="جستجوی سریع محصولات"
+                                    />
+                                    <button type="submit" class="rounded-xl bg-dh-600 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-dh-700 sm:px-7">
+                                        جستجو
+                                    </button>
+                                </div>
+                            </form>
+                            <div class="mt-6 flex flex-wrap gap-2 text-xs font-medium text-dh-muted">
+                                <span>جستجوهای محبوب:</span>
+                                <Link href="/products?search=ویتامین%20D" class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700 hover:bg-dh-100">ویتامین D</Link>
+                                <Link href="/products?search=ضدآفتاب" class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700 hover:bg-dh-100">ضدآفتاب</Link>
+                                <Link href="/products?search=شامپو" class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700 hover:bg-dh-100">شامپو</Link>
+                            </div>
                         </div>
-                    </div>
-                    <div
-                        class="rounded-3xl border border-white/10 bg-white/5 p-7"
-                    >
-                        <div class="text-5xl">🛒</div>
-                        <h2 class="mt-5 text-2xl font-bold">
-                            مسیر خرید یکپارچه
-                        </h2>
-                        <div class="mt-6 space-y-3 text-sm text-slate-300">
-                            <div class="rounded-2xl bg-white/5 p-4">
-                                ۱. محصول را انتخاب کنید
-                            </div>
-                            <div class="rounded-2xl bg-white/5 p-4">
-                                ۲. موجودی و قیمت را بررسی کنید
-                            </div>
-                            <div class="rounded-2xl bg-white/5 p-4">
-                                ۳. آدرس و سفارش را تأیید کنید
-                            </div>
-                            <div class="rounded-2xl bg-white/5 p-4">
-                                ۴. پرداخت را انجام دهید
+
+                        <div class="relative mx-auto w-full max-w-xl">
+                            <div class="absolute -right-8 top-8 h-44 w-44 rounded-full bg-dh-100 blur-2xl"></div>
+                            <div class="absolute -bottom-8 left-0 h-48 w-48 rounded-full bg-dh-green-100 blur-2xl"></div>
+                            <div class="relative rounded-[2rem] border border-dh-100 bg-dh-50 p-5 shadow-[0_22px_55px_rgba(20,108,114,0.12)] sm:p-7">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-xs font-bold text-dh-600">انتخاب روزمره</p>
+                                        <h2 class="mt-1 text-xl font-extrabold text-dh-900">برای مراقبت بهتر</h2>
+                                    </div>
+                                    <div class="flex size-12 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-dh-100">
+                                        <svg viewBox="0 0 24 24" class="size-6 text-dh-green-600" fill="none" aria-hidden="true">
+                                            <path d="M19 4.5c-5.6 0-10.1 2.7-10.8 7.4-.5 3.3 1.7 6.3 5.1 6.6 4.4.4 6.2-4.5 5.7-14Z" stroke="currentColor" stroke-width="1.6"/>
+                                            <path d="M4 19.5c2.1-4.2 5.1-6.6 10.1-8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="mt-6 grid grid-cols-2 gap-3">
+                                    <div class="rounded-2xl bg-white p-4 ring-1 ring-dh-100">
+                                        <div class="flex items-center gap-2 text-dh-600">
+                                            <span class="flex size-9 items-center justify-center rounded-xl bg-dh-50">
+                                                <svg viewBox="0 0 24 24" class="size-5" fill="none" aria-hidden="true">
+                                                    <path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                </svg>
+                                            </span>
+                                            <span class="text-xs font-bold">سلامت و مکمل</span>
+                                        </div>
+                                        <p class="mt-3 text-sm leading-6 text-dh-muted">انتخاب‌های روزمره</p>
+                                    </div>
+                                    <div class="rounded-2xl bg-white p-4 ring-1 ring-dh-100">
+                                        <div class="flex items-center gap-2 text-dh-green-600">
+                                            <span class="flex size-9 items-center justify-center rounded-xl bg-dh-green-50">
+                                                <svg viewBox="0 0 24 24" class="size-5" fill="none" aria-hidden="true">
+                                                    <path d="M7 13c-2.8-1.6-3.5-5.2-1.4-7.3C7.8 3.5 11.4 4.2 13 7c1.6-2.8 5.2-3.5 7.3-1.4 2.1 2.1 1.4 5.7-1.4 7.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                                    <path d="M12 20c-1.6-5 0-9.6 4.2-13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                                </svg>
+                                            </span>
+                                            <span class="text-xs font-bold">مراقبت شخصی</span>
+                                        </div>
+                                        <p class="mt-3 text-sm leading-6 text-dh-muted">پوست، مو و بهداشت</p>
+                                    </div>
+                                </div>
+                                <div class="mt-3 rounded-2xl bg-dh-900 px-5 py-4 text-white">
+                                    <div class="flex items-center justify-between gap-4">
+                                        <div>
+                                            <p class="text-xs font-medium text-dh-200">مسیر خرید</p>
+                                            <p class="mt-1 text-sm font-bold">انتخاب → بررسی → سفارش → پیگیری</p>
+                                        </div>
+                                        <svg viewBox="0 0 24 24" class="size-6 text-dh-200" fill="none" aria-hidden="true">
+                                            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section
-                v-if="props.categories.length"
-                class="border-y border-slate-200 bg-white"
-            >
-                <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-                    <div class="mb-6 flex items-end justify-between gap-4">
+            <section v-if="props.categories.length" class="py-12 sm:py-14">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-end justify-between gap-4">
                         <div>
-                            <h2 class="text-2xl font-bold">دسته‌بندی‌ها</h2>
-                            <p class="mt-1 text-sm text-slate-500">
-                                دسترسی سریع به گروه‌های محصولات
-                            </p>
+                            <span class="text-xs font-extrabold text-dh-500">دسترسی سریع</span>
+                            <h2 class="mt-1 text-2xl font-extrabold text-dh-900 sm:text-3xl">دسته‌بندی‌های محبوب</h2>
                         </div>
-                        <Link
-                            href="/products"
-                            class="text-sm font-medium text-emerald-600 hover:text-emerald-700"
-                            >همه محصولات</Link
-                        >
+                        <Link href="/categories" class="hidden rounded-xl px-3 py-2 text-sm font-bold text-dh-600 hover:bg-dh-50 sm:block">همه دسته‌بندی‌ها</Link>
                     </div>
-                    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                         <Link
-                            v-for="category in props.categories"
+                            v-for="(category, index) in props.categories"
                             :key="category.id"
                             :href="'/categories/' + category.slug"
-                            class="rounded-2xl border border-slate-200 bg-slate-50 p-5 font-semibold transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50"
-                            >{{ category.name }}</Link
+                            class="group flex items-center gap-4 rounded-2xl border border-dh-100 bg-white p-4 transition duration-200 hover:-translate-y-0.5 hover:border-dh-300 hover:shadow-[0_10px_30px_rgba(20,108,114,0.08)]"
                         >
-                    </div>
-                </div>
-            </section>
-
-            <section
-                v-if="props.featuredProducts.length"
-                class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8"
-            >
-                <div class="mb-6 flex items-end justify-between gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold">محصولات منتخب</h2>
-                        <p class="mt-1 text-sm text-slate-500">
-                            محصولات فعال و منتخب فروشگاه
-                        </p>
-                    </div>
-                    <Link
-                        href="/products"
-                        class="text-sm font-medium text-emerald-600 hover:text-emerald-700"
-                        >مشاهده همه</Link
-                    >
-                </div>
-                <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    <article
-                        v-for="product in props.featuredProducts"
-                        :key="product.id"
-                        class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                    >
-                        <Link :href="`/products/${product.slug}`" class="block">
-                            <div class="aspect-square bg-slate-100">
-                                <img
-                                    v-if="product.image"
-                                    :src="product.image"
-                                    :alt="product.name"
-                                    class="h-full w-full object-contain p-5"
-                                />
-                                <div
-                                    v-else
-                                    class="flex h-full items-center justify-center text-sm text-slate-400"
-                                >
-                                    بدون تصویر
-                                </div>
-                            </div>
-                            <div class="p-4">
-                                <p
-                                    v-if="product.brand"
-                                    class="text-xs text-slate-500"
-                                >
-                                    {{ product.brand }}
-                                </p>
-                                <h3
-                                    class="mt-1 line-clamp-2 min-h-12 leading-6 font-semibold"
-                                >
-                                    {{ product.name }}
-                                </h3>
-                                <div
-                                    class="mt-3 flex items-end justify-between gap-2"
-                                >
-                                    <div>
-                                        <div class="font-bold">
-                                            {{ formatPrice(product.price) }}
-                                        </div>
-                                        <div
-                                            v-if="
-                                                product.compare_at_price &&
-                                                product.compare_at_price >
-                                                    (product.price ?? 0)
-                                            "
-                                            class="text-xs text-slate-400 line-through"
-                                        >
-                                            {{
-                                                formatPrice(
-                                                    product.compare_at_price,
-                                                )
-                                            }}
-                                        </div>
-                                    </div>
-                                    <span
-                                        :class="
-                                            product.available
-                                                ? 'text-emerald-600'
-                                                : 'text-red-500'
-                                        "
-                                        class="text-xs font-medium"
-                                        >{{
-                                            product.available
-                                                ? 'موجود'
-                                                : 'ناموجود'
-                                        }}</span
-                                    >
-                                </div>
-                            </div>
+                            <span class="flex size-12 shrink-0 items-center justify-center rounded-2xl" :class="index % 2 === 0 ? 'bg-dh-50 text-dh-600' : 'bg-dh-green-50 text-dh-green-600'">
+                                <svg viewBox="0 0 24 24" class="size-6" fill="none" aria-hidden="true">
+                                    <path d="M6 6.5A2.5 2.5 0 0 1 8.5 4H19v11.5A2.5 2.5 0 0 1 16.5 18h-8A2.5 2.5 0 0 1 6 15.5v-9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                                    <path d="M9 8h7M9 11h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                                </svg>
+                            </span>
+                            <span class="min-w-0">
+                                <span class="block truncate font-extrabold text-dh-800 transition group-hover:text-dh-600">{{ category.name }}</span>
+                                <span class="mt-1 block text-xs text-dh-muted">مشاهده محصولات</span>
+                            </span>
+                            <svg viewBox="0 0 24 24" class="mr-auto size-5 text-dh-300 transition group-hover:-translate-x-0.5 group-hover:text-dh-500" fill="none" aria-hidden="true">
+                                <path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
                         </Link>
-                        <div class="px-4 pb-4">
-                            <button
-                                type="button"
-                                :disabled="
-                                    !product.available || product.price === null
-                                "
-                                class="w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-                                @click="addToCart(product)"
-                            >
-                                افزودن به سبد
-                            </button>
+                    </div>
+                </div>
+            </section>
+
+            <section v-if="props.featuredProducts.length" class="border-y border-dh-100 bg-white py-12 sm:py-14">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-end justify-between gap-4">
+                        <div>
+                            <span class="text-xs font-extrabold text-dh-green-600">انتخاب‌شده برای شما</span>
+                            <h2 class="mt-1 text-2xl font-extrabold text-dh-900 sm:text-3xl">محصولات منتخب</h2>
                         </div>
-                    </article>
+                        <Link href="/products" class="hidden rounded-xl px-3 py-2 text-sm font-bold text-dh-600 hover:bg-dh-50 sm:block">مشاهده همه</Link>
+                    </div>
+
+                    <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <article
+                            v-for="product in props.featuredProducts"
+                            :key="product.id"
+                            class="group overflow-hidden rounded-3xl border border-dh-100 bg-white transition duration-200 hover:-translate-y-1 hover:border-dh-200 hover:shadow-[0_18px_40px_rgba(20,108,114,0.10)]"
+                        >
+                            <Link :href="`/products/${product.slug}`" class="block">
+                                <div class="relative aspect-square overflow-hidden bg-dh-50/60">
+                                    <span v-if="product.compare_at_price && product.compare_at_price > (product.price ?? 0)" class="absolute right-3 top-3 z-10 rounded-full bg-dh-green-500 px-2.5 py-1 text-[11px] font-extrabold text-white">
+                                        تخفیف
+                                    </span>
+                                    <img
+                                        v-if="product.image"
+                                        :src="product.image"
+                                        :alt="product.name"
+                                        loading="lazy"
+                                        class="h-full w-full object-contain p-6 transition duration-300 group-hover:scale-[1.03]"
+                                    />
+                                    <div v-else class="flex h-full items-center justify-center text-sm font-medium text-dh-muted">بدون تصویر</div>
+                                </div>
+                                <div class="p-4">
+                                    <p v-if="product.brand" class="text-xs font-semibold text-dh-muted">{{ product.brand }}</p>
+                                    <h3 class="mt-1 line-clamp-2 min-h-12 text-sm leading-6 font-extrabold text-dh-900">{{ product.name }}</h3>
+                                    <div class="mt-4 flex items-end justify-between gap-3">
+                                        <div>
+                                            <div class="font-extrabold text-dh-900">{{ formatPrice(product.price) }}</div>
+                                            <div v-if="product.compare_at_price && product.compare_at_price > (product.price ?? 0)" class="mt-1 text-xs text-dh-muted line-through">{{ formatPrice(product.compare_at_price) }}</div>
+                                        </div>
+                                        <span class="rounded-full px-2.5 py-1 text-[11px] font-bold" :class="product.available ? 'bg-dh-green-50 text-dh-green-700' : 'bg-gray-100 text-gray-500'">
+                                            {{ product.available ? 'موجود' : 'ناموجود' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </Link>
+                            <div class="px-4 pb-4">
+                                <button
+                                    type="button"
+                                    :disabled="!product.available || product.price === null"
+                                    class="w-full rounded-xl bg-dh-600 px-4 py-3 text-sm font-extrabold text-white transition hover:bg-dh-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
+                                    @click="addToCart(product)"
+                                >
+                                    افزودن به سبد خرید
+                                </button>
+                            </div>
+                        </article>
+                    </div>
                 </div>
             </section>
 
-            <section
-                v-else
-                class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8"
-            >
-                <div
-                    class="rounded-3xl border border-slate-200 bg-white p-8 text-center"
-                >
-                    <h2 class="text-xl font-bold">
-                        محصولات در حال آماده‌سازی هستند
-                    </h2>
-                    <p class="mt-2 text-sm text-slate-500">
-                        برای مشاهده کاتالوگ محصولات به صفحه محصولات بروید.
-                    </p>
-                    <Link
-                        href="/products"
-                        class="mt-5 inline-flex rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700"
-                        >مشاهده محصولات</Link
-                    >
+            <section class="py-12 sm:py-14">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div class="grid gap-4 sm:grid-cols-3">
+                        <div class="rounded-3xl border border-dh-100 bg-white p-6">
+                            <span class="flex size-11 items-center justify-center rounded-2xl bg-dh-50 text-dh-600">
+                                <svg viewBox="0 0 24 24" class="size-5" fill="none" aria-hidden="true">
+                                    <path d="M5 7h14M5 12h14M5 17h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                </svg>
+                            </span>
+                            <h3 class="mt-4 font-extrabold text-dh-900">اطلاعات روشن و کامل</h3>
+                            <p class="mt-2 text-sm leading-7 text-dh-muted">اطلاعات محصول، قیمت و موجودی در مسیر خرید بررسی می‌شود.</p>
+                        </div>
+                        <div class="rounded-3xl border border-dh-100 bg-white p-6">
+                            <span class="flex size-11 items-center justify-center rounded-2xl bg-dh-green-50 text-dh-green-600">
+                                <svg viewBox="0 0 24 24" class="size-5" fill="none" aria-hidden="true">
+                                    <path d="M12 3.5 18 6v5.4c0 4-2.4 7.2-6 9.1-3.6-1.9-6-5.1-6-9.1V6l6-2.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                                    <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            <h3 class="mt-4 font-extrabold text-dh-900">خرید با خیال راحت</h3>
+                            <p class="mt-2 text-sm leading-7 text-dh-muted">فرآیند سفارش و پرداخت با بررسی‌های لازم انجام می‌شود.</p>
+                        </div>
+                        <div class="rounded-3xl border border-dh-100 bg-white p-6">
+                            <span class="flex size-11 items-center justify-center rounded-2xl bg-dh-50 text-dh-600">
+                                <svg viewBox="0 0 24 24" class="size-5" fill="none" aria-hidden="true">
+                                    <path d="M5 12a7 7 0 1 0 14 0 7 7 0 0 0-14 0Z" stroke="currentColor" stroke-width="1.7"/>
+                                    <path d="M12 8v4l2.7 1.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                                </svg>
+                            </span>
+                            <h3 class="mt-4 font-extrabold text-dh-900">پیگیری سفارش</h3>
+                            <p class="mt-2 text-sm leading-7 text-dh-muted">وضعیت سفارش پس از ثبت از داخل حساب کاربری قابل پیگیری است.</p>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <section class="border-y border-slate-200 bg-white">
-                <div
-                    class="mx-auto grid max-w-6xl gap-4 px-4 py-10 sm:grid-cols-3 sm:px-6 lg:px-8"
-                >
-                    <div class="rounded-2xl bg-slate-50 p-5">
-                        <div class="font-bold">موجودی بررسی می‌شود</div>
-                        <p class="mt-2 text-sm leading-6 text-slate-600">
-                            قبل از ثبت سفارش، موجودی محصولات بررسی می‌شود.
+            <section class="border-t border-dh-100 bg-dh-900 text-white">
+                <div class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_1fr] lg:px-8">
+                    <div>
+                        <div class="flex items-center gap-3">
+                            <span class="flex size-11 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/10">
+                                <svg viewBox="0 0 48 48" class="size-7 text-dh-200" fill="none" aria-hidden="true">
+                                    <path d="M13 27.5 27.5 13a7.5 7.5 0 0 1 10.6 10.6L23.6 38.1A7.5 7.5 0 0 1 13 27.5Z" fill="currentColor" opacity=".16"/>
+                                    <path d="M16.2 31.8 31.8 16.2M19.7 28.3l10 10M28.3 19.7l-10-10" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                                    <path d="M15.1 21.5c-3.4-2.4-4.1-6.8-1.8-9.4 2.5-2.8 6.9-2.3 9.3 1.1" stroke="#63b95b" stroke-width="2.6" stroke-linecap="round"/>
+                                </svg>
+                            </span>
+                            <div>
+                                <div class="text-xl font-extrabold">داروخونه</div>
+                                <div class="mt-1 text-xs text-dh-200">دارو و محصولات بهداشتی</div>
+                            </div>
+                        </div>
+                        <p class="mt-5 max-w-xl text-sm leading-7 text-dh-100">
+                            یک تجربه ساده و روشن برای پیدا کردن محصولات سلامت و مدیریت سفارش‌های روزمره.
                         </p>
                     </div>
-                    <div class="rounded-2xl bg-slate-50 p-5">
-                        <div class="font-bold">قیمت به‌روز</div>
-                        <p class="mt-2 text-sm leading-6 text-slate-600">
-                            قیمت در مسیر خرید دوباره بررسی می‌شود.
-                        </p>
-                    </div>
-                    <div class="rounded-2xl bg-slate-50 p-5">
-                        <div class="font-bold">پیگیری سفارش</div>
-                        <p class="mt-2 text-sm leading-6 text-slate-600">
-                            وضعیت سفارش پس از ثبت در حساب کاربری قابل پیگیری
-                            است.
-                        </p>
+                    <div class="grid grid-cols-2 gap-6 text-sm">
+                        <div>
+                            <h3 class="font-extrabold text-white">دسترسی سریع</h3>
+                            <div class="mt-3 space-y-2 text-dh-100">
+                                <Link href="/products" class="block hover:text-white">محصولات</Link>
+                                <Link href="/categories" class="block hover:text-white">دسته‌بندی‌ها</Link>
+                                <Link href="/brands" class="block hover:text-white">برندها</Link>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-extrabold text-white">مطالب</h3>
+                            <div class="mt-3 space-y-2 text-dh-100">
+                                <Link href="/blog" class="block hover:text-white">مجله سلامت</Link>
+                                <Link href="/login" class="block hover:text-white">حساب کاربری</Link>
+                                <Link href="/cart" class="block hover:text-white">سبد خرید</Link>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
         </main>
 
-        <footer class="bg-slate-950 text-slate-400">
-            <div
-                class="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8 text-sm sm:px-6 lg:px-8"
-            >
-                <div class="font-semibold text-white">HealthStore</div>
-                <div>فروشگاه آنلاین محصولات سلامت</div>
-            </div>
-        </footer>
+        <div class="fixed inset-x-0 bottom-0 z-50 border-t border-dh-100 bg-white/95 px-3 py-2 shadow-[0_-8px_25px_rgba(20,86,92,0.08)] backdrop-blur md:hidden">
+            <nav class="mx-auto grid max-w-md grid-cols-4 gap-1 text-center text-[11px] font-bold text-dh-muted" aria-label="ناوبری موبایل">
+                <Link href="/" class="rounded-xl bg-dh-50 px-2 py-2 text-dh-700">
+                    <span class="mx-auto mb-1 block text-base">⌂</span>
+                    خانه
+                </Link>
+                <Link href="/categories" class="rounded-xl px-2 py-2 hover:bg-dh-50">
+                    <span class="mx-auto mb-1 block text-base">◫</span>
+                    دسته‌ها
+                </Link>
+                <Link href="/products" class="rounded-xl px-2 py-2 hover:bg-dh-50">
+                    <span class="mx-auto mb-1 block text-base">⌕</span>
+                    محصولات
+                </Link>
+                <Link href="/cart" class="rounded-xl px-2 py-2 hover:bg-dh-50">
+                    <span class="mx-auto mb-1 block text-base">🛒</span>
+                    سبد خرید
+                </Link>
+            </nav>
+        </div>
+
+        <div class="h-16 md:hidden"></div>
     </div>
 </template>
