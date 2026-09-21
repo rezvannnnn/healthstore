@@ -155,7 +155,7 @@ function formatPrice(value: number | null): string {
     </Head>
 
     <div dir="rtl" class="min-h-screen bg-dh-surface pb-24 text-dh-ink lg:pb-10">
-        <header class="border-b border-dh-100 bg-white">
+        <header class="sticky top-0 z-40 border-b border-dh-100 bg-white/95 backdrop-blur">
             <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between gap-4">
                     <Link href="/" class="flex items-center gap-3" aria-label="داروخونه">
@@ -237,6 +237,11 @@ function formatPrice(value: number | null): string {
                     <span v-if="form.brand" class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700">برند انتخاب شده</span>
                 </div>
             </section>
+
+            <div v-if="products.length" class="flex flex-wrap items-center justify-between gap-3 text-xs font-bold text-dh-muted">
+                <span>{{ pagination.from?.toLocaleString('fa-IR') }} تا {{ pagination.to?.toLocaleString('fa-IR') }} از {{ pagination.total.toLocaleString('fa-IR') }} محصول</span>
+                <span v-if="form.search || form.category || form.brand" class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700">نتایج فیلترشده</span>
+            </div>
 
             <section v-if="products.length" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 <article
