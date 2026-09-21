@@ -246,7 +246,7 @@ function formatPrice(value: number | null): string {
                                 <div class="font-extrabold text-dh-900">{{ formatPrice(product.price) }}</div>
                                 <div v-if="product.compare_at_price && product.compare_at_price > (product.price ?? 0)" class="mt-1 text-xs text-dh-muted line-through">{{ formatPrice(product.compare_at_price) }}</div>
                             </div>
-                            <span class="rounded-full px-2.5 py-1 text-[11px] font-bold" :class="product.available ? 'bg-dh-green-50 text-dh-green-700' : 'bg-gray-100 text-gray-500'">
+                            <span class="rounded-full px-2.5 py-1 text-[11px] font-bold" :class="product.available ? 'bg-dh-green-50 text-dh-green-700' : 'bg-dh-100 text-dh-muted'">
                                 {{ product.available ? 'موجود' : 'ناموجود' }}
                             </span>
                         </div>
