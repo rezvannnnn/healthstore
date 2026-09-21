@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
+import ProductCard from '../../components/ProductCard.vue';
 
 interface Category {
     id: number;
@@ -30,22 +31,15 @@ const props = defineProps<{
     categories: Category[];
 }>();
 
-function formatPrice(value: number | null): string {
-    return value === null
-        ? 'تماس بگیرید'
-        : `${value.toLocaleString('fa-IR')} تومان`;
-}
-
-function addToCart(product: FeaturedProduct): void {
-    if (!product.available || product.price === null) {
-        return;
-    }
+function addToCart(productId: number): void {
     router.post(
         '/cart/items',
-        { product_id: product.id, quantity: 1 },
+        { product_id: productId, quantity: 1 },
         { preserveScroll: true },
     );
 }
+
+const categoryIcons = ['✦', '◌', '⌁', '✧', '＋', '◍', '◇', '✣'];
 </script>
 
 <template>
@@ -62,301 +56,270 @@ function addToCart(product: FeaturedProduct): void {
         <meta name="twitter:description" :content="seo.description" />
     </Head>
 
-    <div dir="rtl" class="min-h-screen bg-slate-50 text-slate-900">
-        <header class="border-b border-slate-200 bg-white">
+    <StorefrontLayout>
+        <section class="relative overflow-hidden">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(33,167,165,0.13),transparent_34%),radial-gradient(circle_at_12%_85%,rgba(123,192,67,0.10),transparent_30%)]"></div>
             <div
-                class="mx-auto flex max-w-6xl items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-8"
+                class="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 lg:py-20"
             >
-                <Link href="/" class="text-2xl font-bold text-slate-900"
-                    >Health<span class="text-emerald-600">Store</span></Link
-                >
-                <nav
-                    class="hidden items-center gap-6 text-sm font-medium sm:flex"
-                >
-                    <Link href="/" class="hover:text-emerald-600">خانه</Link>
-                    <Link href="/products" class="hover:text-emerald-600"
-                        >محصولات</Link
+                <div>
+                    <div
+                        class="mb-5 inline-flex items-center gap-2 rounded-full border border-[#cfe5e4] bg-white px-3 py-1.5 text-xs font-bold text-[#087f88] shadow-sm"
                     >
-                    <Link href="/categories" class="hover:text-emerald-600"
-                        >دسته‌بندی‌ها</Link
+                        <span class="h-2 w-2 rounded-full bg-[#69b84a]"></span>
+                        فروشگاه آنلاین سلامت
+                    </div>
+                    <h1
+                        class="max-w-3xl text-4xl leading-[1.2] font-black tracking-tight text-[#04547b] sm:text-5xl lg:text-6xl"
                     >
-                    <Link href="/brands" class="hover:text-emerald-600"
-                        >برندها</Link
+                        سلامت را ساده‌تر
+                        <span class="text-[#1595a1]">انتخاب کن.</span>
+                    </h1>
+                    <p
+                        class="mt-5 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg"
                     >
-                    <Link href="/blog" class="hover:text-emerald-600"
-                        >مجله سلامت</Link
-                    >
-                    <Link href="/cart" class="hover:text-emerald-600"
-                        >سبد خرید</Link
-                    >
-                </nav>
-                <div class="flex items-center gap-2 text-sm font-medium">
-                    <Link
-                        href="/login"
-                        class="rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-100"
-                        >ورود</Link
-                    >
-                    <Link
-                        href="/register"
-                        class="rounded-lg bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700"
-                        >ثبت‌نام</Link
-                    >
-                </div>
-            </div>
-        </header>
-
-        <main>
-            <section
-                class="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20"
-            >
-                <div
-                    class="grid items-center gap-10 rounded-3xl bg-slate-900 p-8 text-white shadow-xl lg:grid-cols-[1.15fr_0.85fr] lg:p-12"
-                >
-                    <div>
-                        <p
-                            class="mb-4 inline-flex rounded-full bg-emerald-400/15 px-3 py-1 text-sm font-medium text-emerald-300"
+                        دارو، محصولات بهداشتی، مکمل و مراقبتی را راحت‌تر پیدا
+                        کن؛ اطلاعات محصول را ببین و خریدت را با یک مسیر ساده
+                        ادامه بده.
+                    </p>
+                    <div class="mt-7 flex flex-wrap gap-3">
+                        <Link
+                            href="/products"
+                            class="rounded-2xl bg-[#04547b] px-6 py-3.5 text-sm font-bold text-white shadow-[0_10px_24px_rgba(4,84,123,0.18)] transition hover:-translate-y-0.5 hover:bg-[#034664]"
                         >
-                            فروشگاه آنلاین سلامت
-                        </p>
-                        <h1
-                            class="text-4xl leading-tight font-bold tracking-tight sm:text-5xl"
+                            شروع خرید
+                        </Link>
+                        <Link
+                            href="/categories"
+                            class="rounded-2xl border border-[#cfe0e5] bg-white px-6 py-3.5 text-sm font-bold text-[#04547b] transition hover:border-[#a9cfd5] hover:bg-[#f5fbfb]"
                         >
-                            محصولات سلامت را ساده و مطمئن پیدا کنید.
-                        </h1>
-                        <p
-                            class="mt-5 max-w-2xl text-lg leading-8 text-slate-300"
-                        >
-                            از بین محصولات و دسته‌بندی‌های موجود جستجو کنید،
-                            جزئیات و موجودی را ببینید و خریدتان را تا پرداخت
-                            آنلاین ادامه دهید.
-                        </p>
-                        <div class="mt-8 flex flex-wrap gap-3">
-                            <Link
-                                href="/products"
-                                class="rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-white hover:bg-emerald-600"
-                                >مشاهده محصولات</Link
-                            >
-                            <Link
-                                href="/blog"
-                                class="rounded-xl border border-white/20 px-6 py-3 font-semibold text-white hover:bg-white/10"
-                                >مطالب سلامت</Link
-                            >
-                        </div>
+                            دسته‌بندی محصولات
+                        </Link>
                     </div>
                     <div
-                        class="rounded-3xl border border-white/10 bg-white/5 p-7"
+                        class="mt-8 flex flex-wrap gap-x-7 gap-y-3 text-xs font-semibold text-slate-500"
                     >
-                        <div class="text-5xl">🛒</div>
-                        <h2 class="mt-5 text-2xl font-bold">
-                            مسیر خرید یکپارچه
-                        </h2>
-                        <div class="mt-6 space-y-3 text-sm text-slate-300">
-                            <div class="rounded-2xl bg-white/5 p-4">
-                                ۱. محصول را انتخاب کنید
+                        <span>✓ اطلاعات شفاف محصول</span>
+                        <span>✓ موجودی و قیمت به‌روز</span>
+                        <span>✓ پیگیری سفارش</span>
+                    </div>
+                </div>
+
+                <div class="relative mx-auto w-full max-w-md">
+                    <div
+                        class="absolute -right-5 -top-5 h-24 w-24 rounded-full bg-[#dff3ef]"
+                    ></div>
+                    <div
+                        class="absolute -bottom-7 -left-5 h-32 w-32 rounded-full bg-[#edf7e6]"
+                    ></div>
+                    <div
+                        class="relative overflow-hidden rounded-[2.2rem] border border-white/80 bg-white p-6 shadow-[0_20px_60px_rgba(4,84,123,0.12)]"
+                    >
+                        <div
+                            class="rounded-[1.8rem] bg-[linear-gradient(145deg,#f6fbfb_0%,#edf8f6_58%,#f3f9ed_100%)] p-7"
+                        >
+                            <div
+                                class="mx-auto flex h-36 w-36 items-center justify-center rounded-full bg-white/80 shadow-sm"
+                            >
+                                <svg
+                                    viewBox="0 0 120 120"
+                                    class="h-24 w-24"
+                                    fill="none"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        d="M27 58c0-18 14.5-32.5 32.5-32.5H86c4 0 7.2 3.2 7.2 7.2v2.7c0 2-1.6 3.6-3.6 3.6h-4.9"
+                                        stroke="#04547b"
+                                        stroke-width="7"
+                                        stroke-linecap="round"
+                                    />
+                                    <path
+                                        d="M29 61c0 18 14.5 32.5 32.5 32.5H86c4 0 7.2-3.2 7.2-7.2v-2.7c0-2-1.6-3.6-3.6-3.6h-4.9"
+                                        stroke="#0c98a4"
+                                        stroke-width="7"
+                                        stroke-linecap="round"
+                                    />
+                                    <path
+                                        d="M65 26c3-8 10.5-11.7 20.4-10.5-3.4 8.4-9.4 13.7-17.5 15.8"
+                                        stroke="#69b84a"
+                                        stroke-width="6"
+                                        stroke-linecap="round"
+                                    />
+                                    <path
+                                        d="M58 50v23M46.5 61.5h23"
+                                        stroke="#04547b"
+                                        stroke-width="7"
+                                        stroke-linecap="round"
+                                    />
+                                </svg>
                             </div>
-                            <div class="rounded-2xl bg-white/5 p-4">
-                                ۲. موجودی و قیمت را بررسی کنید
+                            <div class="mt-7 text-center">
+                                <div class="text-2xl font-black text-[#04547b]">
+                                    داروخونه
+                                </div>
+                                <div class="mt-1 text-xs font-medium text-slate-400">
+                                    دارو و محصولات بهداشتی
+                                </div>
                             </div>
-                            <div class="rounded-2xl bg-white/5 p-4">
-                                ۳. آدرس و سفارش را تأیید کنید
-                            </div>
-                            <div class="rounded-2xl bg-white/5 p-4">
-                                ۴. پرداخت را انجام دهید
+                            <div class="mt-7 grid grid-cols-2 gap-3">
+                                <div
+                                    class="rounded-2xl border border-white bg-white/75 p-3 text-center"
+                                >
+                                    <div class="text-sm font-black text-[#0a8d9f]">
+                                        سریع
+                                    </div>
+                                    <div class="mt-1 text-[11px] text-slate-400">
+                                        پیدا کردن
+                                    </div>
+                                </div>
+                                <div
+                                    class="rounded-2xl border border-white bg-white/75 p-3 text-center"
+                                >
+                                    <div class="text-sm font-black text-[#2e8b57]">
+                                        شفاف
+                                    </div>
+                                    <div class="mt-1 text-[11px] text-slate-400">
+                                        اطلاعات محصول
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <section
-                v-if="props.categories.length"
-                class="border-y border-slate-200 bg-white"
+        <section class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+            <div
+                class="grid gap-3 rounded-3xl border border-[#dce9ec] bg-white p-3 shadow-[0_10px_35px_rgba(4,84,123,0.05)] sm:grid-cols-3"
             >
-                <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-                    <div class="mb-6 flex items-end justify-between gap-4">
+                <div class="rounded-2xl bg-[#f6fbfb] p-4">
+                    <div class="font-bold text-[#04547b]">انتخاب راحت</div>
+                    <p class="mt-1 text-xs leading-6 text-slate-500">
+                        دسته‌بندی و جستجوی سریع برای پیدا کردن محصول موردنظر.
+                    </p>
+                </div>
+                <div class="rounded-2xl bg-[#f7fbf4] p-4">
+                    <div class="font-bold text-[#2f8150]">بررسی قبل از خرید</div>
+                    <p class="mt-1 text-xs leading-6 text-slate-500">
+                        قیمت، موجودی و جزئیات محصول در مسیر خرید بررسی می‌شود.
+                    </p>
+                </div>
+                <div class="rounded-2xl bg-[#f7f9fc] p-4">
+                    <div class="font-bold text-slate-700">مجله سلامت</div>
+                    <p class="mt-1 text-xs leading-6 text-slate-500">
+                        محتوای آموزشی برای انتخاب آگاهانه‌تر محصولات.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section v-if="props.categories.length" class="py-10 sm:py-14">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mb-6 flex items-end justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-[#0a8d9f]"
+                            >دسته‌های محبوب</span
+                        >
+                        <h2 class="mt-1 text-2xl font-black text-slate-900">
+                            از اینجا شروع کن
+                        </h2>
+                    </div>
+                    <Link
+                        href="/categories"
+                        class="text-sm font-bold text-[#04547b] hover:text-[#0a8d9f]"
+                    >
+                        همه دسته‌ها
+                    </Link>
+                </div>
+
+                <div
+                    class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
+                >
+                    <Link
+                        v-for="(category, index) in props.categories"
+                        :key="category.id"
+                        :href="'/categories/' + category.slug"
+                        class="group rounded-3xl border border-[#dce9ec] bg-white p-5 shadow-[0_8px_22px_rgba(4,84,123,0.04)] transition hover:-translate-y-1 hover:border-[#bfdde0] hover:shadow-[0_14px_30px_rgba(4,84,123,0.08)]"
+                    >
+                        <span
+                            class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#edf8f8] text-lg font-black text-[#07899a] transition group-hover:bg-[#dff2f1]"
+                        >
+                            {{ categoryIcons[index % categoryIcons.length] }}
+                        </span>
+                        <span
+                            class="mt-4 block text-sm font-bold leading-6 text-slate-800"
+                        >
+                            {{ category.name }}
+                        </span>
+                    </Link>
+                </div>
+            </div>
+        </section>
+
+        <section v-if="props.featuredProducts.length" class="bg-white py-12">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mb-7 flex items-end justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-[#0a8d9f]"
+                            >منتخب داروخونه</span
+                        >
+                        <h2 class="mt-1 text-2xl font-black text-slate-900">
+                            محصولات منتخب
+                        </h2>
+                    </div>
+                    <Link
+                        href="/products"
+                        class="text-sm font-bold text-[#04547b] hover:text-[#0a8d9f]"
+                    >
+                        مشاهده همه
+                    </Link>
+                </div>
+
+                <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <ProductCard
+                        v-for="product in props.featuredProducts"
+                        :key="product.id"
+                        :product="product"
+                        @add-to-cart="addToCart"
+                    />
+                </div>
+            </div>
+        </section>
+
+        <section class="py-12">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div
+                    class="overflow-hidden rounded-[2rem] border border-[#bfe1df] bg-[linear-gradient(135deg,#eef9f8_0%,#f8fcf1_100%)] p-7 sm:p-10"
+                >
+                    <div
+                        class="grid items-center gap-7 lg:grid-cols-[1fr_auto]"
+                    >
                         <div>
-                            <h2 class="text-2xl font-bold">دسته‌بندی‌ها</h2>
-                            <p class="mt-1 text-sm text-slate-500">
-                                دسترسی سریع به گروه‌های محصولات
+                            <span class="text-xs font-bold text-[#2f8150]"
+                                >مجله سلامت</span
+                            >
+                            <h2
+                                class="mt-2 text-2xl font-black text-[#04547b] sm:text-3xl"
+                            >
+                                قبل از خرید، بیشتر بدان.
+                            </h2>
+                            <p
+                                class="mt-3 max-w-2xl text-sm leading-7 text-slate-600"
+                            >
+                                مطالب آموزشی و کاربردی درباره سلامت، مراقبت،
+                                بهداشت و انتخاب بهتر محصولات.
                             </p>
                         </div>
                         <Link
-                            href="/products"
-                            class="text-sm font-medium text-emerald-600 hover:text-emerald-700"
-                            >همه محصولات</Link
+                            href="/blog"
+                            class="rounded-2xl bg-white px-6 py-3.5 text-center text-sm font-bold text-[#04547b] shadow-sm ring-1 ring-[#cfe0e5] transition hover:bg-[#f7fcfc]"
                         >
-                    </div>
-                    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        <Link
-                            v-for="category in props.categories"
-                            :key="category.id"
-                            :href="'/categories/' + category.slug"
-                            class="rounded-2xl border border-slate-200 bg-slate-50 p-5 font-semibold transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50"
-                            >{{ category.name }}</Link
-                        >
-                    </div>
-                </div>
-            </section>
-
-            <section
-                v-if="props.featuredProducts.length"
-                class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8"
-            >
-                <div class="mb-6 flex items-end justify-between gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold">محصولات منتخب</h2>
-                        <p class="mt-1 text-sm text-slate-500">
-                            محصولات فعال و منتخب فروشگاه
-                        </p>
-                    </div>
-                    <Link
-                        href="/products"
-                        class="text-sm font-medium text-emerald-600 hover:text-emerald-700"
-                        >مشاهده همه</Link
-                    >
-                </div>
-                <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    <article
-                        v-for="product in props.featuredProducts"
-                        :key="product.id"
-                        class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                    >
-                        <Link :href="`/products/${product.slug}`" class="block">
-                            <div class="aspect-square bg-slate-100">
-                                <img
-                                    v-if="product.image"
-                                    :src="product.image"
-                                    :alt="product.name"
-                                    class="h-full w-full object-contain p-5"
-                                />
-                                <div
-                                    v-else
-                                    class="flex h-full items-center justify-center text-sm text-slate-400"
-                                >
-                                    بدون تصویر
-                                </div>
-                            </div>
-                            <div class="p-4">
-                                <p
-                                    v-if="product.brand"
-                                    class="text-xs text-slate-500"
-                                >
-                                    {{ product.brand }}
-                                </p>
-                                <h3
-                                    class="mt-1 line-clamp-2 min-h-12 leading-6 font-semibold"
-                                >
-                                    {{ product.name }}
-                                </h3>
-                                <div
-                                    class="mt-3 flex items-end justify-between gap-2"
-                                >
-                                    <div>
-                                        <div class="font-bold">
-                                            {{ formatPrice(product.price) }}
-                                        </div>
-                                        <div
-                                            v-if="
-                                                product.compare_at_price &&
-                                                product.compare_at_price >
-                                                    (product.price ?? 0)
-                                            "
-                                            class="text-xs text-slate-400 line-through"
-                                        >
-                                            {{
-                                                formatPrice(
-                                                    product.compare_at_price,
-                                                )
-                                            }}
-                                        </div>
-                                    </div>
-                                    <span
-                                        :class="
-                                            product.available
-                                                ? 'text-emerald-600'
-                                                : 'text-red-500'
-                                        "
-                                        class="text-xs font-medium"
-                                        >{{
-                                            product.available
-                                                ? 'موجود'
-                                                : 'ناموجود'
-                                        }}</span
-                                    >
-                                </div>
-                            </div>
+                            ورود به مجله سلامت
                         </Link>
-                        <div class="px-4 pb-4">
-                            <button
-                                type="button"
-                                :disabled="
-                                    !product.available || product.price === null
-                                "
-                                class="w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-                                @click="addToCart(product)"
-                            >
-                                افزودن به سبد
-                            </button>
-                        </div>
-                    </article>
-                </div>
-            </section>
-
-            <section
-                v-else
-                class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8"
-            >
-                <div
-                    class="rounded-3xl border border-slate-200 bg-white p-8 text-center"
-                >
-                    <h2 class="text-xl font-bold">
-                        محصولات در حال آماده‌سازی هستند
-                    </h2>
-                    <p class="mt-2 text-sm text-slate-500">
-                        برای مشاهده کاتالوگ محصولات به صفحه محصولات بروید.
-                    </p>
-                    <Link
-                        href="/products"
-                        class="mt-5 inline-flex rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700"
-                        >مشاهده محصولات</Link
-                    >
-                </div>
-            </section>
-
-            <section class="border-y border-slate-200 bg-white">
-                <div
-                    class="mx-auto grid max-w-6xl gap-4 px-4 py-10 sm:grid-cols-3 sm:px-6 lg:px-8"
-                >
-                    <div class="rounded-2xl bg-slate-50 p-5">
-                        <div class="font-bold">موجودی بررسی می‌شود</div>
-                        <p class="mt-2 text-sm leading-6 text-slate-600">
-                            قبل از ثبت سفارش، موجودی محصولات بررسی می‌شود.
-                        </p>
-                    </div>
-                    <div class="rounded-2xl bg-slate-50 p-5">
-                        <div class="font-bold">قیمت به‌روز</div>
-                        <p class="mt-2 text-sm leading-6 text-slate-600">
-                            قیمت در مسیر خرید دوباره بررسی می‌شود.
-                        </p>
-                    </div>
-                    <div class="rounded-2xl bg-slate-50 p-5">
-                        <div class="font-bold">پیگیری سفارش</div>
-                        <p class="mt-2 text-sm leading-6 text-slate-600">
-                            وضعیت سفارش پس از ثبت در حساب کاربری قابل پیگیری
-                            است.
-                        </p>
                     </div>
                 </div>
-            </section>
-        </main>
-
-        <footer class="bg-slate-950 text-slate-400">
-            <div
-                class="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8 text-sm sm:px-6 lg:px-8"
-            >
-                <div class="font-semibold text-white">HealthStore</div>
-                <div>فروشگاه آنلاین محصولات سلامت</div>
             </div>
-        </footer>
-    </div>
+        </section>
+    </StorefrontLayout>
 </template>
