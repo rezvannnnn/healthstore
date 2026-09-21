@@ -1,0 +1,27 @@
+name: temporary-prettier-artifact
+
+on:
+  push:
+    branches:
+      - tmp/prettier-darookhooneh
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx prettier --write resources/js/pages/Brand/Show.vue resources/js/pages/Category/Show.vue
+      - uses: actions/upload-artifact@v4
+        with:
+          name: formatted-darookhooneh-pages
+          path: |
+            resources/js/pages/Brand/Show.vue
+            resources/js/pages/Category/Show.vue
