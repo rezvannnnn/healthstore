@@ -21,8 +21,7 @@ class SecurityHeadersTest extends TestCase
 
     public function test_secure_responses_include_hsts_header(): void
     {
-        $this->withServerVariables(['HTTPS' => 'on'])
-            ->get('/')
+        $this->get('https://localhost/')
             ->assertHeader(
                 'Strict-Transport-Security',
                 'max-age=31536000; includeSubDomains'
