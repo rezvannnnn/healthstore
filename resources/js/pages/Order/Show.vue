@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface OrderItem {
@@ -138,478 +138,105 @@ function startPayment(): void {
 </script>
 
 <template>
-    <div class="order-page" dir="rtl">
-        <div class="order-container">
-            <header class="order-header">
-                <div>
-                    <h1>جزئیات سفارش</h1>
-                    <p>
-                        شماره سفارش:
-                        <strong>{{ order.order_number }}</strong>
-                    </p>
-                </div>
-
-                <div class="header-status">
-                    {{ orderStatusLabel }}
-                </div>
+    <Head :title="`سفارش ${order.order_number}`" />
+    <main dir="rtl" class="min-h-screen bg-dh-50 px-4 py-6 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-5xl">
+            <header class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-dh-100">
+                <Link href="/products" class="flex items-center gap-3">
+                    <span class="grid size-11 place-items-center rounded-2xl bg-dh-700 text-white">
+                        <svg viewBox="0 0 48 48" class="size-7" fill="none" aria-hidden="true">
+                            <path d="M11 16h26l-3 17H14l-3-17Z" stroke="currentColor" stroke-width="3" />
+                            <path d="M17 16c0-5 3-8 7-8s7 3 7 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                            <path d="m22 24 3 3 7-7" stroke="#77c8a0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </span>
+                    <span><strong class="block text-lg font-black text-dh-800">داروخونه</strong><span class="text-xs text-dh-muted">دارو و محصولات بهداشتی</span></span>
+                </Link>
+                <nav class="flex items-center gap-2 text-sm">
+                    <Link href="/account/orders" class="rounded-xl px-3 py-2 font-semibold text-dh-700 hover:bg-dh-50">سفارش‌ها</Link>
+                    <Link href="/account/profile" class="rounded-xl px-3 py-2 font-semibold text-dh-700 hover:bg-dh-50">پروفایل</Link>
+                    <Link href="/cart" class="rounded-xl bg-dh-700 px-4 py-2 font-semibold text-white hover:bg-dh-800">سبد خرید</Link>
+                </nav>
             </header>
 
-            <div v-if="success" class="message success-message">
-                {{ success }}
+            <section class="mb-6 rounded-3xl bg-dh-800 p-6 text-white shadow-sm sm:p-8">
+                <div class="flex flex-wrap items-start justify-between gap-5">
+                    <div>
+                        <p class="text-sm font-bold text-dh-green-100">پیگیری خرید</p>
+                        <h1 class="mt-2 text-2xl font-black sm:text-3xl">جزئیات سفارش</h1>
+                        <p class="mt-2 text-sm text-dh-100">شماره سفارش: <strong class="text-white">{{ order.order_number }}</strong></p>
+                    </div>
+                    <span class="rounded-full bg-white/10 px-4 py-2 text-sm font-bold">{{ orderStatusLabel }}</span>
+                </div>
+            </section>
+
+            <div v-if="success" class="mb-4 rounded-2xl border border-dh-green-100 bg-dh-green-50 p-4 text-sm font-medium text-dh-green-700">{{ success }}</div>
+            <div v-if="error" class="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">{{ error }}</div>
+            <div v-if="info" class="mb-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-medium text-blue-700">{{ info }}</div>
+
+            <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+                <div class="space-y-6">
+                    <section class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6">
+                        <h2 class="mb-5 text-lg font-black text-dh-900">اقلام سفارش</h2>
+                        <div v-if="order.items.length === 0" class="rounded-2xl bg-dh-50 p-6 text-center text-sm text-dh-muted">هیچ قلمی برای این سفارش ثبت نشده است.</div>
+                        <div v-for="item in order.items" :key="item.id" class="flex flex-col gap-4 border-b border-dh-100 py-4 first:pt-0 last:border-b-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h3 class="font-bold text-dh-900">{{ item.product_name }}</h3>
+                                <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-dh-muted">
+                                    <span v-if="item.product_sku">کد کالا: {{ item.product_sku }}</span>
+                                    <span>تعداد: {{ item.quantity }}</span>
+                                    <span>قیمت واحد: {{ formatPrice(item.unit_price) }}</span>
+                                </div>
+                            </div>
+                            <strong class="text-dh-800">{{ formatPrice(item.total_amount) }}</strong>
+                        </div>
+                    </section>
+
+                    <section v-if="order.recipient_name || order.recipient_phone || order.shipping_address" class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6">
+                        <h2 class="mb-5 text-lg font-black text-dh-900">اطلاعات گیرنده</h2>
+                        <div class="grid gap-5 sm:grid-cols-2">
+                            <div v-if="order.recipient_name"><span class="block text-xs text-dh-muted">نام گیرنده</span><strong class="mt-1 block text-sm text-dh-900">{{ order.recipient_name }}</strong></div>
+                            <div v-if="order.recipient_phone"><span class="block text-xs text-dh-muted">شماره تماس</span><strong class="mt-1 block text-sm text-dh-900">{{ order.recipient_phone }}</strong></div>
+                            <div v-if="order.province || order.city"><span class="block text-xs text-dh-muted">موقعیت</span><strong class="mt-1 block text-sm text-dh-900">{{ order.province }}<span v-if="order.province && order.city"> - </span>{{ order.city }}</strong></div>
+                            <div v-if="order.postal_code"><span class="block text-xs text-dh-muted">کد پستی</span><strong class="mt-1 block text-sm text-dh-900">{{ order.postal_code }}</strong></div>
+                            <div v-if="order.shipping_address" class="sm:col-span-2"><span class="block text-xs text-dh-muted">آدرس</span><strong class="mt-1 block text-sm leading-7 text-dh-900">{{ order.shipping_address }}</strong></div>
+                        </div>
+                    </section>
+
+                    <section class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6">
+                        <h2 class="mb-5 text-lg font-black text-dh-900">وضعیت سفارش</h2>
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div class="rounded-2xl bg-dh-50 p-4"><span class="text-xs text-dh-muted">وضعیت سفارش</span><strong class="mt-1 block text-sm text-dh-900">{{ orderStatusLabel }}</strong></div>
+                            <div class="rounded-2xl bg-dh-50 p-4"><span class="text-xs text-dh-muted">وضعیت پرداخت</span><strong class="mt-1 block text-sm text-dh-900">{{ paymentStatusLabel }}</strong></div>
+                        </div>
+                    </section>
+                </div>
+
+                <aside class="h-fit space-y-6 lg:sticky lg:top-6">
+                    <section class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100">
+                        <h2 class="mb-5 text-lg font-black text-dh-900">خلاصه مبلغ</h2>
+                        <div class="space-y-4 text-sm">
+                            <div class="flex justify-between gap-4"><span class="text-dh-muted">جمع کالاها</span><strong class="text-dh-800">{{ formatPrice(order.subtotal) }}</strong></div>
+                            <div class="flex justify-between gap-4"><span class="text-dh-muted">تخفیف</span><strong class="text-dh-green-600">{{ formatPrice(order.discount_amount) }}</strong></div>
+                            <div class="flex justify-between gap-4"><span class="text-dh-muted">هزینه ارسال</span><strong class="text-dh-800">{{ formatPrice(order.shipping_amount) }}</strong></div>
+                            <div class="border-t border-dh-100 pt-4"><div class="flex justify-between gap-4"><span class="font-bold text-dh-900">مبلغ قابل پرداخت</span><strong class="text-lg font-black text-dh-800">{{ formatPrice(order.total_amount) }}</strong></div></div>
+                        </div>
+                    </section>
+
+                    <section class="rounded-3xl bg-dh-800 p-5 text-white shadow-sm">
+                        <h2 class="text-lg font-black">پرداخت سفارش</h2>
+                        <div class="mt-4 rounded-2xl bg-white/10 p-4"><span class="text-xs text-dh-100">وضعیت پرداخت</span><strong class="mt-1 block">{{ paymentStatusLabel }}</strong></div>
+                        <button v-if="canPay" type="button" :disabled="isStartingPayment" class="mt-4 w-full rounded-2xl bg-white px-4 py-3.5 font-black text-dh-800 transition hover:bg-dh-50 disabled:opacity-60" @click="startPayment">
+                            {{ isStartingPayment ? 'در حال آماده‌سازی پرداخت...' : `پرداخت ${formatPrice(order.total_amount)}` }}
+                        </button>
+                        <div v-else-if="order.payment_status === 'paid'" class="mt-4 rounded-2xl bg-dh-green-500/15 p-4 text-sm text-dh-green-100">این سفارش با موفقیت پرداخت شده است.</div>
+                        <div v-else-if="!hasPayableAmount" class="mt-4 rounded-2xl bg-white/10 p-4 text-sm text-dh-100">مبلغ این سفارش قابل پرداخت نیست.</div>
+                        <div v-else-if="order.status === 'cancelled'" class="mt-4 rounded-2xl bg-red-500/15 p-4 text-sm text-red-100">این سفارش لغو شده است.</div>
+                    </section>
+
+                    <button type="button" class="w-full rounded-2xl border border-dh-100 bg-white px-4 py-3.5 text-sm font-bold text-dh-700 hover:bg-dh-50" @click="goBackToCheckout">بازگشت به تسویه حساب</button>
+                </aside>
             </div>
-
-            <div v-if="error" class="message error-message">
-                {{ error }}
-            </div>
-
-            <div v-if="info" class="message info-message">
-                {{ info }}
-            </div>
-
-            <section class="card">
-                <h2>اطلاعات سفارش</h2>
-
-                <div class="info-grid">
-                    <div>
-                        <span class="label">شماره سفارش</span>
-                        <strong>{{ order.order_number }}</strong>
-                    </div>
-
-                    <div>
-                        <span class="label">وضعیت سفارش</span>
-                        <strong>{{ orderStatusLabel }}</strong>
-                    </div>
-
-                    <div>
-                        <span class="label">وضعیت پرداخت</span>
-                        <strong>{{ paymentStatusLabel }}</strong>
-                    </div>
-
-                    <div>
-                        <span class="label">واحد پول</span>
-                        <strong>{{ order.currency }}</strong>
-                    </div>
-                </div>
-            </section>
-
-            <section class="card">
-                <h2>اقلام سفارش</h2>
-
-                <div v-if="order.items.length === 0" class="empty-state">
-                    هیچ قلمی برای این سفارش ثبت نشده است.
-                </div>
-
-                <div
-                    v-for="item in order.items"
-                    :key="item.id"
-                    class="order-item"
-                >
-                    <div class="item-info">
-                        <h3>{{ item.product_name }}</h3>
-
-                        <span v-if="item.product_sku">
-                            کد کالا: {{ item.product_sku }}
-                        </span>
-
-                        <span> تعداد: {{ item.quantity }} </span>
-                    </div>
-
-                    <div class="item-prices">
-                        <span>
-                            {{ formatPrice(item.unit_price) }}
-                        </span>
-
-                        <strong>
-                            {{ formatPrice(item.total_amount) }}
-                        </strong>
-                    </div>
-                </div>
-            </section>
-
-            <section class="card">
-                <h2>خلاصه مبلغ</h2>
-
-                <div class="summary">
-                    <div class="summary-row">
-                        <span>جمع کالاها</span>
-                        <strong>
-                            {{ formatPrice(order.subtotal) }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-row">
-                        <span>تخفیف</span>
-                        <strong>
-                            {{ formatPrice(order.discount_amount) }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-row">
-                        <span>هزینه ارسال</span>
-                        <strong>
-                            {{ formatPrice(order.shipping_amount) }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-row total-row">
-                        <span>مبلغ قابل پرداخت</span>
-                        <strong>
-                            {{ formatPrice(order.total_amount) }}
-                        </strong>
-                    </div>
-                </div>
-            </section>
-
-            <section
-                v-if="
-                    order.recipient_name ||
-                    order.recipient_phone ||
-                    order.shipping_address
-                "
-                class="card"
-            >
-                <h2>اطلاعات گیرنده</h2>
-
-                <div class="recipient-info">
-                    <div v-if="order.recipient_name">
-                        <span class="label">نام گیرنده</span>
-                        <strong>{{ order.recipient_name }}</strong>
-                    </div>
-
-                    <div v-if="order.recipient_phone">
-                        <span class="label">شماره تماس</span>
-                        <strong>{{ order.recipient_phone }}</strong>
-                    </div>
-
-                    <div v-if="order.province || order.city">
-                        <span class="label">موقعیت</span>
-                        <strong>
-                            {{ order.province }}
-
-                            <span v-if="order.province && order.city"> - </span>
-
-                            {{ order.city }}
-                        </strong>
-                    </div>
-
-                    <div v-if="order.shipping_address">
-                        <span class="label">آدرس</span>
-                        <strong>{{ order.shipping_address }}</strong>
-                    </div>
-
-                    <div v-if="order.postal_code">
-                        <span class="label">کد پستی</span>
-                        <strong>{{ order.postal_code }}</strong>
-                    </div>
-                </div>
-            </section>
-
-            <section class="card payment-card">
-                <h2>پرداخت</h2>
-
-                <div class="payment-status-box">
-                    <span>وضعیت پرداخت</span>
-                    <strong>{{ paymentStatusLabel }}</strong>
-                </div>
-
-                <div v-if="canPay" class="actions">
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        :disabled="isStartingPayment"
-                        @click="startPayment"
-                    >
-                        {{
-                            isStartingPayment
-                                ? 'در حال آماده‌سازی پرداخت...'
-                                : `پرداخت ${formatPrice(order.total_amount)}`
-                        }}
-                    </button>
-                </div>
-
-                <div
-                    v-else-if="order.payment_status === 'paid'"
-                    class="paid-message"
-                >
-                    این سفارش با موفقیت پرداخت شده است.
-                </div>
-
-                <div v-else-if="!hasPayableAmount" class="info-message-box">
-                    مبلغ این سفارش قابل پرداخت نیست.
-                </div>
-
-                <div
-                    v-else-if="order.status === 'cancelled'"
-                    class="error-message-box"
-                >
-                    این سفارش لغو شده است.
-                </div>
-            </section>
-
-            <section class="actions-footer">
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    @click="goBackToCheckout"
-                >
-                    بازگشت به Checkout
-                </button>
-            </section>
         </div>
-    </div>
+    </main>
 </template>
-
-<style scoped>
-.order-page {
-    min-height: 100vh;
-    background: #f8f9fa;
-    padding: 40px 20px;
-}
-
-.order-container {
-    width: min(100%, 1000px);
-    margin: 0 auto;
-}
-
-.order-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 25px;
-}
-
-.order-header h1 {
-    margin: 0 0 8px;
-    font-size: 30px;
-}
-
-.order-header p {
-    margin: 0;
-    color: #666;
-}
-
-.header-status {
-    padding: 10px 16px;
-    border-radius: 999px;
-    background: #eee;
-    font-weight: 700;
-    white-space: nowrap;
-}
-
-.card {
-    margin-bottom: 20px;
-    padding: 24px;
-    border-radius: 16px;
-    background: #fff;
-}
-
-.card h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
-}
-
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-}
-
-.info-grid > div,
-.recipient-info > div {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.label {
-    color: #777;
-    font-size: 14px;
-}
-
-.order-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    padding: 18px 0;
-    border-bottom: 1px solid #eee;
-}
-
-.order-item:last-child {
-    border-bottom: 0;
-}
-
-.item-info {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.item-info h3 {
-    margin: 0;
-}
-
-.item-info span {
-    color: #777;
-    font-size: 14px;
-}
-
-.item-prices {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
-    white-space: nowrap;
-}
-
-.item-prices span {
-    color: #777;
-}
-
-.summary {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.summary-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-}
-
-.total-row {
-    padding-top: 16px;
-    border-top: 1px solid #eee;
-    font-size: 20px;
-}
-
-.recipient-info {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-}
-
-.payment-card {
-    border: 1px solid #eee;
-}
-
-.payment-status-box {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    padding: 16px;
-    border-radius: 12px;
-    background: #f7f7f7;
-}
-
-.actions {
-    margin-top: 20px;
-}
-
-.actions-footer {
-    display: flex;
-    justify-content: flex-start;
-    margin-top: 10px;
-}
-
-.btn {
-    border: 0;
-    border-radius: 10px;
-    padding: 13px 22px;
-    font-size: 15px;
-    cursor: pointer;
-}
-
-.btn:disabled {
-    cursor: wait;
-    opacity: 0.7;
-}
-
-.btn-primary {
-    background: #111;
-    color: #fff;
-}
-
-.btn-secondary {
-    background: #e9ecef;
-    color: #222;
-}
-
-.message {
-    margin-bottom: 20px;
-    padding: 14px 18px;
-    border-radius: 12px;
-}
-
-.success-message {
-    background: #edf7ed;
-    border: 1px solid #c9e6c9;
-}
-
-.error-message {
-    background: #fdeeee;
-    border: 1px solid #efcaca;
-}
-
-.info-message {
-    background: #eef5fd;
-    border: 1px solid #cbdcf2;
-}
-
-.paid-message,
-.info-message-box,
-.error-message-box {
-    margin-top: 20px;
-    padding: 14px 16px;
-    border-radius: 12px;
-}
-
-.paid-message {
-    background: #edf7ed;
-}
-
-.info-message-box {
-    background: #f2f2f2;
-}
-
-.error-message-box {
-    background: #fdeeee;
-}
-
-.empty-state {
-    padding: 25px 0;
-    text-align: center;
-    color: #777;
-}
-
-@media (max-width: 700px) {
-    .order-header,
-    .order-item,
-    .summary-row,
-    .payment-status-box {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .info-grid,
-    .recipient-info {
-        grid-template-columns: 1fr;
-    }
-
-    .item-prices {
-        align-items: flex-start;
-    }
-
-    .actions-footer,
-    .actions {
-        width: 100%;
-    }
-
-    .btn {
-        width: 100%;
-    }
-}
-</style>
