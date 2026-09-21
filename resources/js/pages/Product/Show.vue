@@ -53,6 +53,7 @@ const selectedImage = ref(
 );
 const quantity = ref(1);
 const addingToCart = ref(false);
+const cartAdded = ref(false);
 const gallery = computed(() => {
     const images = props.product.images.map((image) => image.path);
     if (props.product.image && !images.includes(props.product.image)) {
@@ -84,7 +85,13 @@ function addToCart(): void {
         { product_id: props.product.id, quantity: quantity.value },
         {
             preserveScroll: true,
-            onStart: () => { addingToCart.value = true; },
+            onStart: () => {
+                addingToCart.value = true;
+                cartAdded.value = false;
+            },
+            onSuccess: () => {
+                cartAdded.value = true;
+            },
             onFinish: () => { addingToCart.value = false; },
         },
     );
@@ -291,6 +298,9 @@ function addToCart(): void {
                             <p class="mt-2 text-center text-[11px] text-dh-muted">
                                 {{ product.available_quantity.toLocaleString('fa-IR') }} عدد قابل سفارش است.
                             </p>
+                            <div v-if="cartAdded" class="mt-3 rounded-xl bg-dh-green-50 px-3 py-2 text-center text-xs font-bold text-dh-green-700" role="status">
+                                محصول با موفقیت به سبد خرید اضافه شد.
+                            </div>
                         </div>
 
                         <div class="mt-6 grid gap-2.5 sm:grid-cols-3">
