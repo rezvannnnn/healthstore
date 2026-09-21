@@ -99,7 +99,9 @@ const submitCheckout = () => {
 };
 
 const rejectChanges = () => {
-    if (submitting.value) return;
+    if (submitting.value) {
+        return;
+    }
     router.post('/checkout/reject', {}, {
         preserveScroll: true,
         onStart: () => { submitting.value = true; },
