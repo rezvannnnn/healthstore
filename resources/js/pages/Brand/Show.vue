@@ -84,25 +84,52 @@ function pageUrl(page: number): string {
         <meta v-if="brand.logo" name="twitter:image" :content="brand.logo" />
     </Head>
 
-    <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
+    <div dir="rtl" class="min-h-screen bg-dh-surface text-dh-ink">
+        <header class="sticky top-0 z-40 mb-6 border-b border-dh-100/70 bg-white/95 backdrop-blur">
+        <div class="mx-auto flex h-18 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+            <Link href="/" class="flex items-center gap-2.5">
+                <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-dh-700">
+                    <svg viewBox="0 0 48 48" class="h-8 w-8" aria-hidden="true">
+                        <path d="M10 22.5h28v6.2c0 5.1-4.1 9.3-9.3 9.3H19.3A9.3 9.3 0 0 1 10 28.7v-6.2Z" fill="white"/>
+                        <path d="M14.5 20.5c1.4-6.1 5.2-9.1 9.5-9.1s8.1 3 9.5 9.1" fill="none" stroke="#63b95b" stroke-width="3.4" stroke-linecap="round"/>
+                        <path d="M25 12.7c3.8-.1 6.3 1.2 7.7 3.7-3.6 1.1-6.5-.1-7.7-3.7Z" fill="#63b95b"/>
+                        <path d="M23.7 16.2h7.4v2.9h-7.4z" fill="#16858b"/>
+                        <path d="M27.4 14v7.3" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                <span>
+                    <span class="block text-lg font-extrabold leading-none text-dh-800">داروخونه</span>
+                    <span class="mt-1 block text-[10px] font-medium text-dh-muted">دارو و محصولات بهداشتی</span>
+                </span>
+            </Link>
+            <Link href="/products" class="mr-auto rounded-xl bg-dh-50 px-4 py-2 text-sm font-bold text-dh-700 transition hover:bg-dh-100">همه محصولات</Link>
+            <Link href="/cart" class="flex h-11 w-11 items-center justify-center rounded-xl border border-dh-100 text-dh-700 transition hover:bg-dh-50" aria-label="سبد خرید">
+                <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M4 5h2l1.5 10.2a2 2 0 0 0 2 1.8h7.6a2 2 0 0 0 1.9-1.5L21 8H7" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>
+                </svg>
+            </Link>
+        </div>
+    </header>
+    <main dir="rtl" class="min-h-screen bg-dh-surface px-4 py-8 dark:bg-dh-surface">
         <div class="mx-auto max-w-7xl space-y-8">
             <nav
                 aria-label="مسیر صفحه"
-                class="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400"
+                class="flex flex-wrap items-center gap-2 text-sm text-dh-muted dark:text-dh-muted"
             >
-                <Link href="/" class="hover:text-indigo-600">خانه</Link>
+                <Link href="/" class="hover:text-dh-700">خانه</Link>
                 <span>/</span>
-                <Link href="/products" class="hover:text-indigo-600"
+                <Link href="/products" class="hover:text-dh-700"
                     >محصولات</Link
                 >
                 <span>/</span>
-                <span class="text-gray-900 dark:text-white">{{
+                <span class="text-dh-900 dark:text-white">{{
                     brand.name
                 }}</span>
             </nav>
 
             <header
-                class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800"
+                class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-dh-100 dark:bg-white dark:ring-gray-800"
             >
                 <div
                     class="grid gap-6 p-6 md:p-8"
@@ -114,7 +141,7 @@ function pageUrl(page: number): string {
                 >
                     <div
                         v-if="brand.logo"
-                        class="flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-gray-100 p-6 dark:bg-gray-800"
+                        class="flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-dh-50 p-6 dark:bg-gray-800"
                     >
                         <img
                             :src="brand.logo"
@@ -123,23 +150,23 @@ function pageUrl(page: number): string {
                         />
                     </div>
                     <div class="self-center">
-                        <p class="text-sm font-medium text-indigo-600">
+                        <p class="text-sm font-medium text-dh-700">
                             محصولات برند
                         </p>
                         <h1
-                            class="mt-2 text-3xl font-bold text-gray-900 md:text-4xl dark:text-white"
+                            class="mt-2 text-3xl font-bold text-dh-900 md:text-4xl dark:text-white"
                         >
                             {{ brand.name }}
                         </h1>
                         <p
                             v-if="brand.description"
-                            class="mt-4 max-w-3xl leading-8 text-gray-600 dark:text-gray-300"
+                            class="mt-4 max-w-3xl leading-8 text-dh-muted dark:text-gray-300"
                         >
                             {{ brand.description }}
                         </p>
                         <p
                             v-else
-                            class="mt-4 max-w-3xl leading-8 text-gray-600 dark:text-gray-300"
+                            class="mt-4 max-w-3xl leading-8 text-dh-muted dark:text-gray-300"
                         >
                             محصولات فعال این برند را مشاهده و بررسی کنید.
                         </p>
@@ -153,17 +180,17 @@ function pageUrl(page: number): string {
                 >
                     <div>
                         <h2
-                            class="text-2xl font-bold text-gray-900 dark:text-white"
+                            class="text-2xl font-bold text-dh-900 dark:text-white"
                         >
                             محصولات {{ brand.name }}
                         </h2>
-                        <p class="mt-1 text-sm text-gray-500">
+                        <p class="mt-1 text-sm text-dh-muted">
                             {{ pagination.total.toLocaleString('fa-IR') }} محصول
                         </p>
                     </div>
                     <Link
                         href="/products"
-                        class="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                        class="text-sm font-medium text-dh-700 hover:text-dh-800"
                     >
                         همه محصولات
                     </Link>
@@ -176,11 +203,11 @@ function pageUrl(page: number): string {
                     <article
                         v-for="product in products"
                         :key="product.id"
-                        class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:-translate-y-0.5 hover:shadow-md dark:bg-gray-900 dark:ring-gray-800"
+                        class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-dh-100 transition hover:-translate-y-0.5 hover:shadow-md dark:bg-white dark:ring-gray-800"
                     >
                         <Link :href="'/products/' + product.slug" class="block">
                             <div
-                                class="aspect-square bg-gray-100 dark:bg-gray-800"
+                                class="aspect-square bg-dh-50 dark:bg-gray-800"
                             >
                                 <img
                                     v-if="product.image"
@@ -190,31 +217,31 @@ function pageUrl(page: number): string {
                                 />
                                 <div
                                     v-else
-                                    class="flex h-full items-center justify-center text-sm text-gray-400"
+                                    class="flex h-full items-center justify-center text-sm text-dh-muted"
                                 >
                                     بدون تصویر
                                 </div>
                             </div>
                             <div class="space-y-3 p-4">
                                 <h3
-                                    class="line-clamp-2 font-semibold text-gray-900 dark:text-white"
+                                    class="line-clamp-2 font-semibold text-dh-900 dark:text-white"
                                 >
                                     {{ product.name }}
                                 </h3>
                                 <p
                                     v-if="product.short_description"
-                                    class="line-clamp-2 text-sm text-gray-500 dark:text-gray-400"
+                                    class="line-clamp-2 text-sm text-dh-muted dark:text-dh-muted"
                                 >
                                     {{ product.short_description }}
                                 </p>
                             </div>
                         </Link>
                         <div
-                            class="flex items-center justify-between gap-3 border-t border-gray-100 p-4 dark:border-gray-800"
+                            class="flex items-center justify-between gap-3 border-t border-dh-100 p-4 dark:border-gray-800"
                         >
                             <div>
                                 <div
-                                    class="font-bold text-gray-900 dark:text-white"
+                                    class="font-bold text-dh-900 dark:text-white"
                                 >
                                     {{ formatPrice(product.price) }}
                                 </div>
@@ -224,7 +251,7 @@ function pageUrl(page: number): string {
                                         product.compare_at_price >
                                             (product.price ?? 0)
                                     "
-                                    class="text-xs text-gray-400 line-through"
+                                    class="text-xs text-dh-muted line-through"
                                 >
                                     {{ formatPrice(product.compare_at_price) }}
                                 </div>
@@ -234,7 +261,7 @@ function pageUrl(page: number): string {
                                     product.available && product.price !== null
                                 "
                                 type="button"
-                                class="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
+                                class="rounded-xl bg-dh-700 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
                                 @click="addToCart(product.id)"
                             >
                                 افزودن به سبد
@@ -251,7 +278,7 @@ function pageUrl(page: number): string {
 
                 <div
                     v-else
-                    class="rounded-2xl border border-dashed border-gray-300 p-12 text-center text-gray-500 dark:border-gray-700"
+                    class="rounded-2xl border border-dashed border-dh-200 p-12 text-center text-dh-muted dark:border-gray-700"
                 >
                     در این برند هنوز محصول فعالی ثبت نشده است.
                 </div>
@@ -267,7 +294,7 @@ function pageUrl(page: number): string {
                     :href="pageUrl(pagination.current_page - 1)"
                     preserve-scroll
                     aria-label="صفحه قبلی"
-                    class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800"
+                    class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-dh-700 ring-1 ring-dh-100 hover:bg-dh-surface dark:bg-white dark:text-gray-300 dark:ring-gray-800"
                 >
                     قبلی
                 </Link>
@@ -283,8 +310,8 @@ function pageUrl(page: number): string {
                     class="min-w-10 rounded-xl px-3 py-2 text-center text-sm font-medium"
                     :class="
                         page === pagination.current_page
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800'
+                            ? 'bg-dh-700 text-white'
+                            : 'bg-white text-dh-700 ring-1 ring-dh-100 hover:bg-dh-surface dark:bg-white dark:text-gray-300 dark:ring-gray-800'
                     "
                 >
                     {{ page.toLocaleString('fa-IR') }}
@@ -294,11 +321,19 @@ function pageUrl(page: number): string {
                     :href="pageUrl(pagination.current_page + 1)"
                     preserve-scroll
                     aria-label="صفحه بعدی"
-                    class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800"
+                    class="rounded-xl bg-white px-4 py-2 text-sm font-medium text-dh-700 ring-1 ring-dh-100 hover:bg-dh-surface dark:bg-white dark:text-gray-300 dark:ring-gray-800"
                 >
                     بعدی
                 </Link>
             </nav>
         </div>
     </main>
+    <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-dh-100 bg-white/95 px-3 py-2 shadow-lg backdrop-blur sm:hidden">
+        <div class="mx-auto grid max-w-md grid-cols-3 gap-2">
+            <Link href="/" class="flex flex-col items-center gap-1 rounded-xl py-1.5 text-[11px] font-semibold text-dh-muted">⌂<span>خانه</span></Link>
+            <Link href="/products" class="flex flex-col items-center gap-1 rounded-xl bg-dh-50 py-1.5 text-[11px] font-bold text-dh-700">◫<span>محصولات</span></Link>
+            <Link href="/cart" class="flex flex-col items-center gap-1 rounded-xl py-1.5 text-[11px] font-semibold text-dh-muted">🛒<span>سبد خرید</span></Link>
+        </div>
+    </nav>
+    </div>
 </template>
