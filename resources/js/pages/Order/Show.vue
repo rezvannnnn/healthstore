@@ -103,6 +103,36 @@ const paymentStatusLabel = computed(() => {
     }
 });
 
+const orderStatusClasses = computed(() => {
+    switch (props.order.status) {
+        case 'paid':
+        case 'delivered':
+            return 'bg-dh-green-500/15 text-dh-green-100';
+        case 'shipped':
+        case 'processing':
+            return 'bg-white/10 text-dh-100';
+        case 'cancelled':
+        case 'expired':
+            return 'bg-red-500/15 text-red-100';
+        case 'pending':
+            return 'bg-amber-400/15 text-amber-100';
+        default:
+            return 'bg-white/10 text-dh-100';
+    }
+});
+
+const paymentStatusClasses = computed(() => {
+    switch (props.order.payment_status) {
+        case 'paid':
+            return 'bg-dh-green-50 text-dh-green-700';
+        case 'failed':
+        case 'cancelled':
+            return 'bg-red-50 text-red-700';
+        default:
+            return 'bg-amber-50 text-amber-700';
+    }
+});
+
 const hasPayableAmount = computed(() => {
     return Number(props.order.total_amount) > 0;
 });
@@ -161,7 +191,7 @@ function startPayment(): void {
                         <h1 class="mt-2 text-2xl font-black sm:text-3xl">جزئیات سفارش</h1>
                         <p class="mt-2 text-sm text-dh-100">شماره سفارش: <strong class="text-white">{{ order.order_number }}</strong></p>
                     </div>
-                    <span class="rounded-full bg-white/10 px-4 py-2 text-sm font-bold">{{ orderStatusLabel }}</span>
+                    <span :class="orderStatusClasses" class="rounded-full px-4 py-2 text-sm font-bold">{{ orderStatusLabel }}</span>
                 </div>
             </section>
 
@@ -202,7 +232,7 @@ function startPayment(): void {
                         <h2 class="mb-5 text-lg font-black text-dh-900">وضعیت سفارش</h2>
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div class="rounded-2xl bg-dh-50 p-4"><span class="text-xs text-dh-muted">وضعیت سفارش</span><strong class="mt-1 block text-sm text-dh-900">{{ orderStatusLabel }}</strong></div>
-                            <div class="rounded-2xl bg-dh-50 p-4"><span class="text-xs text-dh-muted">وضعیت پرداخت</span><strong class="mt-1 block text-sm text-dh-900">{{ paymentStatusLabel }}</strong></div>
+                            <div class="rounded-2xl bg-dh-50 p-4"><span class="text-xs text-dh-muted">وضعیت پرداخت</span><strong :class="paymentStatusClasses" class="mt-1 inline-flex rounded-full px-3 py-1 text-xs font-black">{{ paymentStatusLabel }}</strong></div>
                         </div>
                     </section>
                 </div>
