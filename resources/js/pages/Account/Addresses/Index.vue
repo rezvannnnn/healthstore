@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import BrandLogo from '@/components/BrandLogo.vue';
 import { ref } from 'vue';
 
 interface Address {
@@ -78,15 +79,8 @@ function removeAddress(id: number): void {
     <main dir="rtl" class="min-h-screen bg-dh-surface px-4 py-6 pb-24 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-5xl">
             <header class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-dh-100">
-                <Link href="/products" class="flex items-center gap-3">
-                    <span class="grid size-11 place-items-center rounded-2xl bg-dh-700 text-white">
-                        <svg viewBox="0 0 48 48" class="size-7" fill="none" aria-hidden="true">
-                            <path d="M11 16h26l-3 17H14l-3-17Z" stroke="currentColor" stroke-width="3" />
-                            <path d="M17 16c0-5 3-8 7-8s7 3 7 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-                            <path d="m22 24 3 3 7-7" stroke="#77c8a0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </span>
-                    <span><strong class="block text-lg font-black text-dh-800">داروخونه</strong><span class="text-xs text-dh-muted">دارو و محصولات بهداشتی</span></span>
+                <Link href="/" class="flex shrink-0 items-center" aria-label="داروخونه">
+                    <BrandLogo imageClass="h-[4.25rem] w-[4.25rem]" />
                 </Link>
                 <nav class="flex items-center gap-2 text-sm">
                     <Link href="/account/profile" class="rounded-xl px-3 py-2 font-semibold text-dh-700 hover:bg-dh-50">پروفایل</Link>
