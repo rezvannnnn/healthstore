@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import BrandLogo from '@/components/BrandLogo.vue';
+import CartLink from '@/components/CartLink.vue';
 import { ref } from 'vue';
 
 interface Address {
@@ -85,7 +86,7 @@ function removeAddress(id: number): void {
                 <nav class="flex items-center gap-2 text-sm">
                     <Link href="/account/profile" class="rounded-xl px-3 py-2 font-semibold text-dh-700 hover:bg-dh-50">پروفایل</Link>
                     <Link href="/account/orders" class="rounded-xl px-3 py-2 font-semibold text-dh-700 hover:bg-dh-50">سفارش‌ها</Link>
-                    <Link href="/cart" class="rounded-xl bg-dh-700 px-4 py-2 font-semibold text-white hover:bg-dh-800">سبد خرید</Link>
+                    <CartLink />
                 </nav>
             </header>
             <header class="mb-6 flex items-center justify-between gap-4 rounded-3xl bg-dh-800 p-6 text-white shadow-sm">
