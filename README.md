@@ -1,4 +1,4 @@
-# HealthStore
+# داروخونه (Darukhooneh.ir)
 
 فروشگاه آنلاین محصولات سلامت با Laravel 13، Inertia.js و Vue.
 
@@ -44,7 +44,7 @@ php artisan optimize
 ```env
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://your-domain.example
+APP_URL=https://darukhooneh.ir
 ```
 
 `APP_KEY` باید یک مقدار امن و ثابت باشد و هرگز در repository قرار نگیرد. اطلاعات درگاه پرداخت، پیامک و سایر سرویس‌های خارجی نیز فقط از طریق environment configuration تنظیم شوند.
