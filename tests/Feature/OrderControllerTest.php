@@ -108,6 +108,40 @@ class OrderControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
+    public function test_customer_can_cancel_own_pending_order(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->createOrder($user, 180000);
+
+        $response = $this->actingAs($user)->post('/orders/'.$order->order_number.'/cancel');
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'سفارش با موفقیت لغو شد.');
+
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'status' => 'cancelled',
+        ]);
+
+        $this->assertNotNull($order->fresh()->cancelled_at);
+    }
+
+    public function test_customer_cannot_cancel_another_customers_order(): void
+    {
+        $owner = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $order = $this->createOrder($owner, 180000);
+
+        $this->actingAs($otherUser)
+            ->post('/orders/'.$order->order_number.'/cancel')
+            ->assertNotFound();
+
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'status' => 'pending',
+        ]);
+    }
+
     public function test_customer_can_confirm_checkout_and_create_order_with_selected_address(): void
     {
         $user = User::factory()->create();
