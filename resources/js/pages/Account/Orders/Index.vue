@@ -39,6 +39,35 @@ function formatAmount(value: number | string, currency: string): string {
 function formatDate(value: string | null): string {
     return value ? new Date(value).toLocaleDateString('fa-IR') : '—';
 }
+
+function statusClasses(status: string): string {
+    switch (status) {
+        case 'paid':
+        case 'delivered':
+            return 'bg-dh-green-50 text-dh-green-700';
+        case 'shipped':
+        case 'processing':
+            return 'bg-dh-50 text-dh-700';
+        case 'cancelled':
+            return 'bg-red-50 text-red-700';
+        case 'pending':
+            return 'bg-amber-50 text-amber-700';
+        default:
+            return 'bg-dh-50 text-dh-muted';
+    }
+}
+
+function paymentClasses(status: string): string {
+    switch (status) {
+        case 'paid':
+            return 'text-dh-green-700';
+        case 'failed':
+        case 'cancelled':
+            return 'text-red-600';
+        default:
+            return 'text-amber-700';
+    }
+}
 </script>
 
 <template>
@@ -73,12 +102,12 @@ function formatDate(value: string | null): string {
                         <div class="min-w-0">
                             <div class="flex flex-wrap items-center gap-2">
                                 <h2 class="font-black text-dh-900">{{ order.order_number }}</h2>
-                                <span class="rounded-full bg-dh-50 px-3 py-1 text-xs font-bold text-dh-700">{{ statusLabels[order.status] || order.status }}</span>
+                                <span :class="statusClasses(order.status)" class="rounded-full px-3 py-1 text-xs font-bold">{{ statusLabels[order.status] || order.status }}</span>
                             </div>
                             <p class="mt-3 text-sm text-dh-muted">
                                 {{ formatDate(order.created_at) }}
                                 <span class="mx-1 text-dh-200">•</span>
-                                پرداخت: {{ paymentStatusLabels[order.payment_status] || order.payment_status }}
+                                پرداخت: <span :class="paymentClasses(order.payment_status)" class="font-bold">{{ paymentStatusLabels[order.payment_status] || order.payment_status }}</span>
                             </p>
                         </div>
                         <div class="flex items-center justify-between gap-5 md:justify-end">
