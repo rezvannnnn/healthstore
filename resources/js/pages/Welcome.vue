@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
+import BrandLogo from '@/components/BrandLogo.vue';
 import { ref } from 'vue';
 
 interface Category {
@@ -92,18 +93,8 @@ function addToCart(product: FeaturedProduct): void {
         <header class="sticky top-0 z-40 border-b border-dh-100/80 bg-white/95 backdrop-blur">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex min-h-20 items-center gap-4">
-                    <Link href="/" class="flex shrink-0 items-center gap-3" aria-label="داروخونه">
-                        <span class="flex size-11 items-center justify-center rounded-2xl bg-dh-50 ring-1 ring-dh-100">
-                            <svg viewBox="0 0 48 48" class="size-7 text-dh-600" fill="none" aria-hidden="true">
-                                <path d="M13 27.5 27.5 13a7.5 7.5 0 0 1 10.6 10.6L23.6 38.1A7.5 7.5 0 0 1 13 27.5Z" fill="currentColor" opacity=".16"/>
-                                <path d="M16.2 31.8 31.8 16.2M19.7 28.3l10 10M28.3 19.7l-10-10" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
-                                <path d="M15.1 21.5c-3.4-2.4-4.1-6.8-1.8-9.4 2.5-2.8 6.9-2.3 9.3 1.1" stroke="#63b95b" stroke-width="2.6" stroke-linecap="round"/>
-                            </svg>
-                        </span>
-                        <span class="leading-none">
-                            <span class="block text-xl font-extrabold tracking-tight text-dh-800">داروخونه</span>
-                            <span class="mt-1 block text-[10px] font-medium text-dh-muted">دارو و محصولات بهداشتی</span>
-                        </span>
+                    <Link href="/" class="flex shrink-0 items-center" aria-label="داروخونه">
+                        <BrandLogo imageClass="h-[4.25rem] w-[4.25rem]" />
                     </Link>
 
                     <form class="hidden min-w-0 flex-1 md:block" @submit.prevent="searchProducts">
