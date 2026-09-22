@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
+import BrandLogo from '@/components/BrandLogo.vue';
 
 interface Article {
     id: number;
@@ -43,12 +44,9 @@ function pageUrl(page: number): string {
     <div dir="rtl" class="min-h-screen bg-dh-surface pb-24 text-dh-ink lg:pb-10">
         <header class="border-b border-dh-100/70 bg-white">
             <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-6">
-                <Link href="/" class="flex items-center gap-3" aria-label="داروخونه">
-                    <span class="flex size-11 items-center justify-center rounded-2xl bg-dh-50 text-dh-700">
-                        <svg viewBox="0 0 48 48" class="size-8" aria-hidden="true" fill="none"><path d="M10 19h28l-3 16H13l-3-16Z" stroke="currentColor" stroke-width="2.5"/><path d="M15 19c1-5 4-8 9-8s8 3 9 8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M25 13c-3 1-5 4-5 7 4 0 7-2 8-6" stroke="#63b95b" stroke-width="2.5" stroke-linecap="round"/></svg>
-                    </span>
-                    <span><span class="block text-lg font-black text-dh-800">داروخونه</span><span class="hidden text-[10px] text-dh-muted sm:block">دارو و محصولات بهداشتی</span></span>
-                </Link>
+                <Link href="/" class="flex shrink-0 items-center" aria-label="داروخونه">
+                        <BrandLogo imageClass="h-[4.25rem] w-[4.25rem]" />
+                    </Link>
                 <div class="flex items-center gap-2"><Link href="/blog" class="rounded-xl px-4 py-2 text-sm font-bold text-dh-700 hover:bg-dh-50">مجله</Link><Link href="/cart" class="rounded-xl bg-dh-700 px-4 py-2 text-sm font-bold text-white">سبد خرید</Link></div>
             </div>
         </header>
