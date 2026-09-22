@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
+import BrandLogo from '@/components/BrandLogo.vue';
 
 interface Product {
     id: number;
@@ -108,50 +109,9 @@ function pageUrl(page: number): string {
             <div
                 class="mx-auto flex h-18 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8"
             >
-                <Link href="/" class="flex items-center gap-2.5">
-                    <span
-                        class="flex h-11 w-11 items-center justify-center rounded-2xl bg-dh-700"
-                    >
-                        <svg
-                            viewBox="0 0 48 48"
-                            class="h-8 w-8"
-                            aria-hidden="true"
-                        >
-                            <path
-                                d="M10 22.5h28v6.2c0 5.1-4.1 9.3-9.3 9.3H19.3A9.3 9.3 0 0 1 10 28.7v-6.2Z"
-                                fill="white"
-                            />
-                            <path
-                                d="M14.5 20.5c1.4-6.1 5.2-9.1 9.5-9.1s8.1 3 9.5 9.1"
-                                fill="none"
-                                stroke="#63b95b"
-                                stroke-width="3.4"
-                                stroke-linecap="round"
-                            />
-                            <path
-                                d="M25 12.7c3.8-.1 6.3 1.2 7.7 3.7-3.6 1.1-6.5-.1-7.7-3.7Z"
-                                fill="#63b95b"
-                            />
-                            <path d="M23.7 16.2h7.4v2.9h-7.4z" fill="#16858b" />
-                            <path
-                                d="M27.4 14v7.3"
-                                stroke="white"
-                                stroke-width="2.2"
-                                stroke-linecap="round"
-                            />
-                        </svg>
-                    </span>
-                    <span>
-                        <span
-                            class="block text-lg leading-none font-extrabold text-dh-800"
-                            >داروخونه</span
-                        >
-                        <span
-                            class="mt-1 block text-[10px] font-medium text-dh-muted"
-                            >دارو و محصولات بهداشتی</span
-                        >
-                    </span>
-                </Link>
+                <Link href="/" class="flex shrink-0 items-center" aria-label="داروخونه">
+                        <BrandLogo imageClass="h-[4.25rem] w-[4.25rem]" />
+                    </Link>
                 <Link
                     href="/products"
                     class="mr-auto rounded-xl bg-dh-50 px-4 py-2 text-sm font-bold text-dh-700 transition hover:bg-dh-100"
