@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import BrandLogo from '@/components/BrandLogo.vue';
+import CartLink from '@/components/CartLink.vue';
 
 interface Order {
     id: number;
@@ -51,7 +52,7 @@ function formatDate(value: string | null): string {
                 <nav class="flex items-center gap-2 text-sm">
                     <Link href="/account/profile" class="rounded-xl px-3 py-2 font-semibold text-dh-700 hover:bg-dh-50">پروفایل</Link>
                     <Link href="/account/addresses" class="rounded-xl px-3 py-2 font-semibold text-dh-700 hover:bg-dh-50">آدرس‌ها</Link>
-                    <Link href="/cart" class="rounded-xl bg-dh-700 px-4 py-2 font-semibold text-white hover:bg-dh-800">سبد خرید</Link>
+                    <CartLink />
                 </nav>
             </header>
 
@@ -103,10 +104,22 @@ function formatDate(value: string | null): string {
             </div>
         </div>
     
-            <nav class="fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-md items-center justify-around rounded-2xl border border-dh-100 bg-white/95 p-2 shadow-lg backdrop-blur sm:hidden">
-                <Link href="/products" class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-muted hover:bg-dh-50 hover:text-dh-700"><span class="text-base">⌂</span>فروشگاه</Link>
-                <Link href="/account/orders" class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-muted hover:bg-dh-50 hover:text-dh-700"><span class="text-base">◷</span>سفارش‌ها</Link>
-                <Link href="/account/addresses" class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-muted hover:bg-dh-50 hover:text-dh-700"><span class="text-base">⌖</span>آدرس‌ها</Link>
-                <Link href="/cart" class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-700 hover:bg-dh-50"><span class="text-base">▢</span>سبد</Link>
+            <nav class="fixed inset-x-4 bottom-4 z-40 mx-auto grid max-w-md grid-cols-4 gap-1 rounded-2xl border border-dh-100 bg-white/95 p-2 shadow-lg backdrop-blur sm:hidden" aria-label="ناوبری حساب کاربری">
+                <Link href="/products" class="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-bold text-dh-muted hover:bg-dh-50 hover:text-dh-700">
+                    <svg viewBox="0 0 24 24" class="size-4" fill="none" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+                    فروشگاه
+                </Link>
+                <Link href="/account/orders" class="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-bold text-dh-muted hover:bg-dh-50 hover:text-dh-700">
+                    <svg viewBox="0 0 24 24" class="size-4" fill="none" aria-hidden="true"><path d="M7 4h10v16H7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 8h6M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                    سفارش‌ها
+                </Link>
+                <Link href="/account/addresses" class="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-bold text-dh-muted hover:bg-dh-50 hover:text-dh-700">
+                    <svg viewBox="0 0 24 24" class="size-4" fill="none" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg>
+                    آدرس‌ها
+                </Link>
+                <Link href="/cart" class="flex flex-col items-center gap-1 rounded-xl bg-dh-50 px-2 py-2 text-[11px] font-bold text-dh-700" aria-label="سبد خرید">
+                    <svg viewBox="0 0 24 24" class="size-4" fill="none" aria-hidden="true"><path d="M4 5h2l1.5 10.2a2 2 0 0 0 2 1.8h7.6a2 2 0 0 0 2-1.7L20 8H7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1" fill="currentColor"/><circle cx="18" cy="20" r="1" fill="currentColor"/></svg>
+                    سبد
+                </Link>
             </nav></main>
 </template>
