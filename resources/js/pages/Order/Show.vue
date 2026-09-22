@@ -46,6 +46,9 @@ interface Order {
     confirmed_at: string | null;
     paid_at: string | null;
     cancelled_at: string | null;
+    created_at: string | null;
+    shipped_at: string | null;
+    delivered_at: string | null;
     items: OrderItem[];
     payments: Payment[];
 }
@@ -63,8 +66,47 @@ const isStartingPayment = ref(false);
 const isCancelling = ref(false);
 
 function formatPrice(value: number | string): string {
-    return `${formatter.format(Number(value))} تومان`;
+    return formatter.format(Number(value)) + ' تومان';
 }
+
+function formatDateTime(value: string | null): string {
+    return value
+        ? new Date(value).toLocaleString('fa-IR', {
+              dateStyle: 'short',
+              timeStyle: 'short',
+          })
+        : '';
+}
+
+const timeline = computed(() => [
+    {
+        label: 'ثبت سفارش',
+        at: props.order.created_at,
+        complete: true,
+    },
+    {
+        label: 'پرداخت موفق',
+        at: props.order.paid_at,
+        complete: props.order.payment_status === 'paid',
+    },
+    {
+        label: 'در حال پردازش',
+        at: props.order.confirmed_at,
+        complete: ['processing', 'shipped', 'delivered'].includes(
+            props.order.status,
+        ),
+    },
+    {
+        label: 'تحویل به ارسال',
+        at: props.order.shipped_at,
+        complete: ['shipped', 'delivered'].includes(props.order.status),
+    },
+    {
+        label: 'تحویل سفارش',
+        at: props.order.delivered_at,
+        complete: props.order.status === 'delivered',
+    },
+]);
 
 const orderStatusLabel = computed(() => {
     switch (props.order.status) {
@@ -254,6 +296,32 @@ function startPayment(): void {
                             <div v-if="order.province || order.city"><span class="block text-xs text-dh-muted">موقعیت</span><strong class="mt-1 block text-sm text-dh-900">{{ order.province }}<span v-if="order.province && order.city"> - </span>{{ order.city }}</strong></div>
                             <div v-if="order.postal_code"><span class="block text-xs text-dh-muted">کد پستی</span><strong class="mt-1 block text-sm text-dh-900">{{ order.postal_code }}</strong></div>
                             <div v-if="order.shipping_address" class="sm:col-span-2"><span class="block text-xs text-dh-muted">آدرس</span><strong class="mt-1 block text-sm leading-7 text-dh-900">{{ order.shipping_address }}</strong></div>
+                        </div>
+                    </section>
+
+                    <section class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6">
+                        <h2 class="mb-5 text-lg font-black text-dh-900">روند سفارش</h2>
+                        <div class="relative space-y-1">
+                            <div class="absolute right-3 top-3 bottom-3 w-px bg-dh-100" aria-hidden="true"></div>
+                            <div v-for="step in timeline" :key="step.label" class="relative flex gap-4 py-2">
+                                <span
+                                    :class="step.complete ? 'bg-dh-green-500 ring-dh-green-100' : 'bg-white ring-dh-100'"
+                                    class="relative z-10 mt-0.5 grid size-6 shrink-0 place-items-center rounded-full ring-4"
+                                >
+                                    <span v-if="step.complete" class="size-2 rounded-full bg-white"></span>
+                                </span>
+                                <div class="min-w-0 flex-1 pb-2">
+                                    <div class="flex flex-wrap items-center justify-between gap-2">
+                                        <strong :class="step.complete ? 'text-dh-900' : 'text-dh-muted'" class="text-sm">
+                                            {{ step.label }}
+                                        </strong>
+                                        <span v-if="step.at" class="text-[11px] text-dh-muted">{{ formatDateTime(step.at) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="order.status === 'cancelled'" class="mt-4 rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">
+                            سفارش در {{ formatDateTime(order.cancelled_at) }} لغو شده است.
                         </div>
                     </section>
 
