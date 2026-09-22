@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Cart;
+
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -41,6 +43,13 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'cart' => fn () => $request->user() ? [
+                'items_count' => Cart::query()
+                    ->where('user_id', $request->user()->id)
+                    ->where('status', 'active')
+                    ->withCount('items')
+                    ->value('items_count') ?? 0,
+            ] : ['items_count' => 0],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
