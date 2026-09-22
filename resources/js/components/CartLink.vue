@@ -2,6 +2,7 @@
 import { Link, usePage } from '@inertiajs/vue3';
 
 interface SharedProps {
+    [key: string]: unknown;
     cart?: {
         items_count?: number;
     };
