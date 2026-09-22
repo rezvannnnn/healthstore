@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
 import BrandLogo from '@/components/BrandLogo.vue';
+import CartLink from '@/components/CartLink.vue';
 import { computed, ref } from 'vue';
 
 interface ProductImage {
@@ -117,17 +118,7 @@ function addToCart(): void {
                     بازگشت به فروشگاه
                 </Link>
 
-                <Link
-                    href="/cart"
-                    class="relative flex h-11 w-11 items-center justify-center rounded-xl border border-dh-100 bg-white text-dh-700 transition hover:bg-dh-50"
-                    aria-label="سبد خرید"
-                >
-                    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                        <path d="M4 5h2l1.5 10.2a2 2 0 0 0 2 1.8h7.6a2 2 0 0 0 1.9-1.5L21 8H7" stroke-linecap="round" stroke-linejoin="round" />
-                        <circle cx="10" cy="20" r="1" />
-                        <circle cx="18" cy="20" r="1" />
-                    </svg>
-                </Link>
+                <CartLink />
             </div>
         </header>
 
