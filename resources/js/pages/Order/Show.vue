@@ -164,6 +164,8 @@ const orderStatusClasses = computed(() => {
     }
 });
 
+const latestPayment = computed(() => props.order.payments[props.order.payments.length - 1] ?? null);
+
 const paymentStatusClasses = computed(() => {
     switch (props.order.payment_status) {
         case 'paid':
@@ -322,6 +324,31 @@ function startPayment(): void {
                         </div>
                         <div v-if="order.status === 'cancelled'" class="mt-4 rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">
                             سفارش در {{ formatDateTime(order.cancelled_at) }} لغو شده است.
+                        </div>
+                    </section>
+
+                    <section v-if="latestPayment" class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6">
+                        <div class="flex items-center justify-between gap-3">
+                            <h2 class="text-lg font-black text-dh-900">جزئیات پرداخت</h2>
+                            <span :class="paymentStatusClasses" class="rounded-full px-3 py-1 text-xs font-black">{{ paymentStatusLabel }}</span>
+                        </div>
+                        <div class="mt-5 grid gap-4 sm:grid-cols-2">
+                            <div v-if="latestPayment.gateway">
+                                <span class="block text-xs text-dh-muted">درگاه</span>
+                                <strong class="mt-1 block text-sm text-dh-900">{{ latestPayment.gateway }}</strong>
+                            </div>
+                            <div v-if="latestPayment.reference_number">
+                                <span class="block text-xs text-dh-muted">شماره مرجع</span>
+                                <strong class="mt-1 block text-sm text-dh-900">{{ latestPayment.reference_number }}</strong>
+                            </div>
+                            <div v-if="latestPayment.transaction_id">
+                                <span class="block text-xs text-dh-muted">شناسه تراکنش</span>
+                                <strong class="mt-1 block break-all text-sm text-dh-900">{{ latestPayment.transaction_id }}</strong>
+                            </div>
+                            <div v-if="latestPayment.paid_at">
+                                <span class="block text-xs text-dh-muted">زمان پرداخت</span>
+                                <strong class="mt-1 block text-sm text-dh-900">{{ formatDateTime(latestPayment.paid_at) }}</strong>
+                            </div>
                         </div>
                     </section>
 
