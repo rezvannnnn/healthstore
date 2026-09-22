@@ -50,63 +50,9 @@ function register(): void {
         <section
             class="relative w-full max-w-md rounded-3xl bg-white p-7 shadow-sm ring-1 ring-dh-100 dark:bg-white dark:ring-dh-100"
         >
-            <Link href="/" class="flex items-center" aria-label="داروخونه">
+            <Link href="/" class="flex items-center justify-center" aria-label="داروخونه">
                 <BrandLogo imageClass="h-28 w-28" />
-            </Link>t setup lang="ts">
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import BrandLogo from '@/components/BrandLogo.vue';
-import { ref } from 'vue';
-
-const step = ref<'verify' | 'details'>('verify');
-const phoneForm = useForm({
-    phone: '',
-    code: '',
-});
-const detailsForm = useForm({
-    name: '',
-    phone: '',
-    email: '',
-});
-
-function sendCode(): void {
-    phoneForm.post('/register/send-otp', {
-        preserveState: true,
-        onSuccess: () => {
-            step.value = 'verify';
-        },
-    });
-}
-
-function verifyCode(): void {
-    phoneForm.post('/register/verify-otp', {
-        preserveState: true,
-        onSuccess: () => {
-            detailsForm.phone = phoneForm.phone;
-            step.value = 'details';
-        },
-    });
-}
-
-function register(): void {
-    detailsForm.post('/register');
-}
-</script>
-
-<template>
-    <Head title="ثبت‌نام">
-        <meta name="robots" content="noindex, nofollow, noarchive" />
-    </Head>
-
-    <main
-        dir="rtl"
-        class="flex min-h-screen items-center justify-center bg-dh-surface px-4 py-10 dark:bg-dh-surface"
-    >
-        <section
-            class="relative w-full max-w-md rounded-3xl bg-white p-7 shadow-sm ring-1 ring-dh-100 dark:bg-white dark:ring-dh-100"
-        >
-            <Link href="/" class="text-sm font-medium text-dh-700"
-                ><span class="font-black text-dh-800">داروخونه</span></Link
-            >
+            </Link>
             <h1 class="mt-4 text-2xl font-bold text-dh-ink dark:text-dh-ink">
                 ساخت حساب کاربری
             </h1>
