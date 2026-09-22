@@ -462,19 +462,19 @@ function addToCart(product: FeaturedProduct): void {
         <div class="fixed inset-x-0 bottom-0 z-50 border-t border-dh-100 bg-white/95 px-3 py-2 shadow-[0_-8px_25px_rgba(20,86,92,0.08)] backdrop-blur md:hidden">
             <nav class="mx-auto grid max-w-md grid-cols-4 gap-1 text-center text-[11px] font-bold text-dh-muted" aria-label="ناوبری موبایل">
                 <Link href="/" class="rounded-xl bg-dh-50 px-2 py-2 text-dh-700">
-                    <span class="mx-auto mb-1 block text-base">⌂</span>
+                    <svg viewBox="0 0 24 24" class="mx-auto mb-1 size-4" fill="none" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
                     خانه
                 </Link>
                 <Link href="/categories" class="rounded-xl px-2 py-2 hover:bg-dh-50">
-                    <span class="mx-auto mb-1 block text-base">◫</span>
+                    <svg viewBox="0 0 24 24" class="mx-auto mb-1 size-4" fill="none" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="4" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.7"/><rect x="4" y="13" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="13" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.7"/></svg>
                     دسته‌ها
                 </Link>
                 <Link href="/products" class="rounded-xl px-2 py-2 hover:bg-dh-50">
-                    <span class="mx-auto mb-1 block text-base">⌕</span>
+                    <svg viewBox="0 0 24 24" class="mx-auto mb-1 size-4" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" stroke="currentColor" stroke-width="1.7"/><path d="m15 15 5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
                     محصولات
                 </Link>
                 <Link href="/cart" class="rounded-xl px-2 py-2 hover:bg-dh-50">
-                    <span class="mx-auto mb-1 block text-base">🛒</span>
+                    <svg viewBox="0 0 24 24" class="mx-auto mb-1 size-4" fill="none" aria-hidden="true"><path d="M4 5h2l1.5 10.2a2 2 0 0 0 2 1.8h7.6a2 2 0 0 0 2-1.7L20 8H7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1" fill="currentColor"/><circle cx="18" cy="20" r="1" fill="currentColor"/></svg>
                     سبد خرید
                 </Link>
             </nav>
