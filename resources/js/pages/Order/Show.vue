@@ -60,6 +60,7 @@ const props = defineProps<{
 const formatter = new Intl.NumberFormat('fa-IR');
 
 const isStartingPayment = ref(false);
+const isCancelling = ref(false);
 
 function formatPrice(value: number | string): string {
     return `${formatter.format(Number(value))} تومان`;
@@ -148,6 +149,34 @@ const canPay = computed(() => {
 
 function goBackToCheckout(): void {
     router.get('/checkout');
+}
+
+function goBackToOrders(): void {
+    router.get('/account/orders');
+}
+
+function cancelOrder(): void {
+    if (
+        isCancelling.value ||
+        props.order.status !== 'pending' ||
+        props.order.payment_status === 'paid'
+    ) {
+        return;
+    }
+
+    if (! window.confirm('آیا از لغو این سفارش مطمئن هستید؟')) {
+        return;
+    }
+
+    router.post(
+        `/orders/${props.order.order_number}/cancel`,
+        {},
+        {
+            preserveScroll: true,
+            onStart: () => { isCancelling.value = true; },
+            onFinish: () => { isCancelling.value = false; },
+        },
+    );
 }
 
 function startPayment(): void {
@@ -257,9 +286,33 @@ function startPayment(): void {
                         <div v-else-if="order.payment_status === 'paid'" class="mt-4 rounded-2xl bg-dh-green-500/15 p-4 text-sm text-dh-green-100">این سفارش با موفقیت پرداخت شده است.</div>
                         <div v-else-if="!hasPayableAmount" class="mt-4 rounded-2xl bg-white/10 p-4 text-sm text-dh-100">مبلغ این سفارش قابل پرداخت نیست.</div>
                         <div v-else-if="order.status === 'cancelled'" class="mt-4 rounded-2xl bg-red-500/15 p-4 text-sm text-red-100">این سفارش لغو شده است.</div>
+                        <button
+                            v-if="order.status === 'pending' && order.payment_status === 'pending'"
+                            type="button"
+                            :disabled="isCancelling"
+                            class="mt-3 w-full rounded-2xl border border-red-200/20 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-100 transition hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-60"
+                            @click="cancelOrder"
+                        >
+                            {{ isCancelling ? 'در حال لغو سفارش…' : 'لغو سفارش' }}
+                        </button>
                     </section>
 
-                    <button type="button" class="w-full rounded-2xl border border-dh-100 bg-white px-4 py-3.5 text-sm font-bold text-dh-700 hover:bg-dh-50" @click="goBackToCheckout">بازگشت به تسویه حساب</button>
+                    <button
+                        v-if="order.status === 'pending' && order.payment_status === 'pending'"
+                        type="button"
+                        class="w-full rounded-2xl border border-dh-100 bg-white px-4 py-3.5 text-sm font-bold text-dh-700 transition hover:bg-dh-50"
+                        @click="goBackToCheckout"
+                    >
+                        بازگشت به تسویه حساب
+                    </button>
+                    <button
+                        v-else
+                        type="button"
+                        class="w-full rounded-2xl border border-dh-100 bg-white px-4 py-3.5 text-sm font-bold text-dh-700 transition hover:bg-dh-50"
+                        @click="goBackToOrders"
+                    >
+                        بازگشت به سفارش‌ها
+                    </button>
                 </aside>
             </div>
         </div>
