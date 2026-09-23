@@ -92,19 +92,19 @@ const submit = () => {
 <template>
     <div
         dir="rtl"
-        class="min-h-screen bg-gray-50 px-4 py-8 text-gray-900 sm:px-6 lg:px-8"
+        class="min-h-screen bg-dh-50 px-4 py-8 text-dh-900 sm:px-6 lg:px-8"
     >
         <div class="mx-auto max-w-5xl">
             <div class="mb-6">
                 <h1 class="text-2xl font-bold">{{ title }}</h1>
-                <p class="mt-1 text-sm text-gray-500">
+                <p class="mt-1 text-sm text-dh-muted">
                     اطلاعات پایه، قیمت و تنظیمات سئو محصول
                 </p>
             </div>
 
             <form @submit.prevent="submit" class="space-y-6">
                 <section
-                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
+                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
                 >
                     <h2 class="mb-5 text-lg font-semibold">اطلاعات اصلی</h2>
                     <div class="grid gap-4 md:grid-cols-2">
@@ -112,7 +112,7 @@ const submit = () => {
                             <span class="text-sm font-medium">نام محصول *</span>
                             <input
                                 v-model="form.name"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                             />
                             <span
                                 v-if="form.errors.name"
@@ -126,7 +126,7 @@ const submit = () => {
                             <input
                                 v-model="form.slug"
                                 dir="ltr"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                             />
                             <span
                                 v-if="form.errors.slug"
@@ -140,7 +140,7 @@ const submit = () => {
                             <input
                                 v-model="form.sku"
                                 dir="ltr"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                             />
                             <span
                                 v-if="form.errors.sku"
@@ -154,7 +154,7 @@ const submit = () => {
                             <input
                                 v-model="form.barcode"
                                 dir="ltr"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                             />
                         </label>
 
@@ -162,7 +162,7 @@ const submit = () => {
                             <span class="text-sm font-medium">برند</span>
                             <select
                                 v-model="form.brand_id"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                             >
                                 <option :value="null">بدون برند</option>
                                 <option
@@ -179,7 +179,7 @@ const submit = () => {
                             <span class="text-sm font-medium">دسته‌بندی</span>
                             <select
                                 v-model="form.category_id"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                             >
                                 <option :value="null">بدون دسته‌بندی</option>
                                 <option
@@ -196,7 +196,7 @@ const submit = () => {
                             <span class="text-sm font-medium">نوع محصول</span>
                             <input
                                 v-model="form.product_type"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                             />
                         </label>
 
@@ -204,7 +204,7 @@ const submit = () => {
                             <span class="text-sm font-medium">واحد</span>
                             <input
                                 v-model="form.unit"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                                 placeholder="عدد، بسته، میلی‌لیتر و ..."
                             />
                         </label>
@@ -217,14 +217,14 @@ const submit = () => {
                                 v-model.number="form.quantity_per_unit"
                                 type="number"
                                 min="1"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                             />
                         </label>
                     </div>
                 </section>
 
                 <section
-                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
+                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
                 >
                     <h2 class="mb-5 text-lg font-semibold">قیمت</h2>
                     <div class="grid gap-4 md:grid-cols-2">
@@ -235,7 +235,7 @@ const submit = () => {
                                 type="number"
                                 min="0"
                                 step="0.01"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                             />
                             <span
                                 v-if="form.errors.price"
@@ -252,7 +252,7 @@ const submit = () => {
                                 type="number"
                                 min="0"
                                 step="0.01"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                             />
                             <span
                                 v-if="form.errors.compare_at_price"
@@ -264,7 +264,7 @@ const submit = () => {
                 </section>
 
                 <section
-                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
+                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
                 >
                     <h2 class="mb-5 text-lg font-semibold">
                         توضیحات و اطلاعات تکمیلی
@@ -274,7 +274,7 @@ const submit = () => {
                             <span class="text-sm font-medium">توضیح کوتاه</span>
                             <input
                                 v-model="form.short_description"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                             />
                             <span
                                 v-if="form.errors.short_description"
@@ -289,7 +289,7 @@ const submit = () => {
                             <textarea
                                 v-model="form.description"
                                 rows="6"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                             />
                         </label>
                         <div class="grid gap-4 md:grid-cols-2">
@@ -300,7 +300,7 @@ const submit = () => {
                                 <input
                                     v-model="form.expiry_date"
                                     type="date"
-                                    class="mt-1 w-full rounded-lg border-gray-300"
+                                    class="mt-1 w-full rounded-lg border-dh-200"
                                 />
                                 <span
                                     v-if="form.errors.expiry_date"
@@ -315,7 +315,7 @@ const submit = () => {
                                 <input
                                     v-model="form.main_image"
                                     dir="ltr"
-                                    class="mt-1 w-full rounded-lg border-gray-300"
+                                    class="mt-1 w-full rounded-lg border-dh-200"
                                 />
                                 <span
                                     v-if="form.errors.main_image"
@@ -328,7 +328,7 @@ const submit = () => {
                 </section>
 
                 <section
-                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
+                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
                 >
                     <h2 class="mb-5 text-lg font-semibold">سئو</h2>
                     <div class="space-y-4">
@@ -337,7 +337,7 @@ const submit = () => {
                             <input
                                 v-model="form.seo_title"
                                 maxlength="255"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                                 placeholder="در صورت خالی بودن، نام محصول استفاده می‌شود"
                             />
                             <span
@@ -352,10 +352,10 @@ const submit = () => {
                                 v-model="form.seo_description"
                                 maxlength="160"
                                 rows="4"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                                 placeholder="حداکثر ۱۶۰ کاراکتر"
                             />
-                            <span class="mt-1 block text-xs text-gray-500">
+                            <span class="mt-1 block text-xs text-dh-muted">
                                 {{ form.seo_description.length }} / 160
                             </span>
                             <span
@@ -372,7 +372,7 @@ const submit = () => {
                                 v-model="form.canonical_url"
                                 dir="ltr"
                                 maxlength="2048"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                                 placeholder="در صورت خالی بودن، آدرس استاندارد محصول تولید می‌شود"
                             />
                             <span
@@ -385,7 +385,7 @@ const submit = () => {
                 </section>
 
                 <section
-                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
+                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
                 >
                     <h2 class="mb-5 text-lg font-semibold">وضعیت</h2>
                     <div class="grid gap-4 md:grid-cols-3">
@@ -393,7 +393,7 @@ const submit = () => {
                             <input
                                 v-model="form.is_active"
                                 type="checkbox"
-                                class="rounded border-gray-300"
+                                class="rounded border-dh-200"
                             />
                             <span>محصول فعال باشد</span>
                         </label>
@@ -401,7 +401,7 @@ const submit = () => {
                             <input
                                 v-model="form.is_featured"
                                 type="checkbox"
-                                class="rounded border-gray-300"
+                                class="rounded border-dh-200"
                             />
                             <span>محصول ویژه باشد</span>
                         </label>
@@ -411,7 +411,7 @@ const submit = () => {
                                 v-model.number="form.sort_order"
                                 type="number"
                                 min="0"
-                                class="mt-1 w-full rounded-lg border-gray-300"
+                                class="mt-1 w-full rounded-lg border-dh-200"
                             />
                         </label>
                     </div>
@@ -420,13 +420,13 @@ const submit = () => {
                 <div class="flex items-center justify-between">
                     <a
                         href="/admin/products"
-                        class="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium hover:bg-gray-100"
+                        class="rounded-lg border border-dh-200 bg-white px-5 py-2.5 text-sm font-medium hover:bg-dh-50"
                         >انصراف</a
                     >
                     <button
                         :disabled="form.processing"
                         type="submit"
-                        class="rounded-lg bg-gray-900 px-6 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+                        class="rounded-lg bg-dh-700 px-6 py-2.5 text-sm font-medium text-white disabled:opacity-50"
                     >
                         {{
                             form.processing ? 'در حال ذخیره...' : 'ذخیره محصول'
