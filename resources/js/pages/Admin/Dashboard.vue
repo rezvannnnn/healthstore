@@ -185,7 +185,7 @@ const sections = [
             </div>
 
             <div
-                class="mt-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
+                class="mt-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
             >
                 <div class="flex items-center justify-between gap-4">
                     <div>
@@ -214,7 +214,7 @@ const sections = [
             </div>
 
             <div
-                class="mt-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
+                class="mt-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
             >
                 <h2 class="text-lg font-semibold">وضعیت فروشگاه</h2>
                 <div class="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
