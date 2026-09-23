@@ -64,7 +64,7 @@ function submit() {
                 <h1 class="text-2xl font-bold">
                     {{ editing ? 'ویرایش مقاله' : 'مقاله جدید' }}
                 </h1>
-                <p class="mt-1 text-sm text-gray-500">
+                <p class="mt-1 text-sm text-dh-muted">
                     محتوای مقاله و تنظیمات سئو
                 </p>
             </div>
