@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import BrandLogo from '@/components/BrandLogo.vue';
 
 type Stats = {
     today_sales: number;
