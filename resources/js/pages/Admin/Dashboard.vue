@@ -85,7 +85,7 @@ const sections = [
                 class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
             >
                 <div>
-                    <p class="text-sm text-dh-muted">HealthStore</p>
+                    <p class="text-sm font-medium text-dh-700">داروخونه | مدیریت</p>
                     <h1 class="text-3xl font-bold">پنل مدیریت</h1>
                     <p class="mt-2 text-dh-muted">
                         نمای کلی فروشگاه و دسترسی سریع به بخش‌های مدیریتی
