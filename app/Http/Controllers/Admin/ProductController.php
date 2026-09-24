@@ -25,7 +25,9 @@ class ProductController extends Controller
         protected CartService $cartService,
         protected InventoryService $inventoryService,
         protected MediaService $mediaService,
-    ) {}
+    )
+    {
+    }
 
     public function index(Request $request): Response
     {
@@ -192,7 +194,7 @@ class ProductController extends Controller
             $date = Carbon::parse((string) $value)->startOfDay();
             $today = Carbon::today();
 
-            if (!$date->lessThan($today)) {
+            if (! $date->lessThan($today)) {
                 return;
             }
 
