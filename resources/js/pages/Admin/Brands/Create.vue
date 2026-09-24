@@ -8,6 +8,11 @@ const form = useForm({
     logo_file: null as File | null,
     is_active: true,
 });
+const handleLogoChange = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    form.logo_file = input.files?.[0] ?? null;
+};
+
 const submit = () => form.post('/admin/brands', { forceFormData: true });
 </script>
 
@@ -59,7 +64,7 @@ const submit = () => form.post('/admin/brands', { forceFormData: true });
                         type="file"
                         accept="image/jpeg,image/png,image/webp,image/svg+xml"
                         class="w-full rounded-lg border px-3 py-2"
-                        @change="form.logo_file = ($event.target as HTMLInputElement).files?.[0] ?? null"
+                        @change="handleLogoChange"
                     />
                 </div>
                 <label class="flex items-center gap-2"
