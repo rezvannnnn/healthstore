@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\MediaService;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -23,6 +24,7 @@ class ProductController extends Controller
     public function __construct(
         protected CartService $cartService,
         protected InventoryService $inventoryService,
+        protected MediaService $mediaService,
     ) {}
 
     public function index(Request $request): Response
@@ -91,6 +93,10 @@ class ProductController extends Controller
     {
         $data = $this->validatedData($request);
 
+        if ($request->hasFile('main_image_file')) {
+            $data['main_image'] = $this->mediaService->storeImage($request->file('main_image_file'), 'products');
+        }
+
         DB::transaction(function () use ($data): void {
             $product = Product::create($this->productData($data));
             $this->syncRetailPrice($product, $data);
@@ -127,7 +133,7 @@ class ProductController extends Controller
                 'seo_description' => $product->seo_description,
                 'canonical_url' => $product->canonical_url,
                 'expiry_date' => $product->expiry_date?->format('Y-m-d'),
-                'main_image' => $product->main_image,
+                'main_image' => $this->mediaService->url($product->main_image),
                 'is_active' => $product->is_active,
                 'is_featured' => $product->is_featured,
                 'sort_order' => $product->sort_order,
@@ -141,10 +147,20 @@ class ProductController extends Controller
     {
         $data = $this->validatedData($request, $product);
 
+        $oldImage = $product->main_image;
+
+        if ($request->hasFile('main_image_file')) {
+            $data['main_image'] = $this->mediaService->storeImage($request->file('main_image_file'), 'products');
+        }
+
         DB::transaction(function () use ($data, $product): void {
             $product->update($this->productData($data));
             $this->syncRetailPrice($product, $data);
         });
+
+        if ($request->hasFile('main_image_file') && $data['main_image'] !== $oldImage) {
+            $this->mediaService->deleteIfStored($oldImage);
+        }
 
         return to_route('admin.products.index')->with('success', 'محصول با موفقیت ویرایش شد.');
     }
@@ -206,6 +222,7 @@ class ProductController extends Controller
             'canonical_url' => ['nullable', 'url', 'max:2048'],
             'expiry_date' => $expiryRules,
             'main_image' => ['nullable', 'string', 'max:2048'],
+            'main_image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'is_active' => ['boolean'],
             'is_featured' => ['boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
