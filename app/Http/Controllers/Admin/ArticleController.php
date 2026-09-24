@@ -9,11 +9,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Services\MediaService;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ArticleController extends Controller
 {
+    public function __construct(protected MediaService $mediaService) {}
+
     public function index(Request $request): Response
     {
         $validatedFilters = $request->validate([
@@ -87,6 +90,10 @@ class ArticleController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedData($request);
+        if ($request->hasFile('featured_image_file')) {
+            $data['featured_image'] = $this->mediaService->storeImage($request->file('featured_image_file'), 'articles');
+        }
+        unset($data['featured_image_file']);
         $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['title']);
         $data['author_id'] = $request->user()?->id;
         $data['published_at'] = $this->normalizePublishedAt($data['published_at'] ?? null, $data['is_active'] ?? false);
@@ -110,11 +117,20 @@ class ArticleController extends Controller
 
     public function update(Request $request, Article $article): RedirectResponse
     {
+        $oldImage = $article->featured_image;
         $data = $this->validatedData($request, $article);
+        if ($request->hasFile('featured_image_file')) {
+            $data['featured_image'] = $this->mediaService->storeImage($request->file('featured_image_file'), 'articles');
+        }
+        unset($data['featured_image_file']);
         $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['title']);
         $data['published_at'] = $this->normalizePublishedAt($data['published_at'] ?? null, $data['is_active'] ?? false);
 
         $article->update($data);
+
+        if ($request->hasFile('featured_image_file') && $data['featured_image'] !== $oldImage) {
+            $this->mediaService->deleteIfStored($oldImage);
+        }
 
         return to_route('admin.articles.index')->with('success', 'مقاله با موفقیت ویرایش شد.');
     }
@@ -142,6 +158,7 @@ class ArticleController extends Controller
             'excerpt' => ['nullable', 'string', 'max:1000'],
             'content' => ['required', 'string'],
             'featured_image' => ['nullable', 'string', 'max:2048'],
+            'featured_image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'featured_image_alt' => ['nullable', 'string', 'max:255'],
             'seo_title' => ['nullable', 'string', 'max:255'],
             'seo_description' => ['nullable', 'string', 'max:320'],
