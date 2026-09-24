@@ -7,7 +7,7 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: healthstore-tests-${{ github.ref }}
@@ -21,8 +21,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.head_ref || github.ref }}
-          persist-credentials: true
+          persist-credentials: false
 
       - name: Setup PHP
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
@@ -40,22 +39,6 @@ jobs:
         run: |
           composer update --prefer-dist --no-interaction --no-progress
           composer setup
-
-      - name: Format frontend
-        run: npm run format
-
-      - name: Commit frontend formatting
-        run: |
-          if git diff --quiet; then
-            echo "No formatting changes."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add resources
-          git commit -m "style: format frontend files"
-          git push origin HEAD:${{ github.head_ref }}
 
       - name: Check frontend formatting
         run: npm run format:check
