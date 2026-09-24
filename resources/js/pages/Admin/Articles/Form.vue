@@ -165,7 +165,8 @@ function submit() {
                     class="mt-1 inline-block text-sm text-dh-700 underline"
                     >مشاهده تصویر فعلی</a
                 >
-                <span class="text-xs text-dh-muted">JPG، PNG یا WebP — حداکثر ۵ مگابایت</span
+                <span class="text-xs text-dh-muted"
+                    >JPG، PNG یا WebP — حداکثر ۵ مگابایت</span
                 ></label>
                 <label class="space-y-1"
                     ><span>Alt تصویر</span
