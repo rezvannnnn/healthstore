@@ -117,10 +117,9 @@ const changeStatus = (status: string) =>
                 >
                     <div class="mb-5 flex items-center justify-between">
                         <h2 class="font-bold">وضعیت سفارش</h2>
-                        <span
-                            class="rounded-full bg-dh-50 px-3 py-1 text-sm"
-                            >{{ statusLabel(order.status) }}</span
-                        >
+                        <span class="rounded-full bg-dh-50 px-3 py-1 text-sm">{{
+                            statusLabel(order.status)
+                        }}</span>
                     </div>
                     <div
                         v-if="nextStatus(order.status)"

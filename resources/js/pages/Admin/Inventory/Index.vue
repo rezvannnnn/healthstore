@@ -115,9 +115,7 @@ const statusClasses = (value: Product['status']) =>
                         <option value="all">همه</option>
                         <option value="low">کم‌موجودی</option>
                         <option value="out">ناموجود</option></select
-                    ><button
-                        class="rounded-lg bg-dh-700 px-5 py-2 text-white"
-                    >
+                    ><button class="rounded-lg bg-dh-700 px-5 py-2 text-white">
                         جستجو
                     </button>
                 </form>

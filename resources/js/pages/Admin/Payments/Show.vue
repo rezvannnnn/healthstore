@@ -79,7 +79,23 @@ const responseText = (value: unknown) =>
                         </div>
                         <div class="flex justify-between gap-4">
                             <dt class="text-dh-muted">وضعیت</dt>
-                            <dd><span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="{ 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200': payment.status === 'paid', 'bg-amber-50 text-amber-700 ring-1 ring-amber-200': payment.status === 'pending', 'bg-red-50 text-red-700 ring-1 ring-red-200': payment.status === 'failed' || payment.status === 'cancelled', 'bg-violet-50 text-violet-700 ring-1 ring-violet-200': payment.status === 'refunded' }">{{ statusLabel(payment.status) }}</span></dd>
+                            <dd>
+                                <span
+                                    class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                                    :class="{
+                                        'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200':
+                                            payment.status === 'paid',
+                                        'bg-amber-50 text-amber-700 ring-1 ring-amber-200':
+                                            payment.status === 'pending',
+                                        'bg-red-50 text-red-700 ring-1 ring-red-200':
+                                            payment.status === 'failed' ||
+                                            payment.status === 'cancelled',
+                                        'bg-violet-50 text-violet-700 ring-1 ring-violet-200':
+                                            payment.status === 'refunded',
+                                    }"
+                                    >{{ statusLabel(payment.status) }}</span
+                                >
+                            </dd>
                         </div>
                         <div class="flex justify-between gap-4">
                             <dt class="text-dh-muted">درگاه</dt>

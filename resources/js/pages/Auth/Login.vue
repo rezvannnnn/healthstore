@@ -39,7 +39,11 @@ function login(): void {
         <section
             class="relative w-full max-w-md rounded-3xl bg-white p-7 shadow-sm ring-1 ring-dh-100 dark:bg-white dark:ring-dh-100"
         >
-            <Link href="/" class="flex items-center justify-center" aria-label="داروخونه">
+            <Link
+                href="/"
+                class="flex items-center justify-center"
+                aria-label="داروخونه"
+            >
                 <BrandLogo imageClass="h-28 w-28" />
             </Link>
             <h1 class="mt-4 text-2xl font-bold text-dh-ink dark:text-dh-ink">

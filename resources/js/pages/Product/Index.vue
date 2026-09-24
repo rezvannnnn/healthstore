@@ -87,7 +87,9 @@ function addToCart(product: Product): void {
             onSuccess: () => {
                 addedProductId.value = product.id;
             },
-            onFinish: () => { addingProductId.value = null; },
+            onFinish: () => {
+                addingProductId.value = null;
+            },
         },
     );
 }
@@ -96,8 +98,12 @@ function submit(): void {
     router.get('/products', form, {
         preserveState: true,
         replace: true,
-        onStart: () => { filtering.value = true; },
-        onFinish: () => { filtering.value = false; },
+        onStart: () => {
+            filtering.value = true;
+        },
+        onFinish: () => {
+            filtering.value = false;
+        },
     });
 }
 
@@ -112,8 +118,12 @@ function clearFilters(): void {
         {
             preserveState: true,
             replace: true,
-            onStart: () => { filtering.value = true; },
-            onFinish: () => { filtering.value = false; },
+            onStart: () => {
+                filtering.value = true;
+            },
+            onFinish: () => {
+                filtering.value = false;
+            },
         },
     );
 }
@@ -162,94 +172,241 @@ function formatPrice(value: number | null): string {
         <meta name="twitter:description" :content="seo.description" />
     </Head>
 
-    <div dir="rtl" class="min-h-screen bg-dh-surface pb-24 text-dh-ink lg:pb-10">
-        <header class="sticky top-0 z-40 border-b border-dh-100 bg-white/95 backdrop-blur">
+    <div
+        dir="rtl"
+        class="min-h-screen bg-dh-surface pb-24 text-dh-ink lg:pb-10"
+    >
+        <header
+            class="sticky top-0 z-40 border-b border-dh-100 bg-white/95 backdrop-blur"
+        >
             <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between gap-4">
-                    <Link href="/" class="flex shrink-0 items-center" aria-label="داروخونه">
+                    <Link
+                        href="/"
+                        class="flex shrink-0 items-center"
+                        aria-label="داروخونه"
+                    >
                         <BrandLogo imageClass="h-[4.25rem] w-[4.25rem]" />
                     </Link>
                     <div class="flex items-center gap-2">
-                        <Link href="/" class="hidden rounded-xl px-3 py-2 text-sm font-bold text-dh-700 hover:bg-dh-50 sm:block">خانه</Link>
-                        <Link href="/cart" class="rounded-xl border border-dh-100 px-3 py-2 text-sm font-bold text-dh-700 hover:bg-dh-50">سبد خرید</Link>
+                        <Link
+                            href="/"
+                            class="hidden rounded-xl px-3 py-2 text-sm font-bold text-dh-700 hover:bg-dh-50 sm:block"
+                            >خانه</Link
+                        >
+                        <Link
+                            href="/cart"
+                            class="rounded-xl border border-dh-100 px-3 py-2 text-sm font-bold text-dh-700 hover:bg-dh-50"
+                            >سبد خرید</Link
+                        >
                     </div>
                 </div>
             </div>
         </header>
 
-        <main class="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-            <section class="flex flex-col gap-5 rounded-3xl border border-dh-100 bg-white p-6 shadow-[0_12px_35px_rgba(20,108,114,0.06)] sm:p-8 md:flex-row md:items-end md:justify-between">
+        <main
+            class="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10"
+        >
+            <section
+                class="flex flex-col gap-5 rounded-3xl border border-dh-100 bg-white p-6 shadow-[0_12px_35px_rgba(20,108,114,0.06)] sm:p-8 md:flex-row md:items-end md:justify-between"
+            >
                 <div>
-                    <span class="text-xs font-extrabold text-dh-500">کاتالوگ داروخونه</span>
-                    <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-dh-900 sm:text-4xl">محصولات</h1>
-                    <p class="mt-2 max-w-2xl text-sm leading-7 text-dh-muted">محصول موردنظر را جستجو کنید یا از دسته‌بندی و برند کمک بگیرید.</p>
+                    <span class="text-xs font-extrabold text-dh-500"
+                        >کاتالوگ داروخونه</span
+                    >
+                    <h1
+                        class="mt-2 text-3xl font-extrabold tracking-tight text-dh-900 sm:text-4xl"
+                    >
+                        محصولات
+                    </h1>
+                    <p class="mt-2 max-w-2xl text-sm leading-7 text-dh-muted">
+                        محصول موردنظر را جستجو کنید یا از دسته‌بندی و برند کمک
+                        بگیرید.
+                    </p>
                 </div>
-                <div class="rounded-2xl bg-dh-50 px-4 py-3 text-sm font-bold text-dh-700">
+                <div
+                    class="rounded-2xl bg-dh-50 px-4 py-3 text-sm font-bold text-dh-700"
+                >
                     {{ pagination.total.toLocaleString('fa-IR') }} محصول
                 </div>
             </section>
 
-            <section class="rounded-3xl border border-dh-100 bg-white p-4 shadow-sm sm:p-5">
-                <form @submit.prevent="submit" class="grid gap-3 md:grid-cols-[1fr_210px_210px_auto]">
+            <section
+                class="rounded-3xl border border-dh-100 bg-white p-4 shadow-sm sm:p-5"
+            >
+                <form
+                    @submit.prevent="submit"
+                    class="grid gap-3 md:grid-cols-[1fr_210px_210px_auto]"
+                >
                     <label class="relative block">
                         <span class="sr-only">جستجوی محصول</span>
-                        <svg viewBox="0 0 24 24" class="pointer-events-none absolute top-1/2 right-4 size-5 -translate-y-1/2 text-dh-500" fill="none" aria-hidden="true">
-                            <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/>
-                            <path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        <svg
+                            viewBox="0 0 24 24"
+                            class="pointer-events-none absolute top-1/2 right-4 size-5 -translate-y-1/2 text-dh-500"
+                            fill="none"
+                            aria-hidden="true"
+                        >
+                            <circle
+                                cx="11"
+                                cy="11"
+                                r="6.5"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                            />
+                            <path
+                                d="m16 16 4.5 4.5"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                            />
                         </svg>
                         <input
                             v-model="form.search"
                             type="search"
                             enterkeyhint="search"
                             placeholder="نام محصول، SKU یا بارکد..."
-                            class="h-12 w-full rounded-2xl border border-dh-100 bg-dh-50/60 pr-12 pl-4 text-sm outline-none transition placeholder:text-dh-muted focus:border-dh-300 focus:bg-white focus:ring-4 focus:ring-dh-100"
+                            class="h-12 w-full rounded-2xl border border-dh-100 bg-dh-50/60 pr-12 pl-4 text-sm transition outline-none placeholder:text-dh-muted focus:border-dh-300 focus:bg-white focus:ring-4 focus:ring-dh-100"
                         />
                     </label>
 
                     <label>
                         <span class="sr-only">دسته‌بندی</span>
-                        <select v-model="form.category" class="h-12 w-full rounded-2xl border border-dh-100 bg-white px-4 text-sm outline-none focus:border-dh-300 focus:ring-4 focus:ring-dh-100">
+                        <select
+                            v-model="form.category"
+                            class="h-12 w-full rounded-2xl border border-dh-100 bg-white px-4 text-sm outline-none focus:border-dh-300 focus:ring-4 focus:ring-dh-100"
+                        >
                             <option value="">همه دسته‌ها</option>
-                            <option v-for="category in categories" :key="category.id" :value="category.slug">{{ category.name }}</option>
+                            <option
+                                v-for="category in categories"
+                                :key="category.id"
+                                :value="category.slug"
+                            >
+                                {{ category.name }}
+                            </option>
                         </select>
                     </label>
 
                     <label>
                         <span class="sr-only">برند</span>
-                        <select v-model="form.brand" class="h-12 w-full rounded-2xl border border-dh-100 bg-white px-4 text-sm outline-none focus:border-dh-300 focus:ring-4 focus:ring-dh-100">
+                        <select
+                            v-model="form.brand"
+                            class="h-12 w-full rounded-2xl border border-dh-100 bg-white px-4 text-sm outline-none focus:border-dh-300 focus:ring-4 focus:ring-dh-100"
+                        >
                             <option value="">همه برندها</option>
-                            <option v-for="brand in brands" :key="brand.id" :value="brand.slug">{{ brand.name }}</option>
+                            <option
+                                v-for="brand in brands"
+                                :key="brand.id"
+                                :value="brand.slug"
+                            >
+                                {{ brand.name }}
+                            </option>
                         </select>
                     </label>
 
                     <div class="flex gap-2">
-                        <button type="submit" class="h-12 flex-1 rounded-2xl bg-dh-600 px-5 text-sm font-extrabold text-white transition hover:bg-dh-700 disabled:cursor-not-allowed disabled:opacity-60" :disabled="filtering"><span v-if="filtering" class="inline-flex items-center gap-2"><svg viewBox="0 0 24 24" class="size-4 animate-spin" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" opacity="0.25"/><path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>در حال جستجو…</span><span v-else>جستجو</span></button>
-                        <button type="button" class="h-12 rounded-2xl border border-dh-100 px-4 text-sm font-bold text-dh-700 transition hover:bg-dh-50 disabled:cursor-not-allowed disabled:opacity-60" :disabled="filtering" @click="clearFilters">حذف فیلتر</button>
+                        <button
+                            type="submit"
+                            class="h-12 flex-1 rounded-2xl bg-dh-600 px-5 text-sm font-extrabold text-white transition hover:bg-dh-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            :disabled="filtering"
+                        >
+                            <span
+                                v-if="filtering"
+                                class="inline-flex items-center gap-2"
+                                ><svg
+                                    viewBox="0 0 24 24"
+                                    class="size-4 animate-spin"
+                                    fill="none"
+                                    aria-hidden="true"
+                                >
+                                    <circle
+                                        cx="12"
+                                        cy="12"
+                                        r="9"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        opacity="0.25"
+                                    />
+                                    <path
+                                        d="M21 12a9 9 0 0 1-9 9"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                    /></svg
+                                >در حال جستجو…</span
+                            ><span v-else>جستجو</span>
+                        </button>
+                        <button
+                            type="button"
+                            class="h-12 rounded-2xl border border-dh-100 px-4 text-sm font-bold text-dh-700 transition hover:bg-dh-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            :disabled="filtering"
+                            @click="clearFilters"
+                        >
+                            حذف فیلتر
+                        </button>
                     </div>
                 </form>
 
-                <div v-if="form.search || form.category || form.brand" class="mt-4 flex flex-wrap items-center gap-2 text-xs font-bold text-dh-muted">
+                <div
+                    v-if="form.search || form.category || form.brand"
+                    class="mt-4 flex flex-wrap items-center gap-2 text-xs font-bold text-dh-muted"
+                >
                     <span>فیلتر فعال:</span>
-                    <span v-if="form.search" class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700">جستجو: {{ form.search }}</span>
-                    <span v-if="form.category" class="rounded-full bg-dh-green-50 px-3 py-1.5 text-dh-green-700">دسته‌بندی انتخاب شده</span>
-                    <span v-if="form.brand" class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700">برند انتخاب شده</span>
+                    <span
+                        v-if="form.search"
+                        class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700"
+                        >جستجو: {{ form.search }}</span
+                    >
+                    <span
+                        v-if="form.category"
+                        class="rounded-full bg-dh-green-50 px-3 py-1.5 text-dh-green-700"
+                        >دسته‌بندی انتخاب شده</span
+                    >
+                    <span
+                        v-if="form.brand"
+                        class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700"
+                        >برند انتخاب شده</span
+                    >
                 </div>
             </section>
 
-            <div v-if="products.length" class="flex flex-wrap items-center justify-between gap-3 text-xs font-bold text-dh-muted">
-                <span>{{ pagination.from?.toLocaleString('fa-IR') }} تا {{ pagination.to?.toLocaleString('fa-IR') }} از {{ pagination.total.toLocaleString('fa-IR') }} محصول</span>
-                <span v-if="form.search || form.category || form.brand" class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700">نتایج فیلترشده</span>
+            <div
+                v-if="products.length"
+                class="flex flex-wrap items-center justify-between gap-3 text-xs font-bold text-dh-muted"
+            >
+                <span
+                    >{{ pagination.from?.toLocaleString('fa-IR') }} تا
+                    {{ pagination.to?.toLocaleString('fa-IR') }} از
+                    {{ pagination.total.toLocaleString('fa-IR') }} محصول</span
+                >
+                <span
+                    v-if="form.search || form.category || form.brand"
+                    class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700"
+                    >نتایج فیلترشده</span
+                >
             </div>
 
-            <section v-if="products.length" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <section
+                v-if="products.length"
+                class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            >
                 <article
                     v-for="product in products"
                     :key="product.id"
                     class="group overflow-hidden rounded-3xl border border-dh-100 bg-white transition duration-200 hover:-translate-y-1 hover:border-dh-200 hover:shadow-[0_18px_40px_rgba(20,108,114,0.09)]"
                 >
                     <Link :href="`/products/${product.slug}`" class="block">
-                        <div class="relative aspect-square overflow-hidden bg-dh-50/60">
-                            <span v-if="product.compare_at_price && product.compare_at_price > (product.price ?? 0)" class="absolute right-3 top-3 rounded-full bg-dh-green-500 px-2.5 py-1 text-[11px] font-extrabold text-white">تخفیف</span>
+                        <div
+                            class="relative aspect-square overflow-hidden bg-dh-50/60"
+                        >
+                            <span
+                                v-if="
+                                    product.compare_at_price &&
+                                    product.compare_at_price >
+                                        (product.price ?? 0)
+                                "
+                                class="absolute top-3 right-3 rounded-full bg-dh-green-500 px-2.5 py-1 text-[11px] font-extrabold text-white"
+                                >تخفیف</span
+                            >
                             <img
                                 v-if="product.image"
                                 :src="product.image"
@@ -257,26 +414,68 @@ function formatPrice(value: number | null): string {
                                 loading="lazy"
                                 class="h-full w-full object-contain p-6 transition duration-300 group-hover:scale-[1.03]"
                             />
-                            <div v-else class="flex h-full items-center justify-center text-sm font-medium text-dh-muted">بدون تصویر</div>
+                            <div
+                                v-else
+                                class="flex h-full items-center justify-center text-sm font-medium text-dh-muted"
+                            >
+                                بدون تصویر
+                            </div>
                         </div>
 
                         <div class="space-y-3 p-4">
-                            <div class="flex items-center justify-between gap-2 text-xs">
-                                <span v-if="product.brand" class="font-bold text-dh-600">{{ product.brand }}</span>
-                                <span v-if="product.category" class="text-dh-muted">{{ product.category }}</span>
+                            <div
+                                class="flex items-center justify-between gap-2 text-xs"
+                            >
+                                <span
+                                    v-if="product.brand"
+                                    class="font-bold text-dh-600"
+                                    >{{ product.brand }}</span
+                                >
+                                <span
+                                    v-if="product.category"
+                                    class="text-dh-muted"
+                                    >{{ product.category }}</span
+                                >
                             </div>
-                            <h2 class="line-clamp-2 min-h-12 text-sm font-extrabold leading-6 text-dh-900">{{ product.name }}</h2>
-                            <p v-if="product.short_description" class="line-clamp-2 text-xs leading-6 text-dh-muted">{{ product.short_description }}</p>
+                            <h2
+                                class="line-clamp-2 min-h-12 text-sm leading-6 font-extrabold text-dh-900"
+                            >
+                                {{ product.name }}
+                            </h2>
+                            <p
+                                v-if="product.short_description"
+                                class="line-clamp-2 text-xs leading-6 text-dh-muted"
+                            >
+                                {{ product.short_description }}
+                            </p>
                         </div>
                     </Link>
 
                     <div class="border-t border-dh-50 p-4">
                         <div class="flex items-end justify-between gap-3">
                             <div>
-                                <div class="font-extrabold text-dh-900">{{ formatPrice(product.price) }}</div>
-                                <div v-if="product.compare_at_price && product.compare_at_price > (product.price ?? 0)" class="mt-1 text-xs text-dh-muted line-through">{{ formatPrice(product.compare_at_price) }}</div>
+                                <div class="font-extrabold text-dh-900">
+                                    {{ formatPrice(product.price) }}
+                                </div>
+                                <div
+                                    v-if="
+                                        product.compare_at_price &&
+                                        product.compare_at_price >
+                                            (product.price ?? 0)
+                                    "
+                                    class="mt-1 text-xs text-dh-muted line-through"
+                                >
+                                    {{ formatPrice(product.compare_at_price) }}
+                                </div>
                             </div>
-                            <span class="rounded-full px-2.5 py-1 text-[11px] font-bold" :class="product.available ? 'bg-dh-green-50 text-dh-green-700' : 'bg-dh-100 text-dh-muted'">
+                            <span
+                                class="rounded-full px-2.5 py-1 text-[11px] font-bold"
+                                :class="
+                                    product.available
+                                        ? 'bg-dh-green-50 text-dh-green-700'
+                                        : 'bg-dh-100 text-dh-muted'
+                                "
+                            >
                                 {{ product.available ? 'موجود' : 'ناموجود' }}
                             </span>
                         </div>
@@ -288,28 +487,91 @@ function formatPrice(value: number | null): string {
                             :aria-busy="addingProductId === product.id"
                             @click="addToCart(product)"
                         >
-                            <span v-if="addingProductId === product.id" class="inline-flex items-center gap-2"><svg viewBox="0 0 24 24" class="size-4 animate-spin" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" opacity="0.25"/><path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>در حال افزودن…</span><span v-else>افزودن به سبد خرید</span>
+                            <span
+                                v-if="addingProductId === product.id"
+                                class="inline-flex items-center gap-2"
+                                ><svg
+                                    viewBox="0 0 24 24"
+                                    class="size-4 animate-spin"
+                                    fill="none"
+                                    aria-hidden="true"
+                                >
+                                    <circle
+                                        cx="12"
+                                        cy="12"
+                                        r="9"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        opacity="0.25"
+                                    />
+                                    <path
+                                        d="M21 12a9 9 0 0 1-9 9"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                    /></svg
+                                >در حال افزودن…</span
+                            ><span v-else>افزودن به سبد خرید</span>
                         </button>
-                        <div v-if="addedProductId === product.id" class="mt-2 rounded-xl bg-dh-green-50 px-3 py-2 text-center text-xs font-bold text-dh-green-700" role="status">
+                        <div
+                            v-if="addedProductId === product.id"
+                            class="mt-2 rounded-xl bg-dh-green-50 px-3 py-2 text-center text-xs font-bold text-dh-green-700"
+                            role="status"
+                        >
                             به سبد خرید اضافه شد.
                         </div>
                     </div>
                 </article>
             </section>
 
-            <section v-else class="rounded-3xl border border-dashed border-dh-200 bg-white p-12 text-center">
-                <div class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-dh-50 text-dh-600">
-                    <svg viewBox="0 0 24 24" class="size-7" fill="none" aria-hidden="true">
-                        <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/>
-                        <path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            <section
+                v-else
+                class="rounded-3xl border border-dashed border-dh-200 bg-white p-12 text-center"
+            >
+                <div
+                    class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-dh-50 text-dh-600"
+                >
+                    <svg
+                        viewBox="0 0 24 24"
+                        class="size-7"
+                        fill="none"
+                        aria-hidden="true"
+                    >
+                        <circle
+                            cx="11"
+                            cy="11"
+                            r="6.5"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                        />
+                        <path
+                            d="m16 16 4.5 4.5"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linecap="round"
+                        />
                     </svg>
                 </div>
-                <h2 class="mt-4 text-xl font-extrabold text-dh-900">محصولی پیدا نشد</h2>
-                <p class="mt-2 text-sm leading-7 text-dh-muted">عبارت جستجو یا فیلترهای انتخابی را تغییر دهید.</p>
-                <button type="button" class="mt-5 rounded-xl bg-dh-600 px-5 py-3 text-sm font-extrabold text-white hover:bg-dh-700" @click="clearFilters">نمایش همه محصولات</button>
+                <h2 class="mt-4 text-xl font-extrabold text-dh-900">
+                    محصولی پیدا نشد
+                </h2>
+                <p class="mt-2 text-sm leading-7 text-dh-muted">
+                    عبارت جستجو یا فیلترهای انتخابی را تغییر دهید.
+                </p>
+                <button
+                    type="button"
+                    class="mt-5 rounded-xl bg-dh-600 px-5 py-3 text-sm font-extrabold text-white hover:bg-dh-700"
+                    @click="clearFilters"
+                >
+                    نمایش همه محصولات
+                </button>
             </section>
 
-            <nav v-if="pagination.last_page > 1" aria-label="صفحات محصولات" class="flex flex-wrap items-center justify-center gap-2 pb-8">
+            <nav
+                v-if="pagination.last_page > 1"
+                aria-label="صفحات محصولات"
+                class="flex flex-wrap items-center justify-center gap-2 pb-8"
+            >
                 <Link
                     v-if="pagination.current_page > 1"
                     :href="pageUrl(pagination.current_page - 1)"
@@ -325,10 +587,16 @@ function formatPrice(value: number | null): string {
                     :key="page"
                     :href="pageUrl(page)"
                     preserve-scroll
-                    :aria-current="page === pagination.current_page ? 'page' : undefined"
+                    :aria-current="
+                        page === pagination.current_page ? 'page' : undefined
+                    "
                     :aria-label="`صفحه ${page.toLocaleString('fa-IR')}`"
                     class="min-w-10 rounded-xl px-3 py-2 text-center text-sm font-bold"
-                    :class="page === pagination.current_page ? 'bg-dh-600 text-white' : 'bg-white text-dh-700 ring-1 ring-dh-100 hover:bg-dh-50'"
+                    :class="
+                        page === pagination.current_page
+                            ? 'bg-dh-600 text-white'
+                            : 'bg-white text-dh-700 ring-1 ring-dh-100 hover:bg-dh-50'
+                    "
                 >
                     {{ page.toLocaleString('fa-IR') }}
                 </Link>
@@ -345,6 +613,74 @@ function formatPrice(value: number | null): string {
             </nav>
         </main>
 
-        <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-dh-100 bg-white/95 px-3 py-2 backdrop-blur lg:hidden" aria-label="ناوبری موبایل"><div class="mx-auto grid max-w-md grid-cols-3 gap-2 text-center text-[11px] font-bold text-dh-muted"><Link href="/" class="rounded-xl px-2 py-2"><svg viewBox="0 0 24 24" class="mx-auto mb-1 size-4" fill="none" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>خانه</Link><Link href="/products" class="rounded-xl bg-dh-50 px-2 py-2 text-dh-700"><svg viewBox="0 0 24 24" class="mx-auto mb-1 size-4" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" stroke="currentColor" stroke-width="1.7"/><path d="m15 15 5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>فروشگاه</Link><Link href="/cart" class="rounded-xl px-2 py-2"><svg viewBox="0 0 24 24" class="mx-auto mb-1 size-4" fill="none" aria-hidden="true"><path d="M4 5h2l1.5 10.2a2 2 0 0 0 2 1.8h7.6a2 2 0 0 0 2-1.7L20 8H7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1" fill="currentColor"/><circle cx="18" cy="20" r="1" fill="currentColor"/></svg>سبد خرید</Link></div></nav>
+        <nav
+            class="fixed inset-x-0 bottom-0 z-50 border-t border-dh-100 bg-white/95 px-3 py-2 backdrop-blur lg:hidden"
+            aria-label="ناوبری موبایل"
+        >
+            <div
+                class="mx-auto grid max-w-md grid-cols-3 gap-2 text-center text-[11px] font-bold text-dh-muted"
+            >
+                <Link href="/" class="rounded-xl px-2 py-2"
+                    ><svg
+                        viewBox="0 0 24 24"
+                        class="mx-auto mb-1 size-4"
+                        fill="none"
+                        aria-hidden="true"
+                    >
+                        <path
+                            d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linejoin="round"
+                        /></svg
+                    >خانه</Link
+                ><Link
+                    href="/products"
+                    class="rounded-xl bg-dh-50 px-2 py-2 text-dh-700"
+                    ><svg
+                        viewBox="0 0 24 24"
+                        class="mx-auto mb-1 size-4"
+                        fill="none"
+                        aria-hidden="true"
+                    >
+                        <circle
+                            cx="10.5"
+                            cy="10.5"
+                            r="6"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                        />
+                        <path
+                            d="m15 15 5 5"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linecap="round"
+                        /></svg
+                    >فروشگاه</Link
+                ><Link href="/cart" class="rounded-xl px-2 py-2"
+                    ><svg
+                        viewBox="0 0 24 24"
+                        class="mx-auto mb-1 size-4"
+                        fill="none"
+                        aria-hidden="true"
+                    >
+                        <path
+                            d="M4 5h2l1.5 10.2a2 2 0 0 0 2 1.8h7.6a2 2 0 0 0 2-1.7L20 8H7"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                        <circle cx="10" cy="20" r="1" fill="currentColor" />
+                        <circle
+                            cx="18"
+                            cy="20"
+                            r="1"
+                            fill="currentColor"
+                        /></svg
+                    >سبد خرید</Link
+                >
+            </div>
+        </nav>
     </div>
 </template>

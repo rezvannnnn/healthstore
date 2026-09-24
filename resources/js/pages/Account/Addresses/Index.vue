@@ -77,25 +77,40 @@ function removeAddress(id: number): void {
 <template>
     <Head title="آدرس‌های من" />
 
-    <main dir="rtl" class="min-h-screen bg-dh-surface px-4 py-6 pb-24 sm:px-6 lg:px-8">
+    <main
+        dir="rtl"
+        class="min-h-screen bg-dh-surface px-4 py-6 pb-24 sm:px-6 lg:px-8"
+    >
         <div class="mx-auto max-w-5xl">
-            <header class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-dh-100">
-                <Link href="/" class="flex shrink-0 items-center" aria-label="داروخونه">
+            <header
+                class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
+            >
+                <Link
+                    href="/"
+                    class="flex shrink-0 items-center"
+                    aria-label="داروخونه"
+                >
                     <BrandLogo imageClass="h-[4.25rem] w-[4.25rem]" />
                 </Link>
                 <nav class="flex items-center gap-2 text-sm">
-                    <Link href="/account/profile" class="rounded-xl px-3 py-2 font-semibold text-dh-700 hover:bg-dh-50">پروفایل</Link>
-                    <Link href="/account/orders" class="rounded-xl px-3 py-2 font-semibold text-dh-700 hover:bg-dh-50">سفارش‌ها</Link>
+                    <Link
+                        href="/account/profile"
+                        class="rounded-xl px-3 py-2 font-semibold text-dh-700 hover:bg-dh-50"
+                        >پروفایل</Link
+                    >
+                    <Link
+                        href="/account/orders"
+                        class="rounded-xl px-3 py-2 font-semibold text-dh-700 hover:bg-dh-50"
+                        >سفارش‌ها</Link
+                    >
                     <CartLink />
                 </nav>
             </header>
-            <header class="mb-6 flex items-center justify-between gap-4 rounded-3xl bg-dh-800 p-6 text-white shadow-sm">
+            <header
+                class="mb-6 flex items-center justify-between gap-4 rounded-3xl bg-dh-800 p-6 text-white shadow-sm"
+            >
                 <div>
-                    <h1
-                        class="text-2xl font-black text-white"
-                    >
-                        آدرس‌های من
-                    </h1>
+                    <h1 class="text-2xl font-black text-white">آدرس‌های من</h1>
                     <p class="mt-1 text-sm text-dh-100">
                         آدرس‌های ارسال سفارش را مدیریت کنید.
                     </p>
@@ -119,9 +134,7 @@ function removeAddress(id: number): void {
                 class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
             >
                 <div class="mb-5 flex items-center justify-between">
-                    <h2
-                        class="text-lg font-semibold text-dh-900"
-                    >
+                    <h2 class="text-lg font-semibold text-dh-900">
                         {{ editingId ? 'ویرایش آدرس' : 'افزودن آدرس جدید' }}
                     </h2>
                     <button
@@ -138,9 +151,7 @@ function removeAddress(id: number): void {
                     class="grid gap-4 md:grid-cols-2"
                     @submit.prevent="submit"
                 >
-                    <label
-                        class="text-sm font-medium text-dh-800"
-                    >
+                    <label class="text-sm font-medium text-dh-800">
                         عنوان
                         <input
                             v-model="form.title"
@@ -154,9 +165,7 @@ function removeAddress(id: number): void {
                             {{ form.errors.title }}
                         </span>
                     </label>
-                    <label
-                        class="text-sm font-medium text-dh-800"
-                    >
+                    <label class="text-sm font-medium text-dh-800">
                         نام گیرنده
                         <input
                             v-model="form.recipient_name"
@@ -170,9 +179,7 @@ function removeAddress(id: number): void {
                             {{ form.errors.recipient_name }}
                         </span>
                     </label>
-                    <label
-                        class="text-sm font-medium text-dh-800"
-                    >
+                    <label class="text-sm font-medium text-dh-800">
                         شماره موبایل
                         <input
                             v-model="form.phone"
@@ -186,27 +193,21 @@ function removeAddress(id: number): void {
                             {{ form.errors.phone }}
                         </span>
                     </label>
-                    <label
-                        class="text-sm font-medium text-dh-800"
-                    >
+                    <label class="text-sm font-medium text-dh-800">
                         استان
                         <input
                             v-model="form.province"
                             class="mt-1 w-full rounded-xl border-dh-100"
                         />
                     </label>
-                    <label
-                        class="text-sm font-medium text-dh-800"
-                    >
+                    <label class="text-sm font-medium text-dh-800">
                         شهر
                         <input
                             v-model="form.city"
                             class="mt-1 w-full rounded-xl border-dh-100"
                         />
                     </label>
-                    <label
-                        class="text-sm font-medium text-dh-800"
-                    >
+                    <label class="text-sm font-medium text-dh-800">
                         کد پستی
                         <input
                             v-model="form.postal_code"
@@ -276,9 +277,7 @@ function removeAddress(id: number): void {
                         >
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <h3
-                                        class="font-semibold text-dh-900"
-                                    >
+                                    <h3 class="font-semibold text-dh-900">
                                         {{ address.title || 'آدرس' }}
                                     </h3>
                                     <span
@@ -288,20 +287,14 @@ function removeAddress(id: number): void {
                                         پیش‌فرض
                                     </span>
                                 </div>
-                                <p
-                                    class="mt-2 text-sm text-dh-muted"
-                                >
+                                <p class="mt-2 text-sm text-dh-muted">
                                     {{ address.recipient_name }} ·
                                     {{ address.phone }}
                                 </p>
-                                <p
-                                    class="mt-1 text-sm text-dh-muted"
-                                >
+                                <p class="mt-1 text-sm text-dh-muted">
                                     {{ address.province }} {{ address.city }}
                                 </p>
-                                <p
-                                    class="mt-2 text-sm leading-6 text-dh-800"
-                                >
+                                <p class="mt-2 text-sm leading-6 text-dh-800">
                                     {{ address.address }}
                                 </p>
                                 <p
@@ -338,12 +331,30 @@ function removeAddress(id: number): void {
                 </div>
             </section>
         </div>
-    
-            <nav class="fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-md items-center justify-around rounded-2xl border border-dh-100 bg-white/95 p-2 shadow-lg backdrop-blur sm:hidden">
-                <Link href="/products" class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-muted hover:bg-dh-50 hover:text-dh-700"><span class="text-base">⌂</span>فروشگاه</Link>
-                <Link href="/account/orders" class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-muted hover:bg-dh-50 hover:text-dh-700"><span class="text-base">◷</span>سفارش‌ها</Link>
-                <Link href="/account/addresses" class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-muted hover:bg-dh-50 hover:text-dh-700"><span class="text-base">⌖</span>آدرس‌ها</Link>
-                <Link href="/cart" class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-700 hover:bg-dh-50"><span class="text-base">▢</span>سبد</Link>
-            </nav>
-        </main>
+
+        <nav
+            class="fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-md items-center justify-around rounded-2xl border border-dh-100 bg-white/95 p-2 shadow-lg backdrop-blur sm:hidden"
+        >
+            <Link
+                href="/products"
+                class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-muted hover:bg-dh-50 hover:text-dh-700"
+                ><span class="text-base">⌂</span>فروشگاه</Link
+            >
+            <Link
+                href="/account/orders"
+                class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-muted hover:bg-dh-50 hover:text-dh-700"
+                ><span class="text-base">◷</span>سفارش‌ها</Link
+            >
+            <Link
+                href="/account/addresses"
+                class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-muted hover:bg-dh-50 hover:text-dh-700"
+                ><span class="text-base">⌖</span>آدرس‌ها</Link
+            >
+            <Link
+                href="/cart"
+                class="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[11px] font-bold text-dh-700 hover:bg-dh-50"
+                ><span class="text-base">▢</span>سبد</Link
+            >
+        </nav>
+    </main>
 </template>

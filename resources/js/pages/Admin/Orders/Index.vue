@@ -231,13 +231,17 @@ const paymentClasses = (value: string) =>
                                 </td>
                                 <td class="px-4 py-4">
                                     <span
-                                        class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="statusClasses(order.status)"
+                                        class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                                        :class="statusClasses(order.status)"
                                         >{{ statusLabel(order.status) }}</span
                                     >
                                 </td>
                                 <td class="px-4 py-4">
                                     <span
-                                        class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="paymentClasses(order.payment_status)"
+                                        class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                                        :class="
+                                            paymentClasses(order.payment_status)
+                                        "
                                         >{{
                                             paymentLabel(order.payment_status)
                                         }}</span

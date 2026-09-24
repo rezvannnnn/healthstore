@@ -67,7 +67,15 @@ const formatType = (type: string) => (type === 'increase' ? 'افزایش' : 'ک
                                 :key="movement.id"
                             >
                                 <td class="px-4 py-4">
-                                    <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="movement.type === 'increase' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-red-50 text-red-700 ring-1 ring-red-200'">{{ formatType(movement.type) }}</span>
+                                    <span
+                                        class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                                        :class="
+                                            movement.type === 'increase'
+                                                ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                                                : 'bg-red-50 text-red-700 ring-1 ring-red-200'
+                                        "
+                                        >{{ formatType(movement.type) }}</span
+                                    >
                                 </td>
                                 <td class="px-4 py-4 font-semibold">
                                     {{ movement.quantity_delta > 0 ? '+' : ''

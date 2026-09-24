@@ -129,8 +129,7 @@ const pageUrl = (page: number) => `/admin/brands?page=${page}`;
                             class="rounded-lg border border-dh-200 bg-white px-3 py-2 font-medium hover:bg-dh-50"
                             >قبلی</Link
                         >
-                        <span
-                            class="rounded-lg bg-dh-50 px-3 py-2 font-medium"
+                        <span class="rounded-lg bg-dh-50 px-3 py-2 font-medium"
                             >صفحه {{ brands.current_page }} از
                             {{ brands.last_page }}</span
                         >
