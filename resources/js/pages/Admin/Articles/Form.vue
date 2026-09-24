@@ -36,6 +36,7 @@ const form = useForm({
     excerpt: props.article?.excerpt ?? '',
     content: props.article?.content ?? '',
     featured_image: props.article?.featured_image ?? '',
+    featured_image_file: null as File | null,
     featured_image_alt: props.article?.featured_image_alt ?? '',
     seo_title: props.article?.seo_title ?? '',
     seo_description: props.article?.seo_description ?? '',
@@ -47,11 +48,22 @@ const form = useForm({
         : '',
 });
 
+function handleFeaturedImageChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    form.featured_image_file = input.files?.[0] ?? null;
+}
+
 function submit() {
     if (props.article?.id) {
-        form.put(`/admin/articles/${props.article.id}`);
+        form.transform((data) => ({ ...data, _method: 'put' })).post(
+            `/admin/articles/${props.article.id}`,
+            {
+                forceFormData: true,
+                onFinish: () => form.transform((data) => data),
+            },
+        );
     } else {
-        form.post('/admin/articles');
+        form.post('/admin/articles', { forceFormData: true });
     }
 }
 </script>
@@ -137,11 +149,23 @@ function submit() {
 
             <div class="grid gap-4 md:grid-cols-2">
                 <label class="space-y-1"
-                    ><span>آدرس تصویر شاخص</span
+                    ><span>تصویر شاخص</span
                     ><input
-                        v-model="form.featured_image"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
                         class="w-full rounded-lg border p-2"
-                /></label>
+                        @change="handleFeaturedImageChange"
+                />
+                <a
+                    v-if="form.featured_image"
+                    :href="form.featured_image"
+                    target="_blank"
+                    rel="noreferrer"
+                    class="mt-1 inline-block text-sm text-dh-700 underline"
+                    >مشاهده تصویر فعلی</a
+                >
+                <span class="text-xs text-dh-muted">JPG، PNG یا WebP — حداکثر ۵ مگابایت</span
+                ></label>
                 <label class="space-y-1"
                     ><span>Alt تصویر</span
                     ><input
