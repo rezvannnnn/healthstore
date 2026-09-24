@@ -8,8 +8,8 @@ use App\Models\ArticleCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use App\Services\MediaService;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -188,7 +188,7 @@ class ArticleController extends Controller
 
     protected function normalizePublishedAt(?string $publishedAt, bool $isActive): ?string
     {
-        if (! $isActive) {
+        if (!$isActive) {
             return $publishedAt;
         }
 
