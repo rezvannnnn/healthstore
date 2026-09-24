@@ -40,24 +40,11 @@ jobs:
           composer update --prefer-dist --no-interaction --no-progress
           composer setup
 
-      - name: Format frontend resources
-        run: npm run format
+      - name: Check frontend formatting
+        run: npm run format:check
 
-      - name: Format PHP resources
-        run: composer lint
-
-      - name: Commit formatting changes
-        if: github.event_name == 'push'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add resources/ app/ config/ database/ routes/ tests/
-          if git diff --cached --quiet; then
-            echo "No formatting changes to commit."
-          else
-            git commit -m "Apply automated code formatting"
-            git push origin HEAD:main
-          fi
+      - name: Check PHP formatting
+        run: composer lint:check
 
       - name: Run CI Checks
         run: composer ci:check
