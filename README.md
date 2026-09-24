@@ -45,11 +45,16 @@ php artisan optimize
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://darukhooneh.ir
+SESSION_SECURE_COOKIE=true
+SESSION_HTTP_ONLY=true
+SESSION_SAME_SITE=lax
 ```
 
 `APP_KEY` باید یک مقدار امن و ثابت باشد و هرگز در repository قرار نگیرد. اطلاعات درگاه پرداخت، پیامک و سایر سرویس‌های خارجی نیز فقط از طریق environment configuration تنظیم شوند.
 
-## Scheduler
+اگر برنامه پشت reverse proxy یا load balancer اجرا می‌شود، تنظیم HTTPS و forwarded headers سرور را نیز بررسی کنید تا Laravel درخواست‌های HTTPS را به‌درستی تشخیص دهد.
+
+## Scheduler و Queue
 
 برای اجرای cleanup رزروهای منقضی‌شده، scheduler لاراول باید روی سرور فعال باشد. یک cron entry را با کاربر اجرای برنامه تنظیم کنید:
 
@@ -58,6 +63,14 @@ APP_URL=https://darukhooneh.ir
 ```
 
 این scheduler دستورات release رزرو موجودی و رزرو کوپن منقضی‌شده را هر دقیقه اجرا می‌کند.
+
+در صورت استفاده از `QUEUE_CONNECTION=database`، یک worker دائمی نیز باید روی سرور اجرا شود:
+
+```bash
+php artisan queue:work --sleep=3 --tries=3 --timeout=90
+```
+
+برای production بهتر است worker با Supervisor یا systemd مدیریت و پس از deploy با `php artisan queue:restart` راه‌اندازی مجدد شود.
 
 ## وضعیت سرویس‌های خارجی
 
