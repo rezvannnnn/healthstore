@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use App\Models\Cart;
-
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
