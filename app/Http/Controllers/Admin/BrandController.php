@@ -14,7 +14,9 @@ use Inertia\Response;
 
 class BrandController extends Controller
 {
-    public function __construct(protected MediaService $mediaService) {}
+    public function __construct(protected MediaService $mediaService)
+    {
+    }
 
     public function index(): Response
     {
