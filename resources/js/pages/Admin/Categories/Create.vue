@@ -9,10 +9,11 @@ const form = useForm({
     parent_id: null as number | null,
     description: '',
     image: '',
+    image_file: null as File | null,
     is_active: true,
     sort_order: 0,
 });
-const submit = () => form.post('/admin/categories');
+const submit = () => form.post('/admin/categories', { forceFormData: true });
 </script>
 
 <template>
@@ -78,9 +79,10 @@ const submit = () => form.post('/admin/categories');
                 <div>
                     <label class="mb-1 block text-sm font-medium">تصویر</label
                     ><input
-                        v-model="form.image"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
                         class="w-full rounded-lg border px-3 py-2"
-                        placeholder="مسیر یا URL تصویر"
+                        @change="form.image_file = ($event.target as HTMLInputElement).files?.[0] ?? null"
                     />
                 </div>
                 <div class="flex gap-6">
