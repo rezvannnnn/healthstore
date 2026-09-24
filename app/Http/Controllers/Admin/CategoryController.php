@@ -9,11 +9,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Services\MediaService;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class CategoryController extends Controller
 {
+    public function __construct(protected MediaService $mediaService) {}
+
     public function index(): Response
     {
         $categories = Category::query()
@@ -39,6 +42,10 @@ class CategoryController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedData($request);
+        if ($request->hasFile('image_file')) {
+            $data['image'] = $this->mediaService->storeImage($request->file('image_file'), 'categories');
+        }
+        unset($data['image_file']);
         $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
 
         Category::create($data);
@@ -58,10 +65,19 @@ class CategoryController extends Controller
 
     public function update(Request $request, Category $category): RedirectResponse
     {
+        $oldImage = $category->image;
         $data = $this->validatedData($request, $category);
+        if ($request->hasFile('image_file')) {
+            $data['image'] = $this->mediaService->storeImage($request->file('image_file'), 'categories');
+        }
+        unset($data['image_file']);
         $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
 
         $category->update($data);
+
+        if ($request->hasFile('image_file') && $data['image'] !== $oldImage) {
+            $this->mediaService->deleteIfStored($oldImage);
+        }
 
         return to_route('admin.categories.index')->with('success', 'دسته‌بندی با موفقیت ویرایش شد.');
     }
@@ -95,6 +111,7 @@ class CategoryController extends Controller
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('categories', 'slug')->ignore($category?->id)],
             'description' => ['nullable', 'string', 'max:2000'],
             'image' => ['nullable', 'string', 'max:2048'],
+            'image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'is_active' => ['boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
