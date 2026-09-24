@@ -22,7 +22,7 @@ const form = useForm({
     is_active: props.category.is_active,
     sort_order: props.category.sort_order,
 });
-const submit = () => form.put(`/admin/categories/${props.category.id}`);
+const submit = () => form.transform((data) => ({ ...data, _method: 'put' })).post(`/admin/categories/${props.category.id}`, { forceFormData: true, onFinish: () => form.transform((data) => data) });
 </script>
 
 <template>
@@ -87,9 +87,12 @@ const submit = () => form.put(`/admin/categories/${props.category.id}`);
                 <div>
                     <label class="mb-1 block text-sm font-medium">تصویر</label
                     ><input
-                        v-model="form.image"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
                         class="w-full rounded-lg border px-3 py-2"
+                        @change="form.image_file = ($event.target as HTMLInputElement).files?.[0] ?? null"
                     />
+                    <a v-if="form.image" :href="form.image" target="_blank" rel="noreferrer" class="mt-2 inline-block text-sm text-dh-700 underline">مشاهده تصویر فعلی</a>
                 </div>
                 <div class="flex gap-6">
                     <label class="flex items-center gap-2"
