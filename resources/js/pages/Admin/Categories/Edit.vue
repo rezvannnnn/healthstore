@@ -9,6 +9,7 @@ type Category = {
     slug: string;
     description: string | null;
     image: string | null;
+    image_url: string | null;
     is_active: boolean;
     sort_order: number;
 };
@@ -97,7 +98,7 @@ const submit = () => form.transform((data) => ({ ...data, _method: 'put' })).pos
                         class="w-full rounded-lg border px-3 py-2"
                         @change="handleImageChange"
                     />
-                    <a v-if="form.image" :href="form.image" target="_blank" rel="noreferrer" class="mt-2 inline-block text-sm text-dh-700 underline">مشاهده تصویر فعلی</a>
+                    <a v-if="props.category.image_url" :href="props.category.image_url" target="_blank" rel="noreferrer" class="mt-2 inline-block text-sm text-dh-700 underline">مشاهده تصویر فعلی</a>
                 </div>
                 <div class="flex gap-6">
                     <label class="flex items-center gap-2"
