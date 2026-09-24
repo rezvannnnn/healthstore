@@ -16,6 +16,11 @@ const form = useForm({
     logo: props.brand.logo || '',
     is_active: props.brand.is_active,
 });
+const handleLogoChange = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    form.logo_file = input.files?.[0] ?? null;
+};
+
 const submit = () => form.transform((data) => ({ ...data, _method: 'put' })).post(`/admin/brands/${props.brand.id}`, { forceFormData: true, onFinish: () => form.transform((data) => data) });
 </script>
 
@@ -67,7 +72,7 @@ const submit = () => form.transform((data) => ({ ...data, _method: 'put' })).pos
                         type="file"
                         accept="image/jpeg,image/png,image/webp,image/svg+xml"
                         class="w-full rounded-lg border px-3 py-2"
-                        @change="form.logo_file = ($event.target as HTMLInputElement).files?.[0] ?? null"
+                        @change="handleLogoChange"
                     />
                     <a v-if="form.logo" :href="form.logo" target="_blank" rel="noreferrer" class="mt-2 inline-block text-sm text-dh-700 underline">مشاهده لوگوی فعلی</a>
                 </div>
