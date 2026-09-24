@@ -56,9 +56,17 @@ class CategoryController extends Controller
     public function edit(Category $category): Response
     {
         return Inertia::render('Admin/Categories/Edit', [
-            'category' => $category->only([
-                'id', 'parent_id', 'name', 'slug', 'description', 'is_active', 'sort_order',
-            ]),
+            'category' => [
+                'id' => $category->id,
+                'parent_id' => $category->parent_id,
+                'name' => $category->name,
+                'slug' => $category->slug,
+                'description' => $category->description,
+                'image' => $category->image,
+                'image_url' => $this->mediaService->url($category->image),
+                'is_active' => $category->is_active,
+                'sort_order' => $category->sort_order,
+            ],
             'parents' => $this->parentOptions($category),
         ]);
     }
