@@ -51,9 +51,15 @@ class BrandController extends Controller
     public function edit(Brand $brand): Response
     {
         return Inertia::render('Admin/Brands/Edit', [
-            'brand' => $brand->only([
-                'id', 'name', 'slug', 'description', 'logo', 'is_active',
-            ]),
+            'brand' => [
+                'id' => $brand->id,
+                'name' => $brand->name,
+                'slug' => $brand->slug,
+                'description' => $brand->description,
+                'logo' => $brand->logo,
+                'logo_url' => $this->mediaService->url($brand->logo),
+                'is_active' => $brand->is_active,
+            ],
         ]);
     }
 
