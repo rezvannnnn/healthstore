@@ -167,7 +167,8 @@ function submit() {
                 >
                 <span class="text-xs text-dh-muted"
                     >JPG، PNG یا WebP — حداکثر ۵ مگابایت</span
-                ></label>
+                >
+                </label>
                 <label class="space-y-1"
                     ><span>Alt تصویر</span
                     ><input
