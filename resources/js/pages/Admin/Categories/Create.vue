@@ -13,6 +13,11 @@ const form = useForm({
     is_active: true,
     sort_order: 0,
 });
+const handleImageChange = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    form.image_file = input.files?.[0] ?? null;
+};
+
 const submit = () => form.post('/admin/categories', { forceFormData: true });
 </script>
 
@@ -82,7 +87,7 @@ const submit = () => form.post('/admin/categories', { forceFormData: true });
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
                         class="w-full rounded-lg border px-3 py-2"
-                        @change="form.image_file = ($event.target as HTMLInputElement).files?.[0] ?? null"
+                        @change="handleImageChange"
                     />
                 </div>
                 <div class="flex gap-6">
