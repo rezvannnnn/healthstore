@@ -15,7 +15,9 @@ use Inertia\Response;
 
 class ArticleController extends Controller
 {
-    public function __construct(protected MediaService $mediaService) {}
+    public function __construct(protected MediaService $mediaService)
+    {
+    }
 
     public function index(Request $request): Response
     {
@@ -188,7 +190,7 @@ class ArticleController extends Controller
 
     protected function normalizePublishedAt(?string $publishedAt, bool $isActive): ?string
     {
-        if (!$isActive) {
+        if (! $isActive) {
             return $publishedAt;
         }
 
