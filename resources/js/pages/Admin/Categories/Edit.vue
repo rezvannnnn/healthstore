@@ -22,6 +22,11 @@ const form = useForm({
     is_active: props.category.is_active,
     sort_order: props.category.sort_order,
 });
+const handleImageChange = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    form.image_file = input.files?.[0] ?? null;
+};
+
 const submit = () => form.transform((data) => ({ ...data, _method: 'put' })).post(`/admin/categories/${props.category.id}`, { forceFormData: true, onFinish: () => form.transform((data) => data) });
 </script>
 
@@ -90,7 +95,7 @@ const submit = () => form.transform((data) => ({ ...data, _method: 'put' })).pos
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
                         class="w-full rounded-lg border px-3 py-2"
-                        @change="form.image_file = ($event.target as HTMLInputElement).files?.[0] ?? null"
+                        @change="handleImageChange"
                     />
                     <a v-if="form.image" :href="form.image" target="_blank" rel="noreferrer" class="mt-2 inline-block text-sm text-dh-700 underline">مشاهده تصویر فعلی</a>
                 </div>
