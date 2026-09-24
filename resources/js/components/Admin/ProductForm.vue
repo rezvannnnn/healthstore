@@ -86,6 +86,11 @@ const form = useForm<FormData>({
     compare_at_price: props.product?.compare_at_price ?? null,
 });
 
+const handleMainImageChange = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    form.main_image_file = input.files?.[0] ?? null;
+};
+
 const submit = () => {
     if (props.method === 'post') {
         form.post(props.submitUrl, { forceFormData: true });
