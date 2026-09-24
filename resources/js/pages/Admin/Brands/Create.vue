@@ -5,9 +5,10 @@ const form = useForm({
     slug: '',
     description: '',
     logo: '',
+    logo_file: null as File | null,
     is_active: true,
 });
-const submit = () => form.post('/admin/brands');
+const submit = () => form.post('/admin/brands', { forceFormData: true });
 </script>
 
 <template>
@@ -55,9 +56,10 @@ const submit = () => form.post('/admin/brands');
                 <div>
                     <label class="mb-1 block text-sm font-medium">لوگو</label
                     ><input
-                        v-model="form.logo"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/svg+xml"
                         class="w-full rounded-lg border px-3 py-2"
-                        placeholder="مسیر یا URL لوگو"
+                        @change="form.logo_file = ($event.target as HTMLInputElement).files?.[0] ?? null"
                     />
                 </div>
                 <label class="flex items-center gap-2"
