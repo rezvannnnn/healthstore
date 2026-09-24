@@ -14,6 +14,7 @@ interface ArticleData {
     content: string;
     featured_image: string | null;
     featured_image_alt: string | null;
+    featured_image_url?: string | null;
     seo_title: string | null;
     seo_description: string | null;
     canonical_url: string | null;
@@ -157,8 +158,8 @@ function submit() {
                         @change="handleFeaturedImageChange"
                 />
                 <a
-                    v-if="form.featured_image"
-                    :href="form.featured_image"
+                    v-if="props.article?.featured_image_url"
+                    :href="props.article.featured_image_url"
                     target="_blank"
                     rel="noreferrer"
                     class="mt-1 inline-block text-sm text-dh-700 underline"
