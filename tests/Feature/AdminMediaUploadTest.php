@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Article;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -32,7 +33,7 @@ class AdminMediaUploadTest extends TestCase
 
         $response->assertRedirect('/admin/products');
 
-        $product = \App\Models\Product::query()->firstOrFail();
+        $product = Product::query()->firstOrFail();
 
         $this->assertNotNull($product->main_image);
         Storage::disk('public')->assertExists($product->main_image);
