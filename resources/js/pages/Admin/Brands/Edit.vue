@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
+
 type Brand = {
     id: number;
     name: string;
@@ -22,7 +23,13 @@ const handleLogoChange = (event: Event) => {
     form.logo_file = input.files?.[0] ?? null;
 };
 
-const submit = () => form.transform((data) => ({ ...data, _method: 'put' })).post(`/admin/brands/${props.brand.id}`, { forceFormData: true, onFinish: () => form.transform((data) => data) });
+const submit = () =>
+    form
+        .transform((data) => ({ ...data, _method: 'put' }))
+        .post(`/admin/brands/${props.brand.id}`, {
+            forceFormData: true,
+            onFinish: () => form.transform((data) => data),
+        });
 </script>
 
 <template>
@@ -75,7 +82,14 @@ const submit = () => form.transform((data) => ({ ...data, _method: 'put' })).pos
                         class="w-full rounded-lg border px-3 py-2"
                         @change="handleLogoChange"
                     />
-                    <a v-if="props.brand.logo_url" :href="props.brand.logo_url" target="_blank" rel="noreferrer" class="mt-2 inline-block text-sm text-dh-700 underline">مشاهده لوگوی فعلی</a>
+                    <a
+                        v-if="props.brand.logo_url"
+                        :href="props.brand.logo_url"
+                        target="_blank"
+                        rel="noreferrer"
+                        class="mt-2 inline-block text-sm text-dh-700 underline"
+                        >مشاهده لوگوی فعلی</a
+                    >
                 </div>
                 <label class="flex items-center gap-2"
                     ><input v-model="form.is_active" type="checkbox" />
