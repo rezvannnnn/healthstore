@@ -8,11 +8,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Services\MediaService;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class BrandController extends Controller
 {
+    public function __construct(protected MediaService $mediaService) {}
+
     public function index(): Response
     {
         $brands = Brand::query()
@@ -34,6 +37,10 @@ class BrandController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedData($request);
+        if ($request->hasFile('logo_file')) {
+            $data['logo'] = $this->mediaService->storeImage($request->file('logo_file'), 'brands');
+        }
+        unset($data['logo_file']);
         $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
 
         Brand::create($data);
@@ -52,10 +59,19 @@ class BrandController extends Controller
 
     public function update(Request $request, Brand $brand): RedirectResponse
     {
+        $oldLogo = $brand->logo;
         $data = $this->validatedData($request, $brand);
+        if ($request->hasFile('logo_file')) {
+            $data['logo'] = $this->mediaService->storeImage($request->file('logo_file'), 'brands');
+        }
+        unset($data['logo_file']);
         $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
 
         $brand->update($data);
+
+        if ($request->hasFile('logo_file') && $data['logo'] !== $oldLogo) {
+            $this->mediaService->deleteIfStored($oldLogo);
+        }
 
         return to_route('admin.brands.index')->with('success', 'برند با موفقیت ویرایش شد.');
     }
@@ -67,6 +83,7 @@ class BrandController extends Controller
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('brands', 'slug')->ignore($brand?->id)],
             'description' => ['nullable', 'string', 'max:2000'],
             'logo' => ['nullable', 'string', 'max:2048'],
+            'logo_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:5120'],
             'is_active' => ['boolean'],
         ]);
     }
