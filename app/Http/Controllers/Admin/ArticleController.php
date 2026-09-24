@@ -106,11 +106,23 @@ class ArticleController extends Controller
     public function edit(Article $article): Response
     {
         return Inertia::render('Admin/Articles/Edit', [
-            'article' => $article->only([
-                'id', 'category_id', 'title', 'slug', 'excerpt', 'content', 'featured_image',
-                'featured_image_alt', 'seo_title', 'seo_description', 'canonical_url',
-                'is_active', 'is_featured', 'published_at',
-            ]),
+            'article' => [
+                'id' => $article->id,
+                'category_id' => $article->category_id,
+                'title' => $article->title,
+                'slug' => $article->slug,
+                'excerpt' => $article->excerpt,
+                'content' => $article->content,
+                'featured_image' => $article->featured_image,
+                'featured_image_url' => $this->mediaService->url($article->featured_image),
+                'featured_image_alt' => $article->featured_image_alt,
+                'seo_title' => $article->seo_title,
+                'seo_description' => $article->seo_description,
+                'canonical_url' => $article->canonical_url,
+                'is_active' => $article->is_active,
+                'is_featured' => $article->is_featured,
+                'published_at' => $article->published_at,
+            ],
             'categories' => ArticleCategory::query()->where('is_active', true)->orderBy('sort_order')->orderBy('name')->get(['id', 'name']),
         ]);
     }
