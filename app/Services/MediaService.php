@@ -34,8 +34,10 @@ class MediaService
             return url($path);
         }
 
-        if (Storage::disk(self::DISK)->exists($path)) {
-            return Storage::disk(self::DISK)->url($path);
+        foreach (['products/', 'brands/', 'categories/', 'articles/'] as $prefix) {
+            if (str_starts_with($path, $prefix)) {
+                return Storage::disk(self::DISK)->url($path);
+            }
         }
 
         return url($path);
@@ -57,8 +59,11 @@ class MediaService
             return;
         }
 
-        if (Storage::disk(self::DISK)->exists($path)) {
-            Storage::disk(self::DISK)->delete($path);
+        foreach (['products/', 'brands/', 'categories/', 'articles/'] as $prefix) {
+            if (str_starts_with($path, $prefix)) {
+                Storage::disk(self::DISK)->delete($path);
+                return;
+            }
         }
     }
 }
