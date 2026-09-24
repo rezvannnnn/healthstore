@@ -25,9 +25,7 @@ class ProductController extends Controller
         protected CartService $cartService,
         protected InventoryService $inventoryService,
         protected MediaService $mediaService,
-    )
-    {
-    }
+    ) {}
 
     public function index(Request $request): Response
     {
