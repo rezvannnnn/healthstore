@@ -62,6 +62,7 @@ class MediaService
         foreach (['products/', 'brands/', 'categories/', 'articles/'] as $prefix) {
             if (str_starts_with($path, $prefix)) {
                 Storage::disk(self::DISK)->delete($path);
+
                 return;
             }
         }
