@@ -44,6 +44,7 @@ type FormData = {
     canonical_url: string;
     expiry_date: string;
     main_image: string;
+    main_image_file: File | null;
     is_active: boolean;
     is_featured: boolean;
     sort_order: number;
@@ -77,6 +78,7 @@ const form = useForm<FormData>({
     canonical_url: props.product?.canonical_url ?? '',
     expiry_date: props.product?.expiry_date ?? '',
     main_image: props.product?.main_image ?? '',
+    main_image_file: null,
     is_active: props.product?.is_active ?? true,
     is_featured: props.product?.is_featured ?? false,
     sort_order: props.product?.sort_order ?? 0,
@@ -85,7 +87,18 @@ const form = useForm<FormData>({
 });
 
 const submit = () => {
-    form.submit(props.method, props.submitUrl);
+    if (props.method === 'post') {
+        form.post(props.submitUrl, { forceFormData: true });
+        return;
+    }
+
+    form.transform((data) => ({ ...data, _method: 'put' })).post(
+        props.submitUrl,
+        {
+            forceFormData: true,
+            onFinish: () => form.transform((data) => data),
+        },
+    );
 };
 </script>
 
@@ -310,17 +323,34 @@ const submit = () => {
                             </label>
                             <label class="block">
                                 <span class="text-sm font-medium"
-                                    >آدرس تصویر اصلی</span
+                                    >تصویر اصلی</span
                                 >
                                 <input
-                                    v-model="form.main_image"
-                                    dir="ltr"
-                                    class="mt-1 w-full rounded-lg border-dh-200"
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    class="mt-1 block w-full rounded-lg border-dh-200 bg-white p-2"
+                                    @change="
+                                        form.main_image_file =
+                                            ($event.target as HTMLInputElement)
+                                                .files?.[0] ?? null
+                                    "
                                 />
+                                <span class="mt-1 block text-xs text-dh-muted">
+                                    JPG، PNG یا WebP — حداکثر ۵ مگابایت
+                                </span>
+                                <a
+                                    v-if="form.main_image"
+                                    :href="form.main_image"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    class="mt-2 inline-block text-sm text-dh-700 underline"
+                                >
+                                    مشاهده تصویر فعلی
+                                </a>
                                 <span
-                                    v-if="form.errors.main_image"
+                                    v-if="form.errors.main_image_file"
                                     class="text-sm text-red-600"
-                                    >{{ form.errors.main_image }}</span
+                                    >{{ form.errors.main_image_file }}</span
                                 >
                             </label>
                         </div>
