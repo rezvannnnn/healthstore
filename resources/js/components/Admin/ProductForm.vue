@@ -20,6 +20,7 @@ type Product = {
     canonical_url: string | null;
     expiry_date: string | null;
     main_image: string | null;
+    main_image_url?: string | null;
     is_active: boolean;
     is_featured: boolean;
     sort_order: number;
@@ -344,8 +345,8 @@ const submit = () => {
                                     JPG، PNG یا WebP — حداکثر ۵ مگابایت
                                 </span>
                                 <a
-                                    v-if="form.main_image"
-                                    :href="form.main_image"
+                                    v-if="props.product?.main_image_url"
+                                    :href="props.product.main_image_url"
                                     target="_blank"
                                     rel="noreferrer"
                                     class="mt-2 inline-block text-sm text-dh-700 underline"
