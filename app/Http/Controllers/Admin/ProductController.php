@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Throwable;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -92,15 +93,23 @@ class ProductController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedData($request);
+        $storedImage = null;
 
-        if ($request->hasFile('main_image_file')) {
-            $data['main_image'] = $this->mediaService->storeImage($request->file('main_image_file'), 'products');
+        try {
+            if ($request->hasFile('main_image_file')) {
+                $storedImage = $this->mediaService->storeImage($request->file('main_image_file'), 'products');
+                $data['main_image'] = $storedImage;
+            }
+
+            DB::transaction(function () use ($data): void {
+                $product = Product::create($this->productData($data));
+                $this->syncRetailPrice($product, $data);
+            });
+        } catch (Throwable $exception) {
+            $this->mediaService->deleteIfStored($storedImage);
+
+            throw $exception;
         }
-
-        DB::transaction(function () use ($data): void {
-            $product = Product::create($this->productData($data));
-            $this->syncRetailPrice($product, $data);
-        });
 
         return to_route('admin.products.index')->with('success', 'محصول با موفقیت ایجاد شد.');
     }
@@ -149,17 +158,25 @@ class ProductController extends Controller
         $data = $this->validatedData($request, $product);
 
         $oldImage = $product->main_image;
+        $storedImage = null;
 
-        if ($request->hasFile('main_image_file')) {
-            $data['main_image'] = $this->mediaService->storeImage($request->file('main_image_file'), 'products');
+        try {
+            if ($request->hasFile('main_image_file')) {
+                $storedImage = $this->mediaService->storeImage($request->file('main_image_file'), 'products');
+                $data['main_image'] = $storedImage;
+            }
+
+            DB::transaction(function () use ($data, $product): void {
+                $product->update($this->productData($data));
+                $this->syncRetailPrice($product, $data);
+            });
+        } catch (Throwable $exception) {
+            $this->mediaService->deleteIfStored($storedImage);
+
+            throw $exception;
         }
 
-        DB::transaction(function () use ($data, $product): void {
-            $product->update($this->productData($data));
-            $this->syncRetailPrice($product, $data);
-        });
-
-        if ($request->hasFile('main_image_file') && $data['main_image'] !== $oldImage) {
+        if ($storedImage !== null && $storedImage !== $oldImage) {
             $this->mediaService->deleteIfStored($oldImage);
         }
 
