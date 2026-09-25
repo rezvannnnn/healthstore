@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
-import BrandLogo from '@/components/BrandLogo.vue';
+import StorefrontHeader from '@/components/StorefrontHeader.vue';
 import CartLink from '@/components/CartLink.vue';
 import { computed, ref } from 'vue';
 
@@ -104,44 +104,7 @@ function addToCart(): void {
 
 <template>
     <div dir="rtl" class="min-h-screen bg-dh-surface text-dh-ink">
-        <header
-            class="sticky top-0 z-40 border-b border-dh-100/70 bg-white/95 backdrop-blur"
-        >
-            <div
-                class="mx-auto flex h-18 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8"
-            >
-                <Link
-                    href="/"
-                    class="flex shrink-0 items-center"
-                    aria-label="داروخونه"
-                >
-                    <BrandLogo imageClass="h-[4.25rem] w-[4.25rem]" />
-                </Link>
-
-                <Link
-                    href="/products"
-                    class="mr-auto flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-dh-muted transition hover:bg-dh-50 hover:text-dh-700"
-                >
-                    <svg
-                        viewBox="0 0 24 24"
-                        class="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        aria-hidden="true"
-                    >
-                        <path
-                            d="M15 18l-6-6 6-6"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        />
-                    </svg>
-                    بازگشت به فروشگاه
-                </Link>
-
-                <CartLink />
-            </div>
-        </header>
+        <StorefrontHeader active="products" />
 
         <main
             class="mx-auto max-w-7xl px-4 py-6 pb-28 sm:px-6 sm:py-8 lg:px-8 lg:pb-12"
@@ -689,68 +652,6 @@ function addToCart(): void {
             </section>
         </main>
 
-        <nav
-            class="fixed inset-x-0 bottom-0 z-50 border-t border-dh-100 bg-white/95 px-3 py-2 shadow-[0_-8px_30px_rgba(20,108,114,0.08)] backdrop-blur sm:hidden"
-        >
-            <div class="mx-auto grid max-w-md grid-cols-3 gap-2">
-                <Link
-                    href="/"
-                    class="flex flex-col items-center gap-1 rounded-xl py-1.5 text-[11px] font-semibold text-dh-muted"
-                >
-                    <svg
-                        viewBox="0 0 24 24"
-                        class="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    >
-                        <path
-                            d="M3 10.5 12 3l9 7.5v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1v-9Z"
-                            stroke-linejoin="round"
-                        />
-                    </svg>
-                    خانه
-                </Link>
-                <Link
-                    href="/products"
-                    class="flex flex-col items-center gap-1 rounded-xl bg-dh-50 py-1.5 text-[11px] font-bold text-dh-700"
-                >
-                    <svg
-                        viewBox="0 0 24 24"
-                        class="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    >
-                        <path
-                            d="M4 6h16M4 12h16M4 18h16"
-                            stroke-linecap="round"
-                        />
-                    </svg>
-                    محصولات
-                </Link>
-                <Link
-                    href="/cart"
-                    class="flex flex-col items-center gap-1 rounded-xl py-1.5 text-[11px] font-semibold text-dh-muted"
-                >
-                    <svg
-                        viewBox="0 0 24 24"
-                        class="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    >
-                        <path
-                            d="M4 5h2l1.5 10.2a2 2 0 0 0 2 1.8h7.6a2 2 0 0 0 1.9-1.5L21 8H7"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        />
-                        <circle cx="10" cy="20" r="1" />
-                        <circle cx="18" cy="20" r="1" />
-                    </svg>
-                    سبد خرید
-                </Link>
-            </div>
-        </nav>
+
     </div>
 </template>

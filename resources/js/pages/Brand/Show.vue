@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import BrandLogo from '@/components/BrandLogo.vue';
+import StorefrontHeader from '@/components/StorefrontHeader.vue';
 
 interface Product {
     id: number;
@@ -86,48 +86,7 @@ function pageUrl(page: number): string {
     </Head>
 
     <div dir="rtl" class="min-h-screen bg-dh-surface text-dh-ink">
-        <header
-            class="sticky top-0 z-40 mb-6 border-b border-dh-100/70 bg-white/95 backdrop-blur"
-        >
-            <div
-                class="mx-auto flex h-18 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8"
-            >
-                <Link
-                    href="/"
-                    class="flex shrink-0 items-center"
-                    aria-label="داروخونه"
-                >
-                    <BrandLogo imageClass="h-[4.25rem] w-[4.25rem]" />
-                </Link>
-                <Link
-                    href="/products"
-                    class="mr-auto rounded-xl bg-dh-50 px-4 py-2 text-sm font-bold text-dh-700 transition hover:bg-dh-100"
-                    >همه محصولات</Link
-                >
-                <Link
-                    href="/cart"
-                    class="flex h-11 w-11 items-center justify-center rounded-xl border border-dh-100 text-dh-700 transition hover:bg-dh-50"
-                    aria-label="سبد خرید"
-                >
-                    <svg
-                        viewBox="0 0 24 24"
-                        class="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        aria-hidden="true"
-                    >
-                        <path
-                            d="M4 5h2l1.5 10.2a2 2 0 0 0 2 1.8h7.6a2 2 0 0 0 1.9-1.5L21 8H7"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        />
-                        <circle cx="10" cy="20" r="1" />
-                        <circle cx="18" cy="20" r="1" />
-                    </svg>
-                </Link>
-            </div>
-        </header>
+        <StorefrontHeader active="brands" />
         <main
             dir="rtl"
             class="min-h-screen bg-dh-surface px-4 py-8 dark:bg-dh-surface"
@@ -351,26 +310,6 @@ function pageUrl(page: number): string {
                 </nav>
             </div>
         </main>
-        <nav
-            class="fixed inset-x-0 bottom-0 z-50 border-t border-dh-100 bg-white/95 px-3 py-2 shadow-lg backdrop-blur sm:hidden"
-        >
-            <div class="mx-auto grid max-w-md grid-cols-3 gap-2">
-                <Link
-                    href="/"
-                    class="flex flex-col items-center gap-1 rounded-xl py-1.5 text-[11px] font-semibold text-dh-muted"
-                    >⌂<span>خانه</span></Link
-                >
-                <Link
-                    href="/products"
-                    class="flex flex-col items-center gap-1 rounded-xl bg-dh-50 py-1.5 text-[11px] font-bold text-dh-700"
-                    >◫<span>محصولات</span></Link
-                >
-                <Link
-                    href="/cart"
-                    class="flex flex-col items-center gap-1 rounded-xl py-1.5 text-[11px] font-semibold text-dh-muted"
-                    >🛒<span>سبد خرید</span></Link
-                >
-            </div>
-        </nav>
+
     </div>
 </template>

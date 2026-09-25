@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import BrandLogo from '@/components/BrandLogo.vue';
+import StorefrontHeader from '@/components/StorefrontHeader.vue';
 
 interface Category {
     id: number;
@@ -69,49 +69,7 @@ function pageUrl(page: number): string {
         dir="rtl"
         class="min-h-screen bg-dh-surface pb-24 text-dh-ink lg:pb-10"
     >
-        <header
-            class="sticky top-0 z-30 border-b border-dh-100/70 bg-white/95 backdrop-blur"
-        >
-            <div
-                class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-6"
-            >
-                <Link
-                    href="/"
-                    class="flex shrink-0 items-center"
-                    aria-label="داروخونه"
-                >
-                    <BrandLogo imageClass="h-[4.25rem] w-[4.25rem]" />
-                </Link>
-                <div class="hidden items-center gap-2 md:flex">
-                    <Link
-                        href="/products"
-                        class="rounded-xl px-4 py-2 text-sm font-semibold text-dh-muted hover:bg-dh-50 hover:text-dh-800"
-                        >فروشگاه</Link
-                    >
-                    <Link
-                        href="/cart"
-                        class="rounded-xl bg-dh-700 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-dh-800"
-                        >سبد خرید</Link
-                    >
-                </div>
-                <Link
-                    href="/cart"
-                    class="rounded-xl border border-dh-100 p-2.5 text-dh-700 md:hidden"
-                    aria-label="سبد خرید"
-                >
-                    <svg
-                        viewBox="0 0 24 24"
-                        class="size-5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    >
-                        <path d="M6 8h12l1 12H5L6 8Z" />
-                        <path d="M9 8a3 3 0 0 1 6 0" />
-                    </svg>
-                </Link>
-            </div>
-        </header>
+        <StorefrontHeader active="blog" />
 
         <main class="mx-auto max-w-7xl space-y-8 px-4 py-6 md:px-6 md:py-10">
             <section
@@ -381,26 +339,6 @@ function pageUrl(page: number): string {
             </nav>
         </main>
 
-        <nav
-            class="fixed inset-x-0 bottom-0 z-40 border-t border-dh-100 bg-white/95 px-4 py-2 backdrop-blur lg:hidden"
-        >
-            <div
-                class="mx-auto grid max-w-md grid-cols-3 gap-2 text-center text-[11px] font-bold"
-            >
-                <Link href="/" class="rounded-xl px-2 py-2 text-dh-muted"
-                    >خانه</Link
-                >
-                <Link
-                    href="/products"
-                    class="rounded-xl px-2 py-2 text-dh-muted"
-                    >فروشگاه</Link
-                >
-                <Link
-                    href="/blog"
-                    class="rounded-xl bg-dh-50 px-2 py-2 text-dh-700"
-                    >مجله</Link
-                >
-            </div>
-        </nav>
+
     </div>
 </template>
