@@ -183,7 +183,7 @@ function navClass(section: ActiveSection): string {
             <Link
                 href="/cart"
                 class="rounded-xl px-2 py-2"
-                :class="props.active === 'brands' ? 'bg-dh-50 text-dh-700' : 'text-dh-muted'"
+                :class="'text-dh-muted'"
             >
                 سبد
             </Link>
