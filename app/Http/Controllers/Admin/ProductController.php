@@ -1,19 +1,4 @@
-    protected CartService $cartService;
-
-    protected InventoryService $inventoryService;
-
-    protected MediaService $mediaService;
-
-    public function __construct(
-        CartService $cartService,
-        InventoryService $inventoryService,
-        MediaService $mediaService,
-    )
-    {
-        $this->cartService = $cartService;
-        $this->inventoryService = $inventoryService;
-        $this->mediaService = $mediaService;
-    }<?php
+<?php
 
 namespace App\Http\Controllers\Admin;
 
@@ -24,11 +9,11 @@ use App\Models\Product;
 use App\Models\ProductPrice;
 use App\Services\CartService;
 use App\Services\InventoryService;
+use App\Services\MediaService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Services\MediaService;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -36,22 +21,11 @@ use Inertia\Response;
 
 class ProductController extends Controller
 {
-    protected CartService $cartService;
-
-    protected InventoryService $inventoryService;
-
-    protected MediaService $mediaService;
-
     public function __construct(
-        CartService $cartService,
-        InventoryService $inventoryService,
-        MediaService $mediaService,
-    )
-    {
-        $this->cartService = $cartService;
-        $this->inventoryService = $inventoryService;
-        $this->mediaService = $mediaService;
-    }
+        protected CartService $cartService,
+        protected InventoryService $inventoryService,
+        protected MediaService $mediaService
+    ) {}
 
     public function index(Request $request): Response
     {
