@@ -62,7 +62,7 @@ const submit = () => form.post('/admin/brands', { forceFormData: true });
                     <label class="mb-1 block text-sm font-medium">لوگو</label
                     ><input
                         type="file"
-                        accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                        accept="image/jpeg,image/png,image/webp"
                         class="w-full rounded-lg border px-3 py-2"
                         @change="handleLogoChange"
                     />
