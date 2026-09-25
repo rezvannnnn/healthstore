@@ -142,12 +142,8 @@ function navClass(section: ActiveSection): string {
                 <Link href="/categories" :class="navClass('categories')"
                     >دسته‌بندی‌ها</Link
                 >
-                <Link href="/brands" :class="navClass('brands')"
-                    >برندها</Link
-                >
-                <Link href="/blog" :class="navClass('blog')"
-                    >مجله سلامت</Link
-                >
+                <Link href="/brands" :class="navClass('brands')">برندها</Link>
+                <Link href="/blog" :class="navClass('blog')">مجله سلامت</Link>
             </nav>
         </div>
     </header>

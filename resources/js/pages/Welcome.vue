@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
-import CartLink from '@/components/CartLink.vue';
 import { ref } from 'vue';
 
 interface Category {
