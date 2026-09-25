@@ -1,4 +1,19 @@
-<?php
+    protected CartService $cartService;
+
+    protected InventoryService $inventoryService;
+
+    protected MediaService $mediaService;
+
+    public function __construct(
+        CartService $cartService,
+        InventoryService $inventoryService,
+        MediaService $mediaService,
+    )
+    {
+        $this->cartService = $cartService;
+        $this->inventoryService = $inventoryService;
+        $this->mediaService = $mediaService;
+    }<?php
 
 namespace App\Http\Controllers\Admin;
 
