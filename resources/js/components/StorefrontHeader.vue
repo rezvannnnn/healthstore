@@ -16,7 +16,6 @@ type SharedPageProps = {
     };
 };
 
-
 const props = withDefaults(
     defineProps<{
         active?: ActiveSection;
