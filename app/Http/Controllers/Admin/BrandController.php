@@ -108,7 +108,7 @@ class BrandController extends Controller
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('brands', 'slug')->ignore($brand?->id)],
             'description' => ['nullable', 'string', 'max:2000'],
             'logo' => ['nullable', 'string', 'max:2048'],
-            'logo_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:5120'],
+            'logo_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'is_active' => ['boolean'],
         ]);
     }
