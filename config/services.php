@@ -2,6 +2,10 @@
 
 return [
 
+    'sms' => [
+        'provider' => env('SMS_PROVIDER', 'fake'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
