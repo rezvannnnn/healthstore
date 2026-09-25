@@ -16,6 +16,7 @@ const form = useForm({
     slug: props.brand.slug,
     description: props.brand.description || '',
     logo: props.brand.logo || '',
+    logo_file: null as File | null,
     is_active: props.brand.is_active,
 });
 const handleLogoChange = (event: Event) => {
