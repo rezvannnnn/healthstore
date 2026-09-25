@@ -1,4 +1,9 @@
-<?php
+    protected MediaService $mediaService;
+
+    public function __construct(MediaService $mediaService)
+    {
+        $this->mediaService = $mediaService;
+    }<?php
 
 namespace App\Http\Controllers\Admin;
 
