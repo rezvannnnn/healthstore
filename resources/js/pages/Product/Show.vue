@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
-import CartLink from '@/components/CartLink.vue';
 import { computed, ref } from 'vue';
 
 interface ProductImage {
@@ -651,7 +650,5 @@ function addToCart(): void {
                 </div>
             </section>
         </main>
-
-
     </div>
 </template>

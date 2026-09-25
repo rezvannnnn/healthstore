@@ -249,7 +249,5 @@ const structuredData = computed(() => ({
                 </div>
             </section>
         </main>
-
-
     </div>
 </template>

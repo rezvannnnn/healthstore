@@ -366,6 +366,5 @@ function pageUrl(page: number): string {
                 </nav>
             </div>
         </main>
-
     </div>
 </template>
