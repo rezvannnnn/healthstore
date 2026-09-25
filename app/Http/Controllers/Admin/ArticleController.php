@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class ArticleController extends Controller
 {
@@ -90,15 +91,24 @@ class ArticleController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedData($request);
-        if ($request->hasFile('featured_image_file')) {
-            $data['featured_image'] = $this->mediaService->storeImage($request->file('featured_image_file'), 'articles');
-        }
-        unset($data['featured_image_file']);
-        $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['title']);
-        $data['author_id'] = $request->user()?->id;
-        $data['published_at'] = $this->normalizePublishedAt($data['published_at'] ?? null, $data['is_active'] ?? false);
+        $storedImage = null;
 
-        Article::create($data);
+        try {
+            if ($request->hasFile('featured_image_file')) {
+                $storedImage = $this->mediaService->storeImage($request->file('featured_image_file'), 'articles');
+                $data['featured_image'] = $storedImage;
+            }
+            unset($data['featured_image_file']);
+            $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['title']);
+            $data['author_id'] = $request->user()?->id;
+            $data['published_at'] = $this->normalizePublishedAt($data['published_at'] ?? null, $data['is_active'] ?? false);
+
+            Article::create($data);
+        } catch (Throwable $exception) {
+            $this->mediaService->deleteIfStored($storedImage);
+
+            throw $exception;
+        }
 
         return to_route('admin.articles.index')->with('success', 'مقاله با موفقیت ایجاد شد.');
     }
@@ -131,16 +141,25 @@ class ArticleController extends Controller
     {
         $oldImage = $article->featured_image;
         $data = $this->validatedData($request, $article);
-        if ($request->hasFile('featured_image_file')) {
-            $data['featured_image'] = $this->mediaService->storeImage($request->file('featured_image_file'), 'articles');
+        $storedImage = null;
+
+        try {
+            if ($request->hasFile('featured_image_file')) {
+                $storedImage = $this->mediaService->storeImage($request->file('featured_image_file'), 'articles');
+                $data['featured_image'] = $storedImage;
+            }
+            unset($data['featured_image_file']);
+            $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['title']);
+            $data['published_at'] = $this->normalizePublishedAt($data['published_at'] ?? null, $data['is_active'] ?? false);
+
+            $article->update($data);
+        } catch (Throwable $exception) {
+            $this->mediaService->deleteIfStored($storedImage);
+
+            throw $exception;
         }
-        unset($data['featured_image_file']);
-        $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['title']);
-        $data['published_at'] = $this->normalizePublishedAt($data['published_at'] ?? null, $data['is_active'] ?? false);
 
-        $article->update($data);
-
-        if ($request->hasFile('featured_image_file') && $data['featured_image'] !== $oldImage) {
+        if ($storedImage !== null && $storedImage !== $oldImage) {
             $this->mediaService->deleteIfStored($oldImage);
         }
 
@@ -149,7 +168,10 @@ class ArticleController extends Controller
 
     public function destroy(Article $article): RedirectResponse
     {
+        $featuredImage = $article->featured_image;
         $article->delete();
+
+        $this->mediaService->deleteIfStored($featuredImage);
 
         return to_route('admin.articles.index')->with('success', 'مقاله حذف شد.');
     }
