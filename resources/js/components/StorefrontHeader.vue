@@ -162,28 +162,44 @@ function navClass(section: ActiveSection): string {
             <Link
                 href="/"
                 class="rounded-xl px-2 py-2"
-                :class="props.active === 'home' ? 'bg-dh-50 text-dh-700' : 'text-dh-muted'"
+                :class="
+                    props.active === 'home'
+                        ? 'bg-dh-50 text-dh-700'
+                        : 'text-dh-muted'
+                "
             >
                 خانه
             </Link>
             <Link
                 href="/products"
                 class="rounded-xl px-2 py-2"
-                :class="props.active === 'products' ? 'bg-dh-50 text-dh-700' : 'text-dh-muted'"
+                :class="
+                    props.active === 'products'
+                        ? 'bg-dh-50 text-dh-700'
+                        : 'text-dh-muted'
+                "
             >
                 فروشگاه
             </Link>
             <Link
                 href="/categories"
                 class="rounded-xl px-2 py-2"
-                :class="props.active === 'categories' ? 'bg-dh-50 text-dh-700' : 'text-dh-muted'"
+                :class="
+                    props.active === 'categories'
+                        ? 'bg-dh-50 text-dh-700'
+                        : 'text-dh-muted'
+                "
             >
                 دسته‌ها
             </Link>
             <Link
                 href="/brands"
                 class="rounded-xl px-2 py-2"
-                :class="props.active === 'brands' ? 'bg-dh-50 text-dh-700' : 'text-dh-muted'"
+                :class="
+                    props.active === 'brands'
+                        ? 'bg-dh-50 text-dh-700'
+                        : 'text-dh-muted'
+                "
             >
                 برندها
             </Link>
