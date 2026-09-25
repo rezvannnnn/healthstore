@@ -1,26 +1,19 @@
-    protected MediaService $mediaService;
-
-    public function __construct(MediaService $mediaService)
-    {
-        $this->mediaService = $mediaService;
-    }<?php
+<?php
 
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
+use App\Services\MediaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use App\Services\MediaService;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class BrandController extends Controller
 {
-    protected MediaService $mediaService;
-
     public function __construct(MediaService $mediaService)
     {
         $this->mediaService = $mediaService;
