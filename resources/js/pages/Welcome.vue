@@ -766,6 +766,5 @@ function addToCart(product: FeaturedProduct): void {
             </section>
         </main>
 
-
     </div>
 </template>

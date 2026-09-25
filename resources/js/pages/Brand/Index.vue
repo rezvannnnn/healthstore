@@ -192,6 +192,5 @@ function pageUrl(page: number): string {
                 </Link>
             </nav>
         </main>
-
     </div>
 </template>

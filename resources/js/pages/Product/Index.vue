@@ -586,6 +586,5 @@ function formatPrice(value: number | null): string {
                 </Link>
             </nav>
         </main>
-
     </div>
 </template>
