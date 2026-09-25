@@ -27,33 +27,33 @@ class PaymentService
 
         try {
             return DB::transaction(function () use ($order): Payment {
-            $lockedOrder = Order::query()->whereKey($order->id)->lockForUpdate()->first();
-            if (! $lockedOrder) {
-                throw new RuntimeException('سفارش پیدا نشد.');
-            }
-            if ($lockedOrder->status === 'cancelled') {
-                throw new RuntimeException('برای سفارش لغوشده امکان ایجاد پرداخت وجود ندارد.');
-            }
-            if ($lockedOrder->status === 'paid' || $lockedOrder->payment_status === 'paid') {
-                throw new RuntimeException('این سفارش قبلاً پرداخت شده است.');
-            }
-            if ($lockedOrder->status !== 'pending') {
-                throw new RuntimeException('فقط سفارش‌های در انتظار می‌توانند وارد فرایند پرداخت شوند.');
-            }
-            $amount = (float) $lockedOrder->total_amount;
-            if ($amount <= 0) {
-                throw new RuntimeException('مبلغ پرداخت باید بیشتر از صفر باشد.');
-            }
-            $existingPayment = $lockedOrder->payments()->where('status', 'pending')->latest('id')->first();
-            if ($existingPayment) {
-                return $existingPayment;
-            }
+                $lockedOrder = Order::query()->whereKey($order->id)->lockForUpdate()->first();
+                if (! $lockedOrder) {
+                    throw new RuntimeException('سفارش پیدا نشد.');
+                }
+                if ($lockedOrder->status === 'cancelled') {
+                    throw new RuntimeException('برای سفارش لغوشده امکان ایجاد پرداخت وجود ندارد.');
+                }
+                if ($lockedOrder->status === 'paid' || $lockedOrder->payment_status === 'paid') {
+                    throw new RuntimeException('این سفارش قبلاً پرداخت شده است.');
+                }
+                if ($lockedOrder->status !== 'pending') {
+                    throw new RuntimeException('فقط سفارش‌های در انتظار می‌توانند وارد فرایند پرداخت شوند.');
+                }
+                $amount = (float) $lockedOrder->total_amount;
+                if ($amount <= 0) {
+                    throw new RuntimeException('مبلغ پرداخت باید بیشتر از صفر باشد.');
+                }
+                $existingPayment = $lockedOrder->payments()->where('status', 'pending')->latest('id')->first();
+                if ($existingPayment) {
+                    return $existingPayment;
+                }
 
-            return $lockedOrder->payments()->create([
-                'amount' => $amount, 'gateway' => null, 'status' => 'pending', 'authority' => null,
-                'transaction_id' => null, 'reference_number' => null, 'card_last_four' => null,
-                'card_token' => null, 'gateway_response' => null, 'paid_at' => null, 'refunded_at' => null,
-            ]);
+                return $lockedOrder->payments()->create([
+                    'amount' => $amount, 'gateway' => null, 'status' => 'pending', 'authority' => null,
+                    'transaction_id' => null, 'reference_number' => null, 'card_last_four' => null,
+                    'card_token' => null, 'gateway_response' => null, 'paid_at' => null, 'refunded_at' => null,
+                ]);
             });
         } finally {
             $lock->release();
