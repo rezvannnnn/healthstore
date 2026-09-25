@@ -74,7 +74,7 @@ php artisan queue:work --sleep=3 --tries=3 --timeout=90
 
 ## وضعیت سرویس‌های خارجی
 
-در حال حاضر پیاده‌سازی `FakeSmsProvider` برای محیط توسعه/تست استفاده می‌شود. پیش از production باید provider واقعی پیامک و تنظیمات امن آن در environment configuration جایگزین و پیکربندی شود.
+در توسعه و تست، `SMS_PROVIDER=fake` از `FakeSmsProvider` استفاده می‌کند. در production اگر provider واقعی تنظیم نشده باشد، برنامه عمداً ارسال OTP را موفق اعلام نمی‌کند و باید یک provider واقعی پیامک و credentialهای امن آن در environment configuration پیکربندی شود.
 
 ## مسیرهای اصلی
 
