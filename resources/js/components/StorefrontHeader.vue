@@ -1,10 +1,21 @@
 <script setup lang="ts">
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import BrandLogo from '@/components/BrandLogo.vue';
 import CartLink from '@/components/CartLink.vue';
 
 type ActiveSection = 'home' | 'products' | 'categories' | 'brands' | 'blog';
+
+type AuthUser = {
+    name?: string | null;
+};
+
+type SharedPageProps = {
+    auth: {
+        user: AuthUser | null;
+    };
+};
+
 
 const props = withDefaults(
     defineProps<{
@@ -16,6 +27,7 @@ const props = withDefaults(
 );
 
 const searchQuery = ref('');
+const page = usePage<SharedPageProps>();
 
 function searchProducts(): void {
     const query = searchQuery.value.trim();
@@ -92,18 +104,30 @@ function navClass(section: ActiveSection): string {
                 </form>
 
                 <div class="mr-auto flex items-center gap-1">
-                    <Link
-                        href="/login"
-                        class="hidden rounded-xl px-3 py-2 text-sm font-semibold text-dh-700 transition hover:bg-dh-50 sm:block"
-                    >
-                        ورود
-                    </Link>
-                    <Link
-                        href="/register"
-                        class="hidden rounded-xl bg-dh-green-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-dh-green-600 sm:block"
-                    >
-                        ثبت‌نام
-                    </Link>
+                    <template v-if="page.props.auth.user">
+                        <Link
+                            href="/account/profile"
+                            class="rounded-xl px-3 py-2 text-sm font-semibold text-dh-700 transition hover:bg-dh-50 sm:block"
+                        >
+                            {{
+                                page.props.auth.user.name || 'حساب کاربری'
+                            }}
+                        </Link>
+                    </template>
+                    <template v-else>
+                        <Link
+                            href="/login"
+                            class="hidden rounded-xl px-3 py-2 text-sm font-semibold text-dh-700 transition hover:bg-dh-50 sm:block"
+                        >
+                            ورود
+                        </Link>
+                        <Link
+                            href="/register"
+                            class="hidden rounded-xl bg-dh-green-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-dh-green-600 sm:block"
+                        >
+                            ثبت‌نام
+                        </Link>
+                    </template>
                     <CartLink />
                 </div>
             </div>
