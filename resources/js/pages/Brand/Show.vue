@@ -85,7 +85,10 @@ function pageUrl(page: number): string {
         <meta v-if="brand.logo" name="twitter:image" :content="brand.logo" />
     </Head>
 
-    <div dir="rtl" class="min-h-screen bg-dh-surface pb-24 text-dh-ink lg:pb-10">
+    <div
+        dir="rtl"
+        class="min-h-screen bg-dh-surface pb-24 text-dh-ink lg:pb-10"
+    >
         <StorefrontHeader active="brands" />
         <main
             dir="rtl"
