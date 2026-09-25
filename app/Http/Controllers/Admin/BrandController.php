@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Throwable;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -37,13 +38,22 @@ class BrandController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedData($request);
-        if ($request->hasFile('logo_file')) {
-            $data['logo'] = $this->mediaService->storeImage($request->file('logo_file'), 'brands');
-        }
-        unset($data['logo_file']);
-        $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
+        $storedLogo = null;
 
-        Brand::create($data);
+        try {
+            if ($request->hasFile('logo_file')) {
+                $storedLogo = $this->mediaService->storeImage($request->file('logo_file'), 'brands');
+                $data['logo'] = $storedLogo;
+            }
+            unset($data['logo_file']);
+            $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
+
+            Brand::create($data);
+        } catch (Throwable $exception) {
+            $this->mediaService->deleteIfStored($storedLogo);
+
+            throw $exception;
+        }
 
         return to_route('admin.brands.index')->with('success', 'برند با موفقیت ایجاد شد.');
     }
@@ -67,15 +77,24 @@ class BrandController extends Controller
     {
         $oldLogo = $brand->logo;
         $data = $this->validatedData($request, $brand);
-        if ($request->hasFile('logo_file')) {
-            $data['logo'] = $this->mediaService->storeImage($request->file('logo_file'), 'brands');
+        $storedLogo = null;
+
+        try {
+            if ($request->hasFile('logo_file')) {
+                $storedLogo = $this->mediaService->storeImage($request->file('logo_file'), 'brands');
+                $data['logo'] = $storedLogo;
+            }
+            unset($data['logo_file']);
+            $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
+
+            $brand->update($data);
+        } catch (Throwable $exception) {
+            $this->mediaService->deleteIfStored($storedLogo);
+
+            throw $exception;
         }
-        unset($data['logo_file']);
-        $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
 
-        $brand->update($data);
-
-        if ($request->hasFile('logo_file') && $data['logo'] !== $oldLogo) {
+        if ($storedLogo !== null && $storedLogo !== $oldLogo) {
             $this->mediaService->deleteIfStored($oldLogo);
         }
 
