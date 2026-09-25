@@ -157,7 +157,7 @@ function navClass(section: ActiveSection): string {
         aria-label="ناوبری موبایل"
     >
         <div
-            class="mx-auto grid max-w-md grid-cols-4 gap-1 text-center text-[11px] font-bold"
+            class="mx-auto grid max-w-md grid-cols-5 gap-1 text-center text-[11px] font-bold"
         >
             <Link
                 href="/"
@@ -181,10 +181,13 @@ function navClass(section: ActiveSection): string {
                 دسته‌ها
             </Link>
             <Link
-                href="/cart"
+                href="/brands"
                 class="rounded-xl px-2 py-2"
-                :class="'text-dh-muted'"
+                :class="props.active === 'brands' ? 'bg-dh-50 text-dh-700' : 'text-dh-muted'"
             >
+                برندها
+            </Link>
+            <Link href="/cart" class="rounded-xl px-2 py-2 text-dh-muted">
                 سبد
             </Link>
         </div>
