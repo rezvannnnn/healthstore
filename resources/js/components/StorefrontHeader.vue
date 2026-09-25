@@ -108,9 +108,7 @@ function navClass(section: ActiveSection): string {
                             href="/account/profile"
                             class="rounded-xl px-3 py-2 text-sm font-semibold text-dh-700 transition hover:bg-dh-50 sm:block"
                         >
-                            {{
-                                page.props.auth.user.name || 'حساب کاربری'
-                            }}
+                            {{ page.props.auth.user.name || 'حساب کاربری' }}
                         </Link>
                     </template>
                     <template v-else>
