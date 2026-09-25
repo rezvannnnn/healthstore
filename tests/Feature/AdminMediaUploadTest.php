@@ -209,6 +209,21 @@ class AdminMediaUploadTest extends TestCase
         $this->assertDatabaseMissing('articles', ['id' => $article->id]);
     }
 
+    public function test_svg_brand_logo_upload_is_rejected(): void
+    {
+        Storage::fake('public');
+
+        $response = $this->actingAs($this->admin())->post('/admin/brands', [
+            'name' => 'برند SVG نامعتبر',
+            'logo_file' => UploadedFile::fake()->create('brand.svg', 10, 'image/svg+xml'),
+            'is_active' => true,
+        ]);
+
+        $response->assertSessionHasErrors('logo_file');
+        $this->assertDatabaseMissing('brands', ['name' => 'برند SVG نامعتبر']);
+        Storage::disk('public')->assertDirectoryEmpty('brands');
+    }
+
     public function test_non_image_upload_is_rejected(): void
     {
         Storage::fake('public');
