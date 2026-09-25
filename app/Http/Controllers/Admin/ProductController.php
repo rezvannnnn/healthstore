@@ -21,7 +21,22 @@ use Inertia\Response;
 
 class ProductController extends Controller
 {
-    public function __construct(protected CartService $cartService, protected InventoryService $inventoryService, protected MediaService $mediaService) {}
+    protected CartService $cartService;
+
+    protected InventoryService $inventoryService;
+
+    protected MediaService $mediaService;
+
+    public function __construct(
+        CartService $cartService,
+        InventoryService $inventoryService,
+        MediaService $mediaService,
+    )
+    {
+        $this->cartService = $cartService;
+        $this->inventoryService = $inventoryService;
+        $this->mediaService = $mediaService;
+    }
 
     public function index(Request $request): Response
     {
