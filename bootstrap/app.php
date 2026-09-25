@@ -17,8 +17,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withSchedule(function (Schedule $schedule): void {
-        $schedule->command('inventory:release-expired-reservations')->everyMinute();
-        $schedule->command('coupon:release-expired-reservations')->everyMinute();
+        $schedule->command('inventory:release-expired-reservations')
+            ->everyMinute()
+            ->withoutOverlapping(2);
+        $schedule->command('coupon:release-expired-reservations')
+            ->everyMinute()
+            ->withoutOverlapping(2);
     })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
