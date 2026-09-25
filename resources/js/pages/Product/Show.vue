@@ -102,7 +102,7 @@ function addToCart(): void {
 </script>
 
 <template>
-    <div dir="rtl" class="min-h-screen bg-dh-surface text-dh-ink">
+    <div dir="rtl" class="min-h-screen bg-dh-surface pb-24 text-dh-ink lg:pb-10">
         <StorefrontHeader active="products" />
 
         <main
