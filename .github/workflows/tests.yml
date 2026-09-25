@@ -41,6 +41,25 @@ jobs:
           composer update --prefer-dist --no-interaction --no-progress
           composer setup
 
+      - name: Capture storefront Prettier output
+        run: |
+          npx prettier --write \
+            resources/js/pages/Product/Show.vue \
+            resources/js/pages/Brand/Show.vue \
+            resources/js/pages/Category/Show.vue \
+            resources/js/pages/Blog/Index.vue \
+            resources/js/pages/Blog/Show.vue \
+            resources/js/pages/Blog/Categories.vue \
+            resources/js/pages/Blog/Category.vue
+          git diff --no-ext-diff --unified=0 --no-color -- \
+            resources/js/pages/Product/Show.vue \
+            resources/js/pages/Brand/Show.vue \
+            resources/js/pages/Category/Show.vue \
+            resources/js/pages/Blog/Index.vue \
+            resources/js/pages/Blog/Show.vue \
+            resources/js/pages/Blog/Categories.vue \
+            resources/js/pages/Blog/Category.vue
+
       - name: Check frontend formatting
         run: npm run format:check
 
