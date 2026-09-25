@@ -44,9 +44,9 @@ return [
     'zarinpal' => [
         'merchant_id' => env('ZARINPAL_MERCHANT_ID'),
 
-        'sandbox' => (bool) env(
-            'ZARINPAL_SANDBOX',
-            true
+        'sandbox' => filter_var(
+            env('ZARINPAL_SANDBOX', false),
+            FILTER_VALIDATE_BOOL,
         ),
 
         'callback_url' => env(
@@ -56,21 +56,36 @@ return [
 
         /*
          * Keep gateway endpoints configurable so the payment module
-         * is not coupled to a single environment.
+         * can switch between sandbox and live without code changes.
          */
         'request_endpoint' => env(
             'ZARINPAL_REQUEST_ENDPOINT',
-            'https://api.zarinpal.com/pg/v4/payment/request.json'
+            filter_var(
+                env('ZARINPAL_SANDBOX', false),
+                FILTER_VALIDATE_BOOL,
+            )
+                ? 'https://sandbox.zarinpal.com/pg/v4/payment/request.json'
+                : 'https://api.zarinpal.com/pg/v4/payment/request.json'
         ),
 
         'verify_endpoint' => env(
             'ZARINPAL_VERIFY_ENDPOINT',
-            'https://api.zarinpal.com/pg/v4/payment/verify.json'
+            filter_var(
+                env('ZARINPAL_SANDBOX', false),
+                FILTER_VALIDATE_BOOL,
+            )
+                ? 'https://sandbox.zarinpal.com/pg/v4/payment/verify.json'
+                : 'https://api.zarinpal.com/pg/v4/payment/verify.json'
         ),
 
         'payment_base_url' => env(
             'ZARINPAL_PAYMENT_BASE_URL',
-            'https://www.zarinpal.com'
+            filter_var(
+                env('ZARINPAL_SANDBOX', false),
+                FILTER_VALIDATE_BOOL,
+            )
+                ? 'https://sandbox.zarinpal.com'
+                : 'https://www.zarinpal.com'
         ),
     ],
 
