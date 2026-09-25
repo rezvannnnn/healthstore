@@ -20,6 +20,7 @@ const form = useForm({
     parent_id: props.category.parent_id,
     description: props.category.description || '',
     image: props.category.image || '',
+    image_file: null as File | null,
     is_active: props.category.is_active,
     sort_order: props.category.sort_order,
 });
