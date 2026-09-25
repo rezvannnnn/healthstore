@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 class MediaService
 {
@@ -11,7 +12,13 @@ class MediaService
 
     public function storeImage(UploadedFile $file, string $directory): string
     {
-        return $file->store($directory, self::DISK);
+        $path = $file->store($directory, self::DISK);
+
+        if ($path === false) {
+            throw new RuntimeException('ذخیره تصویر با خطا مواجه شد.');
+        }
+
+        return $path;
     }
 
     public function url(?string $path): ?string
