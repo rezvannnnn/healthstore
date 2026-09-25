@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import BrandLogo from '@/components/BrandLogo.vue';
+import StorefrontHeader from '@/components/StorefrontHeader.vue';
 import { reactive, ref } from 'vue';
 
 interface Product {
@@ -176,33 +176,7 @@ function formatPrice(value: number | null): string {
         dir="rtl"
         class="min-h-screen bg-dh-surface pb-24 text-dh-ink lg:pb-10"
     >
-        <header
-            class="sticky top-0 z-40 border-b border-dh-100 bg-white/95 backdrop-blur"
-        >
-            <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between gap-4">
-                    <Link
-                        href="/"
-                        class="flex shrink-0 items-center"
-                        aria-label="داروخونه"
-                    >
-                        <BrandLogo imageClass="h-[4.25rem] w-[4.25rem]" />
-                    </Link>
-                    <div class="flex items-center gap-2">
-                        <Link
-                            href="/"
-                            class="hidden rounded-xl px-3 py-2 text-sm font-bold text-dh-700 hover:bg-dh-50 sm:block"
-                            >خانه</Link
-                        >
-                        <Link
-                            href="/cart"
-                            class="rounded-xl border border-dh-100 px-3 py-2 text-sm font-bold text-dh-700 hover:bg-dh-50"
-                            >سبد خرید</Link
-                        >
-                    </div>
-                </div>
-            </div>
-        </header>
+        <StorefrontHeader active="products" />
 
         <main
             class="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10"
@@ -613,74 +587,5 @@ function formatPrice(value: number | null): string {
             </nav>
         </main>
 
-        <nav
-            class="fixed inset-x-0 bottom-0 z-50 border-t border-dh-100 bg-white/95 px-3 py-2 backdrop-blur lg:hidden"
-            aria-label="ناوبری موبایل"
-        >
-            <div
-                class="mx-auto grid max-w-md grid-cols-3 gap-2 text-center text-[11px] font-bold text-dh-muted"
-            >
-                <Link href="/" class="rounded-xl px-2 py-2"
-                    ><svg
-                        viewBox="0 0 24 24"
-                        class="mx-auto mb-1 size-4"
-                        fill="none"
-                        aria-hidden="true"
-                    >
-                        <path
-                            d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z"
-                            stroke="currentColor"
-                            stroke-width="1.7"
-                            stroke-linejoin="round"
-                        /></svg
-                    >خانه</Link
-                ><Link
-                    href="/products"
-                    class="rounded-xl bg-dh-50 px-2 py-2 text-dh-700"
-                    ><svg
-                        viewBox="0 0 24 24"
-                        class="mx-auto mb-1 size-4"
-                        fill="none"
-                        aria-hidden="true"
-                    >
-                        <circle
-                            cx="10.5"
-                            cy="10.5"
-                            r="6"
-                            stroke="currentColor"
-                            stroke-width="1.7"
-                        />
-                        <path
-                            d="m15 15 5 5"
-                            stroke="currentColor"
-                            stroke-width="1.7"
-                            stroke-linecap="round"
-                        /></svg
-                    >فروشگاه</Link
-                ><Link href="/cart" class="rounded-xl px-2 py-2"
-                    ><svg
-                        viewBox="0 0 24 24"
-                        class="mx-auto mb-1 size-4"
-                        fill="none"
-                        aria-hidden="true"
-                    >
-                        <path
-                            d="M4 5h2l1.5 10.2a2 2 0 0 0 2 1.8h7.6a2 2 0 0 0 2-1.7L20 8H7"
-                            stroke="currentColor"
-                            stroke-width="1.7"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        />
-                        <circle cx="10" cy="20" r="1" fill="currentColor" />
-                        <circle
-                            cx="18"
-                            cy="20"
-                            r="1"
-                            fill="currentColor"
-                        /></svg
-                    >سبد خرید</Link
-                >
-            </div>
-        </nav>
     </div>
 </template>
