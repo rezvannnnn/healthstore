@@ -41,6 +41,11 @@ jobs:
           composer update --prefer-dist --no-interaction --no-progress
           composer setup
 
+      - name: Capture shared header Prettier output
+        run: |
+          npx prettier --write resources/js/components/StorefrontHeader.vue
+          git diff --no-ext-diff --unified=0 --no-color -- resources/js/components/StorefrontHeader.vue
+
       - name: Check frontend formatting
         run: npm run format:check
 
