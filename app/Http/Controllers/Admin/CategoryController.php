@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class CategoryController extends Controller
 {
@@ -42,13 +43,22 @@ class CategoryController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedData($request);
-        if ($request->hasFile('image_file')) {
-            $data['image'] = $this->mediaService->storeImage($request->file('image_file'), 'categories');
-        }
-        unset($data['image_file']);
-        $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
+        $storedImage = null;
 
-        Category::create($data);
+        try {
+            if ($request->hasFile('image_file')) {
+                $storedImage = $this->mediaService->storeImage($request->file('image_file'), 'categories');
+                $data['image'] = $storedImage;
+            }
+            unset($data['image_file']);
+            $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
+
+            Category::create($data);
+        } catch (Throwable $exception) {
+            $this->mediaService->deleteIfStored($storedImage);
+
+            throw $exception;
+        }
 
         return to_route('admin.categories.index')->with('success', 'دسته‌بندی با موفقیت ایجاد شد.');
     }
@@ -75,15 +85,24 @@ class CategoryController extends Controller
     {
         $oldImage = $category->image;
         $data = $this->validatedData($request, $category);
-        if ($request->hasFile('image_file')) {
-            $data['image'] = $this->mediaService->storeImage($request->file('image_file'), 'categories');
+        $storedImage = null;
+
+        try {
+            if ($request->hasFile('image_file')) {
+                $storedImage = $this->mediaService->storeImage($request->file('image_file'), 'categories');
+                $data['image'] = $storedImage;
+            }
+            unset($data['image_file']);
+            $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
+
+            $category->update($data);
+        } catch (Throwable $exception) {
+            $this->mediaService->deleteIfStored($storedImage);
+
+            throw $exception;
         }
-        unset($data['image_file']);
-        $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
 
-        $category->update($data);
-
-        if ($request->hasFile('image_file') && $data['image'] !== $oldImage) {
+        if ($storedImage !== null && $storedImage !== $oldImage) {
             $this->mediaService->deleteIfStored($oldImage);
         }
 
