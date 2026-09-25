@@ -38,7 +38,7 @@ jobs:
 
       - name: Setup Application
         run: |
-          composer update --prefer-dist --no-interaction --no-progress
+          composer install --prefer-dist --no-interaction --no-progress
           composer setup
 
       - name: Check frontend formatting
