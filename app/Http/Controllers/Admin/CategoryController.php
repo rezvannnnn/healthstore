@@ -15,9 +15,7 @@ use Inertia\Response;
 
 class CategoryController extends Controller
 {
-    public function __construct(
-        protected MediaService $mediaService,
-    ) {}
+    public function __construct(protected MediaService $mediaService) {}
 
     public function index(): Response
     {
