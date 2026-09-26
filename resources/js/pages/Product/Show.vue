@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
+import StorefrontHeader from '@/components/StorefrontHeader.vue';
 import { computed, ref } from 'vue';
 
 interface ProductImage {
@@ -52,6 +53,8 @@ const selectedImage = ref(
     props.product.images[0]?.path || props.product.image || null,
 );
 const quantity = ref(1);
+const addingToCart = ref(false);
+const cartAdded = ref(false);
 const gallery = computed(() => {
     const images = props.product.images.map((image) => image.path);
     if (props.product.image && !images.includes(props.product.image)) {
@@ -70,239 +73,466 @@ function formatPrice(value: number | null): string {
         : `${value.toLocaleString('fa-IR')} تومان`;
 }
 function addToCart(): void {
+    if (
+        addingToCart.value ||
+        props.product.available_quantity < 1 ||
+        props.product.price === null
+    ) {
+        return;
+    }
+
     router.post(
         '/cart/items',
         { product_id: props.product.id, quantity: quantity.value },
-        { preserveScroll: true },
+        {
+            preserveScroll: true,
+            onStart: () => {
+                addingToCart.value = true;
+                cartAdded.value = false;
+            },
+            onSuccess: () => {
+                cartAdded.value = true;
+            },
+            onFinish: () => {
+                addingToCart.value = false;
+            },
+        },
     );
 }
 </script>
 
 <template>
-    <Head :title="seo.title">
-        <meta
-            v-if="seo.description"
-            name="description"
-            :content="seo.description"
-        />
-        <link rel="canonical" :href="seo.canonical" />
-        <meta property="og:type" content="product" />
-        <meta property="og:title" :content="seo.title" />
-        <meta
-            v-if="seo.description"
-            property="og:description"
-            :content="seo.description"
-        />
-        <meta property="og:url" :content="seo.canonical" />
-        <meta
-            v-if="product.image"
-            property="og:image"
-            :content="product.image"
-        />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" :content="seo.title" />
-        <meta
-            v-if="seo.description"
-            name="twitter:description"
-            :content="seo.description"
-        />
-        <meta
-            v-if="product.image"
-            name="twitter:image"
-            :content="product.image"
-        />
-    </Head>
+    <div
+        dir="rtl"
+        class="min-h-screen bg-dh-surface pb-24 text-dh-ink lg:pb-10"
+    >
+        <StorefrontHeader active="products" />
 
-    <main dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 dark:bg-gray-950">
-        <div class="mx-auto max-w-6xl space-y-8">
-            <nav class="text-sm text-gray-500 dark:text-gray-400">
-                <Link href="/products" class="hover:text-indigo-600"
-                    >محصولات</Link
-                ><span class="mx-2">/</span><span>{{ product.name }}</span>
-            </nav>
-            <section
-                class="grid gap-8 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-gray-200 md:grid-cols-2 md:p-8 dark:bg-gray-900 dark:ring-gray-800"
+        <main
+            class="mx-auto max-w-7xl px-4 py-6 pb-28 sm:px-6 sm:py-8 lg:px-8 lg:pb-12"
+        >
+            <nav
+                class="mb-6 flex flex-wrap items-center gap-2 text-sm text-dh-muted"
+                aria-label="مسیر صفحه"
             >
-                <div class="space-y-4">
-                    <div
-                        class="aspect-square rounded-2xl bg-gray-100 dark:bg-gray-800"
+                <Link href="/" class="transition hover:text-dh-700">خانه</Link>
+                <span>/</span>
+                <Link href="/products" class="transition hover:text-dh-700"
+                    >محصولات</Link
+                >
+                <template v-if="product.category_slug">
+                    <span>/</span>
+                    <Link
+                        :href="'/categories/' + product.category_slug"
+                        class="transition hover:text-dh-700"
                     >
-                        <img
-                            v-if="selectedImage"
-                            :src="selectedImage"
-                            :alt="product.name"
-                            class="h-full w-full object-contain p-8"
-                        />
+                        {{ product.category }}
+                    </Link>
+                </template>
+                <span>/</span>
+                <span class="line-clamp-1 font-medium text-dh-800">{{
+                    product.name
+                }}</span>
+            </nav>
+
+            <section
+                class="overflow-hidden rounded-[2rem] border border-dh-100 bg-white shadow-[0_16px_50px_rgba(20,108,114,0.07)]"
+            >
+                <div class="grid lg:grid-cols-[1.02fr_0.98fr]">
+                    <div
+                        class="border-b border-dh-100 p-4 sm:p-6 lg:border-b-0 lg:border-l lg:p-8"
+                    >
                         <div
-                            v-else
-                            class="flex h-full items-center justify-center text-gray-400"
+                            class="relative aspect-square overflow-hidden rounded-[1.6rem] bg-gradient-to-br from-dh-50 via-white to-dh-green-50"
                         >
-                            بدون تصویر
+                            <span
+                                v-if="
+                                    product.compare_at_price &&
+                                    product.price !== null &&
+                                    product.compare_at_price > product.price
+                                "
+                                class="absolute top-4 right-4 z-10 rounded-full bg-dh-green-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm"
+                            >
+                                پیشنهاد ویژه
+                            </span>
+
+                            <img
+                                v-if="selectedImage"
+                                :src="selectedImage"
+                                :alt="product.name"
+                                class="h-full w-full object-contain p-8 sm:p-12"
+                            />
+                            <div
+                                v-else
+                                class="flex h-full flex-col items-center justify-center gap-3 text-dh-muted"
+                            >
+                                <span
+                                    class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm"
+                                >
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        class="h-8 w-8"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.5"
+                                    >
+                                        <rect
+                                            x="3"
+                                            y="4"
+                                            width="18"
+                                            height="16"
+                                            rx="2"
+                                        />
+                                        <path
+                                            d="M7 15l3-3 3 3 2-2 3 3"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                        />
+                                    </svg>
+                                </span>
+                                بدون تصویر
+                            </div>
+                        </div>
+
+                        <div
+                            v-if="gallery.length > 1"
+                            class="mt-4 grid grid-cols-5 gap-2.5 sm:gap-3"
+                        >
+                            <button
+                                v-for="(image, index) in gallery"
+                                :key="image"
+                                type="button"
+                                class="aspect-square overflow-hidden rounded-2xl border bg-white p-1.5 transition"
+                                :class="
+                                    selectedImage === image
+                                        ? 'border-dh-600 ring-2 ring-dh-100'
+                                        : 'border-dh-100 hover:border-dh-300'
+                                "
+                                :aria-label="'تصویر ' + (index + 1)"
+                                @click="selectedImage = image"
+                            >
+                                <img
+                                    :src="image"
+                                    :alt="product.name"
+                                    class="h-full w-full object-contain"
+                                />
+                            </button>
                         </div>
                     </div>
-                    <div
-                        v-if="gallery.length > 1"
-                        class="grid grid-cols-5 gap-2"
-                    >
-                        <button
-                            v-for="image in gallery"
-                            :key="image"
-                            type="button"
-                            class="aspect-square rounded-xl bg-gray-100 p-1 ring-2 dark:bg-gray-800"
-                            :class="
-                                selectedImage === image
-                                    ? 'ring-indigo-500'
-                                    : 'ring-transparent'
-                            "
-                            @click="selectedImage = image"
+
+                    <div class="flex flex-col p-5 sm:p-7 lg:p-10">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <Link
+                                v-if="product.brand && product.brand_slug"
+                                :href="'/brands/' + product.brand_slug"
+                                class="rounded-full bg-dh-50 px-3 py-1.5 text-xs font-bold text-dh-700 transition hover:bg-dh-100"
+                            >
+                                {{ product.brand }}
+                            </Link>
+                            <span
+                                v-if="product.product_type"
+                                class="rounded-full bg-dh-green-50 px-3 py-1.5 text-xs font-semibold text-dh-green-700"
+                            >
+                                {{ product.product_type }}
+                            </span>
+                        </div>
+
+                        <h1
+                            class="mt-5 text-2xl leading-[1.35] font-extrabold text-dh-900 sm:text-3xl lg:text-[2.15rem]"
                         >
-                            <img
-                                :src="image"
-                                :alt="product.name"
-                                class="h-full w-full object-contain"
-                            />
-                        </button>
-                    </div>
-                </div>
-                <div class="flex flex-col justify-center">
-                    <div class="flex flex-wrap gap-2 text-xs">
-                        <Link
-                            v-if="product.brand && product.brand_slug"
-                            :href="'/brands/' + product.brand_slug"
-                            class="rounded-full bg-indigo-50 px-3 py-1 font-medium text-indigo-700 hover:underline dark:bg-indigo-950 dark:text-indigo-300"
+                            {{ product.name }}
+                        </h1>
+
+                        <p
+                            v-if="product.short_description"
+                            class="mt-4 text-sm leading-7 text-dh-muted sm:text-base"
                         >
-                            {{ product.brand }}
-                        </Link>
-                        <Link
-                            v-if="product.category_slug"
-                            :href="'/categories/' + product.category_slug"
-                            class="rounded-full bg-gray-100 px-3 py-1 text-gray-600 dark:bg-gray-800 dark:text-gray-300"
-                            >{{ product.category }}</Link
-                        >
-                    </div>
-                    <h1
-                        class="mt-4 text-3xl leading-tight font-bold text-gray-900 dark:text-white"
-                    >
-                        {{ product.name }}
-                    </h1>
-                    <p
-                        v-if="product.short_description"
-                        class="mt-4 text-base leading-7 text-gray-600 dark:text-gray-300"
-                    >
-                        {{ product.short_description }}
-                    </p>
-                    <div
-                        class="mt-8 rounded-2xl bg-gray-50 p-5 dark:bg-gray-950"
-                    >
+                            {{ product.short_description }}
+                        </p>
+
+                        <div class="my-7 h-px bg-dh-100"></div>
+
                         <div class="flex items-end justify-between gap-4">
                             <div>
+                                <div class="text-xs font-medium text-dh-muted">
+                                    قیمت مصرف‌کننده
+                                </div>
                                 <div
-                                    class="text-2xl font-bold text-gray-900 dark:text-white"
+                                    class="mt-1 text-2xl font-extrabold text-dh-800 sm:text-3xl"
                                 >
                                     {{ formatPrice(product.price) }}
                                 </div>
                                 <div
                                     v-if="
                                         product.compare_at_price &&
-                                        product.compare_at_price >
-                                            (product.price ?? 0)
+                                        product.price !== null &&
+                                        product.compare_at_price > product.price
                                     "
-                                    class="mt-1 text-sm text-gray-400 line-through"
+                                    class="mt-1.5 text-sm text-dh-muted line-through"
                                 >
                                     {{ formatPrice(product.compare_at_price) }}
                                 </div>
                             </div>
+
                             <div
                                 v-if="product.available"
-                                class="text-sm font-medium text-emerald-600"
+                                class="flex items-center gap-1.5 rounded-full bg-dh-green-50 px-3 py-2 text-xs font-bold text-dh-green-700"
+                            >
+                                <span
+                                    class="h-2 w-2 rounded-full bg-dh-green-500"
+                                ></span>
+                                موجود در انبار
+                            </div>
+                            <div
+                                v-else
+                                class="rounded-full bg-red-50 px-3 py-2 text-xs font-bold text-red-600"
+                            >
+                                ناموجود
+                            </div>
+                        </div>
+
+                        <div
+                            v-if="product.available && product.price !== null"
+                            class="mt-6 rounded-2xl bg-dh-surface p-3 sm:p-4"
+                        >
+                            <div class="flex gap-3">
+                                <div
+                                    class="flex h-12 items-center rounded-xl border border-dh-100 bg-white"
+                                >
+                                    <button
+                                        type="button"
+                                        class="flex h-full w-10 items-center justify-center text-xl text-dh-700 transition hover:bg-dh-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                        aria-label="کاهش تعداد"
+                                        :disabled="addingToCart"
+                                        @click="
+                                            quantity = Math.max(1, quantity - 1)
+                                        "
+                                    >
+                                        −
+                                    </button>
+                                    <span
+                                        class="w-9 text-center text-sm font-bold"
+                                        >{{ quantity }}</span
+                                    >
+                                    <button
+                                        type="button"
+                                        class="flex h-full w-10 items-center justify-center text-xl text-dh-700 transition hover:bg-dh-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                        aria-label="افزایش تعداد"
+                                        :disabled="addingToCart"
+                                        @click="
+                                            quantity = Math.min(
+                                                product.available_quantity,
+                                                quantity + 1,
+                                            )
+                                        "
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                                <button
+                                    type="button"
+                                    class="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-dh-700 px-5 font-bold text-white shadow-lg shadow-dh-700/15 transition hover:-translate-y-0.5 hover:bg-dh-800 disabled:cursor-not-allowed disabled:opacity-50"
+                                    :disabled="
+                                        addingToCart ||
+                                        product.available_quantity < 1 ||
+                                        product.price === null
+                                    "
+                                    :aria-busy="addingToCart"
+                                    @click="addToCart"
+                                >
+                                    <svg
+                                        v-if="addingToCart"
+                                        viewBox="0 0 24 24"
+                                        class="h-5 w-5 animate-spin"
+                                        fill="none"
+                                        aria-hidden="true"
+                                    >
+                                        <circle
+                                            cx="12"
+                                            cy="12"
+                                            r="9"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            opacity="0.25"
+                                        />
+                                        <path
+                                            d="M21 12a9 9 0 0 1-9 9"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                        />
+                                    </svg>
+                                    <svg
+                                        v-else
+                                        viewBox="0 0 24 24"
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                        aria-hidden="true"
+                                    >
+                                        <path
+                                            d="M4 5h2l1.5 10.2a2 2 0 0 0 2 1.8h7.6a2 2 0 0 0 1.9-1.5L21 8H7"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                        />
+                                        <circle cx="10" cy="20" r="1" />
+                                        <circle cx="18" cy="20" r="1" />
+                                    </svg>
+                                    {{
+                                        addingToCart
+                                            ? 'در حال افزودن…'
+                                            : 'افزودن به سبد خرید'
+                                    }}
+                                </button>
+                            </div>
+                            <p
+                                class="mt-2 text-center text-[11px] text-dh-muted"
                             >
                                 {{
                                     product.available_quantity.toLocaleString(
                                         'fa-IR',
                                     )
                                 }}
-                                عدد موجود
-                            </div>
+                                عدد قابل سفارش است.
+                            </p>
                             <div
-                                v-else
-                                class="text-sm font-medium text-red-500"
+                                v-if="cartAdded"
+                                class="mt-3 rounded-xl bg-dh-green-50 px-3 py-2 text-center text-xs font-bold text-dh-green-700"
+                                role="status"
                             >
-                                ناموجود
+                                محصول با موفقیت به سبد خرید اضافه شد.
                             </div>
                         </div>
+
+                        <div class="mt-6 grid gap-2.5 sm:grid-cols-3">
+                            <div
+                                class="rounded-2xl border border-dh-100 bg-white p-3"
+                            >
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    class="h-5 w-5 text-dh-700"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.6"
+                                >
+                                    <path
+                                        d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3Z"
+                                    />
+                                    <path
+                                        d="M9 12l2 2 4-4"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    />
+                                </svg>
+                                <div class="mt-2 text-xs font-bold text-dh-800">
+                                    خرید مطمئن
+                                </div>
+                                <div
+                                    class="mt-1 text-[11px] leading-5 text-dh-muted"
+                                >
+                                    اطلاعات شفاف محصول
+                                </div>
+                            </div>
+                            <div
+                                class="rounded-2xl border border-dh-100 bg-white p-3"
+                            >
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    class="h-5 w-5 text-dh-green-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.6"
+                                >
+                                    <path
+                                        d="M3 7h11v10H3zM14 10h4l3 3v4h-7z"
+                                        stroke-linejoin="round"
+                                    />
+                                    <circle cx="7" cy="18" r="1.5" />
+                                    <circle cx="18" cy="18" r="1.5" />
+                                </svg>
+                                <div class="mt-2 text-xs font-bold text-dh-800">
+                                    ارسال سفارش
+                                </div>
+                                <div
+                                    class="mt-1 text-[11px] leading-5 text-dh-muted"
+                                >
+                                    پیگیری ساده و شفاف
+                                </div>
+                            </div>
+                            <div
+                                class="rounded-2xl border border-dh-100 bg-white p-3"
+                            >
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    class="h-5 w-5 text-dh-700"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.6"
+                                >
+                                    <path
+                                        d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"
+                                    />
+                                    <path
+                                        d="M12 7v5l3 2"
+                                        stroke-linecap="round"
+                                    />
+                                </svg>
+                                <div class="mt-2 text-xs font-bold text-dh-800">
+                                    پشتیبانی
+                                </div>
+                                <div
+                                    class="mt-1 text-[11px] leading-5 text-dh-muted"
+                                >
+                                    همراه شما در خرید
+                                </div>
+                            </div>
+                        </div>
+
                         <div
-                            v-if="product.available && product.price !== null"
-                            class="mt-5 flex gap-3"
+                            v-if="product.description"
+                            class="mt-7 border-t border-dh-100 pt-6"
                         >
-                            <div
-                                class="flex items-center rounded-xl border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
+                            <h2 class="text-lg font-extrabold text-dh-900">
+                                درباره محصول
+                            </h2>
+                            <p
+                                class="mt-3 text-sm leading-8 whitespace-pre-line text-dh-muted"
                             >
-                                <button
-                                    type="button"
-                                    class="px-3 py-2 text-lg"
-                                    @click="
-                                        quantity = Math.max(1, quantity - 1)
-                                    "
-                                >
-                                    −
-                                </button>
-                                <span class="min-w-10 text-center">{{
-                                    quantity
-                                }}</span>
-                                <button
-                                    type="button"
-                                    class="px-3 py-2 text-lg"
-                                    @click="
-                                        quantity = Math.min(
-                                            product.available_quantity,
-                                            quantity + 1,
-                                        )
-                                    "
-                                >
-                                    +
-                                </button>
-                            </div>
-                            <button
-                                type="button"
-                                class="flex-1 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-700"
-                                @click="addToCart"
-                            >
-                                افزودن به سبد
-                            </button>
+                                {{ product.description }}
+                            </p>
                         </div>
-                    </div>
-                    <div
-                        v-if="product.description"
-                        class="mt-8 leading-8 whitespace-pre-line text-gray-700 dark:text-gray-300"
-                    >
-                        {{ product.description }}
                     </div>
                 </div>
             </section>
 
             <section
                 v-if="specifications.length"
-                class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-gray-200 md:p-8 dark:bg-gray-900 dark:ring-gray-800"
+                class="mt-6 rounded-[2rem] border border-dh-100 bg-white p-5 shadow-[0_12px_40px_rgba(20,108,114,0.05)] sm:p-7 lg:p-8"
             >
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-                    مشخصات محصول
-                </h2>
+                <div class="flex items-end justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-dh-green-600"
+                            >جزئیات محصول</span
+                        >
+                        <h2 class="mt-1 text-2xl font-extrabold text-dh-900">
+                            مشخصات فنی
+                        </h2>
+                    </div>
+                </div>
+
                 <dl
-                    class="mt-5 divide-y divide-gray-200 overflow-hidden rounded-2xl border border-gray-200 dark:divide-gray-800 dark:border-gray-800"
+                    class="mt-6 overflow-hidden rounded-2xl border border-dh-100"
                 >
                     <div
                         v-for="[key, value] in specifications"
                         :key="key"
-                        class="grid gap-2 px-4 py-3 sm:grid-cols-3"
+                        class="grid gap-2 border-b border-dh-100 px-4 py-4 last:border-b-0 sm:grid-cols-[220px_1fr] sm:px-5"
                     >
-                        <dt
-                            class="font-medium text-gray-600 dark:text-gray-300"
-                        >
+                        <dt class="text-sm font-bold text-dh-muted">
                             {{ key }}
                         </dt>
-                        <dd
-                            class="break-words text-gray-900 sm:col-span-2 dark:text-white"
-                        >
+                        <dd class="text-sm font-medium break-words text-dh-800">
                             {{
                                 typeof value === 'object'
                                     ? JSON.stringify(value)
@@ -321,53 +551,45 @@ function addToCart(): void {
                     product.quantity_per_unit ||
                     product.product_type
                 "
-                class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-gray-200 md:p-8 dark:bg-gray-900 dark:ring-gray-800"
+                class="mt-6 rounded-[2rem] border border-dh-100 bg-white p-5 shadow-[0_12px_40px_rgba(20,108,114,0.05)] sm:p-7 lg:p-8"
             >
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 class="text-xl font-extrabold text-dh-900">
                     اطلاعات محصول
                 </h2>
                 <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <div
                         v-if="product.sku"
-                        class="rounded-2xl bg-gray-50 p-4 dark:bg-gray-950"
+                        class="rounded-2xl bg-dh-surface p-4"
                     >
-                        <div class="text-xs text-gray-500">کد کالا</div>
-                        <div
-                            class="mt-1 font-medium text-gray-900 dark:text-white"
-                        >
+                        <div class="text-xs text-dh-muted">کد کالا</div>
+                        <div class="mt-1 font-bold text-dh-800">
                             {{ product.sku }}
                         </div>
                     </div>
                     <div
                         v-if="product.barcode"
-                        class="rounded-2xl bg-gray-50 p-4 dark:bg-gray-950"
+                        class="rounded-2xl bg-dh-surface p-4"
                     >
-                        <div class="text-xs text-gray-500">بارکد</div>
-                        <div
-                            class="mt-1 font-medium text-gray-900 dark:text-white"
-                        >
+                        <div class="text-xs text-dh-muted">بارکد</div>
+                        <div class="mt-1 font-bold text-dh-800">
                             {{ product.barcode }}
                         </div>
                     </div>
                     <div
                         v-if="product.unit"
-                        class="rounded-2xl bg-gray-50 p-4 dark:bg-gray-950"
+                        class="rounded-2xl bg-dh-surface p-4"
                     >
-                        <div class="text-xs text-gray-500">واحد</div>
-                        <div
-                            class="mt-1 font-medium text-gray-900 dark:text-white"
-                        >
+                        <div class="text-xs text-dh-muted">واحد</div>
+                        <div class="mt-1 font-bold text-dh-800">
                             {{ product.unit }}
                         </div>
                     </div>
                     <div
                         v-if="product.quantity_per_unit"
-                        class="rounded-2xl bg-gray-50 p-4 dark:bg-gray-950"
+                        class="rounded-2xl bg-dh-surface p-4"
                     >
-                        <div class="text-xs text-gray-500">تعداد در واحد</div>
-                        <div
-                            class="mt-1 font-medium text-gray-900 dark:text-white"
-                        >
+                        <div class="text-xs text-dh-muted">تعداد در واحد</div>
+                        <div class="mt-1 font-bold text-dh-800">
                             {{ product.quantity_per_unit }}
                         </div>
                     </div>
@@ -376,64 +598,60 @@ function addToCart(): void {
 
             <section
                 v-if="relatedProducts.length"
-                class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-gray-200 md:p-8 dark:bg-gray-900 dark:ring-gray-800"
+                class="mt-6 rounded-[2rem] border border-dh-100 bg-white p-5 shadow-[0_12px_40px_rgba(20,108,114,0.05)] sm:p-7 lg:p-8"
             >
-                <div class="mb-5 flex items-end justify-between gap-4">
+                <div class="flex items-end justify-between gap-4">
                     <div>
-                        <h2
-                            class="text-2xl font-bold text-gray-900 dark:text-white"
+                        <span class="text-xs font-bold text-dh-green-600"
+                            >پیشنهاد برای شما</span
                         >
+                        <h2 class="mt-1 text-2xl font-extrabold text-dh-900">
                             محصولات مرتبط
                         </h2>
-                        <p
-                            class="mt-1 text-sm text-gray-500 dark:text-gray-400"
-                        >
-                            محصولات دیگری از همین دسته‌بندی
-                        </p>
                     </div>
                     <Link
                         v-if="product.category_slug"
                         :href="`/products?category=${encodeURIComponent(product.category_slug)}`"
-                        class="text-sm font-medium text-indigo-600 hover:text-indigo-700"
-                        >مشاهده همه</Link
+                        class="hidden rounded-xl bg-dh-50 px-4 py-2 text-sm font-bold text-dh-700 transition hover:bg-dh-100 sm:block"
                     >
+                        مشاهده همه
+                    </Link>
                 </div>
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+                <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <Link
                         v-for="related in relatedProducts"
                         :key="related.id"
                         :href="`/products/${related.slug}`"
-                        class="group rounded-2xl border border-gray-200 bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-950"
+                        class="group rounded-2xl border border-dh-100 bg-white p-3.5 transition hover:-translate-y-1 hover:border-dh-200 hover:shadow-lg hover:shadow-dh-700/5"
                     >
                         <div
-                            class="aspect-square rounded-xl bg-gray-100 dark:bg-gray-900"
+                            class="aspect-square overflow-hidden rounded-xl bg-dh-surface"
                         >
                             <img
                                 v-if="related.image"
                                 :src="related.image"
                                 :alt="related.name"
-                                class="h-full w-full object-contain p-4"
+                                class="h-full w-full object-contain p-4 transition duration-300 group-hover:scale-105"
                             />
                             <div
                                 v-else
-                                class="flex h-full items-center justify-center text-sm text-gray-400"
+                                class="flex h-full items-center justify-center text-xs text-dh-muted"
                             >
                                 بدون تصویر
                             </div>
                         </div>
                         <h3
-                            class="mt-3 line-clamp-2 font-semibold text-gray-900 group-hover:text-indigo-600 dark:text-white"
+                            class="mt-3 line-clamp-2 text-sm leading-6 font-bold text-dh-800 transition group-hover:text-dh-700"
                         >
                             {{ related.name }}
                         </h3>
-                        <p
-                            class="mt-2 text-sm text-gray-600 dark:text-gray-300"
-                        >
+                        <p class="mt-2 text-sm font-extrabold text-dh-700">
                             {{ formatPrice(related.price) }}
                         </p>
                     </Link>
                 </div>
             </section>
-        </div>
-    </main>
+        </main>
+    </div>
 </template>

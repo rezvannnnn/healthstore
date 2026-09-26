@@ -9,6 +9,7 @@ type Category = {
     slug: string;
     description: string | null;
     image: string | null;
+    image_url: string | null;
     is_active: boolean;
     sort_order: number;
 };
@@ -19,19 +20,31 @@ const form = useForm({
     parent_id: props.category.parent_id,
     description: props.category.description || '',
     image: props.category.image || '',
+    image_file: null as File | null,
     is_active: props.category.is_active,
     sort_order: props.category.sort_order,
 });
-const submit = () => form.put(`/admin/categories/${props.category.id}`);
+const handleImageChange = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    form.image_file = input.files?.[0] ?? null;
+};
+
+const submit = () =>
+    form
+        .transform((data) => ({ ...data, _method: 'put' }))
+        .post(`/admin/categories/${props.category.id}`, {
+            forceFormData: true,
+            onFinish: () => form.transform((data) => data),
+        });
 </script>
 
 <template>
     <Head title="ویرایش دسته‌بندی" />
-    <div dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 text-gray-900">
+    <div dir="rtl" class="min-h-screen bg-dh-50 px-4 py-8 text-dh-900">
         <div class="mx-auto max-w-3xl">
             <div class="mb-6 flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500">مدیریت / دسته‌بندی‌ها</p>
+                    <p class="text-sm text-dh-muted">مدیریت / دسته‌بندی‌ها</p>
                     <h1 class="text-3xl font-bold">ویرایش دسته‌بندی</h1>
                 </div>
                 <Link
@@ -42,7 +55,7 @@ const submit = () => form.put(`/admin/categories/${props.category.id}`);
             </div>
             <form
                 @submit.prevent="submit"
-                class="space-y-5 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
+                class="space-y-5 rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
             >
                 <div>
                     <label class="mb-1 block text-sm font-medium">نام</label
@@ -87,9 +100,19 @@ const submit = () => form.put(`/admin/categories/${props.category.id}`);
                 <div>
                     <label class="mb-1 block text-sm font-medium">تصویر</label
                     ><input
-                        v-model="form.image"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
                         class="w-full rounded-lg border px-3 py-2"
+                        @change="handleImageChange"
                     />
+                    <a
+                        v-if="props.category.image_url"
+                        :href="props.category.image_url"
+                        target="_blank"
+                        rel="noreferrer"
+                        class="mt-2 inline-block text-sm text-dh-700 underline"
+                        >مشاهده تصویر فعلی</a
+                    >
                 </div>
                 <div class="flex gap-6">
                     <label class="flex items-center gap-2"
@@ -108,7 +131,7 @@ const submit = () => form.put(`/admin/categories/${props.category.id}`);
                 </div>
                 <button
                     :disabled="form.processing"
-                    class="rounded-lg bg-gray-900 px-5 py-2.5 font-medium text-white disabled:opacity-50"
+                    class="rounded-lg bg-dh-700 px-5 py-2.5 font-medium text-white disabled:opacity-50"
                 >
                     ذخیره تغییرات
                 </button>

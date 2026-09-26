@@ -81,34 +81,50 @@ const paymentLabel = (value: string) =>
         failed: 'ناموفق',
         refunded: 'برگشت خورده',
     })[value] || value;
+const statusClasses = (value: string) =>
+    ({
+        pending: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200',
+        paid: 'bg-dh-50 text-dh-700 ring-1 ring-dh-100',
+        processing: 'bg-sky-50 text-sky-700 ring-1 ring-sky-200',
+        shipped: 'bg-violet-50 text-violet-700 ring-1 ring-violet-200',
+        delivered: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
+        cancelled: 'bg-red-50 text-red-700 ring-1 ring-red-200',
+    })[value] || 'bg-dh-50 text-dh-700 ring-1 ring-dh-100';
+const paymentClasses = (value: string) =>
+    ({
+        pending: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200',
+        paid: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
+        failed: 'bg-red-50 text-red-700 ring-1 ring-red-200',
+        refunded: 'bg-violet-50 text-violet-700 ring-1 ring-violet-200',
+    })[value] || 'bg-dh-50 text-dh-700 ring-1 ring-dh-100';
 </script>
 
 <template>
     <Head title="مدیریت سفارش‌ها" />
     <div
         dir="rtl"
-        class="min-h-screen bg-gray-50 px-4 py-8 text-gray-900 sm:px-6 lg:px-8"
+        class="min-h-screen bg-dh-50 px-4 py-8 text-dh-900 sm:px-6 lg:px-8"
     >
         <div class="mx-auto max-w-7xl">
             <div
                 class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
             >
                 <div>
-                    <p class="text-sm text-gray-500">HealthStore / مدیریت</p>
+                    <p class="text-sm text-dh-muted">HealthStore / مدیریت</p>
                     <h1 class="text-3xl font-bold">سفارش‌ها</h1>
-                    <p class="mt-2 text-gray-600">
+                    <p class="mt-2 text-dh-700">
                         مشاهده، جستجو و پیگیری سفارش‌های مشتریان
                     </p>
                 </div>
                 <Link
                     href="/admin"
-                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-100"
+                    class="rounded-lg border border-dh-200 bg-white px-4 py-2 text-sm font-medium hover:bg-dh-50"
                     >بازگشت به داشبورد</Link
                 >
             </div>
 
             <div
-                class="mb-6 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200"
+                class="mb-6 rounded-xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
             >
                 <form
                     class="grid gap-3 md:grid-cols-4"
@@ -118,11 +134,11 @@ const paymentLabel = (value: string) =>
                         v-model="search"
                         type="search"
                         placeholder="شماره سفارش، نام یا موبایل..."
-                        class="rounded-lg border border-gray-300 px-4 py-2 text-sm"
+                        class="rounded-lg border border-dh-200 px-4 py-2 text-sm"
                     />
                     <select
                         v-model="status"
-                        class="rounded-lg border border-gray-300 px-4 py-2 text-sm"
+                        class="rounded-lg border border-dh-200 px-4 py-2 text-sm"
                     >
                         <option value="all">همه وضعیت سفارش</option>
                         <option value="pending">در انتظار</option>
@@ -134,7 +150,7 @@ const paymentLabel = (value: string) =>
                     </select>
                     <select
                         v-model="paymentStatus"
-                        class="rounded-lg border border-gray-300 px-4 py-2 text-sm"
+                        class="rounded-lg border border-dh-200 px-4 py-2 text-sm"
                     >
                         <option value="all">همه پرداخت‌ها</option>
                         <option value="pending">در انتظار</option>
@@ -145,7 +161,7 @@ const paymentLabel = (value: string) =>
                     <div class="flex gap-2">
                         <button
                             type="submit"
-                            class="flex-1 rounded-lg bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                            class="flex-1 rounded-lg bg-dh-700 px-5 py-2 text-sm font-medium text-white hover:bg-dh-800"
                         >
                             جستجو
                         </button>
@@ -156,7 +172,7 @@ const paymentLabel = (value: string) =>
                                 paymentStatus !== 'all'
                             "
                             type="button"
-                            class="rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-medium hover:bg-gray-50"
+                            class="rounded-lg border border-dh-200 bg-white px-5 py-2 text-sm font-medium hover:bg-dh-50"
                             @click="resetFilters"
                         >
                             پاک کردن
@@ -166,11 +182,11 @@ const paymentLabel = (value: string) =>
             </div>
 
             <div
-                class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200"
+                class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-dh-100"
             >
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-right text-sm">
-                        <thead class="border-b bg-gray-50 text-gray-600">
+                        <thead class="border-b bg-dh-50 text-dh-700">
                             <tr>
                                 <th class="px-4 py-3 font-medium">سفارش</th>
                                 <th class="px-4 py-3 font-medium">مشتری</th>
@@ -181,17 +197,17 @@ const paymentLabel = (value: string) =>
                                 <th class="px-4 py-3"></th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
+                        <tbody class="divide-y divide-dh-100">
                             <tr
                                 v-for="order in orders"
                                 :key="order.id"
-                                class="hover:bg-gray-50"
+                                class="hover:bg-dh-50"
                             >
                                 <td class="px-4 py-4">
                                     <div class="font-semibold">
                                         {{ order.order_number }}
                                     </div>
-                                    <div class="mt-1 text-xs text-gray-500">
+                                    <div class="mt-1 text-xs text-dh-muted">
                                         {{
                                             order.created_at
                                                 ? new Date(
@@ -203,7 +219,7 @@ const paymentLabel = (value: string) =>
                                 </td>
                                 <td class="px-4 py-4">
                                     <div>{{ order.customer_name || '—' }}</div>
-                                    <div class="mt-1 text-xs text-gray-500">
+                                    <div class="mt-1 text-xs text-dh-muted">
                                         {{ order.customer_phone || '—' }}
                                     </div>
                                 </td>
@@ -215,13 +231,17 @@ const paymentLabel = (value: string) =>
                                 </td>
                                 <td class="px-4 py-4">
                                     <span
-                                        class="rounded-full bg-gray-100 px-2.5 py-1 text-xs"
+                                        class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                                        :class="statusClasses(order.status)"
                                         >{{ statusLabel(order.status) }}</span
                                     >
                                 </td>
                                 <td class="px-4 py-4">
                                     <span
-                                        class="rounded-full bg-gray-100 px-2.5 py-1 text-xs"
+                                        class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                                        :class="
+                                            paymentClasses(order.payment_status)
+                                        "
                                         >{{
                                             paymentLabel(order.payment_status)
                                         }}</span
@@ -230,7 +250,7 @@ const paymentLabel = (value: string) =>
                                 <td class="px-4 py-4">
                                     <Link
                                         :href="`/admin/orders/${order.id}`"
-                                        class="font-medium text-blue-700 hover:underline"
+                                        class="font-medium text-dh-700 hover:underline"
                                         >جزئیات</Link
                                     >
                                 </td>
@@ -238,7 +258,7 @@ const paymentLabel = (value: string) =>
                             <tr v-if="orders.length === 0">
                                 <td
                                     colspan="7"
-                                    class="px-4 py-12 text-center text-gray-500"
+                                    class="px-4 py-12 text-center text-dh-muted"
                                 >
                                     سفارشی پیدا نشد.
                                 </td>
@@ -247,14 +267,14 @@ const paymentLabel = (value: string) =>
                     </table>
                 </div>
                 <div
-                    class="flex flex-col gap-3 border-t px-4 py-4 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between"
+                    class="flex flex-col gap-3 border-t px-4 py-4 text-sm text-dh-700 sm:flex-row sm:items-center sm:justify-between"
                 >
                     <span>مجموع: {{ pagination.total }} سفارش</span>
                     <div class="flex items-center gap-2">
                         <Link
                             v-if="pagination.current_page > 1"
                             :href="pageUrl(pagination.current_page - 1)"
-                            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 hover:bg-gray-50"
+                            class="rounded-lg border border-dh-200 bg-white px-3 py-1.5 hover:bg-dh-50"
                             preserve-scroll
                             preserve-state
                         >
@@ -269,7 +289,7 @@ const paymentLabel = (value: string) =>
                                 pagination.current_page < pagination.last_page
                             "
                             :href="pageUrl(pagination.current_page + 1)"
-                            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 hover:bg-gray-50"
+                            class="rounded-lg border border-dh-200 bg-white px-3 py-1.5 hover:bg-dh-50"
                             preserve-scroll
                             preserve-state
                         >

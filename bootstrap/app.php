@@ -3,12 +3,12 @@
 use App\Http\Middleware\AddSecurityHeaders;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\HandleInertiaRequests;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
-use Illuminate\Console\Scheduling\Schedule;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,8 +17,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withSchedule(function (Schedule $schedule): void {
-        $schedule->command('inventory:release-expired-reservations')->everyMinute();
-        $schedule->command('coupon:release-expired-reservations')->everyMinute();
+        $schedule->command('inventory:release-expired-reservations')
+            ->everyMinute()
+            ->withoutOverlapping(2);
+        $schedule->command('coupon:release-expired-reservations')
+            ->everyMinute()
+            ->withoutOverlapping(2);
     })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([

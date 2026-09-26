@@ -67,7 +67,7 @@ function formatDate(value: string | null) {
         <div class="flex items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold">مقالات و محتوای سئو</h1>
-                <p class="mt-1 text-sm text-gray-500">
+                <p class="mt-1 text-sm text-dh-muted">
                     مدیریت مقالات وبلاگ، انتشار و اطلاعات سئو
                 </p>
             </div>
@@ -104,7 +104,7 @@ function formatDate(value: string | null) {
 
         <div class="overflow-hidden rounded-xl border bg-white shadow-sm">
             <table class="w-full text-right text-sm">
-                <thead class="border-b bg-gray-50">
+                <thead class="border-b bg-dh-50">
                     <tr>
                         <th class="p-3">عنوان</th>
                         <th class="p-3">دسته</th>
@@ -121,7 +121,7 @@ function formatDate(value: string | null) {
                     >
                         <td class="p-3">
                             <div class="font-semibold">{{ article.title }}</div>
-                            <div class="text-xs text-gray-500">
+                            <div class="text-xs text-dh-muted">
                                 /{{ article.slug }}
                             </div>
                         </td>
@@ -129,13 +129,24 @@ function formatDate(value: string | null) {
                             {{ article.category || 'بدون دسته' }}
                         </td>
                         <td class="p-3">
-                            {{
-                                article.is_active &&
-                                article.published_at &&
-                                new Date(article.published_at) <= new Date()
-                                    ? 'منتشرشده'
-                                    : 'پیش‌نویس'
-                            }}
+                            <span
+                                class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                                :class="
+                                    article.is_active &&
+                                    article.published_at &&
+                                    new Date(article.published_at) <= new Date()
+                                        ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                                        : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
+                                "
+                            >
+                                {{
+                                    article.is_active &&
+                                    article.published_at &&
+                                    new Date(article.published_at) <= new Date()
+                                        ? 'منتشرشده'
+                                        : 'پیش‌نویس'
+                                }}
+                            </span>
                         </td>
                         <td class="p-3">
                             {{ formatDate(article.published_at) }}
@@ -156,7 +167,7 @@ function formatDate(value: string | null) {
                         </td>
                     </tr>
                     <tr v-if="props.articles.length === 0">
-                        <td colspan="5" class="p-8 text-center text-gray-500">
+                        <td colspan="5" class="p-8 text-center text-dh-muted">
                             هنوز مقاله‌ای ثبت نشده است.
                         </td>
                     </tr>
@@ -166,7 +177,7 @@ function formatDate(value: string | null) {
                 v-if="props.pagination.last_page > 1"
                 class="flex items-center justify-between gap-4 border-t p-4 text-sm"
             >
-                <span class="text-gray-500">
+                <span class="text-dh-muted">
                     {{ props.pagination.total }} مقاله
                 </span>
                 <div class="flex items-center gap-2">
@@ -193,7 +204,7 @@ function formatDate(value: string | null) {
                     </button>
                 </div>
             </div>
-            <div v-else class="border-t p-4 text-sm text-gray-500">
+            <div v-else class="border-t p-4 text-sm text-dh-muted">
                 {{ props.pagination.total }} مقاله
             </div>
         </div>

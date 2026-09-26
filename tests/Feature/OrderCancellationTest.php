@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Inventory;
 use App\Models\InventoryReservation;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -218,6 +219,66 @@ class OrderCancellationTest extends TestCase
         $this->assertNull(
             $order->cancelled_at
         );
+    }
+
+    public function test_pending_payment_without_authority_is_cancelled_with_order(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->createOrder($user);
+        $payment = Payment::create([
+            'order_id' => $order->id,
+            'amount' => 100000,
+            'gateway' => null,
+            'status' => 'pending',
+            'authority' => null,
+        ]);
+
+        $response = $this->actingAs($user)->post(
+            '/orders/'.$order->order_number.'/cancel'
+        );
+
+        $response->assertRedirect();
+
+        $order->refresh();
+        $payment->refresh();
+
+        $this->assertEquals('cancelled', $order->status);
+        $this->assertEquals('cancelled', $payment->status);
+    }
+
+    public function test_order_with_gateway_authority_cannot_be_cancelled(): void
+    {
+        $user = User::factory()->create();
+        $product = $this->createProduct();
+        $warehouse = $this->createWarehouse();
+        $inventory = $this->createInventory($product, $warehouse, 10);
+        $order = $this->createOrder($user);
+        $reservation = $this->createReservation($order, $product, $inventory, 3);
+
+        $payment = Payment::create([
+            'order_id' => $order->id,
+            'amount' => 100000,
+            'gateway' => 'zarinpal',
+            'status' => 'pending',
+            'authority' => 'A123456789',
+        ]);
+
+        $response = $this->from(
+            '/orders/'.$order->order_number
+        )->actingAs($user)->post(
+            '/orders/'.$order->order_number.'/cancel'
+        );
+
+        $response->assertRedirect();
+        $response->assertSessionHasErrors(['order']);
+
+        $order->refresh();
+        $payment->refresh();
+        $reservation->refresh();
+
+        $this->assertEquals('pending', $order->status);
+        $this->assertEquals('pending', $payment->status);
+        $this->assertEquals('active', $reservation->status);
     }
 
     public function test_paid_order_cannot_be_cancelled_by_customer(): void

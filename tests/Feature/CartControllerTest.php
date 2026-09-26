@@ -62,6 +62,42 @@ class CartControllerTest extends TestCase
         $response->assertOk();
     }
 
+    public function test_authenticated_customer_receives_distinct_cart_item_count_in_shared_props(): void
+    {
+        $user = User::factory()->create();
+        $firstProduct = $this->createProduct();
+        $secondProduct = $this->createProduct();
+
+        $cart = Cart::create([
+            'user_id' => $user->id,
+            'status' => 'active',
+        ]);
+
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $firstProduct->id,
+            'quantity' => 4,
+            'unit_price' => 100000,
+        ]);
+
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_id' => $secondProduct->id,
+            'quantity' => 2,
+            'unit_price' => 100000,
+        ]);
+
+        $this->actingAs($user)
+            ->get('/products')
+            ->assertInertia(fn ($page) => $page->where('cart.items_count', 2));
+    }
+
+    public function test_guest_receives_zero_cart_item_count_in_shared_props(): void
+    {
+        $this->get('/products')
+            ->assertInertia(fn ($page) => $page->where('cart.items_count', 0));
+    }
+
     public function test_customer_can_add_product_to_cart(): void
     {
         $user = User::factory()->create();

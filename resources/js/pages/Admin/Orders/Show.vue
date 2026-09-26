@@ -84,17 +84,17 @@ const changeStatus = (status: string) =>
     <Head :title="`سفارش ${order.order_number}`" />
     <div
         dir="rtl"
-        class="min-h-screen bg-gray-50 px-4 py-8 text-gray-900 sm:px-6 lg:px-8"
+        class="min-h-screen bg-dh-50 px-4 py-8 text-dh-900 sm:px-6 lg:px-8"
     >
         <div class="mx-auto max-w-5xl">
             <div class="mb-8 flex items-center justify-between gap-4">
                 <div>
-                    <p class="text-sm text-gray-500">HealthStore / سفارش‌ها</p>
+                    <p class="text-sm text-dh-muted">HealthStore / سفارش‌ها</p>
                     <h1 class="text-2xl font-bold">{{ order.order_number }}</h1>
                 </div>
                 <Link
                     href="/admin/orders"
-                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm hover:bg-gray-100"
+                    class="rounded-lg border border-dh-200 bg-white px-4 py-2 text-sm hover:bg-dh-50"
                     >بازگشت</Link
                 >
             </div>
@@ -113,14 +113,13 @@ const changeStatus = (status: string) =>
 
             <div class="grid gap-6 lg:grid-cols-3">
                 <section
-                    class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200 lg:col-span-2"
+                    class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-dh-100 lg:col-span-2"
                 >
                     <div class="mb-5 flex items-center justify-between">
                         <h2 class="font-bold">وضعیت سفارش</h2>
-                        <span
-                            class="rounded-full bg-gray-100 px-3 py-1 text-sm"
-                            >{{ statusLabel(order.status) }}</span
-                        >
+                        <span class="rounded-full bg-dh-50 px-3 py-1 text-sm">{{
+                            statusLabel(order.status)
+                        }}</span>
                     </div>
                     <div
                         v-if="nextStatus(order.status)"
@@ -128,34 +127,34 @@ const changeStatus = (status: string) =>
                     >
                         <button
                             type="button"
-                            class="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800"
+                            class="rounded-lg bg-dh-700 px-4 py-2 text-sm text-white hover:bg-dh-800"
                             @click="changeStatus(nextStatus(order.status)!)"
                         >
                             {{ nextStatusLabel(nextStatus(order.status)!) }}
                         </button>
                     </div>
-                    <p v-else class="text-sm text-gray-500">
+                    <p v-else class="text-sm text-dh-muted">
                         برای این وضعیت، عملیات بعدی تعریف نشده است.
                     </p>
                 </section>
                 <section
-                    class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200"
+                    class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-dh-100"
                 >
                     <h2 class="mb-4 font-bold">مشتری</h2>
                     <p>{{ order.user?.name || order.recipient_name || '—' }}</p>
-                    <p class="mt-1 text-sm text-gray-500">
+                    <p class="mt-1 text-sm text-dh-muted">
                         {{ order.user?.phone || order.recipient_phone || '—' }}
                     </p>
                 </section>
             </div>
 
             <section
-                class="mt-6 rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200"
+                class="mt-6 rounded-xl bg-white p-5 shadow-sm ring-1 ring-dh-100"
             >
                 <h2 class="mb-4 font-bold">اقلام سفارش</h2>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-right text-sm">
-                        <thead class="border-b text-gray-500">
+                        <thead class="border-b text-dh-muted">
                             <tr>
                                 <th class="px-2 py-3">محصول</th>
                                 <th class="px-2 py-3">تعداد</th>
@@ -169,7 +168,7 @@ const changeStatus = (status: string) =>
                                     <div class="font-medium">
                                         {{ item.product_name }}
                                     </div>
-                                    <div class="text-xs text-gray-500">
+                                    <div class="text-xs text-dh-muted">
                                         {{ item.product_sku || '—' }}
                                     </div>
                                 </td>
@@ -217,25 +216,25 @@ const changeStatus = (status: string) =>
 
             <div class="mt-6 grid gap-6 lg:grid-cols-2">
                 <section
-                    class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200"
+                    class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-dh-100"
                 >
                     <h2 class="mb-4 font-bold">آدرس ارسال</h2>
                     <p>{{ order.recipient_name || '—' }}</p>
                     <p class="mt-1 text-sm">
                         {{ order.recipient_phone || '—' }}
                     </p>
-                    <p class="mt-3 text-sm text-gray-600">
+                    <p class="mt-3 text-sm text-dh-700">
                         {{ order.province || '' }} {{ order.city || '' }}
                     </p>
-                    <p class="mt-1 text-sm text-gray-600">
+                    <p class="mt-1 text-sm text-dh-700">
                         {{ order.shipping_address || '—' }}
                     </p>
-                    <p class="mt-1 text-sm text-gray-500">
+                    <p class="mt-1 text-sm text-dh-muted">
                         کد پستی: {{ order.postal_code || '—' }}
                     </p>
                 </section>
                 <section
-                    class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200"
+                    class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-dh-100"
                 >
                     <h2 class="mb-4 font-bold">پرداخت‌ها</h2>
                     <div
@@ -247,16 +246,16 @@ const changeStatus = (status: string) =>
                             <span>{{ payment.gateway || 'درگاه' }}</span
                             ><span>{{ paymentLabel(payment.status) }}</span>
                         </div>
-                        <div class="mt-1 text-sm text-gray-500">
+                        <div class="mt-1 text-sm text-dh-muted">
                             {{ formatAmount(Number(payment.amount)) }} ریال
                         </div>
-                        <div class="mt-1 text-xs text-gray-500">
+                        <div class="mt-1 text-xs text-dh-muted">
                             تراکنش: {{ payment.transaction_id || '—' }}
                         </div>
                     </div>
                     <p
                         v-if="order.payments.length === 0"
-                        class="text-sm text-gray-500"
+                        class="text-sm text-dh-muted"
                     >
                         پرداختی ثبت نشده است.
                     </p>

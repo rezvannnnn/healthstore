@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Services\MediaService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -11,9 +12,12 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class CategoryController extends Controller
 {
+    public function __construct(protected MediaService $mediaService) {}
+
     public function index(): Response
     {
         $categories = Category::query()
@@ -39,9 +43,22 @@ class CategoryController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedData($request);
-        $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
+        $storedImage = null;
 
-        Category::create($data);
+        try {
+            if ($request->hasFile('image_file')) {
+                $storedImage = $this->mediaService->storeImage($request->file('image_file'), 'categories');
+                $data['image'] = $storedImage;
+            }
+            unset($data['image_file']);
+            $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
+
+            Category::create($data);
+        } catch (Throwable $exception) {
+            $this->mediaService->deleteIfStored($storedImage);
+
+            throw $exception;
+        }
 
         return to_route('admin.categories.index')->with('success', 'دسته‌بندی با موفقیت ایجاد شد.');
     }
@@ -49,19 +66,45 @@ class CategoryController extends Controller
     public function edit(Category $category): Response
     {
         return Inertia::render('Admin/Categories/Edit', [
-            'category' => $category->only([
-                'id', 'parent_id', 'name', 'slug', 'description', 'is_active', 'sort_order',
-            ]),
+            'category' => [
+                'id' => $category->id,
+                'parent_id' => $category->parent_id,
+                'name' => $category->name,
+                'slug' => $category->slug,
+                'description' => $category->description,
+                'image' => $category->image,
+                'image_url' => $this->mediaService->url($category->image),
+                'is_active' => $category->is_active,
+                'sort_order' => $category->sort_order,
+            ],
             'parents' => $this->parentOptions($category),
         ]);
     }
 
     public function update(Request $request, Category $category): RedirectResponse
     {
+        $oldImage = $category->image;
         $data = $this->validatedData($request, $category);
-        $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
+        $storedImage = null;
 
-        $category->update($data);
+        try {
+            if ($request->hasFile('image_file')) {
+                $storedImage = $this->mediaService->storeImage($request->file('image_file'), 'categories');
+                $data['image'] = $storedImage;
+            }
+            unset($data['image_file']);
+            $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['name']);
+
+            $category->update($data);
+        } catch (Throwable $exception) {
+            $this->mediaService->deleteIfStored($storedImage);
+
+            throw $exception;
+        }
+
+        if ($storedImage !== null && $storedImage !== $oldImage) {
+            $this->mediaService->deleteIfStored($oldImage);
+        }
 
         return to_route('admin.categories.index')->with('success', 'دسته‌بندی با موفقیت ویرایش شد.');
     }
@@ -95,6 +138,7 @@ class CategoryController extends Controller
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('categories', 'slug')->ignore($category?->id)],
             'description' => ['nullable', 'string', 'max:2000'],
             'image' => ['nullable', 'string', 'max:2048'],
+            'image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'is_active' => ['boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);

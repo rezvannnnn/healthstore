@@ -4,10 +4,11 @@ on:
   push:
     branches:
       - main
+      - feat/darukhooneh-storefront-design-v2
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: healthstore-tests-${{ github.ref }}
@@ -21,7 +22,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: true
+          persist-credentials: false
 
       - name: Setup PHP
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
@@ -40,24 +41,11 @@ jobs:
           composer update --prefer-dist --no-interaction --no-progress
           composer setup
 
-      - name: Format frontend resources
-        run: npm run format
+      - name: Check frontend formatting
+        run: npm run format:check
 
-      - name: Format PHP resources
-        run: composer lint
-
-      - name: Commit formatting changes
-        if: github.event_name == 'push'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add resources/ app/ config/ database/ routes/ tests/
-          if git diff --cached --quiet; then
-            echo "No formatting changes to commit."
-          else
-            git commit -m "Apply automated code formatting"
-            git push origin HEAD:main
-          fi
+      - name: Check PHP formatting
+        run: composer lint:check
 
       - name: Run CI Checks
         run: composer ci:check

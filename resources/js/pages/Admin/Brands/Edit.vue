@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
+
 type Brand = {
     id: number;
     name: string;
     slug: string;
     description: string | null;
     logo: string | null;
+    logo_url: string | null;
     is_active: boolean;
 };
 const props = defineProps<{ brand: Brand }>();
@@ -14,18 +16,30 @@ const form = useForm({
     slug: props.brand.slug,
     description: props.brand.description || '',
     logo: props.brand.logo || '',
+    logo_file: null as File | null,
     is_active: props.brand.is_active,
 });
-const submit = () => form.put(`/admin/brands/${props.brand.id}`);
+const handleLogoChange = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    form.logo_file = input.files?.[0] ?? null;
+};
+
+const submit = () =>
+    form
+        .transform((data) => ({ ...data, _method: 'put' }))
+        .post(`/admin/brands/${props.brand.id}`, {
+            forceFormData: true,
+            onFinish: () => form.transform((data) => data),
+        });
 </script>
 
 <template>
     <Head title="ویرایش برند" />
-    <div dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 text-gray-900">
+    <div dir="rtl" class="min-h-screen bg-dh-50 px-4 py-8 text-dh-900">
         <div class="mx-auto max-w-3xl">
             <div class="mb-6 flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500">مدیریت / برندها</p>
+                    <p class="text-sm text-dh-muted">مدیریت / برندها</p>
                     <h1 class="text-3xl font-bold">ویرایش برند</h1>
                 </div>
                 <Link
@@ -36,7 +50,7 @@ const submit = () => form.put(`/admin/brands/${props.brand.id}`);
             </div>
             <form
                 @submit.prevent="submit"
-                class="space-y-5 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
+                class="space-y-5 rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
             >
                 <div>
                     <label class="mb-1 block text-sm font-medium">نام</label
@@ -64,9 +78,19 @@ const submit = () => form.put(`/admin/brands/${props.brand.id}`);
                 <div>
                     <label class="mb-1 block text-sm font-medium">لوگو</label
                     ><input
-                        v-model="form.logo"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
                         class="w-full rounded-lg border px-3 py-2"
+                        @change="handleLogoChange"
                     />
+                    <a
+                        v-if="props.brand.logo_url"
+                        :href="props.brand.logo_url"
+                        target="_blank"
+                        rel="noreferrer"
+                        class="mt-2 inline-block text-sm text-dh-700 underline"
+                        >مشاهده لوگوی فعلی</a
+                    >
                 </div>
                 <label class="flex items-center gap-2"
                     ><input v-model="form.is_active" type="checkbox" />
@@ -74,7 +98,7 @@ const submit = () => form.put(`/admin/brands/${props.brand.id}`);
                 >
                 <button
                     :disabled="form.processing"
-                    class="rounded-lg bg-gray-900 px-5 py-2.5 font-medium text-white disabled:opacity-50"
+                    class="rounded-lg bg-dh-700 px-5 py-2.5 font-medium text-white disabled:opacity-50"
                 >
                     ذخیره تغییرات
                 </button>

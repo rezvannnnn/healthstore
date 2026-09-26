@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
+import StorefrontHeader from '@/components/StorefrontHeader.vue';
 import { computed } from 'vue';
 
 interface Article {
@@ -16,7 +17,6 @@ interface Article {
     author: { id: number; name: string } | null;
     published_at: string | null;
 }
-
 interface RelatedArticle {
     id: number;
     title: string;
@@ -26,7 +26,6 @@ interface RelatedArticle {
     featured_image_alt: string | null;
     published_at: string | null;
 }
-
 const props = defineProps<{
     article: Article;
     relatedArticles: RelatedArticle[];
@@ -103,86 +102,152 @@ const structuredData = computed(() => ({
             {{ JSON.stringify(structuredData) }}
         </script>
     </Head>
-    <div class="mx-auto max-w-4xl space-y-6 p-6" dir="rtl">
-        <Link href="/blog" class="text-sm underline"
-            >← بازگشت به مجله سلامت</Link
-        >
-        <article class="overflow-hidden rounded-2xl border bg-white shadow-sm">
-            <img
-                v-if="article.featured_image"
-                :src="article.featured_image"
-                :alt="article.featured_image_alt || article.title"
-                class="max-h-[28rem] w-full object-cover"
-            />
-            <div class="space-y-6 p-6 md:p-10">
-                <div class="text-sm text-gray-500">
-                    {{ article.category?.name || 'سلامت' }}
-                </div>
-                <h1 class="text-3xl leading-tight font-bold md:text-4xl">
-                    {{ article.title }}
-                </h1>
-                <p
-                    v-if="article.excerpt"
-                    class="text-lg leading-8 text-gray-600"
-                >
-                    {{ article.excerpt }}
-                </p>
-                <div class="text-xs text-gray-500">
-                    {{
-                        article.author?.name
-                            ? `نویسنده: ${article.author.name} · `
-                            : ''
-                    }}{{
-                        article.published_at
-                            ? new Date(article.published_at).toLocaleDateString(
-                                  'fa-IR',
-                              )
-                            : ''
-                    }}
-                </div>
-                <div
-                    class="text-base leading-9 whitespace-pre-wrap text-gray-800"
-                >
-                    {{ article.content }}
-                </div>
-            </div>
-        </article>
 
-        <section v-if="relatedArticles.length" class="space-y-4">
-            <div class="flex items-center justify-between gap-4">
-                <h2 class="text-2xl font-bold">مطالب مرتبط</h2>
-                <Link
-                    v-if="article.category"
-                    :href="`/blog/category/${article.category.slug}`"
-                    class="text-sm underline"
-                >
-                    مطالب بیشتر در {{ article.category.name }}
-                </Link>
-            </div>
-            <div class="grid gap-4 md:grid-cols-2">
-                <Link
-                    v-for="related in relatedArticles"
-                    :key="related.id"
-                    :href="`/blog/${related.slug}`"
-                    class="overflow-hidden rounded-2xl border bg-white transition hover:shadow-md"
-                >
+    <div
+        dir="rtl"
+        class="min-h-screen bg-dh-surface pb-24 text-dh-ink lg:pb-10"
+    >
+        <StorefrontHeader active="blog" />
+
+        <main class="mx-auto max-w-5xl px-4 py-6 md:px-6 md:py-10">
+            <nav
+                aria-label="مسیر صفحه"
+                class="mb-6 flex flex-wrap items-center gap-2 text-sm text-dh-muted"
+            >
+                <Link href="/" class="hover:text-dh-700">خانه</Link
+                ><span>/</span
+                ><Link href="/blog" class="hover:text-dh-700">مجله سلامت</Link
+                ><template v-if="article.category"
+                    ><span>/</span
+                    ><Link
+                        :href="`/blog/category/${article.category.slug}`"
+                        class="hover:text-dh-700"
+                        >{{ article.category.name }}</Link
+                    ></template
+                ><span>/</span
+                ><span class="font-semibold text-dh-800">مقاله</span>
+            </nav>
+
+            <article
+                class="overflow-hidden rounded-[2rem] border border-dh-100 bg-white shadow-sm"
+            >
+                <div v-if="article.featured_image" class="bg-dh-50">
                     <img
-                        v-if="related.featured_image"
-                        :src="related.featured_image"
-                        :alt="related.featured_image_alt || related.title"
-                        class="h-40 w-full object-cover"
+                        :src="article.featured_image"
+                        :alt="article.featured_image_alt || article.title"
+                        class="max-h-[34rem] w-full object-cover"
                     />
-                    <div class="space-y-2 p-4">
-                        <h3 class="leading-7 font-bold">{{ related.title }}</h3>
-                        <p
-                            v-if="related.excerpt"
-                            class="line-clamp-2 text-sm leading-6 text-gray-600"
+                </div>
+                <div class="space-y-7 p-6 md:p-10 lg:p-14">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <Link
+                            v-if="article.category"
+                            :href="`/blog/category/${article.category.slug}`"
+                            class="rounded-full bg-dh-50 px-3 py-1.5 text-xs font-bold text-dh-700"
+                            >{{ article.category.name }}</Link
                         >
-                            {{ related.excerpt }}
-                        </p>
+                        <span class="text-xs text-dh-muted">{{
+                            article.published_at
+                                ? new Date(
+                                      article.published_at,
+                                  ).toLocaleDateString('fa-IR')
+                                : ''
+                        }}</span>
                     </div>
-                </Link>
-            </div>
-        </section>
+                    <header>
+                        <h1
+                            class="text-3xl leading-[1.45] font-black text-dh-800 md:text-5xl"
+                        >
+                            {{ article.title }}
+                        </h1>
+                        <p
+                            v-if="article.excerpt"
+                            class="mt-5 max-w-3xl text-base leading-8 text-dh-muted md:text-lg"
+                        >
+                            {{ article.excerpt }}
+                        </p>
+                    </header>
+                    <div
+                        v-if="article.author?.name"
+                        class="flex items-center gap-3 border-y border-dh-100 py-4 text-sm"
+                    >
+                        <span
+                            class="flex size-9 items-center justify-center rounded-full bg-dh-50 font-black text-dh-700"
+                            >{{ article.author.name.slice(0, 1) }}</span
+                        >
+                        <span class="text-dh-muted">نویسنده:</span
+                        ><strong class="text-dh-800">{{
+                            article.author.name
+                        }}</strong>
+                    </div>
+                    <div
+                        class="prose prose-slate max-w-none text-base leading-9 whitespace-pre-wrap text-dh-800 md:text-lg"
+                    >
+                        {{ article.content }}
+                    </div>
+                </div>
+            </article>
+
+            <section v-if="relatedArticles.length" class="mt-10 space-y-4">
+                <div class="flex items-end justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-bold text-dh-600">
+                            ادامه مطالعه
+                        </p>
+                        <h2 class="mt-1 text-2xl font-black text-dh-800">
+                            مطالب مرتبط
+                        </h2>
+                    </div>
+                    <Link
+                        v-if="article.category"
+                        :href="`/blog/category/${article.category.slug}`"
+                        class="text-sm font-bold text-dh-700"
+                        >مشاهده بیشتر</Link
+                    >
+                </div>
+                <div class="grid gap-5 sm:grid-cols-2">
+                    <Link
+                        v-for="related in relatedArticles"
+                        :key="related.id"
+                        :href="`/blog/${related.slug}`"
+                        class="group overflow-hidden rounded-3xl border border-dh-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                    >
+                        <div class="overflow-hidden bg-dh-50">
+                            <img
+                                v-if="related.featured_image"
+                                :src="related.featured_image"
+                                :alt="
+                                    related.featured_image_alt || related.title
+                                "
+                                class="h-44 w-full object-cover transition duration-500 group-hover:scale-105"
+                            />
+                            <div v-else class="h-44 bg-dh-50"></div>
+                        </div>
+                        <div class="space-y-2 p-5">
+                            <div class="text-[11px] text-dh-muted">
+                                {{
+                                    related.published_at
+                                        ? new Date(
+                                              related.published_at,
+                                          ).toLocaleDateString('fa-IR')
+                                        : ''
+                                }}
+                            </div>
+                            <h3
+                                class="line-clamp-2 text-lg leading-8 font-black text-dh-800 group-hover:text-dh-700"
+                            >
+                                {{ related.title }}
+                            </h3>
+                            <p
+                                v-if="related.excerpt"
+                                class="line-clamp-2 text-sm leading-7 text-dh-muted"
+                            >
+                                {{ related.excerpt }}
+                            </p>
+                        </div>
+                    </Link>
+                </div>
+            </section>
+        </main>
     </div>
 </template>

@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Services\CartService;
 use App\Services\InventoryService;
+use App\Services\MediaService;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,6 +15,7 @@ class HomeController extends Controller
     public function __construct(
         protected CartService $cartService,
         protected InventoryService $inventoryService,
+        protected MediaService $mediaService,
     ) {}
 
     public function __invoke(): Response
@@ -34,9 +36,9 @@ class HomeController extends Controller
                     'name' => $product->name,
                     'slug' => $product->slug,
                     'brand' => $product->brand?->name,
-                    'image' => $product->main_image
+                    'image' => $this->mediaService->url($product->main_image
                         ?: $product->images->firstWhere('is_primary', true)?->image_path
-                        ?: $product->images->first()?->image_path,
+                        ?: $product->images->first()?->image_path),
                     'price' => $price?->price !== null ? (float) $price->price : null,
                     'compare_at_price' => $price?->compare_at_price !== null ? (float) $price->compare_at_price : null,
                     'available' => $this->inventoryService->isAvailable($product),

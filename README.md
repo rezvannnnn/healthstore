@@ -1,4 +1,4 @@
-# HealthStore
+# داروخونه (Darukhooneh.ir)
 
 فروشگاه آنلاین محصولات سلامت با Laravel 13، Inertia.js و Vue.
 
@@ -44,12 +44,17 @@ php artisan optimize
 ```env
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://your-domain.example
+APP_URL=https://darukhooneh.ir
+SESSION_SECURE_COOKIE=true
+SESSION_HTTP_ONLY=true
+SESSION_SAME_SITE=lax
 ```
 
 `APP_KEY` باید یک مقدار امن و ثابت باشد و هرگز در repository قرار نگیرد. اطلاعات درگاه پرداخت، پیامک و سایر سرویس‌های خارجی نیز فقط از طریق environment configuration تنظیم شوند.
 
-## Scheduler
+اگر برنامه پشت reverse proxy یا load balancer اجرا می‌شود، تنظیم HTTPS و forwarded headers سرور را نیز بررسی کنید تا Laravel درخواست‌های HTTPS را به‌درستی تشخیص دهد.
+
+## Scheduler و Queue
 
 برای اجرای cleanup رزروهای منقضی‌شده، scheduler لاراول باید روی سرور فعال باشد. یک cron entry را با کاربر اجرای برنامه تنظیم کنید:
 
@@ -59,9 +64,25 @@ APP_URL=https://your-domain.example
 
 این scheduler دستورات release رزرو موجودی و رزرو کوپن منقضی‌شده را هر دقیقه اجرا می‌کند.
 
+برای ساخت اولین مدیر سیستم پس از اجرای migrationها، فقط از روی سرور برنامه این دستور را اجرا کنید:
+
+```bash
+php artisan admin:create
+```
+
+این دستور در صورت وجود کاربر با آن شماره، حساب را به مدیر ارتقا می‌دهد و برای حساب جدید/ارتقایافته تأیید اولیه شماره را از طریق دسترسی مستقیم سرور ثبت می‌کند. آن را در محیط عمومی یا از طریق وب اجرا نکنید.
+
+در صورت استفاده از `QUEUE_CONNECTION=database`، یک worker دائمی نیز باید روی سرور اجرا شود:
+
+```bash
+php artisan queue:work --sleep=3 --tries=3 --timeout=90
+```
+
+برای production بهتر است worker با Supervisor یا systemd مدیریت و پس از deploy با `php artisan queue:restart` راه‌اندازی مجدد شود.
+
 ## وضعیت سرویس‌های خارجی
 
-در حال حاضر پیاده‌سازی `FakeSmsProvider` برای محیط توسعه/تست استفاده می‌شود. پیش از production باید provider واقعی پیامک و تنظیمات امن آن در environment configuration جایگزین و پیکربندی شود.
+در توسعه و تست، `SMS_PROVIDER=fake` از `FakeSmsProvider` استفاده می‌کند. در production اگر provider واقعی تنظیم نشده باشد، برنامه عمداً ارسال OTP را موفق اعلام نمی‌کند و باید یک provider واقعی پیامک و credentialهای امن آن در environment configuration پیکربندی شود.
 
 ## مسیرهای اصلی
 
