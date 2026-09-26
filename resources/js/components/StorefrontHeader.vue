@@ -14,6 +14,9 @@ type SharedPageProps = {
     auth: {
         user: AuthUser | null;
     };
+    cart?: {
+        items_count?: number;
+    };
 };
 
 const props = withDefaults(
@@ -125,6 +128,38 @@ function navClass(section: ActiveSection): string {
                             ثبت‌نام
                         </Link>
                     </template>
+                    <Link
+                        :href="
+                            page.props.auth.user
+                                ? '/account/profile'
+                                : '/login'
+                        "
+                        class="flex size-11 items-center justify-center rounded-2xl border border-dh-100 bg-white text-dh-700 transition hover:border-dh-300 hover:bg-dh-50 sm:hidden"
+                        :aria-label="
+                            page.props.auth.user ? 'حساب کاربری' : 'ورود'
+                        "
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            class="size-5"
+                            fill="none"
+                            aria-hidden="true"
+                        >
+                            <circle
+                                cx="12"
+                                cy="8"
+                                r="3"
+                                stroke="currentColor"
+                                stroke-width="1.7"
+                            />
+                            <path
+                                d="M5.5 19.5c.9-3.1 3.1-4.7 6.5-4.7s5.6 1.6 6.5 4.7"
+                                stroke="currentColor"
+                                stroke-width="1.7"
+                                stroke-linecap="round"
+                            />
+                        </svg>
+                    </Link>
                     <CartLink />
                 </div>
             </div>
@@ -220,8 +255,18 @@ function navClass(section: ActiveSection): string {
             >
                 برندها
             </Link>
-            <Link href="/cart" class="rounded-xl px-2 py-2 text-dh-muted">
+            <Link
+                href="/cart"
+                class="relative rounded-xl px-2 py-2 text-dh-muted"
+            >
                 سبد
+                <span
+                    v-if="(page.props.cart?.items_count ?? 0) > 0"
+                    class="absolute -top-0.5 right-1/2 flex min-w-4 translate-x-1/2 items-center justify-center rounded-full bg-dh-green-500 px-1 py-0.5 text-[9px] leading-none font-black text-white ring-2 ring-white"
+                    aria-hidden="true"
+                >
+                    {{ page.props.cart?.items_count }}
+                </span>
             </Link>
         </div>
     </nav>
