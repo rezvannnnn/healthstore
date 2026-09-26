@@ -41,6 +41,11 @@ jobs:
           composer update --prefer-dist --no-interaction --no-progress
           composer setup
 
+      - name: Diagnose header formatting
+        run: |
+          npx prettier resources/js/components/StorefrontHeader.vue --write
+          git diff -- resources/js/components/StorefrontHeader.vue
+
       - name: Check frontend formatting
         run: npm run format:check
 
