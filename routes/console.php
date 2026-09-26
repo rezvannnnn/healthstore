@@ -2,8 +2,8 @@
 
 use App\Models\User;
 use App\Services\CouponService;
-use App\Services\OtpService;
 use App\Services\InventoryReservationService;
+use App\Services\OtpService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
