@@ -129,15 +129,9 @@ function navClass(section: ActiveSection): string {
                         </Link>
                     </template>
                     <Link
-                        :href="
-                            page.props.auth.user
-                                ? '/account/profile'
-                                : '/login'
-                        "
+                        :href="page.props.auth.user ? '/account/profile' : '/login'"
                         class="flex size-11 items-center justify-center rounded-2xl border border-dh-100 bg-white text-dh-700 transition hover:border-dh-300 hover:bg-dh-50 sm:hidden"
-                        :aria-label="
-                            page.props.auth.user ? 'حساب کاربری' : 'ورود'
-                        "
+                        :aria-label="page.props.auth.user ? 'حساب کاربری' : 'ورود'"
                     >
                         <svg
                             viewBox="0 0 24 24"
