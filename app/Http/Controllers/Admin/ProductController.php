@@ -186,6 +186,7 @@ class ProductController extends Controller
         $data = $this->validatedData($request, $product);
 
         $oldImage = $product->main_image;
+        $storedImage = null;
         $storedMedia = [];
         $storedGallery = [];
 
