@@ -36,15 +36,15 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Diagnose header formatting
+        run: |
+          npx prettier@3.4.2 resources/js/components/StorefrontHeader.vue --write
+          git diff -- resources/js/components/StorefrontHeader.vue
+
       - name: Setup Application
         run: |
           composer update --prefer-dist --no-interaction --no-progress
           composer setup
-
-      - name: Diagnose header formatting
-        run: |
-          npx prettier resources/js/components/StorefrontHeader.vue --write
-          git diff -- resources/js/components/StorefrontHeader.vue
 
       - name: Check frontend formatting
         run: npm run format:check
