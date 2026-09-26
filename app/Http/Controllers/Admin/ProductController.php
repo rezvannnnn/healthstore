@@ -62,7 +62,9 @@ class ProductController extends Controller
                 'sku' => $product->sku,
                 'brand' => $product->brand?->name,
                 'category' => $product->category?->name,
-                'image' => $product->main_image ?: $product->images->firstWhere('is_primary', true)?->image_path,
+                'image' => $product->main_image
+    ?: $product->images->firstWhere('is_primary', true)?->image_path
+    ?: $product->images->first()?->image_path,
                 'price' => $price?->price !== null ? (float) $price->price : null,
                 'is_active' => $product->is_active,
                 'is_featured' => $product->is_featured,
