@@ -2,6 +2,13 @@
 import { useForm } from '@inertiajs/vue3';
 
 type Option = { id: number; name: string };
+type ProductImage = {
+    id: number;
+    image_url: string | null;
+    alt_text: string | null;
+    is_primary: boolean;
+    sort_order: number;
+};
 type Product = {
     id: number;
     name: string;
@@ -21,6 +28,7 @@ type Product = {
     expiry_date: string | null;
     main_image: string | null;
     main_image_url?: string | null;
+    images?: ProductImage[];
     is_active: boolean;
     is_featured: boolean;
     sort_order: number;
@@ -46,6 +54,7 @@ type FormData = {
     expiry_date: string;
     main_image: string;
     main_image_file: File | null;
+    gallery_files: File[];
     is_active: boolean;
     is_featured: boolean;
     sort_order: number;
@@ -80,12 +89,18 @@ const form = useForm<FormData>({
     expiry_date: props.product?.expiry_date ?? '',
     main_image: props.product?.main_image ?? '',
     main_image_file: null,
+    gallery_files: [],
     is_active: props.product?.is_active ?? true,
     is_featured: props.product?.is_featured ?? false,
     sort_order: props.product?.sort_order ?? 0,
     price: props.product?.price ?? null,
     compare_at_price: props.product?.compare_at_price ?? null,
 });
+
+function setGalleryFiles(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    form.gallery_files = Array.from(input.files ?? []);
+}
 
 const submit = () => {
     if (props.method === 'post') {
@@ -355,6 +370,67 @@ const submit = () => {
                                     >{{ form.errors.main_image_file }}</span
                                 >
                             </label>
+                        </div>
+
+                        <div class="rounded-xl border border-dh-100 bg-dh-50/60 p-4">
+                            <label class="block">
+                                <span class="text-sm font-medium"
+                                    >تصاویر گالری</span
+                                >
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/jpeg,image/png,image/webp"
+                                    class="mt-1 block w-full rounded-lg border-dh-200 bg-white p-2"
+                                    @change="setGalleryFiles"
+                                />
+                                <span class="mt-1 block text-xs text-dh-muted">
+                                    حداکثر ۸ تصویر جدید، هرکدام تا ۵ مگابایت — JPG، PNG یا WebP
+                                </span>
+                                <span
+                                    v-if="form.gallery_files.length"
+                                    class="mt-2 block text-xs font-bold text-dh-700"
+                                >
+                                    {{ form.gallery_files.length.toLocaleString('fa-IR') }}
+                                    تصویر جدید انتخاب شده است.
+                                </span>
+                                <span
+                                    v-if="form.errors.gallery_files"
+                                    class="text-sm text-red-600"
+                                    >{{ form.errors.gallery_files }}</span
+                                >
+                                <span
+                                    v-if="form.errors['gallery_files.0']"
+                                    class="text-sm text-red-600"
+                                    >{{ form.errors['gallery_files.0'] }}</span
+                                >
+                            </label>
+
+                            <div
+                                v-if="props.product?.images?.length"
+                                class="mt-4"
+                            >
+                                <p class="text-xs font-bold text-dh-muted">
+                                    تصاویر فعلی
+                                </p>
+                                <div class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                                    <a
+                                        v-for="image in props.product.images"
+                                        :key="image.id"
+                                        :href="image.image_url ?? undefined"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        class="aspect-square overflow-hidden rounded-lg border border-dh-100 bg-white p-1"
+                                    >
+                                        <img
+                                            v-if="image.image_url"
+                                            :src="image.image_url"
+                                            :alt="image.alt_text || 'تصویر محصول'"
+                                            class="h-full w-full object-contain"
+                                        />
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>

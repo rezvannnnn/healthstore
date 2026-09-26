@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\ProductPrice;
 use App\Services\CartService;
 use App\Services\InventoryService;
@@ -93,20 +94,36 @@ class ProductController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedData($request);
-        $storedImage = null;
+        $storedMedia = [];
+        $storedGallery = [];
 
         try {
             if ($request->hasFile('main_image_file')) {
                 $storedImage = $this->mediaService->storeImage($request->file('main_image_file'), 'products');
                 $data['main_image'] = $storedImage;
+                $storedMedia[] = $storedImage;
             }
 
-            DB::transaction(function () use ($data): void {
+            $galleryFiles = $request->file('gallery_files', []);
+            foreach (is_array($galleryFiles) ? $galleryFiles : [$galleryFiles] as $file) {
+                if ($file === null) {
+                    continue;
+                }
+
+                $path = $this->mediaService->storeImage($file, 'products');
+                $storedGallery[] = $path;
+                $storedMedia[] = $path;
+            }
+
+            DB::transaction(function () use ($data, $storedGallery): void {
                 $product = Product::create($this->productData($data));
                 $this->syncRetailPrice($product, $data);
+                $this->appendGalleryImages($product, $storedGallery);
             });
         } catch (Throwable $exception) {
-            $this->mediaService->deleteIfStored($storedImage);
+            foreach ($storedMedia as $path) {
+                $this->mediaService->deleteIfStored($path);
+            }
 
             throw $exception;
         }
@@ -116,7 +133,7 @@ class ProductController extends Controller
 
     public function edit(Product $product): Response
     {
-        $product->load(['brand', 'category', 'prices']);
+        $product->load(['brand', 'category', 'prices', 'images']);
         $price = $product->prices
             ->where('price_type', 'retail')
             ->where('min_quantity', 1)
@@ -144,6 +161,17 @@ class ProductController extends Controller
                 'expiry_date' => $product->expiry_date?->format('Y-m-d'),
                 'main_image' => $product->main_image,
                 'main_image_url' => $this->mediaService->url($product->main_image),
+                'images' => $product->images
+                    ->sortBy([['is_primary', 'desc'], ['sort_order', 'asc']])
+                    ->values()
+                    ->map(fn (ProductImage $image) => [
+                        'id' => $image->id,
+                        'image_url' => $this->mediaService->url($image->image_path),
+                        'alt_text' => $image->alt_text,
+                        'is_primary' => $image->is_primary,
+                        'sort_order' => $image->sort_order,
+                    ])
+                    ->all(),
                 'is_active' => $product->is_active,
                 'is_featured' => $product->is_featured,
                 'sort_order' => $product->sort_order,
@@ -158,20 +186,36 @@ class ProductController extends Controller
         $data = $this->validatedData($request, $product);
 
         $oldImage = $product->main_image;
-        $storedImage = null;
+        $storedMedia = [];
+        $storedGallery = [];
 
         try {
             if ($request->hasFile('main_image_file')) {
                 $storedImage = $this->mediaService->storeImage($request->file('main_image_file'), 'products');
                 $data['main_image'] = $storedImage;
+                $storedMedia[] = $storedImage;
             }
 
-            DB::transaction(function () use ($data, $product): void {
+            $galleryFiles = $request->file('gallery_files', []);
+            foreach (is_array($galleryFiles) ? $galleryFiles : [$galleryFiles] as $file) {
+                if ($file === null) {
+                    continue;
+                }
+
+                $path = $this->mediaService->storeImage($file, 'products');
+                $storedGallery[] = $path;
+                $storedMedia[] = $path;
+            }
+
+            DB::transaction(function () use ($data, $product, $storedGallery): void {
                 $product->update($this->productData($data));
                 $this->syncRetailPrice($product, $data);
+                $this->appendGalleryImages($product, $storedGallery);
             });
         } catch (Throwable $exception) {
-            $this->mediaService->deleteIfStored($storedImage);
+            foreach ($storedMedia as $path) {
+                $this->mediaService->deleteIfStored($path);
+            }
 
             throw $exception;
         }
@@ -241,6 +285,8 @@ class ProductController extends Controller
             'expiry_date' => $expiryRules,
             'main_image' => ['nullable', 'string', 'max:2048'],
             'main_image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'gallery_files' => ['nullable', 'array', 'max:8'],
+            'gallery_files.*' => ['file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'is_active' => ['boolean'],
             'is_featured' => ['boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
@@ -277,6 +323,25 @@ class ProductController extends Controller
             'is_featured' => (bool) ($data['is_featured'] ?? false),
             'sort_order' => $data['sort_order'] ?? 0,
         ];
+    }
+
+    protected function appendGalleryImages(Product $product, array $storedPaths): void
+    {
+        if ($storedPaths === []) {
+            return;
+        }
+
+        $sortOrder = ((int) $product->images()->max('sort_order')) + 1;
+
+        foreach ($storedPaths as $path) {
+            ProductImage::create([
+                'product_id' => $product->id,
+                'image_path' => $path,
+                'alt_text' => $product->name,
+                'is_primary' => false,
+                'sort_order' => $sortOrder++,
+            ]);
+        }
     }
 
     protected function syncRetailPrice(Product $product, array $data): void

@@ -6,6 +6,7 @@ use App\Models\Article;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -19,6 +20,33 @@ class AdminMediaUploadTest extends TestCase
     protected function admin(): User
     {
         return User::factory()->create(['is_admin' => true]);
+    }
+
+    public function test_admin_can_upload_product_gallery_images(): void
+    {
+        Storage::fake('public');
+
+        $response = $this->actingAs($this->admin())->post('/admin/products', [
+            'name' => 'محصول گالری تستی',
+            'price' => 100000,
+            'gallery_files' => [
+                UploadedFile::fake()->image('front.jpg'),
+                UploadedFile::fake()->image('back.webp'),
+            ],
+        ]);
+
+        $response->assertRedirect('/admin/products');
+
+        $product = Product::query()->firstOrFail();
+        $images = ProductImage::query()->where('product_id', $product->id)->get();
+
+        $this->assertCount(2, $images);
+
+        foreach ($images as $image) {
+            Storage::disk('public')->assertExists($image->image_path);
+            $this->assertFalse($image->is_primary);
+            $this->assertSame($product->name, $image->alt_text);
+        }
     }
 
     public function test_admin_can_upload_product_image(): void
@@ -74,6 +102,37 @@ class AdminMediaUploadTest extends TestCase
 
         $this->assertNotNull($category->image);
         Storage::disk('public')->assertExists($category->image);
+    }
+
+    public function test_admin_can_append_product_gallery_images(): void
+    {
+        Storage::fake('public');
+
+        $product = Product::create([
+            'name' => 'محصول گالری موجود',
+            'slug' => 'existing-gallery-product',
+        ]);
+
+        $response = $this->actingAs($this->admin())->put("/admin/products/{$product->id}", [
+            'name' => $product->name,
+            'slug' => $product->slug,
+            'price' => 100000,
+            'gallery_files' => [
+                UploadedFile::fake()->image('side.jpg'),
+                UploadedFile::fake()->image('label.png'),
+            ],
+        ]);
+
+        $response->assertRedirect('/admin/products');
+
+        $images = ProductImage::query()->where('product_id', $product->id)->orderBy('sort_order')->get();
+
+        $this->assertCount(2, $images);
+        $this->assertSame([1, 2], $images->pluck('sort_order')->all());
+
+        foreach ($images as $image) {
+            Storage::disk('public')->assertExists($image->image_path);
+        }
     }
 
     public function test_admin_can_replace_stored_product_image(): void
