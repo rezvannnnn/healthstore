@@ -106,10 +106,6 @@ class ProductController extends Controller
 
             $galleryFiles = $request->file('gallery_files', []);
             foreach (is_array($galleryFiles) ? $galleryFiles : [$galleryFiles] as $file) {
-                if ($file === null) {
-                    continue;
-                }
-
                 $path = $this->mediaService->storeImage($file, 'products');
                 $storedGallery[] = $path;
                 $storedMedia[] = $path;
@@ -199,10 +195,6 @@ class ProductController extends Controller
 
             $galleryFiles = $request->file('gallery_files', []);
             foreach (is_array($galleryFiles) ? $galleryFiles : [$galleryFiles] as $file) {
-                if ($file === null) {
-                    continue;
-                }
-
                 $path = $this->mediaService->storeImage($file, 'products');
                 $storedGallery[] = $path;
                 $storedMedia[] = $path;

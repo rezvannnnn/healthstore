@@ -372,7 +372,9 @@ const submit = () => {
                             </label>
                         </div>
 
-                        <div class="rounded-xl border border-dh-100 bg-dh-50/60 p-4">
+                        <div
+                            class="rounded-xl border border-dh-100 bg-dh-50/60 p-4"
+                        >
                             <label class="block">
                                 <span class="text-sm font-medium"
                                     >تصاویر گالری</span
@@ -385,13 +387,18 @@ const submit = () => {
                                     @change="setGalleryFiles"
                                 />
                                 <span class="mt-1 block text-xs text-dh-muted">
-                                    حداکثر ۸ تصویر جدید، هرکدام تا ۵ مگابایت — JPG، PNG یا WebP
+                                    حداکثر ۸ تصویر جدید، هرکدام تا ۵ مگابایت —
+                                    JPG، PNG یا WebP
                                 </span>
                                 <span
                                     v-if="form.gallery_files.length"
                                     class="mt-2 block text-xs font-bold text-dh-700"
                                 >
-                                    {{ form.gallery_files.length.toLocaleString('fa-IR') }}
+                                    {{
+                                        form.gallery_files.length.toLocaleString(
+                                            'fa-IR',
+                                        )
+                                    }}
                                     تصویر جدید انتخاب شده است.
                                 </span>
                                 <span
@@ -413,7 +420,9 @@ const submit = () => {
                                 <p class="text-xs font-bold text-dh-muted">
                                     تصاویر فعلی
                                 </p>
-                                <div class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                                <div
+                                    class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4"
+                                >
                                     <a
                                         v-for="image in props.product.images"
                                         :key="image.id"
@@ -425,7 +434,9 @@ const submit = () => {
                                         <img
                                             v-if="image.image_url"
                                             :src="image.image_url"
-                                            :alt="image.alt_text || 'تصویر محصول'"
+                                            :alt="
+                                                image.alt_text || 'تصویر محصول'
+                                            "
                                             class="h-full w-full object-contain"
                                         />
                                     </a>
