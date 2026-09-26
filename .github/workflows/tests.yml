@@ -36,12 +36,6 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Diagnose header formatting
-        run: |
-          npm ci --no-audit --no-fund
-          npx prettier resources/js/components/StorefrontHeader.vue --write
-          git diff -- resources/js/components/StorefrontHeader.vue
-
       - name: Setup Application
         run: |
           composer update --prefer-dist --no-interaction --no-progress
