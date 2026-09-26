@@ -38,7 +38,8 @@ jobs:
 
       - name: Diagnose header formatting
         run: |
-          npx prettier@3.4.2 resources/js/components/StorefrontHeader.vue --write
+          npm ci --no-audit --no-fund
+          npx prettier resources/js/components/StorefrontHeader.vue --write
           git diff -- resources/js/components/StorefrontHeader.vue
 
       - name: Setup Application
