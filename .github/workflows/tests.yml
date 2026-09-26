@@ -41,6 +41,11 @@ jobs:
           composer update --prefer-dist --no-interaction --no-progress
           composer setup
 
+      - name: Diagnose admin product form formatting
+        run: |
+          npx prettier resources/js/components/Admin/ProductForm.vue --write
+          git diff -- resources/js/components/Admin/ProductForm.vue
+
       - name: Check frontend formatting
         run: npm run format:check
 
