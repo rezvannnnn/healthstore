@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import BrandLogo from '@/components/BrandLogo.vue';
+import StorefrontHeader from '@/components/StorefrontHeader.vue';
 import { ref } from 'vue';
 
 const step = ref<'verify' | 'details'>('verify');
@@ -43,20 +44,15 @@ function register(): void {
         <meta name="robots" content="noindex, nofollow, noarchive" />
     </Head>
 
+    <StorefrontHeader :active="null" />
+
     <main
         dir="rtl"
-        class="flex min-h-screen items-center justify-center bg-dh-surface px-4 py-10 dark:bg-dh-surface"
+        class="flex min-h-[calc(100vh-8rem)] items-center justify-center bg-dh-surface px-4 py-10 pb-28 dark:bg-dh-surface"
     >
         <section
             class="relative w-full max-w-md rounded-3xl bg-white p-7 shadow-sm ring-1 ring-dh-100 dark:bg-white dark:ring-dh-100"
         >
-            <Link
-                href="/"
-                class="flex items-center justify-center"
-                aria-label="داروخونه"
-            >
-                <BrandLogo imageClass="h-28 w-28" />
-            </Link>
             <h1 class="mt-4 text-2xl font-bold text-dh-ink dark:text-dh-ink">
                 ساخت حساب کاربری
             </h1>
@@ -181,6 +177,13 @@ function register(): void {
                     ایجاد حساب
                 </button>
             </form>
+
+            <Link
+                href="/"
+                class="mt-7 flex items-center justify-center gap-2 text-sm font-semibold text-dh-700 transition hover:text-dh-500 hover:underline"
+            >
+                ادامه خرید بدون ورود
+            </Link>
 
             <p class="mt-7 text-center text-sm text-dh-muted">
                 قبلاً ثبت‌نام کرده‌اید؟
