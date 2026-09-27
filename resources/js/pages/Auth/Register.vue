@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import BrandLogo from '@/components/BrandLogo.vue';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
 import { ref } from 'vue';
 
