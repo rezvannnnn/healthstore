@@ -21,7 +21,7 @@ type SharedPageProps = {
 
 const props = withDefaults(
     defineProps<{
-        active?: ActiveSection;
+        active?: ActiveSection | null;
     }>(),
     {
         active: 'home',
