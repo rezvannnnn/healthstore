@@ -3,10 +3,11 @@ import { createApp, h } from 'vue';
 import type { DefineComponent } from 'vue';
 import StructuredData from './components/StructuredData.vue';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'داروخونه';
+const siteTitle = 'داروخونه - محصولات سلامت';
 
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: (title) => (title ? `${title} - ${appName} | محصولات سلامت` : siteTitle),
 
     resolve: (name) => {
         const pages = import.meta.glob<DefineComponent>('./pages/**/*.vue', {
