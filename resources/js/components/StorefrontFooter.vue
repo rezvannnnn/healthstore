@@ -65,7 +65,9 @@ import BrandLogo from '@/components/BrandLogo.vue';
                 class="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"
             >
                 <div>
-                    <div class="font-extrabold text-white">ما را دنبال کنید</div>
+                    <div class="font-extrabold text-white">
+                        ما را دنبال کنید
+                    </div>
                     <div class="mt-3 flex gap-3">
                         <a
                             href="https://instagram.com/Darukhooneh.ir"
@@ -124,9 +126,12 @@ import BrandLogo from '@/components/BrandLogo.vue';
                         </a>
                     </div>
                 </div>
-                <p class="text-xs leading-6 text-dh-200 sm:max-w-2xl sm:text-left">
-                    تمامی حقوق این وب‌سایت متعلق به داروخونه است و هرگونه کپی‌برداری
-                    از محتوا، طراحی یا مطالب آن بدون اجازه کتبی مجاز نیست.
+                <p
+                    class="text-xs leading-6 text-dh-200 sm:max-w-2xl sm:text-left"
+                >
+                    تمامی حقوق این وب‌سایت متعلق به داروخونه است و هرگونه
+                    کپی‌برداری از محتوا، طراحی یا مطالب آن بدون اجازه کتبی مجاز
+                    نیست.
                 </p>
             </div>
         </div>
