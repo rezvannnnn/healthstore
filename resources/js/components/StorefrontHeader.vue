@@ -204,6 +204,7 @@ function navClass(section: ActiveSection): string {
     </header>
 
     <nav
+        dir="rtl"
         class="fixed inset-x-0 bottom-0 z-50 border-t border-dh-100 bg-white/95 px-3 py-2 shadow-[0_-8px_25px_rgba(20,86,92,0.08)] backdrop-blur md:hidden"
         aria-label="ناوبری موبایل"
     >
