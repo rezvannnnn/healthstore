@@ -85,7 +85,7 @@ Route::post('/login/send-otp', [LoginController::class, 'sendOtp'])
     ->name('login.send-otp');
 Route::post('/logout', [LogoutController::class, 'store'])->name('logout');
 
-Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::post('/logout', AdminLogoutController::class)->name('logout');
     Route::get('/', DashboardController::class)->name('dashboard');
     Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');

@@ -26,6 +26,12 @@ return Application::configure(basePath: dirname(__DIR__))
             ->withoutOverlapping(2);
     })
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->redirectGuestsTo(
+            fn (Request $request) => $request->is('admin') || $request->is('admin/*')
+                ? route('admin.login')
+                : route('login'),
+        );
+
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
             'customer' => EnsureCustomerUser::class,

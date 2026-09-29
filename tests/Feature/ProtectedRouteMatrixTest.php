@@ -78,6 +78,8 @@ class ProtectedRouteMatrixTest extends TestCase
     {
         $response = $this->call($method, $uri);
 
-        $response->assertRedirect('/login');
+        $response->assertRedirect(
+            str_starts_with($uri, '/admin') ? '/admin/login' : '/login'
+        );
     }
 }
