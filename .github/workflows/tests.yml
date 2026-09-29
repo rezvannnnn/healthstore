@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: healthstore-tests-${{ github.ref }}
+  group: healthstore-tests-\${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -36,13 +36,14 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Debug Wayfinder generation
-        run: |
-          php artisan wayfinder:generate --with-form -vvv 2>&1 || true
       - name: Setup Application
         run: |
           composer update --prefer-dist --no-interaction --no-progress
           composer setup
+
+      - name: Debug Wayfinder generation
+        run: |
+          php artisan wayfinder:generate --with-form -vvv 2>&1 || true
 
       - name: Check frontend formatting
         run: npm run format:check
