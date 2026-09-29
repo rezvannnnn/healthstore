@@ -119,7 +119,9 @@ function addToCart(product: FeaturedProduct): void {
                                 <BrandLogo
                                     imageClass="h-24 w-24 shrink-0 sm:h-28 sm:w-28"
                                 />
-                                <h1 class="text-3xl leading-[1.35] font-extrabold tracking-tight text-dh-900 sm:text-4xl lg:text-5xl">
+                                <h1
+                                    class="text-3xl leading-[1.35] font-extrabold tracking-tight text-dh-900 sm:text-4xl lg:text-5xl"
+                                >
                                     سلامت، ساده‌تر از چیزی که فکر می‌کنید.
                                 </h1>
                             </div>
@@ -804,7 +806,9 @@ function addToCart(product: FeaturedProduct): void {
                                     fill="currentColor"
                                     aria-hidden="true"
                                 >
-                                    <path d="M21.4 4.6 18.2 19c-.2 1-1 1.3-1.8.8l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.8-7.9c.4-.4-.1-.6-.6-.2L6 12.9 1.4 11.4c-1-.3-1-1 .2-1.4L19.6 3c.9-.3 2-.2 1.8 1.6Z" />
+                                    <path
+                                        d="M21.4 4.6 18.2 19c-.2 1-1 1.3-1.8.8l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.8-7.9c.4-.4-.1-.6-.6-.2L6 12.9 1.4 11.4c-1-.3-1-1 .2-1.4L19.6 3c.9-.3 2-.2 1.8 1.6Z"
+                                    />
                                 </svg>
                             </a>
                         </div>
