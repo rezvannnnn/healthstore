@@ -116,16 +116,20 @@ class User extends Authenticatable
             return false;
         }
 
+        if ($this->isAdmin()) {
+            return true;
+        }
+
         if ($routeName === 'admin.logout') {
             return true;
         }
 
         if ($routeName === 'admin.dashboard') {
-            return $this->isAdmin();
+            return false;
         }
 
         if (in_array($routeName, config('admin.admin_only_routes', []), true)) {
-            return $this->isAdmin();
+            return false;
         }
 
         $routePermissions = config('admin.route_permissions', []);
