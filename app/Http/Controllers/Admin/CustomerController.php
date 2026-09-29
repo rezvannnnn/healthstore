@@ -101,5 +101,4 @@ class CustomerController extends Controller
             ],
         ]);
     }
-
 }

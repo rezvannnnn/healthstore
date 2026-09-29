@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AdminUserManagementTest extends TestCase
@@ -51,7 +50,7 @@ class AdminUserManagementTest extends TestCase
             ->firstOrFail();
 
         $this->assertSame(User::ROLE_STAFF, $staff->role);
-        $this->assertTrue(Hash::check('AccountingPass123!', $staff->password));
+        $this->assertTrue(password_verify('AccountingPass123!', $staff->password));
 
         $this->actingAs($staff)
             ->get('/admin/payments')
