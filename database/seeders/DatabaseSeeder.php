@@ -1,10 +1,10 @@
 <?php
 
-namespace Database\Seeders;
+namespace DatabaseSeeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
+use AppModelsUser;
+use IlluminateDatabaseConsoleSeedsWithoutModelEvents;
+use IlluminateDatabaseSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +15,43 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        if (! app()->environment(['local', 'testing'])) {
+            return;
+        }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        $users = [
+            [
+                'name' => 'مدیر داروخونه',
+                'email' => 'admin@darukhooneh.local',
+                'phone' => '09000000001',
+                'role' => User::ROLE_ADMIN,
+                'is_admin' => true,
+            ],
+            [
+                'name' => 'کاربر تست',
+                'email' => 'user@darukhooneh.local',
+                'phone' => '09000000002',
+                'role' => User::ROLE_USER,
+                'is_admin' => false,
+            ],
+            [
+                'name' => 'مسئول انبار',
+                'email' => 'storagekeeper@darukhooneh.local',
+                'phone' => '09000000003',
+                'role' => User::ROLE_STORAGEKEEPER,
+                'is_admin' => false,
+            ],
+        ];
+
+        foreach ($users as $userData) {
+            User::updateOrCreate(
+                ['email' => $userData['email']],
+                [
+                    ...$userData,
+                    'phone_verified_at' => now(),
+                    'password' => null,
+                ],
+            );
+        }
     }
 }

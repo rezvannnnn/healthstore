@@ -1,0 +1,28 @@
+<?php
+
+use IlluminateDatabaseMigrationsMigration;
+use IlluminateDatabaseSchemaBlueprint;
+use IlluminateSupportFacadesDB;
+use IlluminateSupportFacadesSchema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('role')->default('user')->after('is_admin')->index();
+        });
+
+        DB::table('users')
+            ->where('is_admin', true)
+            ->update(['role' => 'admin']);
+    }
+
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropIndex(['role']);
+            $table->dropColumn('role');
+        });
+    }
+};
