@@ -18,38 +18,28 @@ import BrandLogo from '@/components/BrandLogo.vue';
                         />
                     </span>
                     <div>
-                        <div class="text-xl font-extrabold">
-                            داروخونه
-                        </div>
+                        <div class="text-xl font-extrabold">داروخونه</div>
                         <div class="mt-1 text-xs text-dh-200">
                             دارو و محصولات بهداشتی
                         </div>
                     </div>
                 </div>
                 <p class="mt-5 max-w-xl text-sm leading-7 text-dh-100">
-                    یک تجربه ساده و روشن برای پیدا کردن محصولات سلامت و
-                    مدیریت سفارش‌های روزمره.
+                    یک تجربه ساده و روشن برای پیدا کردن محصولات سلامت و مدیریت
+                    سفارش‌های روزمره.
                 </p>
             </div>
             <div class="grid grid-cols-2 gap-6 text-sm">
                 <div>
-                    <h3 class="font-extrabold text-white">
-                        دسترسی سریع
-                    </h3>
+                    <h3 class="font-extrabold text-white">دسترسی سریع</h3>
                     <div class="mt-3 space-y-2 text-dh-100">
-                        <Link
-                            href="/products"
-                            class="block hover:text-white"
+                        <Link href="/products" class="block hover:text-white"
                             >محصولات</Link
                         >
-                        <Link
-                            href="/categories"
-                            class="block hover:text-white"
+                        <Link href="/categories" class="block hover:text-white"
                             >دسته‌بندی‌ها</Link
                         >
-                        <Link
-                            href="/brands"
-                            class="block hover:text-white"
+                        <Link href="/brands" class="block hover:text-white"
                             >برندها</Link
                         >
                     </div>
@@ -57,19 +47,13 @@ import BrandLogo from '@/components/BrandLogo.vue';
                 <div>
                     <h3 class="font-extrabold text-white">مطالب</h3>
                     <div class="mt-3 space-y-2 text-dh-100">
-                        <Link
-                            href="/blog"
-                            class="block hover:text-white"
+                        <Link href="/blog" class="block hover:text-white"
                             >مجله سلامت</Link
                         >
-                        <Link
-                            href="/login"
-                            class="block hover:text-white"
+                        <Link href="/login" class="block hover:text-white"
                             >حساب کاربری</Link
                         >
-                        <Link
-                            href="/cart"
-                            class="block hover:text-white"
+                        <Link href="/cart" class="block hover:text-white"
                             >سبد خرید</Link
                         >
                     </div>
@@ -80,9 +64,7 @@ import BrandLogo from '@/components/BrandLogo.vue';
             class="mt-8 flex flex-col gap-5 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between"
         >
             <div>
-                <div class="font-extrabold text-white">
-                    ما را دنبال کنید
-                </div>
+                <div class="font-extrabold text-white">ما را دنبال کنید</div>
                 <div class="mt-3 flex gap-3">
                     <a
                         href="https://instagram.com/Darukhooneh.ir"
@@ -141,11 +123,9 @@ import BrandLogo from '@/components/BrandLogo.vue';
                     </a>
                 </div>
             </div>
-            <p
-                class="text-xs leading-6 text-dh-200 sm:max-w-2xl sm:text-left"
-            >
-                تمامی حقوق این وب‌سایت متعلق به داروخونه است و هرگونه
-                کپی‌برداری از محتوا، طراحی یا مطالب آن بدون اجازه کتبی مجاز نیست.
+            <p class="text-xs leading-6 text-dh-200 sm:max-w-2xl sm:text-left">
+                تمامی حقوق این وب‌سایت متعلق به داروخونه است و هرگونه کپی‌برداری
+                از محتوا، طراحی یا مطالب آن بدون اجازه کتبی مجاز نیست.
             </p>
         </div>
     </footer>

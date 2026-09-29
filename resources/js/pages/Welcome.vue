@@ -116,7 +116,9 @@ function addToCart(product: FeaturedProduct): void {
                                 ></span>
                                 فروشگاه آنلاین سلامت
                             </span>
-                            <div class="mt-5 flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-right">
+                            <div
+                                class="mt-5 flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-right"
+                            >
                                 <BrandLogo
                                     imageClass="h-20 w-20 shrink-0 sm:h-28 sm:w-28"
                                 />
