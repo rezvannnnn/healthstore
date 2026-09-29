@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <link rel="icon" href="/images/darukhooneh-logo.webp?v=2" type="image/webp">
+        <link rel="icon" href="/images/darukhooneh-logo.webp?v=3" type="image/webp">
         <link rel="apple-touch-icon" href="/images/darukhooneh-logo.webp?v=2">
 
         @fonts
@@ -12,7 +12,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.ts'])
 
         <x-inertia::head>
-            <title>{{ config('app.name', 'Laravel') }}</title>
+            <title>{{ config('app.name', 'داروخونه') }}</title>
         </x-inertia::head>
     </head>
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
+import StorefrontFooter from '@/components/StorefrontFooter.vue';
 
 interface Category {
     id: number;
@@ -338,5 +339,6 @@ function pageUrl(page: number): string {
                 >
             </nav>
         </main>
+        <StorefrontFooter />
     </div>
 </template>

@@ -63,7 +63,7 @@ class HomeController extends Controller
             ->all();
 
         $seo = [
-            'title' => 'HealthStore | فروشگاه آنلاین محصولات سلامت',
+            'title' => 'محصولات سلامت',
             'description' => 'خرید آنلاین محصولات بهداشتی و سلامت با مشاهده محصولات منتخب، دسته‌بندی‌ها، موجودی و مسیر پرداخت یکپارچه.',
             'canonical' => route('home'),
         ];
@@ -71,7 +71,7 @@ class HomeController extends Controller
         $structuredData = [
             '@context' => 'https://schema.org',
             '@type' => 'WebSite',
-            'name' => config('app.name', 'HealthStore'),
+            'name' => 'داروخونه',
             'url' => route('home'),
             'inLanguage' => 'fa-IR',
             'potentialAction' => [

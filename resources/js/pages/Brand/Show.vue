@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
+import StorefrontFooter from '@/components/StorefrontFooter.vue';
 
 interface Product {
     id: number;
@@ -313,5 +314,6 @@ function pageUrl(page: number): string {
                 </nav>
             </div>
         </main>
+        <StorefrontFooter />
     </div>
 </template>

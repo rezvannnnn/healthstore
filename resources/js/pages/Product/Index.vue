@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
+import StorefrontFooter from '@/components/StorefrontFooter.vue';
 import { reactive, ref } from 'vue';
 
 interface Product {
@@ -586,5 +587,6 @@ function formatPrice(value: number | null): string {
                 </Link>
             </nav>
         </main>
+        <StorefrontFooter />
     </div>
 </template>

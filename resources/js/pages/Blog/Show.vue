@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
+import StorefrontFooter from '@/components/StorefrontFooter.vue';
 import { computed } from 'vue';
 
 interface Article {
@@ -249,5 +250,6 @@ const structuredData = computed(() => ({
                 </div>
             </section>
         </main>
+        <StorefrontFooter />
     </div>
 </template>
