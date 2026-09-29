@@ -8,6 +8,7 @@ use Tests\TestCase;
 
 class AdminUserManagementTest extends TestCase
 {
+    use RefreshDatabase;
     protected function admin(): User
     {
         return User::factory()->create([
