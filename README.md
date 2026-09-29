@@ -11,6 +11,21 @@ composer setup
 composer dev
 ```
 
+برای ساخت مدیر اولیه در محیط local، ابتدا مقادیر زیر را در فایل `.env` تنظیم کنید:
+
+```env
+ADMIN_SEED_USERNAME=admin
+ADMIN_SEED_PASSWORD=یک-رمز-عبور-حداقل-۱۲-کاراکتری
+```
+
+سپس:
+
+```bash
+php artisan migrate --seed
+```
+
+ورود مدیریت از مسیر `/admin/login` انجام می‌شود و صفحه ورود مدیریت مسیر ثبت‌نام ندارد.
+
 برای اجرای جداگانه frontend در توسعه:
 
 ```bash

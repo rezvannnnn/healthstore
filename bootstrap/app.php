@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
+            'customer' => EnsureCustomerUser::class,
         ]);
 
         $middleware->web(append: [

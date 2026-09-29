@@ -48,7 +48,7 @@ Route::get('/blog/categories', [ArticleCategoryController::class, 'index'])->nam
 Route::get('/blog/category/{articleCategory:slug}', [ArticleCategoryController::class, 'show'])->name('blog.categories.show');
 Route::get('/blog/{slug}', [ArticleController::class, 'show'])->name('blog.show');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'customer'])->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
     Route::post('/checkout/confirm', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
     Route::post('/checkout/reject', [CheckoutController::class, 'reject'])->name('checkout.reject');
@@ -121,7 +121,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/articles/{article}', [AdminArticleController::class, 'destroy'])->name('articles.destroy');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'customer'])->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/items', [CartController::class, 'store'])->name('cart.items.store');
     Route::put('/cart/{cart}/items/{item}', [CartController::class, 'update'])->name('cart.items.update');

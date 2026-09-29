@@ -10,46 +10,43 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         if (! app()->environment(['local', 'testing'])) {
             return;
         }
 
-        $users = [
+        User::query()->updateOrCreate(
+            ['email' => 'test@example.com'],
             [
-                'name' => 'مدیر داروخونه',
-                'email' => 'admin@darukhooneh.local',
-                'phone' => '09000000001',
-                'role' => User::ROLE_ADMIN,
-                'is_admin' => true,
-            ],
-            [
-                'name' => 'کاربر تست',
-                'email' => 'user@darukhooneh.local',
-                'phone' => '09000000002',
+                'name' => 'Test User',
+                'phone' => '09110000001',
                 'role' => User::ROLE_USER,
                 'is_admin' => false,
+                'phone_verified_at' => now(),
+                'password' => null,
+                'admin_username' => null,
+                'admin_title' => null,
+                'admin_active' => true,
+                'admin_permissions' => [],
             ],
-            [
-                'name' => 'مسئول انبار',
-                'email' => 'storagekeeper@darukhooneh.local',
-                'phone' => '09000000003',
-                'role' => User::ROLE_STORAGEKEEPER,
-                'is_admin' => false,
-            ],
-        ];
+        );
 
-        foreach ($users as $userData) {
-            User::updateOrCreate(
-                ['email' => $userData['email']],
+        $adminPassword = config('admin.seed.password');
+
+        if (filled($adminPassword)) {
+            User::query()->updateOrCreate(
+                ['admin_username' => strtolower((string) config('admin.seed.username', 'admin'))],
                 [
-                    ...$userData,
-                    'phone_verified_at' => now(),
-                    'password' => null,
+                    'name' => 'مدیر داروخونه',
+                    'email' => 'admin@darukhooneh.local',
+                    'admin_username' => strtolower((string) config('admin.seed.username', 'admin')),
+                    'admin_title' => 'مدیر سیستم',
+                    'password' => $adminPassword,
+                    'role' => User::ROLE_ADMIN,
+                    'is_admin' => true,
+                    'admin_active' => true,
+                    'admin_permissions' => [],
                 ],
             );
         }

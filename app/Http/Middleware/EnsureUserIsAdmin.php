@@ -12,8 +12,25 @@ class EnsureUserIsAdmin
     {
         $user = $request->user();
 
+        if (! $user) {
+            return redirect()->route('admin.login');
+        }
+
+        if (
+            $request->route()?->getName() === 'admin.dashboard'
+            && $user->isAdminPanelUser()
+            && ! $user->isAdmin()
+            && $user->admin_active
+        ) {
+            $landing = $user->adminLandingPath();
+
+            if ($landing !== null) {
+                return redirect()->to($landing);
+            }
+        }
+
         abort_unless(
-            $user?->canAccessAdminRoute($request->route()?->getName()),
+            $user->canAccessAdminRoute($request->route()?->getName()),
             403
         );
 

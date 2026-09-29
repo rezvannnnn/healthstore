@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 
 type Stats = {
     today_sales: number;
@@ -94,12 +94,27 @@ const sections = [
                     </p>
                 </div>
 
-                <Link
-                    href="/"
-                    class="rounded-xl border border-dh-100 bg-white px-4 py-2 text-sm font-bold text-dh-700 shadow-sm hover:bg-dh-50"
-                >
-                    بازگشت به فروشگاه
-                </Link>
+                <div class="flex flex-wrap gap-2">
+                    <Link
+                        href="/"
+                        class="rounded-xl border border-dh-100 bg-white px-4 py-2 text-sm font-bold text-dh-700 shadow-sm hover:bg-dh-50"
+                    >
+                        بازگشت به فروشگاه
+                    </Link>
+                    <Link
+                        href="/admin/users"
+                        class="rounded-xl border border-dh-100 bg-white px-4 py-2 text-sm font-bold text-dh-700 shadow-sm hover:bg-dh-50"
+                    >
+                        مدیریت کاربران
+                    </Link>
+                    <button
+                        type="button"
+                        class="rounded-xl border border-red-100 bg-white px-4 py-2 text-sm font-bold text-red-600 shadow-sm hover:bg-red-50"
+                        @click="router.post('/admin/logout')"
+                    >
+                        خروج
+                    </button>
+                </div>
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
