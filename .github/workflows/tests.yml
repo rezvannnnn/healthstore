@@ -39,11 +39,18 @@ jobs:
       - name: Setup Application
         run: |
           composer update --prefer-dist --no-interaction --no-progress
-          composer setup
+          composer install
+          php -r "file_exists('.env') || copy('.env.example', '.env');"
+          php artisan key:generate
+          php artisan migrate --force
+          npm install
 
       - name: Debug Wayfinder generation
         run: |
-          php artisan wayfinder:generate --with-form -vvv 2>&1 || true
+          php artisan wayfinder:generate --with-form -vvv
+
+      - name: Build frontend
+        run: npm run build
 
       - name: Check frontend formatting
         run: npm run format:check
