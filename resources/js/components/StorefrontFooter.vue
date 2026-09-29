@@ -65,68 +65,68 @@ import BrandLogo from '@/components/BrandLogo.vue';
                 class="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"
             >
                 <div>
-                <div class="font-extrabold text-white">ما را دنبال کنید</div>
-                <div class="mt-3 flex gap-3">
-                    <a
-                        href="https://instagram.com/Darukhooneh.ir"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="اینستاگرام داروخونه"
-                        class="flex size-10 items-center justify-center rounded-xl bg-white/10 text-dh-100 hover:bg-white/20 hover:text-white"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            class="size-5"
-                            fill="none"
-                            aria-hidden="true"
+                    <div class="font-extrabold text-white">ما را دنبال کنید</div>
+                    <div class="mt-3 flex gap-3">
+                        <a
+                            href="https://instagram.com/Darukhooneh.ir"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="اینستاگرام داروخونه"
+                            class="flex size-10 items-center justify-center rounded-xl bg-white/10 text-dh-100 hover:bg-white/20 hover:text-white"
                         >
-                            <rect
-                                x="3.5"
-                                y="3.5"
-                                width="17"
-                                height="17"
-                                rx="4.5"
-                                stroke="currentColor"
-                                stroke-width="1.7"
-                            />
-                            <circle
-                                cx="12"
-                                cy="12"
-                                r="4"
-                                stroke="currentColor"
-                                stroke-width="1.7"
-                            />
-                            <circle
-                                cx="17.5"
-                                cy="6.7"
-                                r="1"
+                            <svg
+                                viewBox="0 0 24 24"
+                                class="size-5"
+                                fill="none"
+                                aria-hidden="true"
+                            >
+                                <rect
+                                    x="3.5"
+                                    y="3.5"
+                                    width="17"
+                                    height="17"
+                                    rx="4.5"
+                                    stroke="currentColor"
+                                    stroke-width="1.7"
+                                />
+                                <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="4"
+                                    stroke="currentColor"
+                                    stroke-width="1.7"
+                                />
+                                <circle
+                                    cx="17.5"
+                                    cy="6.7"
+                                    r="1"
+                                    fill="currentColor"
+                                />
+                            </svg>
+                        </a>
+                        <a
+                            href="https://t.me/Darukhooneh_ir"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="تلگرام داروخونه"
+                            class="flex size-10 items-center justify-center rounded-xl bg-white/10 text-dh-100 hover:bg-white/20 hover:text-white"
+                        >
+                            <svg
+                                viewBox="0 0 24 24"
+                                class="size-5"
                                 fill="currentColor"
-                            />
-                        </svg>
-                    </a>
-                    <a
-                        href="https://t.me/Darukhooneh_ir"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="تلگرام داروخونه"
-                        class="flex size-10 items-center justify-center rounded-xl bg-white/10 text-dh-100 hover:bg-white/20 hover:text-white"
-                    >
-                        <svg
-                            viewBox="0 0 24 24"
-                            class="size-5"
-                            fill="currentColor"
-                            aria-hidden="true"
-                        >
-                            <path
-                                d="M21.4 4.6 18.2 19c-.2 1-1 1.3-1.8.8l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.8-7.9c.4-.4-.1-.6-.6-.2L6 12.9 1.4 11.4c-1-.3-1-1 .2-1.4L19.6 3c.9-.3 2-.2 1.8 1.6Z"
-                            />
-                        </svg>
-                    </a>
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M21.4 4.6 18.2 19c-.2 1-1 1.3-1.8.8l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.8-7.9c.4-.4-.1-.6-.6-.2L6 12.9 1.4 11.4c-1-.3-1-1 .2-1.4L19.6 3c.9-.3 2-.2 1.8 1.6Z"
+                                />
+                            </svg>
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <p class="text-xs leading-6 text-dh-200 sm:max-w-2xl sm:text-left">
-                تمامی حقوق این وب‌سایت متعلق به داروخونه است و هرگونه کپی‌برداری
-                از محتوا، طراحی یا مطالب آن بدون اجازه کتبی مجاز نیست.
+                <p class="text-xs leading-6 text-dh-200 sm:max-w-2xl sm:text-left">
+                    تمامی حقوق این وب‌سایت متعلق به داروخونه است و هرگونه کپی‌برداری
+                    از محتوا، طراحی یا مطالب آن بدون اجازه کتبی مجاز نیست.
                 </p>
             </div>
         </div>
