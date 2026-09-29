@@ -13,7 +13,7 @@ class EnsureUserIsAdmin
         $user = $request->user();
 
         if (! $user) {
-            return redirect()->route('admin.login');
+            return redirect()->route('admin.dashboard');
         }
 
         if (

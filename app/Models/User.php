@@ -95,12 +95,12 @@ class User extends Authenticatable
 
     public function hasAdminPermission(string $permission): bool
     {
-        if (! $this->isAdminPanelUser() || ! $this->admin_active) {
-            return false;
+        if ($this->isAdmin()) {
+            return $this->admin_active !== false;
         }
 
-        if ($this->isAdmin()) {
-            return true;
+        if (! $this->isAdminPanelUser() || $this->admin_active !== true) {
+            return false;
         }
 
         return in_array(
@@ -112,12 +112,12 @@ class User extends Authenticatable
 
     public function canAccessAdminRoute(?string $routeName): bool
     {
-        if (! $this->isAdminPanelUser() || ! $this->admin_active) {
-            return false;
+        if ($this->isAdmin()) {
+            return $this->admin_active !== false;
         }
 
-        if ($this->isAdmin()) {
-            return true;
+        if (! $this->isAdminPanelUser() || $this->admin_active !== true) {
+            return false;
         }
 
         if ($routeName === 'admin.logout') {

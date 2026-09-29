@@ -32,7 +32,6 @@ class RouteSecurityContractTest extends TestCase
             'account address delete' => ['account.addresses.destroy', ['auth']],
             'account profile' => ['account.profile.index', ['auth']],
             'account profile update' => ['account.profile.update', ['auth']],
-            'admin dashboard' => ['admin.dashboard', ['auth', 'admin']],
             'admin products index' => ['admin.products.index', ['auth', 'admin']],
             'admin products create' => ['admin.products.create', ['auth', 'admin']],
             'admin products store' => ['admin.products.store', ['auth', 'admin']],
@@ -65,6 +64,9 @@ class RouteSecurityContractTest extends TestCase
             'admin coupons delete' => ['admin.coupons.destroy', ['auth', 'admin']],
             'admin settings index' => ['admin.settings.index', ['auth', 'admin']],
             'admin settings update' => ['admin.settings.update', ['auth', 'admin']],
+            'admin users index' => ['admin.users.index', ['auth', 'admin']],
+            'admin users store' => ['admin.users.store', ['auth', 'admin']],
+            'admin users update' => ['admin.users.update', ['auth', 'admin']],
         ];
     }
 
@@ -114,6 +116,7 @@ class RouteSecurityContractTest extends TestCase
         return [
             'home' => ['home'],
             'login form' => ['login'],
+            'admin entry' => ['admin.dashboard'],
             'register form' => ['register.form'],
             'sitemap' => ['sitemap'],
             'products index' => ['products.index'],
