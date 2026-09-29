@@ -17,6 +17,7 @@ class CustomerController extends Controller
 
         $query = User::query()
             ->where('role', User::ROLE_USER)
+            ->where('is_admin', false)
             ->withCount('orders')
             ->orderByDesc('created_at')
             ->orderByDesc('id');
