@@ -18,6 +18,8 @@ class User extends Authenticatable
 
     public const ROLE_STORAGEKEEPER = 'storagekeeper';
 
+    public const ROLE_STAFF = 'staff';
+
     protected $fillable = [
         'name',
         'email',
@@ -26,6 +28,10 @@ class User extends Authenticatable
         'password',
         'is_admin',
         'role',
+        'admin_username',
+        'admin_title',
+        'admin_active',
+        'admin_permissions',
     ];
 
     protected $hidden = [
@@ -38,6 +44,8 @@ class User extends Authenticatable
         'phone_verified_at' => 'datetime',
         'password' => 'hashed',
         'is_admin' => 'boolean',
+        'admin_active' => 'boolean',
+        'admin_permissions' => 'array',
     ];
 
     public function businessProfile(): HasOne
@@ -66,42 +74,92 @@ class User extends Authenticatable
         return $this->hasMany(Order::class);
     }
 
-    /**
-     * Determine whether the user's phone number has been verified.
-     */
     public function hasVerifiedPhone(): bool
     {
         return $this->phone_verified_at !== null;
     }
 
-    /**
-     * Determine whether the user can access the administration area.
-     */
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN || $this->is_admin === true;
     }
 
-    public function isStoragekeeper(): bool
+    public function isAdminPanelUser(): bool
     {
-        return $this->role === self::ROLE_STORAGEKEEPER;
+        return in_array($this->role, [
+            self::ROLE_ADMIN,
+            self::ROLE_STAFF,
+            self::ROLE_STORAGEKEEPER,
+        ], true) || $this->is_admin === true;
     }
 
-    public function canAccessAdminRoute(?string $routeName): bool
+    public function hasAdminPermission(string $permission): bool
     {
+        if (! $this->isAdminPanelUser() || ! $this->admin_active) {
+            return false;
+        }
+
         if ($this->isAdmin()) {
             return true;
         }
 
-        if (! $this->isStoragekeeper()) {
+        return in_array(
+            $permission,
+            array_values($this->admin_permissions ?? []),
+            true
+        );
+    }
+
+    public function canAccessAdminRoute(?string $routeName): bool
+    {
+        if (! $this->isAdminPanelUser() || ! $this->admin_active) {
             return false;
         }
 
-        return in_array($routeName, [
-            'admin.inventory.index',
-            'admin.inventory.store',
-            'admin.inventory.adjust',
-            'admin.inventory.movements',
-        ], true);
+        if ($routeName === 'admin.logout') {
+            return true;
+        }
+
+        if ($routeName === 'admin.dashboard') {
+            return $this->isAdmin();
+        }
+
+        if (in_array($routeName, config('admin.admin_only_routes', []), true)) {
+            return $this->isAdmin();
+        }
+
+        $routePermissions = config('admin.route_permissions', []);
+        $permission = is_string($routeName)
+            ? ($routePermissions[$routeName] ?? null)
+            : null;
+
+        return is_string($permission) && $this->hasAdminPermission($permission);
+    }
+
+    public function adminLandingPath(): ?string
+    {
+        foreach (config('admin.landing_routes', []) as $routeName) {
+            if ($routeName === 'admin.dashboard' && ! $this->isAdmin()) {
+                continue;
+            }
+
+            if ($this->canAccessAdminRoute($routeName)) {
+                return route($routeName);
+            }
+        }
+
+        return null;
+    }
+
+    public function adminPermissionCount(): int
+    {
+        if ($this->isAdmin()) {
+            return count(config('admin.permissions', []));
+        }
+
+        return count(array_intersect(
+            array_keys(config('admin.permissions', [])),
+            array_values($this->admin_permissions ?? [])
+        ));
     }
 }
