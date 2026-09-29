@@ -681,30 +681,7 @@ function addToCart(product: FeaturedProduct): void {
                             <span
                                 class="flex size-11 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/10"
                             >
-                                <svg
-                                    viewBox="0 0 48 48"
-                                    class="size-7 text-dh-200"
-                                    fill="none"
-                                    aria-hidden="true"
-                                >
-                                    <path
-                                        d="M13 27.5 27.5 13a7.5 7.5 0 0 1 10.6 10.6L23.6 38.1A7.5 7.5 0 0 1 13 27.5Z"
-                                        fill="currentColor"
-                                        opacity=".16"
-                                    />
-                                    <path
-                                        d="M16.2 31.8 31.8 16.2M19.7 28.3l10 10M28.3 19.7l-10-10"
-                                        stroke="currentColor"
-                                        stroke-width="2.6"
-                                        stroke-linecap="round"
-                                    />
-                                    <path
-                                        d="M15.1 21.5c-3.4-2.4-4.1-6.8-1.8-9.4 2.5-2.8 6.9-2.3 9.3 1.1"
-                                        stroke="#63b95b"
-                                        stroke-width="2.6"
-                                        stroke-linecap="round"
-                                    />
-                                </svg>
+                                <BrandLogo imageClass="h-10 w-10 rounded-xl bg-white p-1 object-contain" />
                             </span>
                             <div>
                                 <div class="text-xl font-extrabold">
@@ -765,6 +742,28 @@ function addToCart(product: FeaturedProduct): void {
                         </div>
                     </div>
                 </div>
+                    <div class="mt-8 flex flex-col gap-5 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <div class="font-extrabold text-white">ما را دنبال کنید</div>
+                            <div class="mt-3 flex gap-3">
+                                <a href="https://www.instagram.com/Darukhooneh.ir/" target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام داروخونه" class="flex size-10 items-center justify-center rounded-xl bg-white/10 text-dh-100 hover:bg-white/20 hover:text-white">
+                                    <svg viewBox="0 0 24 24" class="size-5" fill="none" aria-hidden="true">
+                                        <rect x="3.5" y="3.5" width="17" height="17" rx="4.5" stroke="currentColor" stroke-width="1.7" />
+                                        <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7" />
+                                        <circle cx="17.5" cy="6.7" r="1" fill="currentColor" />
+                                    </svg>
+                                </a>
+                                <a href="https://t.me/Darukhooneh_ir" target="_blank" rel="noopener noreferrer" aria-label="تلگرام داروخونه" class="flex size-10 items-center justify-center rounded-xl bg-white/10 text-dh-100 hover:bg-white/20 hover:text-white">
+                                    <svg viewBox="0 0 24 24" class="size-5" fill="currentColor" aria-hidden="true">
+                                        <path d="M21.4 4.6 18.2 19c-.2 1-1 1.3-1.8.8l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.8-7.9c.4-.4-.1-.6-.6-.2L6 12.9 1.4 11.4c-1-.3-1-1 .2-1.4L19.6 3c.9-.3 2-.2 1.8 1.6Z" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                        <p class="text-xs leading-6 text-dh-200 sm:max-w-2xl sm:text-left">
+                            تمامی حقوق این وب‌سایت متعلق به داروخونه است و هرگونه کپی‌برداری از محتوا، طراحی و اطلاعات آن بدون کسب اجازه ممنوع است.
+                        </p>
+                    </div>
             </section>
         </main>
     </div>
