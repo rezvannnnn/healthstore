@@ -15,14 +15,8 @@ use Inertia\Response;
 
 class LoginController extends Controller
 {
-    public function show(Request $request): Response|RedirectResponse
+    public function show(): Response
     {
-        $user = $request->user();
-
-        if ($user?->isAdminPanelUser() && $user->admin_active) {
-            return redirect()->to($user->adminLandingPath() ?? route('admin.login'));
-        }
-
         return Inertia::render('Admin/Login');
     }
 
