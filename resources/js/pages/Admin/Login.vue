@@ -14,16 +14,26 @@ const submit = () => {
 <template>
     <Head title="ورود مدیریت" />
 
-    <main dir="rtl" class="flex min-h-screen items-center justify-center bg-dh-50 px-4 py-10">
-        <section class="w-full max-w-md rounded-3xl bg-white p-8 shadow-sm ring-1 ring-dh-100">
+    <main
+        dir="rtl"
+        class="flex min-h-screen items-center justify-center bg-dh-50 px-4 py-10"
+    >
+        <section
+            class="w-full max-w-md rounded-3xl bg-white p-8 shadow-sm ring-1 ring-dh-100"
+        >
             <div class="text-center">
-                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-dh-700 text-xl font-black text-white">
+                <div
+                    class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-dh-700 text-xl font-black text-white"
+                >
                     د
                 </div>
                 <p class="mt-4 text-sm font-semibold text-dh-700">داروخونه</p>
-                <h1 class="mt-1 text-2xl font-bold text-dh-900">ورود به پنل مدیریت</h1>
+                <h1 class="mt-1 text-2xl font-bold text-dh-900">
+                    ورود به پنل مدیریت
+                </h1>
                 <p class="mt-2 text-sm leading-6 text-dh-muted">
-                    برای دسترسی به مدیریت، نام کاربری و رمز عبور خود را وارد کنید.
+                    برای دسترسی به مدیریت، نام کاربری و رمز عبور خود را وارد
+                    کنید.
                 </p>
             </div>
 

@@ -103,7 +103,8 @@ const submit = () => {
                     <p class="text-sm text-dh-muted">داروخونه | مدیریت</p>
                     <h1 class="text-3xl font-bold">مدیریت کاربران پنل</h1>
                     <p class="mt-2 text-sm text-dh-muted">
-                        ساخت کاربر مدیریتی و تعیین دقیق دسترسی‌های مورد نیاز هر واحد.
+                        ساخت کاربر مدیریتی و تعیین دقیق دسترسی‌های مورد نیاز هر
+                        واحد.
                     </p>
                 </div>
                 <div class="flex gap-2">
@@ -134,7 +135,8 @@ const submit = () => {
                             {{ isEditing ? 'ویرایش کاربر' : 'ساخت کاربر جدید' }}
                         </h2>
                         <p class="mt-1 text-sm text-dh-muted">
-                            برای کارکنان واحدهای مختلف، فقط دسترسی‌های لازم را فعال کنید.
+                            برای کارکنان واحدهای مختلف، فقط دسترسی‌های لازم را
+                            فعال کنید.
                         </p>
                     </div>
                     <div class="flex flex-wrap gap-2">
