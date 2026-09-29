@@ -36,6 +36,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Debug Wayfinder generation
+        run: |
+          php artisan wayfinder:generate --with-form -vvv 2>&1 || true
       - name: Setup Application
         run: |
           composer update --prefer-dist --no-interaction --no-progress
