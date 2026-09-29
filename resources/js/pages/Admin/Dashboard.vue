@@ -70,6 +70,11 @@ const sections = [
         label: 'تنظیمات',
         description: 'تنظیمات فروشگاه',
     },
+    {
+        href: '/admin/users',
+        label: 'مدیریت کاربران',
+        description: 'کاربران پنل و سطح دسترسی',
+    },
 ];
 </script>
 

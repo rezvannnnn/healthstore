@@ -38,6 +38,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', HomeController::class)->name('home');
 Route::inertia('/login', 'Auth/Login')->name('login');
 Route::inertia('/register', 'Auth/Register')->name('register.form');
+Route::get('/admin', [AdminLoginController::class, 'show'])->name('admin.dashboard');
 Route::get('/admin/login', [AdminLoginController::class, 'show'])->name('admin.login');
 Route::post('/admin/login', [AdminLoginController::class, 'store'])
     ->middleware('throttle:10,1')
@@ -87,7 +88,6 @@ Route::post('/logout', [LogoutController::class, 'store'])->name('logout');
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::post('/logout', AdminLogoutController::class)->name('logout');
-    Route::get('/', DashboardController::class)->name('dashboard');
     Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
     Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');

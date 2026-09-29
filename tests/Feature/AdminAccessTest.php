@@ -14,7 +14,8 @@ class AdminAccessTest extends TestCase
     public function test_guest_is_redirected_to_admin_login(): void
     {
         $this->get('/admin')
-            ->assertRedirect('/admin/login');
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Admin/Login'));
     }
 
     public function test_regular_customer_cannot_access_admin_area(): void
@@ -27,7 +28,7 @@ class AdminAccessTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->get('/admin')
+            ->get('/admin/inventory')
             ->assertForbidden();
     }
 
