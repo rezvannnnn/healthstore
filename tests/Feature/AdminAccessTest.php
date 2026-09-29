@@ -92,7 +92,7 @@ class AdminAccessTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get('/admin')
+            ->get('/admin/inventory')
             ->assertForbidden();
     }
 
