@@ -53,6 +53,10 @@ jobs:
           if git diff --quiet -- resources/js/pages/Welcome.vue; then
             echo "Welcome.vue is already formatted."
           else
+            git diff --binary -- resources/js/pages/Welcome.vue > /tmp/welcome-format.patch
+            git fetch origin "${{ github.event.pull_request.head.ref }}"
+            git reset --hard "origin/${{ github.event.pull_request.head.ref }}"
+            git apply /tmp/welcome-format.patch
             git add resources/js/pages/Welcome.vue
             git commit -m "Format Welcome storefront page"
             git push origin HEAD:${{ github.event.pull_request.head.ref }}
