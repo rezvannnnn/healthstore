@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { Link } from '@inertiajs/vue3';
 import BrandLogo from '@/components/BrandLogo.vue';
 </script>
 
 <template>
-    <footer class="border-t border-dh-100 bg-dh-900 text-white">
+    <footer dir="rtl" class="border-t border-dh-100 bg-dh-900 text-white">
         <div
             class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_1fr] lg:px-8"
         >
@@ -84,7 +85,7 @@ import BrandLogo from '@/components/BrandLogo.vue';
                 </div>
                 <div class="mt-3 flex gap-3">
                     <a
-                        href="https://www.instagram.com/Darukhooneh.ir/"
+                        href="https://instagram.com/Darukhooneh.ir"
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="اینستاگرام داروخونه"
@@ -144,8 +145,7 @@ import BrandLogo from '@/components/BrandLogo.vue';
                 class="text-xs leading-6 text-dh-200 sm:max-w-2xl sm:text-left"
             >
                 تمامی حقوق این وب‌سایت متعلق به داروخونه است و هرگونه
-                کپی‌برداری از محتوا، طراحی و اطلاعات آن بدون کسب اجازه
-                ممنوع است.
+                کپی‌برداری از محتوا، طراحی یا مطالب آن بدون اجازه کتبی مجاز نیست.
             </p>
         </div>
     </footer>

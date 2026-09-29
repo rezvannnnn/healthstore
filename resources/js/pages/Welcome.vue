@@ -671,11 +671,13 @@ function addToCart(product: FeaturedProduct): void {
                             <p class="mt-2 text-sm leading-7 text-dh-muted">
                                 وضعیت سفارش پس از ثبت از داخل حساب کاربری قابل
                                 پیگیری است.
-                     <StorefrontFooter />لاعات آن بدون کسب اجازه
-                        ممنوع است.
-                    </p>
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </section>
+
+            <StorefrontFooter />
         </main>
     </div>
 </template>
