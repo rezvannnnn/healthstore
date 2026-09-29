@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
+import BrandLogo from '@/components/BrandLogo.vue';
 import { ref } from 'vue';
 
 interface Category {
@@ -114,11 +115,12 @@ function addToCart(product: FeaturedProduct): void {
                                 ></span>
                                 فروشگاه آنلاین سلامت
                             </span>
-                            <h1
-                                class="mt-5 text-4xl leading-[1.25] font-extrabold tracking-tight text-dh-900 sm:text-5xl lg:text-6xl"
-                            >
-                                سلامت، ساده‌تر از چیزی که فکر می‌کنید.
-                            </h1>
+                            <div class="mt-5 flex items-center gap-4 sm:gap-6">
+                                <BrandLogo imageClass="h-24 w-24 shrink-0 sm:h-28 sm:w-28" />
+                                <h1 class="text-3xl leading-[1.35] font-extrabold tracking-tight text-dh-900 sm:text-4xl lg:text-5xl">
+                                    سلامت، ساده‌تر از چیزی که فکر می‌کنید.
+                                </h1>
+                            </div>
                             <p
                                 class="mt-5 max-w-xl text-base leading-8 text-dh-muted sm:text-lg"
                             >
