@@ -11,9 +11,8 @@ const page = usePage();
 let scriptElement: HTMLScriptElement | null = null;
 
 watchEffect(() => {
-    const data = (page.props as Record<string, unknown>).structuredData as
-        | StructuredDataProps
-        | undefined;
+    const props = page.props as Record<string, unknown>;
+    const data = props.structuredData as StructuredDataProps | undefined;
 
     if (typeof document === 'undefined') {
         return;
