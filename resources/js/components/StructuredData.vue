@@ -21,6 +21,7 @@ watchEffect(() => {
     if (!data) {
         scriptElement?.remove();
         scriptElement = null;
+
         return;
     }
 
