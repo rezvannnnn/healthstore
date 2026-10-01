@@ -2,7 +2,6 @@
 import { Head, Link } from '@inertiajs/vue3';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
 import StorefrontFooter from '@/components/StorefrontFooter.vue';
-import { computed } from 'vue';
 
 interface Article {
     title: string;
@@ -31,22 +30,6 @@ const props = defineProps<{
     article: Article;
     relatedArticles: RelatedArticle[];
 }>();
-const structuredData = computed(() => ({
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: props.article.title,
-    description:
-        props.article.seo_description || props.article.excerpt || undefined,
-    url: props.article.canonical_url || `/blog/${props.article.slug}`,
-    image: props.article.featured_image
-        ? [props.article.featured_image]
-        : undefined,
-    datePublished: props.article.published_at || undefined,
-    author: props.article.author
-        ? { '@type': 'Person', name: props.article.author.name }
-        : undefined,
-    articleSection: props.article.category?.name || undefined,
-}));
 </script>
 
 <template>
@@ -99,9 +82,6 @@ const structuredData = computed(() => ({
             name="twitter:image"
             :content="article.featured_image"
         />
-        <script type="application/ld+json">
-            {{ JSON.stringify(structuredData) }}
-        </script>
     </Head>
 
     <div
