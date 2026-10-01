@@ -119,6 +119,29 @@ class ArticleController extends Controller
         $canonicalUrl = $article->canonical_url ?: url('/blog/'.$article->slug);
         $seoDescription = $article->seo_description ?: $article->excerpt;
         $featuredImage = $this->mediaService->url($article->featured_image);
+        $structuredData = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Article',
+            'headline' => $article->title,
+            'description' => $seoDescription,
+            'url' => $canonicalUrl,
+            'datePublished' => $article->published_at?->toISOString(),
+        ];
+
+        if ($featuredImage) {
+            $structuredData['image'] = [$featuredImage];
+        }
+
+        if ($article->author?->name) {
+            $structuredData['author'] = [
+                '@type' => 'Person',
+                'name' => $article->author->name,
+            ];
+        }
+
+        if ($article->category?->name) {
+            $structuredData['articleSection'] = $article->category->name;
+        }
 
         $relatedArticles = [];
         if ($article->category_id !== null) {
@@ -167,6 +190,7 @@ class ArticleController extends Controller
                 'author' => $article->author?->only(['id', 'name']),
                 'published_at' => $article->published_at?->toISOString(),
             ],
+            'structuredData' => $structuredData,
             'relatedArticles' => $relatedArticles,
         ]);
     }
