@@ -26,7 +26,7 @@ interface RelatedArticle {
     featured_image_alt: string | null;
     published_at: string | null;
 }
-const props = defineProps<{
+defineProps<{
     article: Article;
     relatedArticles: RelatedArticle[];
 }>();
