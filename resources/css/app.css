@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
 
 @import 'tailwindcss';
 
@@ -9,4 +9,47 @@
     --font-sans:
         Vazirmatn, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
         'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-dh-50: #effcfc;
+    --color-dh-100: #d7f5f4;
+    --color-dh-200: #b4e9e8;
+    --color-dh-300: #83d8d6;
+    --color-dh-400: #4fc1c1;
+    --color-dh-500: #1da6a9;
+    --color-dh-600: #16858b;
+    --color-dh-700: #146c72;
+    --color-dh-800: #14565c;
+    --color-dh-900: #12474d;
+
+    --color-dh-green-50: #f3fbf0;
+    --color-dh-green-100: #e4f5df;
+    --color-dh-green-500: #63b95b;
+    --color-dh-green-600: #4e9f48;
+    --color-dh-green-700: #3e7f3a;
+
+    --color-dh-ink: #19343a;
+    --color-dh-muted: #667a80;
+    --color-dh-surface: #f7fbfb;
+}
+
+:root {
+    color-scheme: light;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-width: 320px;
+    background: #f7fbfb;
+    color: #19343a;
+    font-family:
+        Vazirmatn, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+::selection {
+    background: #b4e9e8;
+    color: #12474d;
 }

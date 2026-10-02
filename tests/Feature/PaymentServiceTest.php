@@ -132,6 +132,56 @@ class PaymentServiceTest extends TestCase
         $this->assertDatabaseCount('payments', 1);
     }
 
+    public function test_gateway_request_cannot_start_for_cancelled_order(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->createOrder($user, 360000);
+        $service = new PaymentService(new InventoryReservationService);
+        $payment = $service->create($order);
+
+        $order->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+        ]);
+
+        $gateway = new class implements PaymentGatewayInterface
+        {
+            public int $requestCalls = 0;
+
+            public function request(Payment $payment): array
+            {
+                $this->requestCalls++;
+
+                return [
+                    'authority' => 'SHOULD-NOT-BE-USED',
+                    'payment_url' => 'https://gateway.test/pay/SHOULD-NOT-BE-USED',
+                    'response' => ['code' => 100],
+                ];
+            }
+
+            public function verify(Payment $payment, array $callbackData): array
+            {
+                return [];
+            }
+
+            public function paymentUrl(array $gatewayData): string
+            {
+                return 'https://gateway.test/pay/'.($gatewayData['authority'] ?? '');
+            }
+        };
+
+        $service = new PaymentService(new InventoryReservationService, $gateway);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('این سفارش دیگر در وضعیت قابل پرداخت نیست.');
+
+        try {
+            $service->requestGatewayPayment($payment);
+        } finally {
+            $this->assertSame(0, $gateway->requestCalls);
+        }
+    }
+
     public function test_existing_gateway_authority_is_reused_without_new_gateway_request(): void
     {
         $user = User::factory()->create();

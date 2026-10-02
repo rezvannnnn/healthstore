@@ -74,14 +74,20 @@ const adjust = (inventoryId: number, delta: number) => {
 };
 const formatStatus = (value: Product['status']) =>
     value === 'out' ? 'ناموجود' : value === 'low' ? 'کم‌موجودی' : 'مناسب';
+const statusClasses = (value: Product['status']) =>
+    value === 'out'
+        ? 'bg-red-50 text-red-700 ring-1 ring-red-200'
+        : value === 'low'
+          ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
+          : 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200';
 </script>
 <template>
     <Head title="مدیریت موجودی" />
-    <div dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 text-gray-900">
+    <div dir="rtl" class="min-h-screen bg-dh-50 px-4 py-8 text-dh-900">
         <div class="mx-auto max-w-7xl">
             <div class="mb-8 flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500">HealthStore / مدیریت</p>
+                    <p class="text-sm text-dh-muted">HealthStore / مدیریت</p>
                     <h1 class="text-3xl font-bold">موجودی</h1>
                 </div>
                 <Link
@@ -91,7 +97,7 @@ const formatStatus = (value: Product['status']) =>
                 >
             </div>
             <div
-                class="mb-6 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200"
+                class="mb-6 rounded-xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
             >
                 <form
                     class="flex flex-col gap-3 md:flex-row"
@@ -109,19 +115,17 @@ const formatStatus = (value: Product['status']) =>
                         <option value="all">همه</option>
                         <option value="low">کم‌موجودی</option>
                         <option value="out">ناموجود</option></select
-                    ><button
-                        class="rounded-lg bg-gray-900 px-5 py-2 text-white"
-                    >
+                    ><button class="rounded-lg bg-dh-700 px-5 py-2 text-white">
                         جستجو
                     </button>
                 </form>
             </div>
             <div
-                class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200"
+                class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-dh-100"
             >
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-right text-sm">
-                        <thead class="border-b bg-gray-50">
+                        <thead class="border-b bg-dh-50">
                             <tr>
                                 <th class="px-4 py-3">محصول</th>
                                 <th class="px-4 py-3">فیزیکی</th>
@@ -138,7 +142,7 @@ const formatStatus = (value: Product['status']) =>
                                     <div class="font-semibold">
                                         {{ product.name }}
                                     </div>
-                                    <div class="text-xs text-gray-500">
+                                    <div class="text-xs text-dh-muted">
                                         SKU: {{ product.sku || '—' }}
                                     </div>
                                 </td>
@@ -155,7 +159,12 @@ const formatStatus = (value: Product['status']) =>
                                     {{ product.minimum_quantity }}
                                 </td>
                                 <td class="px-4 py-4">
-                                    {{ formatStatus(product.status) }}
+                                    <span
+                                        class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                                        :class="statusClasses(product.status)"
+                                    >
+                                        {{ formatStatus(product.status) }}
+                                    </span>
                                 </td>
                                 <td class="px-4 py-4">
                                     <div class="flex flex-wrap gap-2">
@@ -167,7 +176,7 @@ const formatStatus = (value: Product['status']) =>
                                                         1,
                                                     )
                                                 "
-                                                class="rounded bg-gray-900 px-3 py-1 text-white"
+                                                class="rounded bg-dh-700 px-3 py-1 text-white"
                                             >
                                                 +۱</button
                                             ><button
@@ -197,7 +206,7 @@ const formatStatus = (value: Product['status']) =>
                             <tr v-if="products.length === 0">
                                 <td
                                     colspan="7"
-                                    class="px-4 py-12 text-center text-gray-500"
+                                    class="px-4 py-12 text-center text-dh-muted"
                                 >
                                     محصولی پیدا نشد.
                                 </td>
@@ -206,7 +215,7 @@ const formatStatus = (value: Product['status']) =>
                     </table>
                 </div>
                 <div
-                    class="flex flex-col gap-3 border-t px-4 py-4 text-sm text-gray-600 md:flex-row md:items-center md:justify-between"
+                    class="flex flex-col gap-3 border-t px-4 py-4 text-sm text-dh-700 md:flex-row md:items-center md:justify-between"
                 >
                     <span>
                         مجموع: {{ pagination.total }} محصول — صفحه
@@ -251,7 +260,7 @@ const formatStatus = (value: Product['status']) =>
             </div>
             <div
                 v-if="selectedProduct !== null"
-                class="mt-6 rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200"
+                class="mt-6 rounded-xl bg-white p-5 shadow-sm ring-1 ring-dh-100"
             >
                 <h2 class="mb-4 text-lg font-bold">ثبت رکورد موجودی</h2>
                 <form
@@ -288,7 +297,7 @@ const formatStatus = (value: Product['status']) =>
                     />
                     <div class="flex gap-2">
                         <button
-                            class="rounded-lg bg-gray-900 px-4 py-2 text-white"
+                            class="rounded-lg bg-dh-700 px-4 py-2 text-white"
                         >
                             ثبت</button
                         ><button

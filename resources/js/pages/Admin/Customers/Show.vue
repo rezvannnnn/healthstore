@@ -74,47 +74,47 @@ function goToPage(page: number) {
     />
     <div
         dir="rtl"
-        class="min-h-screen bg-gray-50 px-4 py-8 text-gray-900 sm:px-6 lg:px-8"
+        class="min-h-screen bg-dh-50 px-4 py-8 text-dh-900 sm:px-6 lg:px-8"
     >
         <div class="mx-auto max-w-5xl">
             <div class="mb-8 flex items-center justify-between gap-4">
                 <div>
-                    <p class="text-sm text-gray-500">HealthStore / مشتریان</p>
+                    <p class="text-sm text-dh-muted">HealthStore / مشتریان</p>
                     <h1 class="text-2xl font-bold">
                         {{ props.customer.name || 'بدون نام' }}
                     </h1>
                 </div>
                 <Link
                     href="/admin/customers"
-                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm hover:bg-gray-100"
+                    class="rounded-lg border border-dh-200 bg-white px-4 py-2 text-sm hover:bg-dh-50"
                     >بازگشت</Link
                 >
             </div>
             <section
-                class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
+                class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
             >
                 <h2 class="mb-5 font-bold">اطلاعات مشتری</h2>
                 <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                     <div>
-                        <p class="text-xs text-gray-500">نام</p>
+                        <p class="text-xs text-dh-muted">نام</p>
                         <p class="mt-1 font-medium">
                             {{ props.customer.name || '—' }}
                         </p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500">موبایل</p>
+                        <p class="text-xs text-dh-muted">موبایل</p>
                         <p class="mt-1 font-medium">
                             {{ props.customer.phone || '—' }}
                         </p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500">ایمیل</p>
+                        <p class="text-xs text-dh-muted">ایمیل</p>
                         <p class="mt-1 font-medium">
                             {{ props.customer.email || '—' }}
                         </p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500">تأیید موبایل</p>
+                        <p class="text-xs text-dh-muted">تأیید موبایل</p>
                         <p class="mt-1 font-medium">
                             {{
                                 props.customer.phone_verified
@@ -126,19 +126,19 @@ function goToPage(page: number) {
                 </div>
             </section>
             <section
-                class="mt-6 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200"
+                class="mt-6 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-dh-100"
             >
                 <div
                     class="flex items-center justify-between border-b px-5 py-4"
                 >
                     <h2 class="font-bold">آخرین سفارش‌ها</h2>
-                    <span class="text-sm text-gray-500">
+                    <span class="text-sm text-dh-muted">
                         {{ props.pagination.total }} سفارش
                     </span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-right text-sm">
-                        <thead class="border-b bg-gray-50 text-gray-600">
+                        <thead class="border-b bg-dh-50 text-dh-700">
                             <tr>
                                 <th class="px-4 py-3 font-medium">سفارش</th>
                                 <th class="px-4 py-3 font-medium">اقلام</th>
@@ -149,7 +149,7 @@ function goToPage(page: number) {
                                 <th class="px-4 py-3"></th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
+                        <tbody class="divide-y divide-dh-100">
                             <tr v-for="order in props.orders" :key="order.id">
                                 <td class="px-4 py-4 font-semibold">
                                     {{ order.order_number }}
@@ -166,7 +166,7 @@ function goToPage(page: number) {
                                 <td class="px-4 py-4">
                                     {{ paymentLabel(order.payment_status) }}
                                 </td>
-                                <td class="px-4 py-4 text-xs text-gray-500">
+                                <td class="px-4 py-4 text-xs text-dh-muted">
                                     {{
                                         order.created_at
                                             ? new Date(
@@ -178,7 +178,7 @@ function goToPage(page: number) {
                                 <td class="px-4 py-4">
                                     <Link
                                         :href="`/admin/orders/${order.id}`"
-                                        class="font-medium text-blue-700 hover:underline"
+                                        class="font-medium text-dh-700 hover:underline"
                                         >مشاهده</Link
                                     >
                                 </td>
@@ -186,7 +186,7 @@ function goToPage(page: number) {
                             <tr v-if="props.orders.length === 0">
                                 <td
                                     colspan="7"
-                                    class="px-4 py-12 text-center text-gray-500"
+                                    class="px-4 py-12 text-center text-dh-muted"
                                 >
                                     سفارشی برای این مشتری ثبت نشده است.
                                 </td>

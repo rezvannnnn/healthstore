@@ -6,6 +6,7 @@ use App\Models\Brand;
 use App\Models\Product;
 use App\Services\CartService;
 use App\Services\InventoryService;
+use App\Services\MediaService;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,6 +15,7 @@ class BrandController extends Controller
     public function __construct(
         protected CartService $cartService,
         protected InventoryService $inventoryService,
+        protected MediaService $mediaService,
     ) {}
 
     public function index(): Response
@@ -32,7 +34,7 @@ class BrandController extends Controller
                 'name' => $brand->name,
                 'slug' => $brand->slug,
                 'description' => $brand->description,
-                'logo' => $this->absoluteAssetUrl($brand->logo),
+                'logo' => $this->mediaService->url($brand->logo),
                 'products_count' => (int) $brand->getAttribute('active_products_count'),
             ])
             ->values()
@@ -102,9 +104,9 @@ class BrandController extends Controller
                     'slug' => $product->slug,
                     'sku' => $product->sku,
                     'short_description' => $product->short_description,
-                    'image' => $product->main_image
+                    'image' => $this->mediaService->url($product->main_image
                         ?: $product->images->firstWhere('is_primary', true)?->image_path
-                        ?: $product->images->first()?->image_path,
+                        ?: $product->images->first()?->image_path),
                     'price' => $price?->price !== null ? (float) $price->price : null,
                     'compare_at_price' => $price?->compare_at_price !== null ? (float) $price->compare_at_price : null,
                     'available' => $this->inventoryService->isAvailable($product),

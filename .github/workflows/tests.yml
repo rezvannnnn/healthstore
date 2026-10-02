@@ -4,13 +4,14 @@ on:
   push:
     branches:
       - main
+      - feat/darukhooneh-storefront-design-v2
   pull_request:
 
 permissions:
   contents: write
 
 concurrency:
-  group: healthstore-tests-${{ github.ref }}
+  group: healthstore-tests-\${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -38,26 +39,32 @@ jobs:
       - name: Setup Application
         run: |
           composer update --prefer-dist --no-interaction --no-progress
-          composer setup
+          composer install
+          php -r "file_exists('.env') || copy('.env.example', '.env');"
+          php artisan key:generate
+          php artisan migrate --force
+          npm install
 
-      - name: Format frontend resources
-        run: npm run format
-
-      - name: Format PHP resources
-        run: composer lint
-
-      - name: Commit formatting changes
-        if: github.event_name == 'push'
+      - name: Format new admin Vue pages
         run: |
+          npx prettier --write resources/js/pages/Admin/Login.vue resources/js/pages/Admin/Users/Index.vue
+          if git diff --quiet -- resources/js/pages/Admin/Login.vue resources/js/pages/Admin/Users/Index.vue; then
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add resources/ app/ config/ database/ routes/ tests/
-          if git diff --cached --quiet; then
-            echo "No formatting changes to commit."
-          else
-            git commit -m "Apply automated code formatting"
-            git push origin HEAD:main
-          fi
+          git add resources/js/pages/Admin/Login.vue resources/js/pages/Admin/Users/Index.vue
+          git commit -m "Format admin Vue pages"
+          git push origin HEAD:feat/darukhooneh-storefront-design-v2
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Check frontend formatting
+        run: npm run format:check
+
+      - name: Check PHP formatting
+        run: composer lint:check
 
       - name: Run CI Checks
         run: composer ci:check

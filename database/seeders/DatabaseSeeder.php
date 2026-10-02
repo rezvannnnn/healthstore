@@ -10,16 +10,45 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        if (! app()->environment(['local', 'testing'])) {
+            return;
+        }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::query()->updateOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'phone' => '09110000001',
+                'role' => User::ROLE_USER,
+                'is_admin' => false,
+                'phone_verified_at' => now(),
+                'password' => null,
+                'admin_username' => null,
+                'admin_title' => null,
+                'admin_active' => true,
+                'admin_permissions' => [],
+            ],
+        );
+
+        $adminPassword = config('admin.seed.password');
+
+        if (filled($adminPassword)) {
+            User::query()->updateOrCreate(
+                ['admin_username' => strtolower((string) config('admin.seed.username', 'admin'))],
+                [
+                    'name' => 'مدیر داروخونه',
+                    'email' => 'admin@darukhooneh.local',
+                    'admin_username' => strtolower((string) config('admin.seed.username', 'admin')),
+                    'admin_title' => 'مدیر سیستم',
+                    'password' => $adminPassword,
+                    'role' => User::ROLE_ADMIN,
+                    'is_admin' => true,
+                    'admin_active' => true,
+                    'admin_permissions' => [],
+                ],
+            );
+        }
     }
 }

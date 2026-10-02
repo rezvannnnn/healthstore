@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Services\Payment\PaymentGatewayInterface;
 use App\Services\Payment\ZarinPalGateway;
 use App\Services\Sms\FakeSmsProvider;
+use App\Services\Sms\NotConfiguredSmsProvider;
 use App\Services\Sms\SmsProviderInterface;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -30,13 +31,20 @@ class AppServiceProvider extends ServiceProvider
         /*
          * SMS provider abstraction.
          *
-         * FakeSmsProvider is currently used while the real SMS
-         * provider has not been selected/configured yet.
+         * Keep development/tests deterministic while failing closed in
+         * production until a real provider is configured.
          */
-        $this->app->bind(
-            SmsProviderInterface::class,
-            FakeSmsProvider::class
-        );
+        $this->app->bind(SmsProviderInterface::class, function () {
+            $provider = (string) config('services.sms.provider', 'fake');
+
+            if (app()->isProduction() && $provider === 'fake') {
+                return new NotConfiguredSmsProvider;
+            }
+
+            return $provider === 'fake'
+                ? new FakeSmsProvider
+                : new NotConfiguredSmsProvider;
+        });
     }
 
     /**

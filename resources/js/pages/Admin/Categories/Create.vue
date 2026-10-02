@@ -9,19 +9,25 @@ const form = useForm({
     parent_id: null as number | null,
     description: '',
     image: '',
+    image_file: null as File | null,
     is_active: true,
     sort_order: 0,
 });
-const submit = () => form.post('/admin/categories');
+const handleImageChange = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    form.image_file = input.files?.[0] ?? null;
+};
+
+const submit = () => form.post('/admin/categories', { forceFormData: true });
 </script>
 
 <template>
     <Head title="ایجاد دسته‌بندی" />
-    <div dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 text-gray-900">
+    <div dir="rtl" class="min-h-screen bg-dh-50 px-4 py-8 text-dh-900">
         <div class="mx-auto max-w-3xl">
             <div class="mb-6 flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500">مدیریت / دسته‌بندی‌ها</p>
+                    <p class="text-sm text-dh-muted">مدیریت / دسته‌بندی‌ها</p>
                     <h1 class="text-3xl font-bold">دسته‌بندی جدید</h1>
                 </div>
                 <Link
@@ -32,7 +38,7 @@ const submit = () => form.post('/admin/categories');
             </div>
             <form
                 @submit.prevent="submit"
-                class="space-y-5 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200"
+                class="space-y-5 rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
             >
                 <div>
                     <label class="mb-1 block text-sm font-medium">نام</label
@@ -78,9 +84,10 @@ const submit = () => form.post('/admin/categories');
                 <div>
                     <label class="mb-1 block text-sm font-medium">تصویر</label
                     ><input
-                        v-model="form.image"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
                         class="w-full rounded-lg border px-3 py-2"
-                        placeholder="مسیر یا URL تصویر"
+                        @change="handleImageChange"
                     />
                 </div>
                 <div class="flex gap-6">
@@ -100,7 +107,7 @@ const submit = () => form.post('/admin/categories');
                 </div>
                 <button
                     :disabled="form.processing"
-                    class="rounded-lg bg-gray-900 px-5 py-2.5 font-medium text-white disabled:opacity-50"
+                    class="rounded-lg bg-dh-700 px-5 py-2.5 font-medium text-white disabled:opacity-50"
                 >
                     ذخیره دسته‌بندی
                 </button>

@@ -74,29 +74,29 @@ const formatAmount = (amount: number | null) =>
 
     <div
         dir="rtl"
-        class="min-h-screen bg-gray-50 px-4 py-8 text-gray-900 sm:px-6 lg:px-8"
+        class="min-h-screen bg-dh-50 px-4 py-8 text-dh-900 sm:px-6 lg:px-8"
     >
         <div class="mx-auto max-w-7xl">
             <div
                 class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
             >
                 <div>
-                    <p class="text-sm text-gray-500">HealthStore / مدیریت</p>
+                    <p class="text-sm text-dh-muted">HealthStore / مدیریت</p>
                     <h1 class="text-3xl font-bold">محصولات</h1>
-                    <p class="mt-2 text-gray-600">
+                    <p class="mt-2 text-dh-700">
                         مدیریت و بررسی موجودی محصولات فروشگاه
                     </p>
                 </div>
                 <div class="flex flex-wrap gap-2">
                     <Link
                         href="/admin"
-                        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-100"
+                        class="rounded-lg border border-dh-200 bg-white px-4 py-2 text-sm font-medium hover:bg-dh-50"
                     >
                         داشبورد
                     </Link>
                     <Link
                         href="/admin/products/create"
-                        class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                        class="rounded-lg bg-dh-700 px-4 py-2 text-sm font-medium text-white hover:bg-dh-800"
                     >
                         محصول جدید
                     </Link>
@@ -104,7 +104,7 @@ const formatAmount = (amount: number | null) =>
             </div>
 
             <div
-                class="mb-6 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200"
+                class="mb-6 rounded-xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
             >
                 <form
                     class="flex flex-col gap-3 md:flex-row"
@@ -114,11 +114,11 @@ const formatAmount = (amount: number | null) =>
                         v-model="search"
                         type="search"
                         placeholder="نام، SKU یا بارکد..."
-                        class="min-w-0 flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-gray-500"
+                        class="min-w-0 flex-1 rounded-lg border border-dh-200 px-4 py-2 text-sm outline-none focus:border-gray-500"
                     />
                     <select
                         v-model="status"
-                        class="rounded-lg border border-gray-300 px-4 py-2 text-sm"
+                        class="rounded-lg border border-dh-200 px-4 py-2 text-sm"
                     >
                         <option value="all">همه محصولات</option>
                         <option value="active">فعال</option>
@@ -127,14 +127,14 @@ const formatAmount = (amount: number | null) =>
                     <div class="flex gap-2">
                         <button
                             type="submit"
-                            class="rounded-lg bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                            class="rounded-lg bg-dh-700 px-5 py-2 text-sm font-medium text-white hover:bg-dh-800"
                         >
                             جستجو
                         </button>
                         <button
                             v-if="search || status !== 'all'"
                             type="button"
-                            class="rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-medium hover:bg-gray-50"
+                            class="rounded-lg border border-dh-200 bg-white px-5 py-2 text-sm font-medium hover:bg-dh-50"
                             @click="resetFilters"
                         >
                             پاک کردن
@@ -144,11 +144,11 @@ const formatAmount = (amount: number | null) =>
             </div>
 
             <div
-                class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200"
+                class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-dh-100"
             >
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-right text-sm">
-                        <thead class="border-b bg-gray-50 text-gray-600">
+                        <thead class="border-b bg-dh-50 text-dh-700">
                             <tr>
                                 <th class="px-4 py-3 font-medium">محصول</th>
                                 <th class="px-4 py-3 font-medium">
@@ -164,17 +164,17 @@ const formatAmount = (amount: number | null) =>
                                 <th class="px-4 py-3 font-medium">عملیات</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
+                        <tbody class="divide-y divide-dh-100">
                             <tr
                                 v-for="product in products"
                                 :key="product.id"
-                                class="hover:bg-gray-50"
+                                class="hover:bg-dh-50"
                             >
                                 <td class="px-4 py-4">
                                     <div class="font-semibold">
                                         {{ product.name }}
                                     </div>
-                                    <div class="mt-1 text-xs text-gray-500">
+                                    <div class="mt-1 text-xs text-dh-muted">
                                         SKU: {{ product.sku || '—' }}
                                     </div>
                                 </td>
@@ -182,7 +182,7 @@ const formatAmount = (amount: number | null) =>
                                     <div>
                                         {{ product.category || 'بدون دسته' }}
                                     </div>
-                                    <div class="mt-1 text-xs text-gray-500">
+                                    <div class="mt-1 text-xs text-dh-muted">
                                         {{ product.brand || 'بدون برند' }}
                                     </div>
                                 </td>
@@ -204,7 +204,7 @@ const formatAmount = (amount: number | null) =>
                                         :class="
                                             product.is_active
                                                 ? 'bg-green-100 text-green-700'
-                                                : 'bg-gray-100 text-gray-600'
+                                                : 'bg-dh-50 text-dh-700'
                                         "
                                     >
                                         {{
@@ -217,7 +217,7 @@ const formatAmount = (amount: number | null) =>
                                 <td class="px-4 py-4">
                                     <Link
                                         :href="`/admin/products/${product.id}/edit`"
-                                        class="font-medium text-blue-700 hover:underline"
+                                        class="font-medium text-dh-700 hover:underline"
                                     >
                                         ویرایش
                                     </Link>
@@ -226,7 +226,7 @@ const formatAmount = (amount: number | null) =>
                             <tr v-if="products.length === 0">
                                 <td
                                     colspan="8"
-                                    class="px-4 py-12 text-center text-gray-500"
+                                    class="px-4 py-12 text-center text-dh-muted"
                                 >
                                     محصولی پیدا نشد.
                                 </td>
@@ -236,14 +236,14 @@ const formatAmount = (amount: number | null) =>
                 </div>
 
                 <div
-                    class="flex flex-col gap-3 border-t px-4 py-4 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between"
+                    class="flex flex-col gap-3 border-t px-4 py-4 text-sm text-dh-700 sm:flex-row sm:items-center sm:justify-between"
                 >
                     <span>مجموع: {{ pagination.total }} محصول</span>
                     <div class="flex items-center gap-2">
                         <Link
                             v-if="pagination.current_page > 1"
                             :href="pageUrl(pagination.current_page - 1)"
-                            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 hover:bg-gray-50"
+                            class="rounded-lg border border-dh-200 bg-white px-3 py-1.5 hover:bg-dh-50"
                             preserve-scroll
                             preserve-state
                         >
@@ -258,7 +258,7 @@ const formatAmount = (amount: number | null) =>
                                 pagination.current_page < pagination.last_page
                             "
                             :href="pageUrl(pagination.current_page + 1)"
-                            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 hover:bg-gray-50"
+                            class="rounded-lg border border-dh-200 bg-white px-3 py-1.5 hover:bg-dh-50"
                             preserve-scroll
                             preserve-state
                         >

@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Services\CartService;
 use App\Services\InventoryService;
+use App\Services\MediaService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -15,7 +16,8 @@ class ProductController extends Controller
 {
     public function __construct(
         protected CartService $cartService,
-        protected InventoryService $inventoryService
+        protected InventoryService $inventoryService,
+        protected MediaService $mediaService,
     ) {}
 
     public function index(Request $request): Response
@@ -75,7 +77,7 @@ class ProductController extends Controller
                 'brand' => $product->brand?->name,
                 'brand_slug' => $product->brand?->slug,
                 'category' => $product->category?->name,
-                'image' => $product->main_image ?: $product->images->firstWhere('is_primary', true)?->image_path ?: $product->images->first()?->image_path,
+                'image' => $this->mediaService->url($product->main_image ?: $product->images->firstWhere('is_primary', true)?->image_path ?: $product->images->first()?->image_path),
                 'price' => $price?->price !== null ? (float) $price->price : null,
                 'compare_at_price' => $price?->compare_at_price !== null ? (float) $price->compare_at_price : null,
                 'available' => $this->inventoryService->isAvailable($product),
@@ -141,7 +143,7 @@ class ProductController extends Controller
                     'id' => $related->id,
                     'name' => $related->name,
                     'slug' => $related->slug,
-                    'image' => $related->main_image ?: $related->images->firstWhere('is_primary', true)?->image_path ?: $related->images->first()?->image_path,
+                    'image' => $this->mediaService->url($related->main_image ?: $related->images->firstWhere('is_primary', true)?->image_path ?: $related->images->first()?->image_path),
                     'price' => $relatedPrice?->price !== null ? (float) $relatedPrice->price : null,
                 ];
             })
@@ -181,7 +183,7 @@ class ProductController extends Controller
         }
 
         if ($imagePaths->isNotEmpty()) {
-            $structuredData['image'] = $imagePaths->map(fn (string $path) => url($path))->all();
+            $structuredData['image'] = $imagePaths->map(fn (string $path) => $this->mediaService->url($path))->filter()->values()->all();
         }
 
         if ($price?->price !== null) {
@@ -218,10 +220,10 @@ class ProductController extends Controller
                 'brand_slug' => $product->brand?->slug,
                 'category' => $product->category?->name,
                 'category_slug' => $product->category?->slug,
-                'image' => $this->absoluteAssetUrl($product->main_image),
+                'image' => $this->mediaService->url($product->main_image),
                 'images' => $images->map(fn ($image) => [
                     'id' => $image->id,
-                    'path' => $image->image_path,
+                    'path' => $this->mediaService->url($image->image_path),
                     'alt' => $image->alt_text ?: $product->name,
                 ])->all(),
                 'price' => $price?->price !== null ? (float) $price->price : null,

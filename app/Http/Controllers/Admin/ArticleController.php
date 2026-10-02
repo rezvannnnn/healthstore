@@ -5,15 +5,19 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\ArticleCategory;
+use App\Services\MediaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class ArticleController extends Controller
 {
+    public function __construct(protected MediaService $mediaService) {}
+
     public function index(Request $request): Response
     {
         $validatedFilters = $request->validate([
@@ -87,11 +91,24 @@ class ArticleController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedData($request);
-        $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['title']);
-        $data['author_id'] = $request->user()?->id;
-        $data['published_at'] = $this->normalizePublishedAt($data['published_at'] ?? null, $data['is_active'] ?? false);
+        $storedImage = null;
 
-        Article::create($data);
+        try {
+            if ($request->hasFile('featured_image_file')) {
+                $storedImage = $this->mediaService->storeImage($request->file('featured_image_file'), 'articles');
+                $data['featured_image'] = $storedImage;
+            }
+            unset($data['featured_image_file']);
+            $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['title']);
+            $data['author_id'] = $request->user()?->id;
+            $data['published_at'] = $this->normalizePublishedAt($data['published_at'] ?? null, $data['is_active'] ?? false);
+
+            Article::create($data);
+        } catch (Throwable $exception) {
+            $this->mediaService->deleteIfStored($storedImage);
+
+            throw $exception;
+        }
 
         return to_route('admin.articles.index')->with('success', 'مقاله با موفقیت ایجاد شد.');
     }
@@ -99,29 +116,62 @@ class ArticleController extends Controller
     public function edit(Article $article): Response
     {
         return Inertia::render('Admin/Articles/Edit', [
-            'article' => $article->only([
-                'id', 'category_id', 'title', 'slug', 'excerpt', 'content', 'featured_image',
-                'featured_image_alt', 'seo_title', 'seo_description', 'canonical_url',
-                'is_active', 'is_featured', 'published_at',
-            ]),
+            'article' => [
+                'id' => $article->id,
+                'category_id' => $article->category_id,
+                'title' => $article->title,
+                'slug' => $article->slug,
+                'excerpt' => $article->excerpt,
+                'content' => $article->content,
+                'featured_image' => $article->featured_image,
+                'featured_image_url' => $this->mediaService->url($article->featured_image),
+                'featured_image_alt' => $article->featured_image_alt,
+                'seo_title' => $article->seo_title,
+                'seo_description' => $article->seo_description,
+                'canonical_url' => $article->canonical_url,
+                'is_active' => $article->is_active,
+                'is_featured' => $article->is_featured,
+                'published_at' => $article->published_at,
+            ],
             'categories' => ArticleCategory::query()->where('is_active', true)->orderBy('sort_order')->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
     public function update(Request $request, Article $article): RedirectResponse
     {
+        $oldImage = $article->featured_image;
         $data = $this->validatedData($request, $article);
-        $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['title']);
-        $data['published_at'] = $this->normalizePublishedAt($data['published_at'] ?? null, $data['is_active'] ?? false);
+        $storedImage = null;
 
-        $article->update($data);
+        try {
+            if ($request->hasFile('featured_image_file')) {
+                $storedImage = $this->mediaService->storeImage($request->file('featured_image_file'), 'articles');
+                $data['featured_image'] = $storedImage;
+            }
+            unset($data['featured_image_file']);
+            $data['slug'] = $this->makeSlug($data['slug'] ?? null, $data['title']);
+            $data['published_at'] = $this->normalizePublishedAt($data['published_at'] ?? null, $data['is_active'] ?? false);
+
+            $article->update($data);
+        } catch (Throwable $exception) {
+            $this->mediaService->deleteIfStored($storedImage);
+
+            throw $exception;
+        }
+
+        if ($storedImage !== null && $storedImage !== $oldImage) {
+            $this->mediaService->deleteIfStored($oldImage);
+        }
 
         return to_route('admin.articles.index')->with('success', 'مقاله با موفقیت ویرایش شد.');
     }
 
     public function destroy(Article $article): RedirectResponse
     {
+        $featuredImage = $article->featured_image;
         $article->delete();
+
+        $this->mediaService->deleteIfStored($featuredImage);
 
         return to_route('admin.articles.index')->with('success', 'مقاله حذف شد.');
     }
@@ -142,6 +192,7 @@ class ArticleController extends Controller
             'excerpt' => ['nullable', 'string', 'max:1000'],
             'content' => ['required', 'string'],
             'featured_image' => ['nullable', 'string', 'max:2048'],
+            'featured_image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'featured_image_alt' => ['nullable', 'string', 'max:255'],
             'seo_title' => ['nullable', 'string', 'max:255'],
             'seo_description' => ['nullable', 'string', 'max:320'],

@@ -16,6 +16,7 @@ class CustomerController extends Controller
         $search = trim((string) $request->query('search', ''));
 
         $query = User::query()
+            ->where('role', User::ROLE_USER)
             ->where('is_admin', false)
             ->withCount('orders')
             ->orderByDesc('created_at')
@@ -60,7 +61,7 @@ class CustomerController extends Controller
 
     public function show(User $user): Response
     {
-        abort_if($user->isAdmin(), 404);
+        abort_unless($user->role === User::ROLE_USER, 404);
 
         $orders = Order::query()
             ->where('user_id', $user->id)

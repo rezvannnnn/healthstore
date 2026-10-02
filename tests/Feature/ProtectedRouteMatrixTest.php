@@ -30,7 +30,6 @@ class ProtectedRouteMatrixTest extends TestCase
             'account address delete' => ['DELETE', '/account/addresses/1'],
             'account profile' => ['GET', '/account/profile'],
             'account profile update' => ['PUT', '/account/profile'],
-            'admin dashboard' => ['GET', '/admin'],
             'admin products' => ['GET', '/admin/products'],
             'admin product create' => ['GET', '/admin/products/create'],
             'admin product store' => ['POST', '/admin/products'],
@@ -70,6 +69,9 @@ class ProtectedRouteMatrixTest extends TestCase
             'admin article edit' => ['GET', '/admin/articles/1/edit'],
             'admin article update' => ['PUT', '/admin/articles/1'],
             'admin article delete' => ['DELETE', '/admin/articles/1'],
+            'admin users' => ['GET', '/admin/users'],
+            'admin users store' => ['POST', '/admin/users'],
+            'admin users update' => ['PUT', '/admin/users/1'],
         ];
     }
 
@@ -78,6 +80,8 @@ class ProtectedRouteMatrixTest extends TestCase
     {
         $response = $this->call($method, $uri);
 
-        $response->assertRedirect('/login');
+        $response->assertRedirect(
+            str_starts_with($uri, '/admin') ? '/admin' : '/login'
+        );
     }
 }

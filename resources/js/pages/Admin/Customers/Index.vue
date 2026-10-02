@@ -49,46 +49,46 @@ const pageUrl = (page: number) => {
     <Head title="مدیریت مشتریان" />
     <div
         dir="rtl"
-        class="min-h-screen bg-gray-50 px-4 py-8 text-gray-900 sm:px-6 lg:px-8"
+        class="min-h-screen bg-dh-50 px-4 py-8 text-dh-900 sm:px-6 lg:px-8"
     >
         <div class="mx-auto max-w-7xl">
             <div
                 class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
             >
                 <div>
-                    <p class="text-sm text-gray-500">HealthStore / مدیریت</p>
+                    <p class="text-sm text-dh-muted">HealthStore / مدیریت</p>
                     <h1 class="text-3xl font-bold">مشتریان</h1>
-                    <p class="mt-2 text-gray-600">
+                    <p class="mt-2 text-dh-700">
                         مشاهده اطلاعات مشتریان و سابقه سفارش‌ها
                     </p>
                 </div>
                 <Link
                     href="/admin"
-                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-100"
+                    class="rounded-lg border border-dh-200 bg-white px-4 py-2 text-sm font-medium hover:bg-dh-50"
                     >بازگشت به داشبورد</Link
                 >
             </div>
 
             <div
-                class="mb-6 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200"
+                class="mb-6 rounded-xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
             >
                 <form class="flex gap-3" @submit.prevent="submitSearch">
                     <input
                         v-model="search"
                         type="search"
                         placeholder="نام، موبایل یا ایمیل..."
-                        class="min-w-0 flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm"
+                        class="min-w-0 flex-1 rounded-lg border border-dh-200 px-4 py-2 text-sm"
                     />
                     <button
                         type="submit"
-                        class="rounded-lg bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                        class="rounded-lg bg-dh-700 px-5 py-2 text-sm font-medium text-white hover:bg-dh-800"
                     >
                         جستجو
                     </button>
                     <button
                         v-if="search"
                         type="button"
-                        class="rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-medium hover:bg-gray-50"
+                        class="rounded-lg border border-dh-200 bg-white px-5 py-2 text-sm font-medium hover:bg-dh-50"
                         @click="resetSearch"
                     >
                         پاک کردن
@@ -97,11 +97,11 @@ const pageUrl = (page: number) => {
             </div>
 
             <div
-                class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200"
+                class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-dh-100"
             >
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-right text-sm">
-                        <thead class="border-b bg-gray-50 text-gray-600">
+                        <thead class="border-b bg-dh-50 text-dh-700">
                             <tr>
                                 <th class="px-4 py-3 font-medium">مشتری</th>
                                 <th class="px-4 py-3 font-medium">موبایل</th>
@@ -114,11 +114,11 @@ const pageUrl = (page: number) => {
                                 <th class="px-4 py-3"></th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
+                        <tbody class="divide-y divide-dh-100">
                             <tr
                                 v-for="customer in customers"
                                 :key="customer.id"
-                                class="hover:bg-gray-50"
+                                class="hover:bg-dh-50"
                             >
                                 <td class="px-4 py-4 font-medium">
                                     {{ customer.name || 'بدون نام' }}
@@ -135,7 +135,7 @@ const pageUrl = (page: number) => {
                                         :class="
                                             customer.phone_verified
                                                 ? 'bg-green-100 text-green-700'
-                                                : 'bg-gray-100 text-gray-600'
+                                                : 'bg-dh-50 text-dh-700'
                                         "
                                     >
                                         {{
@@ -148,7 +148,7 @@ const pageUrl = (page: number) => {
                                 <td class="px-4 py-4">
                                     {{ customer.orders_count }}
                                 </td>
-                                <td class="px-4 py-4 text-xs text-gray-500">
+                                <td class="px-4 py-4 text-xs text-dh-muted">
                                     {{
                                         customer.created_at
                                             ? new Date(
@@ -160,7 +160,7 @@ const pageUrl = (page: number) => {
                                 <td class="px-4 py-4">
                                     <Link
                                         :href="`/admin/customers/${customer.id}`"
-                                        class="font-medium text-blue-700 hover:underline"
+                                        class="font-medium text-dh-700 hover:underline"
                                         >جزئیات</Link
                                     >
                                 </td>
@@ -168,7 +168,7 @@ const pageUrl = (page: number) => {
                             <tr v-if="customers.length === 0">
                                 <td
                                     colspan="7"
-                                    class="px-4 py-12 text-center text-gray-500"
+                                    class="px-4 py-12 text-center text-dh-muted"
                                 >
                                     مشتری‌ای پیدا نشد.
                                 </td>
@@ -177,14 +177,14 @@ const pageUrl = (page: number) => {
                     </table>
                 </div>
                 <div
-                    class="flex flex-col gap-3 border-t px-4 py-4 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between"
+                    class="flex flex-col gap-3 border-t px-4 py-4 text-sm text-dh-700 sm:flex-row sm:items-center sm:justify-between"
                 >
                     <span>مجموع: {{ pagination.total }} مشتری</span>
                     <div class="flex items-center gap-2">
                         <Link
                             v-if="pagination.current_page > 1"
                             :href="pageUrl(pagination.current_page - 1)"
-                            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 hover:bg-gray-50"
+                            class="rounded-lg border border-dh-200 bg-white px-3 py-1.5 hover:bg-dh-50"
                             preserve-scroll
                             preserve-state
                         >
@@ -199,7 +199,7 @@ const pageUrl = (page: number) => {
                                 pagination.current_page < pagination.last_page
                             "
                             :href="pageUrl(pagination.current_page + 1)"
-                            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 hover:bg-gray-50"
+                            class="rounded-lg border border-dh-200 bg-white px-3 py-1.5 hover:bg-dh-50"
                             preserve-scroll
                             preserve-state
                         >

@@ -10,7 +10,29 @@ class EnsureUserIsAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        $user = $request->user();
+
+        if (! $user) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        if (
+            $request->route()?->getName() === 'admin.dashboard'
+            && $user->isAdminPanelUser()
+            && ! $user->isAdmin()
+            && $user->admin_active
+        ) {
+            $landing = $user->adminLandingPath();
+
+            if ($landing !== null) {
+                return redirect()->to($landing);
+            }
+        }
+
+        abort_unless(
+            $user->canAccessAdminRoute($request->route()?->getName()),
+            403
+        );
 
         return $next($request);
     }

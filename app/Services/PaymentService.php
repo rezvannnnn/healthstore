@@ -19,48 +19,79 @@ class PaymentService
 
     public function create(Order $order): Payment
     {
-        return DB::transaction(function () use ($order): Payment {
-            $lockedOrder = Order::query()->whereKey($order->id)->lockForUpdate()->first();
-            if (! $lockedOrder) {
-                throw new RuntimeException('سفارش پیدا نشد.');
-            }
-            if ($lockedOrder->status === 'cancelled') {
-                throw new RuntimeException('برای سفارش لغوشده امکان ایجاد پرداخت وجود ندارد.');
-            }
-            if ($lockedOrder->status === 'paid' || $lockedOrder->payment_status === 'paid') {
-                throw new RuntimeException('این سفارش قبلاً پرداخت شده است.');
-            }
-            if ($lockedOrder->status !== 'pending') {
-                throw new RuntimeException('فقط سفارش‌های در انتظار می‌توانند وارد فرایند پرداخت شوند.');
-            }
-            $amount = (float) $lockedOrder->total_amount;
-            if ($amount <= 0) {
-                throw new RuntimeException('مبلغ پرداخت باید بیشتر از صفر باشد.');
-            }
-            $existingPayment = $lockedOrder->payments()->where('status', 'pending')->latest('id')->first();
-            if ($existingPayment) {
-                return $existingPayment;
-            }
+        $lock = Cache::lock("order:payment-lifecycle:{$order->id}", 60);
 
-            return $lockedOrder->payments()->create([
-                'amount' => $amount, 'gateway' => null, 'status' => 'pending', 'authority' => null,
-                'transaction_id' => null, 'reference_number' => null, 'card_last_four' => null,
-                'card_token' => null, 'gateway_response' => null, 'paid_at' => null, 'refunded_at' => null,
-            ]);
-        });
+        if (! $lock->get()) {
+            throw new RuntimeException('عملیات پرداخت یا لغو سفارش دیگری در حال انجام است. لطفاً چند لحظه صبر کنید.');
+        }
+
+        try {
+            return DB::transaction(function () use ($order): Payment {
+                $lockedOrder = Order::query()->whereKey($order->id)->lockForUpdate()->first();
+                if (! $lockedOrder) {
+                    throw new RuntimeException('سفارش پیدا نشد.');
+                }
+                if ($lockedOrder->status === 'cancelled') {
+                    throw new RuntimeException('برای سفارش لغوشده امکان ایجاد پرداخت وجود ندارد.');
+                }
+                if ($lockedOrder->status === 'paid' || $lockedOrder->payment_status === 'paid') {
+                    throw new RuntimeException('این سفارش قبلاً پرداخت شده است.');
+                }
+                if ($lockedOrder->status !== 'pending') {
+                    throw new RuntimeException('فقط سفارش‌های در انتظار می‌توانند وارد فرایند پرداخت شوند.');
+                }
+                $amount = (float) $lockedOrder->total_amount;
+                if ($amount <= 0) {
+                    throw new RuntimeException('مبلغ پرداخت باید بیشتر از صفر باشد.');
+                }
+                $existingPayment = $lockedOrder->payments()->where('status', 'pending')->latest('id')->first();
+                if ($existingPayment) {
+                    return $existingPayment;
+                }
+
+                return $lockedOrder->payments()->create([
+                    'amount' => $amount, 'gateway' => null, 'status' => 'pending', 'authority' => null,
+                    'transaction_id' => null, 'reference_number' => null, 'card_last_four' => null,
+                    'card_token' => null, 'gateway_response' => null, 'paid_at' => null, 'refunded_at' => null,
+                ]);
+            });
+        } finally {
+            $lock->release();
+        }
     }
 
     public function requestGatewayPayment(Payment $payment): array
     {
         $gateway = $this->gateway ?? app(PaymentGatewayInterface::class);
-        $lock = Cache::lock("payment:gateway-request:{$payment->id}", 30);
+        $orderLock = Cache::lock("order:payment-lifecycle:{$payment->order_id}", 60);
 
-        if (! $lock->get()) {
+        if (! $orderLock->get()) {
+            throw new RuntimeException('عملیات پرداخت یا لغو سفارش دیگری در حال انجام است. لطفاً چند لحظه صبر کنید.');
+        }
+
+        $paymentLock = Cache::lock("payment:gateway-request:{$payment->id}", 30);
+
+        if (! $paymentLock->get()) {
+            $orderLock->release();
+
             throw new RuntimeException('درخواست پرداخت دیگری برای این تراکنش در حال انجام است.');
         }
 
         try {
             $payment = DB::transaction(function () use ($payment, $gateway): Payment {
+                $lockedOrder = Order::query()
+                    ->whereKey($payment->order_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $lockedOrder) {
+                    throw new RuntimeException('سفارش پیدا نشد.');
+                }
+
+                if ($lockedOrder->status !== 'pending' || $lockedOrder->payment_status === 'paid') {
+                    throw new RuntimeException('این سفارش دیگر در وضعیت قابل پرداخت نیست.');
+                }
+
                 $lockedPayment = Payment::query()->whereKey($payment->id)->lockForUpdate()->first();
                 if (! $lockedPayment) {
                     throw new RuntimeException('پرداخت پیدا نشد.');
@@ -70,7 +101,7 @@ class PaymentService
                 }
 
                 $this->assertPaymentGatewayConsistency($lockedPayment, $gateway);
-                $lockedPayment->loadMissing('order');
+                $lockedPayment->setRelation('order', $lockedOrder);
 
                 return $lockedPayment;
             });
@@ -132,7 +163,8 @@ class PaymentService
                 ];
             });
         } finally {
-            $lock->release();
+            $paymentLock->release();
+            $orderLock->release();
         }
     }
 

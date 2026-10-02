@@ -50,7 +50,7 @@ function money(value: number) {
     <div class="mx-auto max-w-7xl space-y-6 p-6" dir="rtl">
         <div>
             <h1 class="text-2xl font-bold">گزارش‌ها</h1>
-            <p class="mt-1 text-sm text-gray-500">
+            <p class="mt-1 text-sm text-dh-muted">
                 گزارش فروش، سفارش‌ها و محصولات پرفروش
             </p>
         </div>
@@ -86,43 +86,43 @@ function money(value: number) {
 
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div class="rounded-xl border bg-white p-5 shadow-sm">
-                <p class="text-sm text-gray-500">تعداد سفارش‌ها</p>
+                <p class="text-sm text-dh-muted">تعداد سفارش‌ها</p>
                 <p class="mt-2 text-2xl font-bold">
                     {{ money(props.summary.orders_count) }}
                 </p>
             </div>
             <div class="rounded-xl border bg-white p-5 shadow-sm">
-                <p class="text-sm text-gray-500">سفارش‌های پرداخت‌شده</p>
+                <p class="text-sm text-dh-muted">سفارش‌های پرداخت‌شده</p>
                 <p class="mt-2 text-2xl font-bold">
                     {{ money(props.summary.paid_orders_count) }}
                 </p>
             </div>
             <div class="rounded-xl border bg-white p-5 shadow-sm">
-                <p class="text-sm text-gray-500">فروش ناخالص</p>
+                <p class="text-sm text-dh-muted">فروش ناخالص</p>
                 <p class="mt-2 text-2xl font-bold">
                     {{ money(props.summary.gross_sales) }}
                 </p>
             </div>
             <div class="rounded-xl border bg-white p-5 shadow-sm">
-                <p class="text-sm text-gray-500">پرداخت‌های موفق</p>
+                <p class="text-sm text-dh-muted">پرداخت‌های موفق</p>
                 <p class="mt-2 text-2xl font-bold">
                     {{ money(props.summary.successful_payments) }}
                 </p>
             </div>
             <div class="rounded-xl border bg-white p-5 shadow-sm">
-                <p class="text-sm text-gray-500">تعداد اقلام فروخته‌شده</p>
+                <p class="text-sm text-dh-muted">تعداد اقلام فروخته‌شده</p>
                 <p class="mt-2 text-2xl font-bold">
                     {{ money(props.summary.items_sold) }}
                 </p>
             </div>
             <div class="rounded-xl border bg-white p-5 shadow-sm">
-                <p class="text-sm text-gray-500">میانگین مبلغ سفارش</p>
+                <p class="text-sm text-dh-muted">میانگین مبلغ سفارش</p>
                 <p class="mt-2 text-2xl font-bold">
                     {{ money(props.summary.average_order) }}
                 </p>
             </div>
             <div class="rounded-xl border bg-white p-5 shadow-sm">
-                <p class="text-sm text-gray-500">سفارش‌های لغوشده</p>
+                <p class="text-sm text-dh-muted">سفارش‌های لغوشده</p>
                 <p class="mt-2 text-2xl font-bold">
                     {{ money(props.summary.cancelled_count) }}
                 </p>
@@ -135,7 +135,7 @@ function money(value: number) {
             </div>
             <div v-if="props.top_products.length" class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
-                    <thead class="bg-gray-50">
+                    <thead class="bg-dh-50">
                         <tr>
                             <th class="p-3">محصول</th>
                             <th class="p-3">تعداد فروش</th>
@@ -155,7 +155,7 @@ function money(value: number) {
                     </tbody>
                 </table>
             </div>
-            <p v-else class="p-5 text-sm text-gray-500">
+            <p v-else class="p-5 text-sm text-dh-muted">
                 در این بازه فروش ثبت‌شده‌ای وجود ندارد.
             </p>
         </section>

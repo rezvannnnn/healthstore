@@ -19,7 +19,7 @@ function submit() {
     <div class="mx-auto max-w-4xl space-y-6 p-6" dir="rtl">
         <div>
             <h1 class="text-2xl font-bold">تنظیمات فروشگاه</h1>
-            <p class="mt-1 text-sm text-gray-500">
+            <p class="mt-1 text-sm text-dh-muted">
                 اطلاعات عمومی و تنظیمات پایه فروشگاه
             </p>
         </div>

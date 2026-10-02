@@ -6,6 +6,7 @@ use App\Models\Address;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -149,39 +150,64 @@ class OrderService
 
     public function cancel(Order $order): bool
     {
-        return DB::transaction(function () use ($order) {
-            $order = Order::query()->whereKey($order->id)->lockForUpdate()->first();
+        $lock = Cache::lock("order:payment-lifecycle:{$order->id}", 60);
 
-            if (! $order) {
-                throw new RuntimeException('سفارش پیدا نشد.');
-            }
+        if (! $lock->get()) {
+            throw new RuntimeException('عملیات پرداخت دیگری برای این سفارش در حال انجام است. لطفاً چند لحظه صبر کنید.');
+        }
 
-            if ($order->status === 'paid' || $order->payment_status === 'paid') {
-                throw new RuntimeException('سفارش پرداخت‌شده قابل لغو نیست.');
-            }
+        try {
+            return DB::transaction(function () use ($order) {
+                $order = Order::query()->whereKey($order->id)->lockForUpdate()->first();
 
-            if ($order->status === 'cancelled') {
-                throw new RuntimeException('این سفارش قبلاً لغو شده است.');
-            }
-
-            if ($order->status !== 'pending') {
-                throw new RuntimeException('این سفارش در وضعیت فعلی قابل لغو نیست.');
-            }
-
-            $reservations = $order->inventoryReservations()->where('status', 'active')->get();
-
-            foreach ($reservations as $reservation) {
-                if (! $this->reservationService->release($reservation)) {
-                    throw new RuntimeException('آزادسازی رزرو موجودی سفارش انجام نشد.');
+                if (! $order) {
+                    throw new RuntimeException('سفارش پیدا نشد.');
                 }
-            }
 
-            ($this->couponService ?? app(CouponService::class))->releaseForOrder($order);
+                if ($order->status === 'paid' || $order->payment_status === 'paid') {
+                    throw new RuntimeException('سفارش پرداخت‌شده قابل لغو نیست.');
+                }
 
-            $order->update(['status' => 'cancelled', 'cancelled_at' => now()]);
+                if ($order->status === 'cancelled') {
+                    throw new RuntimeException('این سفارش قبلاً لغو شده است.');
+                }
 
-            return true;
-        });
+                if ($order->status !== 'pending') {
+                    throw new RuntimeException('این سفارش در وضعیت فعلی قابل لغو نیست.');
+                }
+
+                $pendingPayments = $order->payments()
+                    ->where('status', 'pending')
+                    ->lockForUpdate()
+                    ->get();
+
+                foreach ($pendingPayments as $payment) {
+                    if (trim((string) $payment->authority) !== '') {
+                        throw new RuntimeException('این سفارش وارد فرایند پرداخت شده و در حال حاضر قابل لغو نیست.');
+                    }
+                }
+
+                $reservations = $order->inventoryReservations()->where('status', 'active')->get();
+
+                foreach ($reservations as $reservation) {
+                    if (! $this->reservationService->release($reservation)) {
+                        throw new RuntimeException('آزادسازی رزرو موجودی سفارش انجام نشد.');
+                    }
+                }
+
+                ($this->couponService ?? app(CouponService::class))->releaseForOrder($order);
+
+                foreach ($pendingPayments as $payment) {
+                    $payment->update(['status' => 'cancelled']);
+                }
+
+                $order->update(['status' => 'cancelled', 'cancelled_at' => now()]);
+
+                return true;
+            });
+        } finally {
+            $lock->release();
+        }
     }
 
     public function setStatus(Order $order, string $newStatus): bool

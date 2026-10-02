@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Services\CartService;
 use App\Services\InventoryService;
+use App\Services\MediaService;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,6 +15,7 @@ class CategoryController extends Controller
     public function __construct(
         protected CartService $cartService,
         protected InventoryService $inventoryService,
+        protected MediaService $mediaService,
     ) {}
 
     public function index(): Response
@@ -41,7 +43,7 @@ class CategoryController extends Controller
                 'name' => $category->name,
                 'slug' => $category->slug,
                 'description' => $category->description,
-                'image' => $this->absoluteAssetUrl($category->image),
+                'image' => $this->mediaService->url($category->image),
                 'products_count' => (int) $category->getAttribute('active_products_count'),
                 'parent' => $category->parent && $category->parent->is_active
                     ? $category->parent->only(['id', 'name', 'slug'])
@@ -129,9 +131,9 @@ class CategoryController extends Controller
                     'sku' => $product->sku,
                     'short_description' => $product->short_description,
                     'brand' => $product->brand?->name,
-                    'image' => $product->main_image
+                    'image' => $this->mediaService->url($product->main_image
                         ?: $product->images->firstWhere('is_primary', true)?->image_path
-                        ?: $product->images->first()?->image_path,
+                        ?: $product->images->first()?->image_path),
                     'price' => $price?->price !== null ? (float) $price->price : null,
                     'compare_at_price' => $price?->compare_at_price !== null ? (float) $price->compare_at_price : null,
                     'available' => $this->inventoryService->isAvailable($product),

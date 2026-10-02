@@ -20,6 +20,14 @@ type Product = {
     canonical_url: string | null;
     expiry_date: string | null;
     main_image: string | null;
+    main_image_url?: string | null;
+    images: {
+        id: number;
+        image_url: string | null;
+        alt_text: string | null;
+        is_primary: boolean;
+        sort_order: number;
+    }[];
     is_active: boolean;
     is_featured: boolean;
     sort_order: number;

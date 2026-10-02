@@ -16,9 +16,6 @@ class LoginController extends Controller
         protected OtpService $otpService
     ) {}
 
-    /**
-     * Login an existing customer using a verified OTP.
-     */
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -62,6 +59,12 @@ class LoginController extends Controller
             ]);
         }
 
+        if ($user->isAdminPanelUser()) {
+            throw ValidationException::withMessages([
+                'phone' => 'حساب‌های مدیریتی باید از بخش مدیریت وارد شوند.',
+            ]);
+        }
+
         if (! $user->hasVerifiedPhone()) {
             throw ValidationException::withMessages([
                 'phone' => 'شماره موبایل این حساب هنوز تأیید نشده است.',
@@ -76,9 +79,6 @@ class LoginController extends Controller
         );
     }
 
-    /**
-     * Request a new OTP for an existing customer.
-     */
     public function sendOtp(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -99,6 +99,7 @@ class LoginController extends Controller
         $userExists = User::query()
             ->where('phone', $phone)
             ->whereNotNull('phone_verified_at')
+            ->where('role', User::ROLE_USER)
             ->exists();
 
         if (! $userExists) {

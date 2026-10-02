@@ -28,13 +28,13 @@ const formatType = (type: string) => (type === 'increase' ? 'افزایش' : 'ک
 </script>
 <template>
     <Head title="گردش موجودی" />
-    <div dir="rtl" class="min-h-screen bg-gray-50 px-4 py-8 text-gray-900">
+    <div dir="rtl" class="min-h-screen bg-dh-50 px-4 py-8 text-dh-900">
         <div class="mx-auto max-w-5xl">
             <div class="mb-8 flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500">HealthStore / موجودی</p>
+                    <p class="text-sm text-dh-muted">HealthStore / موجودی</p>
                     <h1 class="text-3xl font-bold">گردش موجودی</h1>
-                    <p class="mt-2 text-gray-600">
+                    <p class="mt-2 text-dh-700">
                         {{ inventory.product }} — {{ inventory.warehouse }} —
                         موجودی فعلی: {{ inventory.quantity }}
                     </p>
@@ -46,11 +46,11 @@ const formatType = (type: string) => (type === 'increase' ? 'افزایش' : 'ک
                 >
             </div>
             <div
-                class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200"
+                class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-dh-100"
             >
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-right text-sm">
-                        <thead class="border-b bg-gray-50">
+                        <thead class="border-b bg-dh-50">
                             <tr>
                                 <th class="px-4 py-3">نوع</th>
                                 <th class="px-4 py-3">تغییر</th>
@@ -67,7 +67,15 @@ const formatType = (type: string) => (type === 'increase' ? 'افزایش' : 'ک
                                 :key="movement.id"
                             >
                                 <td class="px-4 py-4">
-                                    {{ formatType(movement.type) }}
+                                    <span
+                                        class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                                        :class="
+                                            movement.type === 'increase'
+                                                ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                                                : 'bg-red-50 text-red-700 ring-1 ring-red-200'
+                                        "
+                                        >{{ formatType(movement.type) }}</span
+                                    >
                                 </td>
                                 <td class="px-4 py-4 font-semibold">
                                     {{ movement.quantity_delta > 0 ? '+' : ''
@@ -92,7 +100,7 @@ const formatType = (type: string) => (type === 'increase' ? 'افزایش' : 'ک
                             <tr v-if="movements.data.length === 0">
                                 <td
                                     colspan="7"
-                                    class="px-4 py-12 text-center text-gray-500"
+                                    class="px-4 py-12 text-center text-dh-muted"
                                 >
                                     گردشی ثبت نشده است.
                                 </td>
@@ -100,7 +108,7 @@ const formatType = (type: string) => (type === 'increase' ? 'افزایش' : 'ک
                         </tbody>
                     </table>
                 </div>
-                <div class="border-t px-4 py-4 text-sm text-gray-600">
+                <div class="border-t px-4 py-4 text-sm text-dh-700">
                     مجموع رکوردها: {{ movements.total }}
                 </div>
             </div>
