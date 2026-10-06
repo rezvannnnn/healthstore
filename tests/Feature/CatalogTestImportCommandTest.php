@@ -120,5 +120,4 @@ class CatalogTestImportCommandTest extends TestCase
             $this->assertStringContainsString('ریال', $content, $path);
         }
     }
-
 }
