@@ -102,8 +102,6 @@ class CatalogTestImportCommandTest extends TestCase
         $this->assertSame(0, Product::query()->where('sku', 'like', 'TEST-IMPORT-%')->count());
         $this->assertSame(0, ProductPrice::query()->count());
     }
-}
-
 
     public function test_storefront_price_labels_are_in_rials(): void
     {
@@ -122,3 +120,5 @@ class CatalogTestImportCommandTest extends TestCase
             $this->assertStringContainsString('ریال', $content, $path);
         }
     }
+
+}
