@@ -172,12 +172,12 @@ class CatalogTestImport extends Command
         return self::SUCCESS;
     }
 
-    protected function resolveBrand(array $row, array &$manifest): int
+    protected function resolveBrand(array $row, array &$manifest): ?int
     {
         $name = trim((string) ($row['brand'] ?? ''));
 
         if ($name === '') {
-            return 0;
+            return null;
         }
 
         $brand = Brand::query()->where('name', $name)->first();
@@ -199,16 +199,16 @@ class CatalogTestImport extends Command
         return $brand->id;
     }
 
-    protected function resolveCategory(array $row, array &$manifest): int
+    protected function resolveCategory(array $row, array &$manifest): ?int
     {
         $categoryName = trim((string) ($row['category'] ?? ''));
         $subCategoryName = trim((string) ($row['sub_category'] ?? ''));
 
         if ($categoryName === '') {
-            return 0;
+            return null;
         }
 
-        $parent = Category::query()->where('parent_id', null)->where('name', $categoryName)->first();
+        $parent = Category::query()->whereNull('parent_id')->where('name', $categoryName)->first();
 
         if (! $parent) {
             $parent = Category::create([
