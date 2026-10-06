@@ -269,14 +269,9 @@ function addToCart(): void {
                                         product.price !== null &&
                                         product.compare_at_price > product.price
                                     "
-                                    class="mt-1.5 flex items-center gap-2 text-sm text-dh-muted"
+                                    class="mt-1.5 text-sm text-dh-muted line-through"
                                 >
-                                    <span class="text-xs">
-                                        قیمت قبل از تخفیف:
-                                    </span>
-                                    <span class="line-through">
-                                        {{ formatPrice(product.compare_at_price) }}
-                                    </span>
+                                    {{ formatPrice(product.compare_at_price) }}
                                 </div>
                             </div>
 
