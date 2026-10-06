@@ -35,6 +35,17 @@ class CatalogTestImportCommandTest extends TestCase
             ->with(['brand', 'category'])
             ->firstOrFail();
 
+        $productPrice = ProductPrice::query()
+            ->where('product_id', $product->id)
+            ->firstOrFail();
+
+        $this->assertSame(
+            'مکمل مولتی‌ویتامین و مینرال مخصوص بانوان با مجموعه‌ای از ویتامین‌ها، مواد معدنی و ترکیبات تغذیه‌ای برای پوشش نیازهای روزمره.',
+            $product->description,
+        );
+        $this->assertSame(10230000.0, (float) $productPrice->price);
+        $this->assertSame(12276000.0, (float) $productPrice->compare_at_price);
+
         $this->get('/products')
             ->assertSuccessful()
             ->assertInertia(fn ($page) => $page
@@ -65,6 +76,10 @@ class CatalogTestImportCommandTest extends TestCase
                 ->where('product.id', $product->id)
                 ->where('product.brand', $product->brand->name)
                 ->where('product.category', $product->category->name)
+                ->where('product.description', $product->description)
+                ->where('product.price', 10230000.0)
+                ->where('product.compare_at_price', 12276000.0)
+                ->where('structuredData.offers.priceCurrency', 'IRR')
             );
 
         $this->get("/brands/{$product->brand->slug}")
@@ -88,3 +103,22 @@ class CatalogTestImportCommandTest extends TestCase
         $this->assertSame(0, ProductPrice::query()->count());
     }
 }
+
+
+    public function test_storefront_price_labels_are_in_rials(): void
+    {
+        foreach ([
+            'resources/js/pages/Product/Show.vue',
+            'resources/js/pages/Product/Index.vue',
+            'resources/js/pages/Brand/Show.vue',
+            'resources/js/pages/Category/Show.vue',
+            'resources/js/pages/Cart/Index.vue',
+            'resources/js/pages/Checkout.vue',
+            'resources/js/pages/Order/Show.vue',
+        ] as $path) {
+            $content = file_get_contents(base_path($path));
+
+            $this->assertStringNotContainsString('تومان', $content, $path);
+            $this->assertStringContainsString('ریال', $content, $path);
+        }
+    }
