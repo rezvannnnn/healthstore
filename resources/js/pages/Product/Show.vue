@@ -71,7 +71,7 @@ const specifications = computed(() =>
 function formatPrice(value: number | null): string {
     return value === null
         ? 'تماس بگیرید'
-        : `${value.toLocaleString('fa-IR')} تومان`;
+        : `${value.toLocaleString('fa-IR')} ریال`;
 }
 function addToCart(): void {
     if (
@@ -256,7 +256,7 @@ function addToCart(): void {
                         <div class="flex items-end justify-between gap-4">
                             <div>
                                 <div class="text-xs font-medium text-dh-muted">
-                                    قیمت مصرف‌کننده
+                                    قیمت فروش
                                 </div>
                                 <div
                                     class="mt-1 text-2xl font-extrabold text-dh-800 sm:text-3xl"
@@ -271,7 +271,8 @@ function addToCart(): void {
                                     "
                                     class="mt-1.5 text-sm text-dh-muted line-through"
                                 >
-                                    {{ formatPrice(product.compare_at_price) }}
+                                    <span class="text-xs">قیمت قبل از تخفیف:</span>
+                                    <span>{{ formatPrice(product.compare_at_price) }}</span>
                                 </div>
                             </div>
 
