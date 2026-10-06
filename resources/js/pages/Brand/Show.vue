@@ -45,7 +45,7 @@ const props = defineProps<{
 function formatPrice(value: number | null): string {
     return value === null
         ? 'تماس بگیرید'
-        : value.toLocaleString('fa-IR') + ' تومان';
+        : value.toLocaleString('fa-IR') + ' ریال';
 }
 
 function addToCart(productId: number): void {
