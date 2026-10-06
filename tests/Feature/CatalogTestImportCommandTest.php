@@ -77,8 +77,8 @@ class CatalogTestImportCommandTest extends TestCase
                 ->where('product.brand', $product->brand->name)
                 ->where('product.category', $product->category->name)
                 ->where('product.description', $product->description)
-                ->where('product.price', 10230000.0)
-                ->where('product.compare_at_price', 12276000.0)
+                ->where('product.price', 10230000)
+                ->where('product.compare_at_price', 12276000)
                 ->where('structuredData.offers.priceCurrency', 'IRR')
             );
 
