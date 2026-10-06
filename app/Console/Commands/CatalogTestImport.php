@@ -69,7 +69,7 @@ class CatalogTestImport extends Command
         }
 
         $manifest = [
-            'source' => 'pharmacy_products_images_researched_draft(1).xlsx',
+            'source' => 'pharmacy_products_researched_import_draft.xlsx',
             'fixture_files' => array_map(fn (string $file): string => basename($file), $files),
             'imported_at' => now()->toISOString(),
             'products' => [],
@@ -97,19 +97,19 @@ class CatalogTestImport extends Command
                         'name' => $name,
                         'slug' => $this->testSlug($name, $rowNumber),
                         'sku' => $this->testSku($rowNumber),
-                        'barcode' => null,
-                        'product_type' => null,
-                        'unit' => null,
+                        'barcode' => $row['source_barcode'] ?? null,
+                        'product_type' => $row['product_type'] ?? null,
+                        'unit' => $row['unit'] ?? null,
                         'quantity_per_unit' => $row['quantity_per_unit'] ?? null,
                         'short_description' => $row['short_description'] ?? null,
-                        'description' => null,
-                        'seo_title' => null,
-                        'seo_description' => null,
-                        'canonical_url' => null,
+                        'description' => $row['description'] ?? null,
+                        'seo_title' => $row['seo_title'] ?? null,
+                        'seo_description' => $row['seo_description'] ?? null,
+                        'canonical_url' => $row['canonical_url'] ?? null,
                         'main_image' => $row['image'] ?? null,
-                        'is_active' => true,
-                        'is_featured' => false,
-                        'sort_order' => $rowNumber,
+                        'is_active' => array_key_exists('active', $row) ? (bool) $row['active'] : true,
+                        'is_featured' => array_key_exists('featured', $row) ? (bool) $row['featured'] : false,
+                        'sort_order' => (int) ($row['sort_order'] ?? $rowNumber),
                     ]);
 
                     $manifest['products'][] = $product->id;
@@ -119,7 +119,7 @@ class CatalogTestImport extends Command
                             'product_id' => $product->id,
                             'price_type' => 'retail',
                             'price' => $row['price'],
-                            'compare_at_price' => null,
+                            'compare_at_price' => $row['compare_at_price'] ?? null,
                             'min_quantity' => 1,
                             'is_active' => true,
                             'starts_at' => null,
