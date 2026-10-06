@@ -71,7 +71,7 @@ const submitting = ref(false);
 const priceFormatter = new Intl.NumberFormat('fa-IR');
 
 const formatPrice = (value: number | string): string => {
-    return `${priceFormatter.format(Number(value))} تومان`;
+    return `${priceFormatter.format(Number(value))} ریال`;
 };
 
 const hasPriceChanges = computed(() => props.priceChanges.length > 0);
@@ -440,7 +440,7 @@ const goBackToCart = () => {
                                         >ناموجود</span
                                     ><span
                                         class="mt-1 block text-xs font-normal text-dh-muted"
-                                        >۰ تومان</span
+                                        >۰ ریال</span
                                     ></template
                                 >
                             </div>
