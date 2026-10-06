@@ -66,7 +66,7 @@ const isStartingPayment = ref(false);
 const isCancelling = ref(false);
 
 function formatPrice(value: number | string): string {
-    return formatter.format(Number(value)) + ' تومان';
+    return formatter.format(Number(value)) + ' ریال';
 }
 
 function formatDateTime(value: string | null): string {
