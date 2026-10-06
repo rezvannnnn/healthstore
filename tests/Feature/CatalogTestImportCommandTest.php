@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductPrice;
-use App\Models\Brand;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
