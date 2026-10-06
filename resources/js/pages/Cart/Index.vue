@@ -31,7 +31,7 @@ const props = defineProps<{
 const page = usePage<PagePropsWithFlash>();
 const busyItem = ref<number | null>(null);
 function formatPrice(value: number): string {
-    return `${value.toLocaleString('fa-IR')} تومان`;
+    return `${value.toLocaleString('fa-IR')} ریال`;
 }
 function updateQuantity(item: CartItem, quantity: number): void {
     if (quantity < 1) {
