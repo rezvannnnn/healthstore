@@ -271,8 +271,12 @@ function addToCart(): void {
                                     "
                                     class="mt-1.5 flex items-center gap-2 text-sm text-dh-muted"
                                 >
-                                    <span class="text-xs">قیمت قبل از تخفیف:</span>
-                                    <span class="line-through">{{ formatPrice(product.compare_at_price) }}</span>
+                                    <span class="text-xs">
+                                        قیمت قبل از تخفیف:
+                                    </span>
+                                    <span class="line-through">
+                                        {{ formatPrice(product.compare_at_price) }}
+                                    </span>
                                 </div>
                             </div>
 
