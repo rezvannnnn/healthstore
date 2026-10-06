@@ -259,7 +259,9 @@ const submit = () => {
                     <h2 class="mb-5 text-lg font-semibold">قیمت</h2>
                     <div class="grid gap-4 md:grid-cols-2">
                         <label class="block">
-                            <span class="text-sm font-medium">قیمت فروش (ریال) *</span>
+                            <span class="text-sm font-medium">
+                                قیمت فروش (ریال) *
+                            </span>
                             <input
                                 v-model.number="form.price"
                                 type="number"
