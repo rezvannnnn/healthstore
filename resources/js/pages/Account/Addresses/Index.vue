@@ -83,7 +83,7 @@ function removeAddress(id: number): void {
     >
         <div class="mx-auto max-w-5xl">
             <header
-                class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
+                class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
             >
                 <Link
                     href="/"
@@ -107,7 +107,7 @@ function removeAddress(id: number): void {
                 </nav>
             </header>
             <header
-                class="mb-6 flex items-center justify-between gap-4 rounded-3xl bg-dh-800 p-6 text-white shadow-sm"
+                class="mb-6 flex items-center justify-between gap-4 rounded-2xl bg-dh-800 p-6 text-white shadow-sm"
             >
                 <div>
                     <h1 class="text-2xl font-black text-white">آدرس‌های من</h1>

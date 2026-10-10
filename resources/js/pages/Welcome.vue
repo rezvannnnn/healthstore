@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ProductPlaceholder from '@/components/ProductPlaceholder.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
 import BrandLogo from '@/components/BrandLogo.vue';
@@ -102,7 +103,7 @@ function addToCart(product: FeaturedProduct): void {
                     class="absolute inset-0 [background-image:radial-gradient(circle_at_12%_20%,rgba(29,166,169,0.14),transparent_28%),radial-gradient(circle_at_85%_70%,rgba(99,185,91,0.13),transparent_30%)] opacity-70"
                 ></div>
                 <div
-                    class="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20"
+                    class="relative mx-auto max-w-7xl px-4 py-9 sm:px-6 sm:py-16 lg:px-8 lg:py-20"
                 >
                     <div
                         class="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]"
@@ -120,10 +121,10 @@ function addToCart(product: FeaturedProduct): void {
                                 class="mt-5 flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-right"
                             >
                                 <BrandLogo
-                                    imageClass="h-20 w-20 shrink-0 sm:h-28 sm:w-28"
+                                    imageClass="h-16 w-16 shrink-0 sm:h-20 sm:w-20"
                                 />
                                 <h1
-                                    class="text-3xl leading-[1.35] font-extrabold tracking-tight text-dh-900 sm:text-4xl lg:text-5xl"
+                                    class="text-3xl leading-[1.35] font-extrabold tracking-tight text-dh-900 sm:text-4xl lg:text-4xl"
                                 >
                                     سلامت، ساده‌تر از چیزی که فکر می‌کنید.
                                 </h1>
@@ -333,7 +334,7 @@ function addToCart(product: FeaturedProduct): void {
                 </div>
             </section>
 
-            <section v-if="props.categories.length" class="py-12 sm:py-14">
+            <section v-if="props.categories.length" class="py-9 sm:py-14">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="flex items-end justify-between gap-4">
                         <div>
@@ -417,7 +418,7 @@ function addToCart(product: FeaturedProduct): void {
 
             <section
                 v-if="props.featuredProducts.length"
-                class="border-y border-dh-100 bg-white py-12 sm:py-14"
+                class="border-y border-dh-100 bg-white py-9 sm:py-14"
             >
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="flex items-end justify-between gap-4">
@@ -443,14 +444,14 @@ function addToCart(product: FeaturedProduct): void {
                         <article
                             v-for="product in props.featuredProducts"
                             :key="product.id"
-                            class="group overflow-hidden rounded-3xl border border-dh-100 bg-white transition duration-200 hover:-translate-y-1 hover:border-dh-200 hover:shadow-[0_18px_40px_rgba(20,108,114,0.10)]"
+                            class="group overflow-hidden rounded-2xl border border-dh-100 bg-white transition duration-200 hover:-translate-y-0.5 hover:border-dh-200 hover:shadow-[0_18px_40px_rgba(20,108,114,0.10)]"
                         >
                             <Link
                                 :href="`/products/${product.slug}`"
                                 class="block"
                             >
                                 <div
-                                    class="relative aspect-square overflow-hidden bg-dh-50/60"
+                                    class="relative aspect-[4/3] overflow-hidden bg-dh-50/60"
                                 >
                                     <span
                                         v-if="
@@ -469,12 +470,7 @@ function addToCart(product: FeaturedProduct): void {
                                         loading="lazy"
                                         class="h-full w-full object-contain p-6 transition duration-300 group-hover:scale-[1.03]"
                                     />
-                                    <div
-                                        v-else
-                                        class="flex h-full items-center justify-center text-sm font-medium text-dh-muted"
-                                    >
-                                        بدون تصویر
-                                    </div>
+                                    <ProductPlaceholder v-else />
                                 </div>
                                 <div class="p-4">
                                     <p
@@ -576,11 +572,11 @@ function addToCart(product: FeaturedProduct): void {
                 </div>
             </section>
 
-            <section class="py-12 sm:py-14">
+            <section class="py-9 sm:py-14">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="grid gap-4 sm:grid-cols-3">
                         <div
-                            class="rounded-3xl border border-dh-100 bg-white p-6"
+                            class="rounded-2xl border border-dh-100 bg-white p-6"
                         >
                             <span
                                 class="flex size-11 items-center justify-center rounded-2xl bg-dh-50 text-dh-600"
@@ -608,7 +604,7 @@ function addToCart(product: FeaturedProduct): void {
                             </p>
                         </div>
                         <div
-                            class="rounded-3xl border border-dh-100 bg-white p-6"
+                            class="rounded-2xl border border-dh-100 bg-white p-6"
                         >
                             <span
                                 class="flex size-11 items-center justify-center rounded-2xl bg-dh-green-50 text-dh-green-600"
@@ -643,7 +639,7 @@ function addToCart(product: FeaturedProduct): void {
                             </p>
                         </div>
                         <div
-                            class="rounded-3xl border border-dh-100 bg-white p-6"
+                            class="rounded-2xl border border-dh-100 bg-white p-6"
                         >
                             <span
                                 class="flex size-11 items-center justify-center rounded-2xl bg-dh-50 text-dh-600"

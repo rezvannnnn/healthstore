@@ -53,13 +53,13 @@ function navClass(section: ActiveSection): string {
         class="sticky top-0 z-40 border-b border-dh-100/80 bg-white/95 backdrop-blur"
     >
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="flex min-h-20 items-center gap-4">
+            <div class="flex min-h-16 items-center gap-4">
                 <Link
                     href="/"
                     class="flex shrink-0 items-center"
                     aria-label="داروخونه"
                 >
-                    <BrandLogo imageClass="h-[4.25rem] w-[4.25rem]" />
+                    <BrandLogo imageClass="h-14 w-14" />
                 </Link>
 
                 <form

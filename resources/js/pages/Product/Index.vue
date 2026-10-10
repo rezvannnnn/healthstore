@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ProductPlaceholder from '@/components/ProductPlaceholder.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
 import StorefrontFooter from '@/components/StorefrontFooter.vue';
@@ -180,10 +181,10 @@ function formatPrice(value: number | null): string {
         <StorefrontHeader active="products" />
 
         <main
-            class="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10"
+            class="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-8"
         >
             <section
-                class="flex flex-col gap-5 rounded-3xl border border-dh-100 bg-white p-6 shadow-[0_12px_35px_rgba(20,108,114,0.06)] sm:p-8 md:flex-row md:items-end md:justify-between"
+                class="flex flex-col gap-5 rounded-2xl border border-dh-100 bg-white p-6 shadow-[0_12px_35px_rgba(20,108,114,0.06)] sm:p-8 md:flex-row md:items-end md:justify-between"
             >
                 <div>
                     <span class="text-xs font-extrabold text-dh-500"
@@ -207,7 +208,7 @@ function formatPrice(value: number | null): string {
             </section>
 
             <section
-                class="rounded-3xl border border-dh-100 bg-white p-4 shadow-sm sm:p-5"
+                class="rounded-2xl border border-dh-100 bg-white p-4 shadow-sm sm:p-5"
             >
                 <form
                     @submit.prevent="submit"
@@ -367,11 +368,11 @@ function formatPrice(value: number | null): string {
                 <article
                     v-for="product in products"
                     :key="product.id"
-                    class="group overflow-hidden rounded-3xl border border-dh-100 bg-white transition duration-200 hover:-translate-y-1 hover:border-dh-200 hover:shadow-[0_18px_40px_rgba(20,108,114,0.09)]"
+                    class="group overflow-hidden rounded-2xl border border-dh-100 bg-white transition duration-200 hover:-translate-y-0.5 hover:border-dh-200 hover:shadow-[0_18px_40px_rgba(20,108,114,0.09)]"
                 >
                     <Link :href="`/products/${product.slug}`" class="block">
                         <div
-                            class="relative aspect-square overflow-hidden bg-dh-50/60"
+                            class="relative aspect-[4/3] overflow-hidden bg-dh-50/60"
                         >
                             <span
                                 v-if="
@@ -389,12 +390,7 @@ function formatPrice(value: number | null): string {
                                 loading="lazy"
                                 class="h-full w-full object-contain p-6 transition duration-300 group-hover:scale-[1.03]"
                             />
-                            <div
-                                v-else
-                                class="flex h-full items-center justify-center text-sm font-medium text-dh-muted"
-                            >
-                                بدون تصویر
-                            </div>
+                            <ProductPlaceholder v-else />
                         </div>
 
                         <div class="space-y-3 p-4">
@@ -501,7 +497,7 @@ function formatPrice(value: number | null): string {
 
             <section
                 v-else
-                class="rounded-3xl border border-dashed border-dh-200 bg-white p-12 text-center"
+                class="rounded-2xl border border-dashed border-dh-200 bg-white p-12 text-center"
             >
                 <div
                     class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-dh-50 text-dh-600"

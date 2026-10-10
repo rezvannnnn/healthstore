@@ -72,7 +72,7 @@ function pageUrl(page: number): string {
     >
         <StorefrontHeader active="blog" />
 
-        <main class="mx-auto max-w-7xl space-y-8 px-4 py-6 md:px-6 md:py-10">
+        <main class="mx-auto max-w-7xl space-y-8 px-4 py-6 md:px-6 md:py-8">
             <section
                 class="overflow-hidden rounded-[2rem] bg-dh-800 p-6 text-white shadow-xl shadow-dh-900/10 md:p-10"
             >
@@ -81,7 +81,7 @@ function pageUrl(page: number): string {
                         class="absolute -top-20 -left-10 size-56 rounded-full bg-dh-600/30 blur-3xl"
                     ></div>
                     <div
-                        class="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end"
+                        class="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end"
                     >
                         <div class="max-w-2xl">
                             <Link
@@ -90,7 +90,7 @@ function pageUrl(page: number): string {
                                 >مجله سلامت</Link
                             >
                             <h1
-                                class="mt-5 text-3xl leading-tight font-black md:text-5xl"
+                                class="mt-5 text-3xl leading-tight font-black md:text-4xl"
                             >
                                 دانش سلامت،<br class="sm:hidden" />
                                 ساده و کاربردی
@@ -103,7 +103,7 @@ function pageUrl(page: number): string {
                             </p>
                         </div>
                         <div
-                            class="hidden rounded-3xl border border-white/10 bg-white/10 p-5 lg:block"
+                            class="hidden rounded-2xl border border-white/10 bg-white/10 p-5 lg:block"
                         >
                             <div class="text-3xl font-black">
                                 {{ pagination.total.toLocaleString('fa-IR') }}
@@ -200,7 +200,7 @@ function pageUrl(page: number): string {
                     <article
                         v-for="article in articles"
                         :key="article.id"
-                        class="group overflow-hidden rounded-3xl border border-dh-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
+                        class="group overflow-hidden rounded-2xl border border-dh-100 bg-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-lg"
                     >
                         <Link :href="`/blog/${article.slug}`" class="block">
                             <div class="relative overflow-hidden bg-dh-50">
@@ -271,7 +271,7 @@ function pageUrl(page: number): string {
 
                 <div
                     v-else
-                    class="rounded-3xl border border-dashed border-dh-200 bg-white p-12 text-center"
+                    class="rounded-2xl border border-dashed border-dh-200 bg-white p-12 text-center"
                 >
                     <div
                         class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-dh-50 text-dh-600"

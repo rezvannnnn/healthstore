@@ -153,7 +153,7 @@ const goBackToCart = () => {
             </div>
         </header>
 
-        <main class="mx-auto max-w-6xl space-y-6 px-4 py-6 md:px-6 md:py-10">
+        <main class="mx-auto max-w-6xl space-y-6 px-4 py-6 md:px-6 md:py-8">
             <header>
                 <p class="text-xs font-bold text-dh-600">مرحله نهایی</p>
                 <h1 class="mt-1 text-3xl font-black text-dh-800 md:text-4xl">
@@ -175,7 +175,7 @@ const goBackToCart = () => {
             <section class="grid gap-6 lg:grid-cols-[1fr_350px]">
                 <div class="space-y-5">
                     <section
-                        class="rounded-3xl border border-dh-100 bg-white p-5 shadow-sm md:p-6"
+                        class="rounded-2xl border border-dh-100 bg-white p-5 shadow-sm md:p-6"
                     >
                         <div
                             class="mb-5 flex items-start justify-between gap-4"
@@ -276,7 +276,7 @@ const goBackToCart = () => {
 
                     <section
                         v-if="hasPayableItems"
-                        class="rounded-3xl border border-dh-100 bg-white p-5 shadow-sm md:p-6"
+                        class="rounded-2xl border border-dh-100 bg-white p-5 shadow-sm md:p-6"
                     >
                         <div class="flex items-start gap-3">
                             <span
@@ -322,7 +322,7 @@ const goBackToCart = () => {
 
                     <section
                         v-if="hasChanges"
-                        class="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm md:p-6"
+                        class="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm md:p-6"
                     >
                         <h2 class="text-xl font-black text-amber-900">
                             تغییرات سبد خرید
@@ -376,7 +376,7 @@ const goBackToCart = () => {
                     </section>
 
                     <section
-                        class="rounded-3xl border border-dh-100 bg-white p-5 shadow-sm md:p-6"
+                        class="rounded-2xl border border-dh-100 bg-white p-5 shadow-sm md:p-6"
                     >
                         <div class="flex items-start gap-3">
                             <span
@@ -449,7 +449,7 @@ const goBackToCart = () => {
                 </div>
 
                 <aside
-                    class="h-fit rounded-3xl border border-dh-100 bg-white p-6 shadow-sm lg:sticky lg:top-24"
+                    class="h-fit rounded-2xl border border-dh-100 bg-white p-6 shadow-sm lg:sticky lg:top-24"
                 >
                     <h2 class="text-lg font-black text-dh-800">خلاصه سفارش</h2>
                     <div

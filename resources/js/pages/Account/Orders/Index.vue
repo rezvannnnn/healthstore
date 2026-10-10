@@ -78,7 +78,7 @@ function paymentClasses(status: string): string {
     >
         <div class="mx-auto max-w-5xl">
             <header
-                class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
+                class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
             >
                 <Link
                     href="/"
@@ -103,7 +103,7 @@ function paymentClasses(status: string): string {
             </header>
 
             <section
-                class="mb-6 rounded-3xl bg-dh-800 p-6 text-white shadow-sm sm:p-8"
+                class="mb-6 rounded-2xl bg-dh-800 p-6 text-white shadow-sm sm:p-8"
             >
                 <p class="text-sm font-bold text-dh-green-100">حساب کاربری</p>
                 <div
@@ -129,7 +129,7 @@ function paymentClasses(status: string): string {
                 <article
                     v-for="order in orders"
                     :key="order.id"
-                    class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 transition hover:-translate-y-0.5 hover:shadow-md sm:p-6"
+                    class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-dh-100 transition hover:-translate-y-0.5 hover:shadow-md sm:p-6"
                 >
                     <div
                         class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between"
@@ -194,7 +194,7 @@ function paymentClasses(status: string): string {
 
             <div
                 v-else
-                class="rounded-3xl border border-dashed border-dh-200 bg-white p-12 text-center"
+                class="rounded-2xl border border-dashed border-dh-200 bg-white p-12 text-center"
             >
                 <div
                     class="mx-auto grid size-14 place-items-center rounded-2xl bg-dh-50 text-dh-600"

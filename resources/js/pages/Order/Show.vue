@@ -256,7 +256,7 @@ function startPayment(): void {
     >
         <div class="mx-auto max-w-5xl">
             <header
-                class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
+                class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
             >
                 <Link
                     href="/"
@@ -281,7 +281,7 @@ function startPayment(): void {
             </header>
 
             <section
-                class="mb-6 rounded-3xl bg-dh-800 p-6 text-white shadow-sm sm:p-8"
+                class="mb-6 rounded-2xl bg-dh-800 p-6 text-white shadow-sm sm:p-8"
             >
                 <div class="flex flex-wrap items-start justify-between gap-5">
                     <div>
@@ -328,7 +328,7 @@ function startPayment(): void {
             <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
                 <div class="space-y-6">
                     <section
-                        class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
+                        class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
                     >
                         <h2 class="mb-5 text-lg font-black text-dh-900">
                             اقلام سفارش
@@ -373,7 +373,7 @@ function startPayment(): void {
                             order.recipient_phone ||
                             order.shipping_address
                         "
-                        class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
+                        class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
                     >
                         <h2 class="mb-5 text-lg font-black text-dh-900">
                             اطلاعات گیرنده
@@ -428,7 +428,7 @@ function startPayment(): void {
                     </section>
 
                     <section
-                        class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
+                        class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
                     >
                         <h2 class="mb-5 text-lg font-black text-dh-900">
                             روند سفارش
@@ -491,7 +491,7 @@ function startPayment(): void {
 
                     <section
                         v-if="latestPayment"
-                        class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
+                        class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
                     >
                         <div class="flex items-center justify-between gap-3">
                             <h2 class="text-lg font-black text-dh-900">
@@ -548,7 +548,7 @@ function startPayment(): void {
                     </section>
 
                     <section
-                        class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
+                        class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
                     >
                         <h2 class="mb-5 text-lg font-black text-dh-900">
                             وضعیت سفارش
@@ -577,7 +577,7 @@ function startPayment(): void {
 
                 <aside class="h-fit space-y-6 lg:sticky lg:top-6">
                     <section
-                        class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100"
+                        class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-dh-100"
                     >
                         <h2 class="mb-5 text-lg font-black text-dh-900">
                             خلاصه مبلغ
@@ -617,7 +617,7 @@ function startPayment(): void {
                     </section>
 
                     <section
-                        class="rounded-3xl bg-dh-800 p-5 text-white shadow-sm"
+                        class="rounded-2xl bg-dh-800 p-5 text-white shadow-sm"
                     >
                         <h2 class="text-lg font-black">پرداخت سفارش</h2>
                         <div class="mt-4 rounded-2xl bg-white/10 p-4">
