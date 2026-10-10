@@ -13,11 +13,15 @@ class CatalogImageCleanupTest extends TestCase
     public function test_cleanup_only_removes_images_from_the_109_imported_products(): void
     {
         $imported = Product::create([
-            'name' => 'Imported', 'slug' => 'imported', 'sku' => 'TEST-IMPORT-001',
+            'name' => 'Imported',
+            'slug' => 'imported',
+            'sku' => 'TEST-IMPORT-001',
             'main_image' => 'https://example.com/imported.jpg',
         ]);
         $unrelated = Product::create([
-            'name' => 'Other', 'slug' => 'other', 'sku' => 'TEST-IMPORT-110',
+            'name' => 'Other',
+            'slug' => 'other',
+            'sku' => 'TEST-IMPORT-110',
             'main_image' => 'https://example.com/other.jpg',
         ]);
         $imported->images()->create(['image_path' => 'products/imported.jpg']);
