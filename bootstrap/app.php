@@ -4,6 +4,7 @@ use App\Http\Middleware\AddSecurityHeaders;
 use App\Http\Middleware\EnsureCustomerUser;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RedirectOldSlugs;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -36,6 +37,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => EnsureUserIsAdmin::class,
             'customer' => EnsureCustomerUser::class,
         ]);
+
+        $middleware->prependToGroup('web', RedirectOldSlugs::class);
 
         $middleware->web(append: [
             HandleInertiaRequests::class,

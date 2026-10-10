@@ -33,7 +33,7 @@ class ProductController extends Controller
     {
         $search = trim((string) $request->query('search', ''));
         $status = trim((string) $request->query('status', 'all'));
-        $query = Product::query()->with(['brand', 'category', 'images'])->orderByDesc('id');
+        $query = Product::query()->forCatalog()->with(['brand', 'category', 'images'])->orderByDesc('id');
 
         if ($search !== '') {
             $query->where(function ($builder) use ($search) {
@@ -153,6 +153,7 @@ class ProductController extends Controller
                 'quantity_per_unit' => $product->quantity_per_unit,
                 'short_description' => $product->short_description,
                 'description' => $product->description,
+                'specifications' => $product->specifications,
                 'seo_title' => $product->seo_title,
                 'seo_description' => $product->seo_description,
                 'canonical_url' => $product->canonical_url,
@@ -204,6 +205,16 @@ class ProductController extends Controller
 
             DB::transaction(function () use ($data, $product, $storedGallery): void {
                 $product->update($this->productData($data));
+                foreach ($data['existing_images'] ?? [] as $imageData) {
+                    $image = $product->images()->whereKey((int) $imageData['id'])->firstOrFail();
+                    if ($imageData['remove'] ?? false) {
+                        $path = $image->image_path;
+                        $image->delete();
+                        DB::afterCommit(fn () => $this->mediaService->deleteIfStored($path));
+                    } else {
+                        $image->update(['alt_text' => $imageData['alt_text'] ?? null, 'sort_order' => $imageData['sort_order']]);
+                    }
+                }
                 $this->syncRetailPrice($product, $data);
                 $this->appendGalleryImages($product, $storedGallery);
             });
@@ -274,6 +285,13 @@ class ProductController extends Controller
             'quantity_per_unit' => ['nullable', 'integer', 'min:1'],
             'short_description' => ['nullable', 'string', 'max:1000'],
             'description' => ['nullable', 'string'],
+            'specifications' => ['nullable', 'array', 'max:50'],
+            'specifications.*' => ['nullable', 'string', 'max:1000'],
+            'existing_images' => ['nullable', 'array', 'max:50'],
+            'existing_images.*.id' => ['required', 'integer', Rule::exists('product_images', 'id')->where('product_id', $product?->id)],
+            'existing_images.*.alt_text' => ['nullable', 'string', 'max:255'],
+            'existing_images.*.sort_order' => ['required', 'integer', 'min:0'],
+            'existing_images.*.remove' => ['boolean'],
             'seo_title' => ['nullable', 'string', 'max:255'],
             'seo_description' => ['nullable', 'string', 'max:160'],
             'canonical_url' => ['nullable', 'url', 'max:2048'],
@@ -295,7 +313,14 @@ class ProductController extends Controller
         $slug = trim((string) ($data['slug'] ?? ''));
         $name = trim((string) $data['name']);
         $description = trim((string) ($data['short_description'] ?? ''));
-        $resolvedSlug = $slug !== '' ? $slug : Str::slug($name);
+        $resolvedSlug = $slug !== '' ? $slug : (Str::slug($name) ?: 'product');
+        if ($slug === '') {
+            $base = $resolvedSlug;
+            $suffix = 2;
+            while (Product::query()->where('slug', $resolvedSlug)->exists()) {
+                $resolvedSlug = $base.'-'.$suffix++;
+            }
+        }
 
         return [
             'name' => $name,
@@ -309,6 +334,7 @@ class ProductController extends Controller
             'quantity_per_unit' => $data['quantity_per_unit'] ?? null,
             'short_description' => $data['short_description'] ?? null,
             'description' => $data['description'] ?? null,
+            'specifications' => $data['specifications'] ?? null,
             'seo_title' => trim((string) ($data['seo_title'] ?? '')) ?: $name,
             'seo_description' => trim((string) ($data['seo_description'] ?? '')) ?: ($description !== '' ? Str::limit($description, 160, '') : null),
             'canonical_url' => trim((string) ($data['canonical_url'] ?? '')) ?: url('/products/'.$resolvedSlug),

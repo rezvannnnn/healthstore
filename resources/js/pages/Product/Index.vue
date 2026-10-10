@@ -44,6 +44,7 @@ interface Seo {
     title: string;
     description: string;
     canonical: string;
+    robots?: string;
 }
 
 const props = defineProps<{
@@ -162,6 +163,11 @@ function formatPrice(value: number | null): string {
 
 <template>
     <Head>
+        <meta
+            head-key="robots"
+            name="robots"
+            :content="seo.robots || 'index,follow'"
+        />
         <title>{{ seo.title }}</title>
         <meta name="description" :content="seo.description" />
         <link rel="canonical" :href="seo.canonical" />
@@ -583,6 +589,15 @@ function formatPrice(value: number | null): string {
                 </Link>
             </nav>
         </main>
+        <p dir="rtl" class="mx-auto max-w-6xl px-4 py-4 text-sm">
+            برای محصولات بدون قیمت، از
+            <Link
+                href="/information/contact"
+                class="font-bold text-dh-700 underline"
+                >صفحه تماس و پشتیبانی</Link
+            >
+            اقدام کنید.
+        </p>
         <StorefrontFooter />
     </div>
 </template>

@@ -66,6 +66,7 @@ return [
     ],
 
     'admin_only_routes' => [
+        'admin.audit',
         'admin.users.index',
         'admin.users.store',
         'admin.users.update',
@@ -73,6 +74,7 @@ return [
     ],
 
     'route_permissions' => [
+        'admin.articles.preview' => 'content.manage',
         'admin.products.index' => 'products.view',
         'admin.products.create' => 'products.manage',
         'admin.products.store' => 'products.manage',

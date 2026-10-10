@@ -27,6 +27,7 @@ const statusLabel = (value: string) =>
     ({
         pending: 'در انتظار',
         paid: 'موفق',
+        requires_review: 'تأیید بانکی؛ نیازمند بررسی تأمین یا استرداد',
         failed: 'ناموفق',
         cancelled: 'لغو شده',
         refunded: 'برگشت خورده',

@@ -86,7 +86,7 @@ class CategoryController extends Controller
             'seo' => [
                 'title' => 'دسته‌بندی‌ها | فروشگاه سلامت',
                 'description' => 'مشاهده دسته‌بندی‌های فعال و محصولات هر دسته در فروشگاه سلامت.',
-                'canonical' => route('categories.index'),
+                'canonical' => route('categories.index').($paginator->currentPage() > 1 ? '?page='.$paginator->currentPage() : ''),
             ],
             'categories' => $categories,
             'pagination' => [
@@ -111,7 +111,7 @@ class CategoryController extends Controller
                 ->orderBy('name'),
         ]);
 
-        $paginator = Product::query()
+        $paginator = Product::query()->forCatalog()
             ->with(['brand', 'images'])
             ->where('is_active', true)
             ->where('category_id', $category->id)
@@ -175,7 +175,7 @@ class CategoryController extends Controller
             'seo' => [
                 'title' => $category->name.' | فروشگاه سلامت',
                 'description' => $description,
-                'canonical' => $categoryUrl,
+                'canonical' => $categoryUrl.($paginator->currentPage() > 1 ? '?page='.$paginator->currentPage() : ''),
             ],
             'category' => [
                 'id' => $category->id,

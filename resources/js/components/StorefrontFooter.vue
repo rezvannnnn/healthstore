@@ -33,6 +33,18 @@ import BrandLogo from '@/components/BrandLogo.vue';
                 <div>
                     <h3 class="font-extrabold text-white">دسترسی سریع</h3>
                     <div class="mt-3 space-y-2 text-dh-100">
+                        <Link href="/information/contact" class="block"
+                            >تماس و پشتیبانی</Link
+                        >
+                        <Link href="/information/shipping" class="block"
+                            >شرایط ارسال</Link
+                        >
+                        <Link href="/information/returns" class="block"
+                            >شرایط مرجوعی</Link
+                        >
+                        <Link href="/information/privacy" class="block"
+                            >حریم خصوصی</Link
+                        >
                         <Link href="/products" class="block hover:text-white"
                             >محصولات</Link
                         >

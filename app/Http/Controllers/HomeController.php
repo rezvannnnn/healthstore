@@ -20,7 +20,7 @@ class HomeController extends Controller
 
     public function __invoke(): Response
     {
-        $featuredProducts = Product::query()
+        $featuredProducts = Product::query()->forCatalog()
             ->with(['brand', 'images'])
             ->where('is_active', true)
             ->where('is_featured', true)

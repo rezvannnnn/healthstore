@@ -1,8 +1,8 @@
 import stylistic from '@stylistic/eslint-plugin';
-import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript';
 import prettier from 'eslint-config-prettier/flat';
 import importPlugin from 'eslint-plugin-import';
 import vue from 'eslint-plugin-vue';
+import tseslint from 'typescript-eslint';
 
 const controlStatements = [
     'if',
@@ -21,9 +21,10 @@ const paddingAroundControl = [
     ]),
 ];
 
-export default defineConfigWithVueTs(
+export default tseslint.config(
+    tseslint.configs.recommended,
     vue.configs['flat/essential'],
-    vueTsConfigs.recommended,
+    { files: ['**/*.vue'], languageOptions: { parserOptions: { parser: tseslint.parser, extraFileExtensions: ['.vue'] } } },
     {
         plugins: {
             import: importPlugin,

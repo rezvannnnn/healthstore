@@ -8,6 +8,7 @@ interface Article {
     slug: string;
     excerpt: string | null;
     content: string;
+    content_html: string;
     featured_image: string | null;
     featured_image_alt: string | null;
     seo_title: string | null;
@@ -162,10 +163,9 @@ defineProps<{
                         }}</strong>
                     </div>
                     <div
-                        class="prose prose-slate max-w-none text-base leading-9 whitespace-pre-wrap text-dh-800 md:text-lg"
-                    >
-                        {{ article.content }}
-                    </div>
+                        class="prose prose-slate max-w-none text-base leading-9 text-dh-800 md:text-lg"
+                        v-html="article.content_html"
+                    ></div>
                 </div>
             </article>
 

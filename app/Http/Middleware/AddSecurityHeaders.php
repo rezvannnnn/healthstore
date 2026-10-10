@@ -30,6 +30,9 @@ class AddSecurityHeaders
             'strict-origin-when-cross-origin'
         );
 
+        $response->headers->set('Content-Security-Policy-Report-Only', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'");
+        $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+
         if ($request->isSecure()) {
             $response->headers->set(
                 'Strict-Transport-Security',

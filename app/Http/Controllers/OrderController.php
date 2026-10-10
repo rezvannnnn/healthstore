@@ -46,6 +46,7 @@ class OrderController extends Controller
             ->firstOrFail();
 
         return Inertia::render('Order/Show', [
+            'paymentEnabled' => config('services.payment.provider') === 'zarinpal',
             'order' => $order, 'success' => session('success'),
             'error' => session('error'), 'info' => session('info'),
         ]);

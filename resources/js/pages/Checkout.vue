@@ -57,6 +57,8 @@ const props = defineProps<{
     requiresPriceConfirmation: boolean;
     subtotal: number;
     totalAmount?: number;
+    shippingAmount?: number;
+    minimumOrderAmount?: number;
     canProceedToPayment: boolean;
     cartHasPayableItems: boolean;
     message?: string;
@@ -103,6 +105,15 @@ const submitCheckout = () => {
     );
 };
 
+const previewCoupon = () =>
+    router.post(
+        '/checkout/preview',
+        {
+            address_id: selectedAddressId.value,
+            coupon_code: couponCode.value.trim() || null,
+        },
+        { preserveScroll: true },
+    );
 const rejectChanges = () => {
     if (submitting.value) {
         return;
@@ -301,6 +312,13 @@ const goBackToCart = () => {
                                 placeholder="کد تخفیف"
                                 class="w-full rounded-xl border border-dh-100 bg-dh-surface px-4 py-3 text-sm outline-none focus:border-dh-500 sm:max-w-sm"
                             />
+                            <button
+                                type="button"
+                                @click="previewCoupon"
+                                class="rounded-xl bg-dh-700 px-4 py-3 font-bold text-white"
+                            >
+                                اعمال کد تخفیف
+                            </button>
                             <span
                                 v-if="props.appliedCoupon"
                                 class="rounded-xl bg-dh-green-50 px-3 py-2 text-xs font-bold text-dh-green-700"
@@ -467,6 +485,21 @@ const goBackToCart = () => {
                             >- {{ formatPrice(discountAmount || 0) }}</strong
                         >
                     </div>
+                    <div class="mt-3 flex justify-between text-sm">
+                        <span>هزینه ارسال</span
+                        ><strong>{{ formatPrice(shippingAmount || 0) }}</strong>
+                    </div>
+                    <p
+                        v-if="
+                            minimumOrderAmount && subtotal < minimumOrderAmount
+                        "
+                        role="status"
+                        class="mt-3 text-sm text-red-700"
+                    >
+                        حداقل سفارش {{ formatPrice(minimumOrderAmount) }} است؛
+                        {{ formatPrice(minimumOrderAmount - subtotal) }} دیگر
+                        اضافه کنید.
+                    </p>
                     <div class="my-5 border-t border-dh-100"></div>
                     <div class="flex items-end justify-between gap-3">
                         <span class="text-sm font-bold text-dh-800"

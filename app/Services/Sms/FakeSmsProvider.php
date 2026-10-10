@@ -27,6 +27,10 @@ class FakeSmsProvider implements SmsProviderInterface
             'message' => $message,
         ];
 
+        if (app()->environment('local') && app()->bound('request') && request()->hasSession()) {
+            request()->session()->flash('info', 'پیامک آزمایشی (FakeSms): '.$message);
+        }
+
         return [
             'success' => true,
             'message_id' => $messageId,

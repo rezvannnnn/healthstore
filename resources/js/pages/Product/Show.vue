@@ -621,6 +621,15 @@ function addToCart(): void {
                 </div>
             </section>
         </main>
+        <p dir="rtl" class="mx-auto max-w-6xl px-4 py-4 text-sm">
+            برای محصولات بدون قیمت، از
+            <Link
+                href="/information/contact"
+                class="font-bold text-dh-700 underline"
+                >صفحه تماس و پشتیبانی</Link
+            >
+            اقدام کنید.
+        </p>
         <StorefrontFooter />
     </div>
 </template>

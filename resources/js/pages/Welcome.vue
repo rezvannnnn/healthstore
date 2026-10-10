@@ -41,7 +41,7 @@ const addingProductId = ref<number | null>(null);
 function formatPrice(value: number | null): string {
     return value === null
         ? 'تماس بگیرید'
-        : `${value.toLocaleString('fa-IR')} تومان`;
+        : `${value.toLocaleString('fa-IR')} ریال`;
 }
 
 function searchProducts(): void {

@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\ArticleCategory;
+use App\Models\StoreSetting;
 use App\Services\MediaService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -17,6 +20,13 @@ use Throwable;
 class ArticleController extends Controller
 {
     public function __construct(protected MediaService $mediaService) {}
+
+    public function preview(Request $request): JsonResponse
+    {
+        $data = $request->validate(['content' => ['nullable', 'string', 'max:100000']]);
+
+        return response()->json(['html' => Str::markdown($data['content'] ?? '', ['html_input' => 'strip', 'allow_unsafe_links' => false])]);
+    }
 
     public function index(Request $request): Response
     {
@@ -131,7 +141,7 @@ class ArticleController extends Controller
                 'canonical_url' => $article->canonical_url,
                 'is_active' => $article->is_active,
                 'is_featured' => $article->is_featured,
-                'published_at' => $article->published_at,
+                'published_at' => $article->published_at?->setTimezone(StoreSetting::getValue('timezone', 'Asia/Tehran'))->format('Y-m-d\TH:i'),
             ],
             'categories' => ArticleCategory::query()->where('is_active', true)->orderBy('sort_order')->orderBy('name')->get(['id', 'name']),
         ]);
@@ -205,15 +215,25 @@ class ArticleController extends Controller
 
     protected function makeSlug(?string $slug, string $title): string
     {
-        return trim((string) $slug) !== '' ? Str::slug($slug) : Str::slug($title);
+        if (trim((string) $slug) !== '') {
+            return Str::slug($slug);
+        }
+        $base = Str::slug($title) ?: 'article';
+        $resolved = $base;
+        $suffix = 2;
+        while (Article::query()->where('slug', $resolved)->exists()) {
+            $resolved = $base.'-'.$suffix++;
+        }
+
+        return $resolved;
     }
 
     protected function normalizePublishedAt(?string $publishedAt, bool $isActive): ?string
     {
-        if (! $isActive) {
-            return $publishedAt;
+        if ($publishedAt) {
+            return Carbon::parse($publishedAt, StoreSetting::getValue('timezone', 'Asia/Tehran'))->utc()->toDateTimeString();
         }
 
-        return $publishedAt ?: now()->toDateTimeString();
+        return $isActive ? now()->toDateTimeString() : null;
     }
 }

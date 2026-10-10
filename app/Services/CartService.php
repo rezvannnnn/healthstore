@@ -6,6 +6,7 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\ProductPrice;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -17,6 +18,19 @@ class CartService
     public function __construct(?InventoryService $inventoryService = null)
     {
         $this->inventoryService = $inventoryService ?? app(InventoryService::class);
+    }
+
+    public function restoreIntent(Request $request, int $userId): void
+    {
+        $intent = $request->session()->pull('cart_intent');
+        if (! is_array($intent)) {
+            return;
+        }
+        try {
+            $this->addItem($userId, (int) $intent['product_id'], (int) ($intent['quantity'] ?? 1));
+        } catch (RuntimeException $exception) {
+            $request->session()->flash('error', $exception->getMessage());
+        }
     }
 
     /**
@@ -132,6 +146,14 @@ class CartService
     ): ?ProductPrice {
         $now = now();
         $quantity = max(1, $quantity);
+
+        if ($product->relationLoaded('prices')) {
+            return $product->prices->filter(fn (ProductPrice $price) => $price->is_active
+                && $price->min_quantity <= $quantity
+                && ($price->starts_at === null || $price->starts_at->lte($now))
+                && ($price->ends_at === null || $price->ends_at->gte($now)))
+                ->sortByDesc('min_quantity')->first();
+        }
 
         return $product->prices()
             ->where('is_active', true)

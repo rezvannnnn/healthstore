@@ -54,11 +54,11 @@ class AdminUserManagementTest extends TestCase
         $this->assertSame(User::ROLE_STAFF, $staff->role);
         $this->assertTrue(password_verify('AccountingPass123!', $staff->password));
 
-        $this->actingAs($staff)
+        $this->withSession(['password_hash_web' => $staff->password])->actingAs($staff)
             ->get('/admin/payments')
             ->assertOk();
 
-        $this->actingAs($staff)
+        $this->withSession(['password_hash_web' => $staff->password])->actingAs($staff)
             ->get('/admin/products')
             ->assertForbidden();
     }
@@ -84,15 +84,15 @@ class AdminUserManagementTest extends TestCase
         $this->assertContains('products.view', $staff->admin_permissions);
         $this->assertContains('inventory.view', $staff->admin_permissions);
 
-        $this->actingAs($staff)
+        $this->withSession(['password_hash_web' => $staff->password])->actingAs($staff)
             ->get('/admin/products')
             ->assertOk();
 
-        $this->actingAs($staff)
+        $this->withSession(['password_hash_web' => $staff->password])->actingAs($staff)
             ->get('/admin/inventory')
             ->assertOk();
 
-        $this->actingAs($staff)
+        $this->withSession(['password_hash_web' => $staff->password])->actingAs($staff)
             ->get('/admin/payments')
             ->assertForbidden();
     }
@@ -106,7 +106,7 @@ class AdminUserManagementTest extends TestCase
             'admin_permissions' => ['inventory.view', 'inventory.manage'],
         ]);
 
-        $this->actingAs($staff)
+        $this->withSession(['password_hash_web' => $staff->password])->actingAs($staff)
             ->get('/admin/users')
             ->assertForbidden();
     }

@@ -22,7 +22,7 @@ class RouteSecurityContractTest extends TestCase
             'order cancel' => ['orders.cancel', ['auth']],
             'order payment start' => ['orders.payment.start', ['auth', 'throttle:10,1']],
             'cart index' => ['cart.index', ['auth']],
-            'cart item store' => ['cart.items.store', ['auth']],
+            'cart item store' => ['cart.items.store', ['throttle:30,1']],
             'cart item update' => ['cart.items.update', ['auth']],
             'cart item destroy' => ['cart.items.destroy', ['auth']],
             'account orders' => ['account.orders.index', ['auth']],

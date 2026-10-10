@@ -66,7 +66,7 @@ class ArticleCategoryController extends Controller
             'seo' => [
                 'title' => 'دسته‌بندی‌های مجله | مجله سلامت',
                 'description' => 'مشاهده دسته‌بندی‌های فعال مجله سلامت و مطالب آموزشی هر دسته.',
-                'canonical' => route('blog.categories.index'),
+                'canonical' => route('blog.categories.index').($paginator->currentPage() > 1 ? '?page='.$paginator->currentPage() : ''),
             ],
             'categories' => $categories,
             'pagination' => [
@@ -138,7 +138,7 @@ class ArticleCategoryController extends Controller
             'seo' => [
                 'title' => $articleCategory->name.' | مجله سلامت',
                 'description' => $description,
-                'canonical' => $categoryUrl,
+                'canonical' => $categoryUrl.($paginator->currentPage() > 1 ? '?page='.$paginator->currentPage() : ''),
             ],
             'category' => [
                 'id' => $articleCategory->id,

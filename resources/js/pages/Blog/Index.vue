@@ -24,6 +24,7 @@ interface Seo {
     title: string;
     description: string;
     canonical: string;
+    robots?: string;
 }
 
 defineProps<{
@@ -54,6 +55,11 @@ function pageUrl(page: number): string {
 
 <template>
     <Head>
+        <meta
+            head-key="robots"
+            name="robots"
+            :content="seo.robots || 'index,follow'"
+        />
         <title>{{ seo.title }}</title>
         <meta name="description" :content="seo.description" />
         <link rel="canonical" :href="seo.canonical" />

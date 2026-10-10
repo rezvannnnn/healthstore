@@ -4,6 +4,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 const form = useForm({
     username: '',
     password: '',
+    two_factor_code: '',
 });
 
 const submit = () => {
@@ -38,6 +39,12 @@ const submit = () => {
             </div>
 
             <form class="mt-8 space-y-5" @submit.prevent="submit">
+                <label class="block"
+                    >کد دومرحله‌ای (در صورت فعال بودن)<input
+                        v-model="form.two_factor_code"
+                        autocomplete="one-time-code"
+                        class="mt-2 w-full rounded-xl border p-3"
+                /></label>
                 <label class="block text-sm font-medium text-dh-900">
                     نام کاربری
                     <input

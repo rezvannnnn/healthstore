@@ -41,7 +41,7 @@ class AdminSettingsTest extends TestCase
             'shipping_fee' => 50000,
             'free_shipping_threshold' => 1000000,
             'min_order_amount' => 100000,
-            'currency' => 'تومان',
+            'currency' => 'ریال',
             'timezone' => 'Asia/Tehran',
         ]);
 
@@ -61,7 +61,7 @@ class AdminSettingsTest extends TestCase
             'shipping_fee' => 0,
             'free_shipping_threshold' => 0,
             'min_order_amount' => 0,
-            'currency' => 'تومان',
+            'currency' => 'ریال',
             'timezone' => 'Invalid/Timezone',
         ];
 

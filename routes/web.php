@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
+use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\BrandController as AdminBrandController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CouponController as AdminCouponController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\SecurityController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\ArticleCategoryController;
@@ -31,19 +33,23 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\StoreInformationController;
 use App\Http\Controllers\ZarinPalCallbackController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/information/{section}', StoreInformationController::class)->whereIn('section', ['contact', 'shipping', 'returns', 'privacy'])->name('information');
 Route::get('/', HomeController::class)->name('home');
 Route::inertia('/login', 'Auth/Login')->name('login');
 Route::inertia('/register', 'Auth/Register')->name('register.form');
-Route::get('/admin', [AdminLoginController::class, 'show'])->name('admin.dashboard');
-Route::get('/admin/login', [AdminLoginController::class, 'show'])->name('admin.login');
+Route::get('/admin', [AdminLoginController::class, 'show'])->middleware('auth.session')->name('admin.dashboard');
+Route::get('/admin/login', [AdminLoginController::class, 'show'])->middleware('auth.session')->name('admin.login');
 Route::post('/admin/login', [AdminLoginController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('admin.login.store');
+Route::get('/sitemaps/{type}/{page}.xml', [SitemapController::class, 'part'])->whereNumber('page')->name('sitemap.part');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/robots.txt', RobotsController::class)->name('robots');
+Route::post('/cart/items', [CartController::class, 'store'])->middleware('throttle:30,1')->name('cart.items.store');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categories/{category:slug}', [CategoryController::class, 'show'])->name('categories.show');
@@ -57,6 +63,7 @@ Route::get('/blog/{slug}', [ArticleController::class, 'show'])->name('blog.show'
 
 Route::middleware(['auth', 'customer'])->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
+    Route::post('/checkout/preview', [CheckoutController::class, 'preview'])->name('checkout.preview');
     Route::post('/checkout/confirm', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
     Route::post('/checkout/reject', [CheckoutController::class, 'reject'])->name('checkout.reject');
 
@@ -85,7 +92,7 @@ Route::post('/login/send-otp', [LoginController::class, 'sendOtp'])
     ->name('login.send-otp');
 Route::post('/logout', [LogoutController::class, 'store'])->name('logout');
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'auth.session', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::post('/logout', AdminLogoutController::class)->name('logout');
     Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
@@ -120,6 +127,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
+    Route::post('/articles/preview', [AdminArticleController::class, 'preview'])->middleware('throttle:30,1')->name('articles.preview');
     Route::get('/articles', [AdminArticleController::class, 'index'])->name('articles.index');
     Route::get('/articles/create', [AdminArticleController::class, 'create'])->name('articles.create');
     Route::post('/articles', [AdminArticleController::class, 'store'])->name('articles.store');
@@ -127,6 +135,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/articles/{article}', [AdminArticleController::class, 'update'])->name('articles.update');
     Route::delete('/articles/{article}', [AdminArticleController::class, 'destroy'])->name('articles.destroy');
 
+    Route::get('/security', [SecurityController::class, 'index'])->name('security.index');
+    foreach (['prepare', 'enable', 'disable'] as $action) {
+        Route::post('/security/'.$action, [SecurityController::class, $action])->middleware('throttle:5,1')->name('security.'.$action);
+    }
+    Route::get('/audit', AuditController::class)->name('audit');
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
@@ -134,7 +147,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
 Route::middleware(['auth', 'customer'])->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-    Route::post('/cart/items', [CartController::class, 'store'])->name('cart.items.store');
+
     Route::put('/cart/{cart}/items/{item}', [CartController::class, 'update'])->name('cart.items.update');
     Route::delete('/cart/{cart}/items/{item}', [CartController::class, 'destroy'])->name('cart.items.destroy');
     Route::get('/account/orders', [OrderController::class, 'index'])->name('account.orders.index');

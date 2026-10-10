@@ -69,7 +69,7 @@ class BrandController extends Controller
             'seo' => [
                 'title' => 'برندها | فروشگاه سلامت',
                 'description' => 'مشاهده برندهای فعال و محصولات هر برند در فروشگاه سلامت.',
-                'canonical' => route('brands.index'),
+                'canonical' => route('brands.index').($paginator->currentPage() > 1 ? '?page='.$paginator->currentPage() : ''),
             ],
             'brands' => $brands,
             'pagination' => [
@@ -85,7 +85,7 @@ class BrandController extends Controller
     {
         abort_unless($brand->is_active, 404);
 
-        $paginator = Product::query()
+        $paginator = Product::query()->forCatalog()
             ->with(['brand', 'images'])
             ->where('is_active', true)
             ->where('brand_id', $brand->id)
@@ -148,7 +148,7 @@ class BrandController extends Controller
             'seo' => [
                 'title' => $brand->name.' | فروشگاه سلامت',
                 'description' => $description,
-                'canonical' => $brandUrl,
+                'canonical' => $brandUrl.($paginator->currentPage() > 1 ? '?page='.$paginator->currentPage() : ''),
             ],
             'brand' => [
                 'id' => $brand->id,

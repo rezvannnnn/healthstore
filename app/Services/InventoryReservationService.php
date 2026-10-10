@@ -12,6 +12,37 @@ use RuntimeException;
 
 class InventoryReservationService
 {
+    public function hasCompleteReservation(Order $order): bool
+    {
+        $items = $order->items()->with('product')->get();
+        if ($items->isEmpty()) {
+            return false;
+        }
+        $reservations = $order->inventoryReservations()->where('status', 'active')
+            ->where('expires_at', '>', now())->with('inventory')->get();
+        foreach ($items as $item) {
+            if (! $item->product || ! $item->product->is_active) {
+                return false;
+            }
+        }
+        foreach ($reservations->groupBy('inventory_id') as $group) {
+            $inventory = $group->first()?->inventory;
+            if (! $inventory || ! $inventory->is_active || ($inventory->expiry_date && $inventory->expiry_date->lt(now()->startOfDay())) || $inventory->quantity < $group->sum('quantity')) {
+                return false;
+            }
+        }
+        if ($order->coupon_id !== null && ! $order->couponUsages()->where('status', 'reserved')->where('expires_at', '>', now())->exists()) {
+            return false;
+        }
+        foreach ($items->groupBy('product_id') as $productId => $lines) {
+            if ((int) $reservations->where('product_id', $productId)->sum('quantity') !== (int) $lines->sum('quantity')) {
+                return false;
+            }
+        }
+
+        return (int) $reservations->sum('quantity') === (int) $items->sum('quantity');
+    }
+
     /**
      * Reserve a quantity of a product for an order.
      *
@@ -190,6 +221,10 @@ class InventoryReservationService
                 throw new RuntimeException(
                     'رکورد موجودی مربوط به این رزرو پیدا نشد.'
                 );
+            }
+
+            if (! $inventory->is_active || ($inventory->expiry_date !== null && $inventory->expiry_date->lt(now()->startOfDay()))) {
+                return false;
             }
 
             if ($inventory->quantity < $lockedReservation->quantity) {

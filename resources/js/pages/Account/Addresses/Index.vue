@@ -183,6 +183,8 @@ function removeAddress(id: number): void {
                         شماره موبایل
                         <input
                             v-model="form.phone"
+                            inputmode="tel"
+                            autocomplete="tel-national"
                             required
                             class="mt-1 w-full rounded-xl border-dh-100"
                         />
@@ -197,6 +199,8 @@ function removeAddress(id: number): void {
                         استان
                         <input
                             v-model="form.province"
+                            autocomplete="address-level1"
+                            required
                             class="mt-1 w-full rounded-xl border-dh-100"
                         />
                     </label>
@@ -204,6 +208,8 @@ function removeAddress(id: number): void {
                         شهر
                         <input
                             v-model="form.city"
+                            autocomplete="address-level2"
+                            required
                             class="mt-1 w-full rounded-xl border-dh-100"
                         />
                     </label>
@@ -211,6 +217,9 @@ function removeAddress(id: number): void {
                         کد پستی
                         <input
                             v-model="form.postal_code"
+                            inputmode="numeric"
+                            autocomplete="postal-code"
+                            maxlength="10"
                             class="mt-1 w-full rounded-xl border-dh-100"
                         />
                         <span
@@ -226,6 +235,7 @@ function removeAddress(id: number): void {
                         نشانی کامل
                         <textarea
                             v-model="form.address"
+                            autocomplete="street-address"
                             required
                             class="mt-1 min-h-28 w-full rounded-xl border-dh-100"
                         />

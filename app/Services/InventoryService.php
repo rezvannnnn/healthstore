@@ -17,6 +17,10 @@ class InventoryService
      */
     public function getPhysicalQuantity(Product $product): int
     {
+        if (array_key_exists('catalog_physical', $product->getAttributes())) {
+            return (int) $product->getAttribute('catalog_physical');
+        }
+
         return (int) Inventory::query()
             ->where('product_id', $product->id)
             ->where('is_active', true)
@@ -43,6 +47,10 @@ class InventoryService
      */
     public function getReservedQuantity(Product $product): int
     {
+        if (array_key_exists('catalog_reserved', $product->getAttributes())) {
+            return (int) $product->getAttribute('catalog_reserved');
+        }
+
         return (int) InventoryReservation::query()
             ->where('product_id', $product->id)
             ->where('status', 'active')
@@ -72,6 +80,6 @@ class InventoryService
      */
     public function isAvailable(Product $product): bool
     {
-        return $this->getAvailableQuantity($product) > 0;
+        return $product->is_active && $this->getAvailableQuantity($product) > 0;
     }
 }

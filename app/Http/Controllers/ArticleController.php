@@ -90,7 +90,8 @@ class ArticleController extends Controller
             'seo' => [
                 'title' => 'مجله سلامت | مطالب آموزشی و کاربردی سلامت',
                 'description' => 'مطالب آموزشی و کاربردی درباره سلامت و محصولات بهداشتی.',
-                'canonical' => url('/blog'),
+                'canonical' => url('/blog').($paginator->currentPage() > 1 ? '?page='.$paginator->currentPage() : ''),
+                'robots' => $search !== '' ? 'noindex,follow' : 'index,follow',
             ],
             'articles' => $articles,
             'pagination' => [
@@ -181,6 +182,7 @@ class ArticleController extends Controller
                 'slug' => $article->slug,
                 'excerpt' => $article->excerpt,
                 'content' => $article->content,
+                'content_html' => Str::markdown($article->content, ['html_input' => 'strip', 'allow_unsafe_links' => false]),
                 'featured_image' => $featuredImage,
                 'featured_image_alt' => $article->featured_image_alt,
                 'seo_title' => $article->seo_title,
