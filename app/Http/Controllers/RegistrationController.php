@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\OtpVerification;
 use App\Models\User;
+use App\Services\CartService;
 use App\Services\OtpService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -48,9 +49,7 @@ class RegistrationController extends Controller
                 ->where('phone', $phone)
                 ->exists()
         ) {
-            throw ValidationException::withMessages([
-                'phone' => 'این شماره موبایل قبلاً ثبت شده است.',
-            ]);
+            return back()->with('status', 'کد تأیید ارسال شد.');
         }
 
         /*
@@ -244,11 +243,13 @@ class RegistrationController extends Controller
         ]);
 
         Auth::login($user);
+        $request->session()->forget('password_hash_'.Auth::getDefaultDriver());
 
         /*
          * Prevent session fixation after authentication.
          */
         $request->session()->regenerate();
+        app(CartService::class)->restoreIntent($request, $user->id);
 
         return redirect()->intended(
             route('home')

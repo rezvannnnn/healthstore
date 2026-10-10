@@ -65,6 +65,7 @@ const statusLabel = (value: string) =>
     ({
         pending: 'در انتظار',
         paid: 'موفق',
+        requires_review: 'تأیید بانکی؛ نیازمند بررسی تأمین یا استرداد',
         failed: 'ناموفق',
         cancelled: 'لغو شده',
         refunded: 'برگشت خورده',
@@ -90,7 +91,7 @@ const statusClasses = (value: string) =>
                 class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
             >
                 <div>
-                    <p class="text-sm text-dh-muted">HealthStore / مدیریت</p>
+                    <p class="text-sm text-dh-muted">داروخونه / مدیریت</p>
                     <h1 class="text-3xl font-bold">پرداخت‌ها</h1>
                     <p class="mt-2 text-dh-700">
                         پیگیری وضعیت و جزئیات پرداخت‌های سفارش‌ها
@@ -123,6 +124,7 @@ const statusClasses = (value: string) =>
                         <option value="all">همه وضعیت‌ها</option>
                         <option value="pending">در انتظار</option>
                         <option value="paid">موفق</option>
+                        <option value="requires_review">نیازمند بررسی</option>
                         <option value="failed">ناموفق</option>
                         <option value="cancelled">لغو شده</option>
                         <option value="refunded">برگشت خورده</option>

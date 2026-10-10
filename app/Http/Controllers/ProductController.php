@@ -28,11 +28,11 @@ class ProductController extends Controller
             'brand' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $search = trim((string) ($validatedFilters['search'] ?? ''));
+        $search = strtr(trim((string) ($validatedFilters['search'] ?? '')), ['ي' => 'ی', 'ك' => 'ک', '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9']);
         $categorySlug = trim((string) ($validatedFilters['category'] ?? ''));
         $brandSlug = trim((string) ($validatedFilters['brand'] ?? ''));
 
-        $query = Product::query()
+        $query = Product::query()->forCatalog()
             ->with(['brand', 'category', 'images'])
             ->where('is_active', true)
             ->orderByDesc('is_featured')
@@ -42,7 +42,7 @@ class ProductController extends Controller
         if ($search !== '') {
             $query->where(function ($builder) use ($search) {
                 $builder
-                    ->where('name', 'like', "%{$search}%")
+                    ->whereRaw("REPLACE(REPLACE(name, 'ي', 'ی'), 'ك', 'ک') LIKE ?", ["%{$search}%"])
                     ->orWhere('sku', 'like', "%{$search}%")
                     ->orWhere('barcode', 'like', "%{$search}%")
                     ->orWhere('short_description', 'like', "%{$search}%");
@@ -100,7 +100,8 @@ class ProductController extends Controller
             'seo' => [
                 'title' => 'محصولات | فروشگاه سلامت',
                 'description' => 'خرید و بررسی محصولات بهداشتی و سلامت از فروشگاه آنلاین.',
-                'canonical' => url('/products'),
+                'canonical' => url('/products').($paginator->currentPage() > 1 ? '?page='.$paginator->currentPage() : ''),
+                'robots' => ($search !== '' || $categorySlug !== '' || $brandSlug !== '') ? 'noindex,follow' : 'index,follow',
             ],
             'products' => $products,
             'pagination' => [
@@ -127,7 +128,7 @@ class ProductController extends Controller
         $product->load(['brand', 'category', 'images', 'prices']);
         $price = $this->cartService->getCurrentPrice($product);
 
-        $relatedProducts = Product::query()
+        $relatedProducts = Product::query()->forCatalog()
             ->with(['brand', 'images'])
             ->where('is_active', true)
             ->when($product->category_id, fn ($query) => $query->where('category_id', $product->category_id))

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ProductPlaceholder from '@/components/ProductPlaceholder.vue';
 import { Link, router } from '@inertiajs/vue3';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
 import StorefrontFooter from '@/components/StorefrontFooter.vue';
@@ -163,36 +164,7 @@ function addToCart(): void {
                                 :alt="product.name"
                                 class="h-full w-full object-contain p-8 sm:p-12"
                             />
-                            <div
-                                v-else
-                                class="flex h-full flex-col items-center justify-center gap-3 text-dh-muted"
-                            >
-                                <span
-                                    class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm"
-                                >
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        class="h-8 w-8"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="1.5"
-                                    >
-                                        <rect
-                                            x="3"
-                                            y="4"
-                                            width="18"
-                                            height="16"
-                                            rx="2"
-                                        />
-                                        <path
-                                            d="M7 15l3-3 3 3 2-2 3 3"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        />
-                                    </svg>
-                                </span>
-                                بدون تصویر
-                            </div>
+                            <ProductPlaceholder v-else />
                         </div>
 
                         <div
@@ -239,7 +211,7 @@ function addToCart(): void {
                         </div>
 
                         <h1
-                            class="mt-5 text-2xl leading-[1.35] font-extrabold text-dh-900 sm:text-3xl lg:text-[2.15rem]"
+                            class="mt-5 text-2xl leading-[1.35] font-extrabold text-dh-900 sm:text-3xl lg:text-3xl"
                         >
                             {{ product.name }}
                         </h1>
@@ -624,7 +596,7 @@ function addToCart(): void {
                         v-for="related in relatedProducts"
                         :key="related.id"
                         :href="`/products/${related.slug}`"
-                        class="group rounded-2xl border border-dh-100 bg-white p-3.5 transition hover:-translate-y-1 hover:border-dh-200 hover:shadow-lg hover:shadow-dh-700/5"
+                        class="group rounded-2xl border border-dh-100 bg-white p-3.5 transition hover:-translate-y-0.5 hover:border-dh-200 hover:shadow-lg hover:shadow-dh-700/5"
                     >
                         <div
                             class="aspect-square overflow-hidden rounded-xl bg-dh-surface"
@@ -635,12 +607,7 @@ function addToCart(): void {
                                 :alt="related.name"
                                 class="h-full w-full object-contain p-4 transition duration-300 group-hover:scale-105"
                             />
-                            <div
-                                v-else
-                                class="flex h-full items-center justify-center text-xs text-dh-muted"
-                            >
-                                بدون تصویر
-                            </div>
+                            <ProductPlaceholder v-else />
                         </div>
                         <h3
                             class="mt-3 line-clamp-2 text-sm leading-6 font-bold text-dh-800 transition group-hover:text-dh-700"
@@ -654,6 +621,15 @@ function addToCart(): void {
                 </div>
             </section>
         </main>
+        <p dir="rtl" class="mx-auto max-w-6xl px-4 py-4 text-sm">
+            برای محصولات بدون قیمت، از
+            <Link
+                href="/information/contact"
+                class="font-bold text-dh-700 underline"
+                >صفحه تماس و پشتیبانی</Link
+            >
+            اقدام کنید.
+        </p>
         <StorefrontFooter />
     </div>
 </template>

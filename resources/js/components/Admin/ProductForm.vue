@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 type Option = { id: number; name: string };
 type ProductImage = {
@@ -22,6 +23,7 @@ type Product = {
     quantity_per_unit: number | null;
     short_description: string | null;
     description: string | null;
+    specifications?: Record<string, string> | null;
     seo_title: string | null;
     seo_description: string | null;
     canonical_url: string | null;
@@ -48,6 +50,13 @@ type FormData = {
     quantity_per_unit: number | null;
     short_description: string;
     description: string;
+    specifications: Record<string, string>;
+    existing_images: {
+        id: number;
+        alt_text: string;
+        sort_order: number;
+        remove: boolean;
+    }[];
     seo_title: string;
     seo_description: string;
     canonical_url: string;
@@ -83,6 +92,13 @@ const form = useForm<FormData>({
     quantity_per_unit: props.product?.quantity_per_unit ?? null,
     short_description: props.product?.short_description ?? '',
     description: props.product?.description ?? '',
+    specifications: props.product?.specifications ?? {},
+    existing_images: (props.product?.images ?? []).map((image) => ({
+        id: image.id,
+        alt_text: image.alt_text ?? '',
+        sort_order: image.sort_order,
+        remove: false,
+    })),
     seo_title: props.product?.seo_title ?? '',
     seo_description: props.product?.seo_description ?? '',
     canonical_url: props.product?.canonical_url ?? '',
@@ -102,7 +118,26 @@ function setGalleryFiles(event: Event): void {
     form.gallery_files = Array.from(input.files ?? []);
 }
 
+const specificationText = ref(
+    Object.entries(props.product?.specifications ?? {})
+        .map(([key, value]) => `${key}: ${value}`)
+        .join('\n'),
+);
 const submit = () => {
+    form.specifications = Object.fromEntries(
+        specificationText.value
+            .split('\n')
+            .filter((line) => line.includes(':'))
+            .map((line) => {
+                const index = line.indexOf(':');
+
+                return [
+                    line.slice(0, index).trim(),
+                    line.slice(index + 1).trim(),
+                ];
+            }),
+    );
+
     if (props.method === 'post') {
         form.post(props.submitUrl, { forceFormData: true });
 
@@ -133,6 +168,49 @@ const submit = () => {
             </div>
 
             <form @submit.prevent="submit" class="space-y-6">
+                <section class="rounded-2xl bg-white p-6">
+                    <label for="specifications" class="font-bold"
+                        >مشخصات محصول (هر خط: عنوان: مقدار)</label
+                    >
+                    <textarea
+                        id="specifications"
+                        v-model="specificationText"
+                        rows="6"
+                        class="mt-3 w-full rounded-xl border p-3"
+                    />
+                    <div
+                        v-for="image in form.existing_images"
+                        :key="image.id"
+                        class="mt-3 flex flex-wrap gap-3"
+                    >
+                        <img
+                            :src="
+                                props.product?.images?.find(
+                                    (item) => item.id === image.id,
+                                )?.image_url || undefined
+                            "
+                            alt="تصویر گالری"
+                            class="size-16 object-contain"
+                        />
+                        <label
+                            >متن جایگزین<input
+                                v-model="image.alt_text"
+                                maxlength="255"
+                                class="block rounded border p-2"
+                        /></label>
+                        <label
+                            >ترتیب<input
+                                v-model.number="image.sort_order"
+                                type="number"
+                                min="0"
+                                class="block w-20 rounded border p-2"
+                        /></label>
+                        <label
+                            ><input v-model="image.remove" type="checkbox" />
+                            حذف در زمان ذخیره</label
+                        >
+                    </div>
+                </section>
                 <section
                     class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
                 >

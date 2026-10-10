@@ -25,6 +25,9 @@ class PaymentController extends Controller
         $order = Order::query()->where('order_number', $orderNumber)
             ->where('user_id', $user->id)->firstOrFail();
 
+        if (config('services.payment.provider') === 'disabled') {
+            return back()->with('info', 'درگاه پرداخت هنوز فعال نشده است؛ نیازی به پرداخت نیست.');
+        }
         try {
             $payment = $this->paymentService->create($order);
             $gatewayPayment = $this->paymentService->requestGatewayPayment($payment);

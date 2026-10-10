@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -40,6 +41,17 @@ class Product extends Model
         'is_featured' => 'boolean',
         'specifications' => 'array',
     ];
+
+    public function scopeForCatalog(Builder $query): void
+    {
+        $query->with('prices')->addSelect([
+            'catalog_physical' => Inventory::query()->selectRaw('COALESCE(SUM(quantity), 0)')
+                ->whereColumn('product_id', 'products.id')->where('is_active', true)->where('quantity', '>', 0)
+                ->where(fn ($q) => $q->whereNull('expiry_date')->orWhereDate('expiry_date', '>=', now()->toDateString())),
+            'catalog_reserved' => InventoryReservation::query()->selectRaw('COALESCE(SUM(quantity), 0)')
+                ->whereColumn('product_id', 'products.id')->where('status', 'active')->where('expires_at', '>', now()),
+        ]);
+    }
 
     /** @return BelongsTo<Brand, $this> */
     public function brand(): BelongsTo

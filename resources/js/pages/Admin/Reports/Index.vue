@@ -2,6 +2,11 @@
 import { Head, router } from '@inertiajs/vue3';
 
 interface Summary {
+    date_basis?: string;
+    requires_review?: number;
+    products_subtotal?: number;
+    discounts?: number;
+    shipping?: number;
     orders_count: number;
     cancelled_count: number;
     paid_orders_count: number;
@@ -77,6 +82,23 @@ function money(value: number) {
                     class="w-full rounded-lg border p-2"
                 />
             </label>
+            <a
+                :href="
+                    '/admin/reports?format=csv&from=' +
+                    encodeURIComponent(props.filters.from) +
+                    '&to=' +
+                    encodeURIComponent(props.filters.to)
+                "
+                class="inline-block rounded border px-4 py-2"
+                >دریافت گزارش CSV</a
+            >
+            <p class="mb-4 text-sm">{{ props.summary.date_basis }}</p>
+            <p class="mb-4">
+                جمع کالا: {{ money(props.summary.products_subtotal || 0) }}؛
+                تخفیف: {{ money(props.summary.discounts || 0) }}؛ ارسال:
+                {{ money(props.summary.shipping || 0) }} ریال؛ پرداخت‌های
+                نیازمند بررسی: {{ props.summary.requires_review || 0 }}
+            </p>
             <div class="flex items-end">
                 <button class="w-full rounded-lg bg-black px-5 py-2 text-white">
                     نمایش گزارش

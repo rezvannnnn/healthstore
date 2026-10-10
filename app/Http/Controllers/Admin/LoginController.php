@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\TwoFactorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,6 +20,12 @@ class LoginController extends Controller
     {
         $user = Auth::user();
 
+        if ($user?->two_factor_confirmed_at && session('admin_mfa_verified') !== $user->id) {
+            Auth::logout();
+            session()->invalidate();
+            session()->regenerateToken();
+            $user = null;
+        }
         if ($user?->isAdminPanelUser() && $user->admin_active) {
             if ($user->isAdmin()) {
                 return app(DashboardController::class)();
@@ -39,6 +46,7 @@ class LoginController extends Controller
         $data = $request->validate([
             'username' => ['required', 'string', 'max:100'],
             'password' => ['required', 'string', 'max:255'],
+            'two_factor_code' => ['nullable', 'string', 'max:100'],
         ]);
 
         $username = Str::lower(trim($data['username']));
@@ -58,8 +66,13 @@ class LoginController extends Controller
             ]);
         }
 
+        if ($user->two_factor_confirmed_at && ! app(TwoFactorService::class)->verify($user, (string) ($data['two_factor_code'] ?? ''))) {
+            throw ValidationException::withMessages(['two_factor_code' => 'کد احراز هویت دوم یا کد بازیابی صحیح نیست.']);
+        }
         Auth::login($user);
+        $request->session()->forget('password_hash_'.Auth::getDefaultDriver());
         $request->session()->regenerate();
+        $request->session()->put('admin_mfa_verified', $user->id);
 
         return redirect()->intended(
             $user->adminLandingPath() ?? route('admin.login')

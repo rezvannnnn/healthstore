@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 interface Category {
@@ -54,6 +55,37 @@ function handleFeaturedImageChange(event: Event) {
     form.featured_image_file = input.files?.[0] ?? null;
 }
 
+const previewHtml = ref('');
+const previewError = ref('');
+async function preview() {
+    previewError.value = '';
+    try {
+        const token = decodeURIComponent(
+            document.cookie
+                .split('; ')
+                .find((cookie) => cookie.startsWith('XSRF-TOKEN='))
+                ?.slice(11) || '',
+        );
+        const result = await fetch('/admin/articles/preview', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                'X-XSRF-TOKEN': token,
+            },
+            body: JSON.stringify({ content: form.content }),
+        });
+        if (!result.ok) {
+            throw new Error('پیش‌نمایش بارگیری نشد.');
+        }
+        previewHtml.value = (await result.json()).html;
+    } catch {
+        previewError.value = 'پیش‌نمایش بارگیری نشد؛ دوباره تلاش کنید.';
+    }
+}
+function insertText(text: string) {
+    form.content += text;
+}
 function submit() {
     if (props.article?.id) {
         form.transform((data) => ({ ...data, _method: 'put' })).post(
@@ -93,6 +125,43 @@ function submit() {
             class="space-y-5 rounded-xl border bg-white p-5 shadow-sm"
             @submit.prevent="submit"
         >
+            <section class="space-y-3 rounded-xl border p-4">
+                <p>
+                    متن مقاله از Markdown پشتیبانی می‌کند؛ HTML خام نمایش داده
+                    نمی‌شود.
+                </p>
+                <div class="flex flex-wrap gap-3">
+                    <button
+                        type="button"
+                        @click="insertText('\n## عنوان بخش\n')"
+                    >
+                        افزودن عنوان
+                    </button>
+                    <button
+                        type="button"
+                        @click="insertText('\n[متن لینک](/products)\n')"
+                    >
+                        افزودن لینک داخلی
+                    </button>
+                    <button
+                        type="button"
+                        @click="
+                            insertText(
+                                '\n| عنوان | مقدار |\n| --- | --- |\n| مورد | توضیح |\n',
+                            )
+                        "
+                    >
+                        افزودن جدول
+                    </button>
+                    <button type="button" @click="preview">پیش‌نمایش</button>
+                </div>
+                <p v-if="previewError" role="alert">{{ previewError }}</p>
+                <div
+                    v-if="previewHtml"
+                    class="prose max-w-none"
+                    v-html="previewHtml"
+                ></div>
+            </section>
             <div class="grid gap-4 md:grid-cols-2">
                 <label class="space-y-1">
                     <span>عنوان</span>

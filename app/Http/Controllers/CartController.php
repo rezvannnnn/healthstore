@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Services\CartService;
 use App\Services\InventoryService;
+use App\Services\MediaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -40,7 +41,7 @@ class CartController extends Controller
                         'name' => $item->product->name,
                         'slug' => $item->product->slug,
                         'brand' => $item->product->brand?->name,
-                        'image' => $item->product->main_image ?: $item->product->images->firstWhere('is_primary', true)?->image_path ?: $item->product->images->first()?->image_path,
+                        'image' => app(MediaService::class)->url($item->product->main_image ?: $item->product->images->firstWhere('is_primary', true)?->image_path ?: $item->product->images->first()?->image_path),
                     ],
                 ])->values()->all(),
                 'subtotal' => $this->cartService->calculateSubtotal($cart),
@@ -51,13 +52,21 @@ class CartController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $user = $request->user();
-        abort_unless($user !== null, 401);
+        if ($user !== null) {
+            abort_unless(! $user->isAdminPanelUser(), 403);
+        }
 
         $validated = $request->validate([
             'product_id' => ['required', 'integer', 'exists:products,id'],
             'quantity' => ['sometimes', 'integer', 'min:1', 'max:100'],
         ]);
 
+        if ($user === null) {
+            $request->session()->put('cart_intent', $validated);
+            $request->session()->put('url.intended', route('cart.index'));
+
+            return to_route('login')->with('info', 'انتخاب شما حفظ شد؛ پس از ورود به سبد اضافه می‌شود.');
+        }
         try {
             $this->cartService->addItem(
                 $user->id,

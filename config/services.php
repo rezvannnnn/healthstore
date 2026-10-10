@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'payment' => ['provider' => env('PAYMENT_PROVIDER', 'disabled')],
 
     'sms' => [
         'provider' => env('SMS_PROVIDER', 'fake'),

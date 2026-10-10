@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ProductPlaceholder from '@/components/ProductPlaceholder.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
 import StorefrontFooter from '@/components/StorefrontFooter.vue';
@@ -110,7 +111,7 @@ function pageUrl(page: number): string {
                 </nav>
 
                 <header
-                    class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-dh-100"
+                    class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-dh-100"
                 >
                     <div
                         class="grid gap-6 p-6 md:p-8"
@@ -122,7 +123,7 @@ function pageUrl(page: number): string {
                     >
                         <div
                             v-if="brand.logo"
-                            class="flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-dh-50 p-6"
+                            class="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-2xl bg-dh-50 p-6"
                         >
                             <img
                                 :src="brand.logo"
@@ -189,19 +190,14 @@ function pageUrl(page: number): string {
                                 :href="'/products/' + product.slug"
                                 class="block"
                             >
-                                <div class="aspect-square bg-dh-50">
+                                <div class="aspect-[4/3] bg-dh-50">
                                     <img
                                         v-if="product.image"
                                         :src="product.image"
                                         :alt="product.name"
                                         class="h-full w-full object-contain p-6"
                                     />
-                                    <div
-                                        v-else
-                                        class="flex h-full items-center justify-center text-sm text-dh-muted"
-                                    >
-                                        بدون تصویر
-                                    </div>
+                                    <ProductPlaceholder v-else />
                                 </div>
                                 <div class="space-y-3 p-4">
                                     <h3

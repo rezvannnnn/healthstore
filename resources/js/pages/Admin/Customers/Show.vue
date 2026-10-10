@@ -79,7 +79,7 @@ function goToPage(page: number) {
         <div class="mx-auto max-w-5xl">
             <div class="mb-8 flex items-center justify-between gap-4">
                 <div>
-                    <p class="text-sm text-dh-muted">HealthStore / مشتریان</p>
+                    <p class="text-sm text-dh-muted">داروخونه / مشتریان</p>
                     <h1 class="text-2xl font-bold">
                         {{ props.customer.name || 'بدون نام' }}
                     </h1>

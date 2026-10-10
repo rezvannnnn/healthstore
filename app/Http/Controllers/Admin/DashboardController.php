@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Product;
+use App\Models\StoreSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -15,17 +16,17 @@ class DashboardController extends Controller
 {
     public function __invoke(): Response
     {
-        $today = now()->startOfDay();
-        $month = now()->startOfMonth();
+        $today = now()->setTimezone(StoreSetting::getValue('timezone', 'Asia/Tehran'))->startOfDay()->utc();
+        $month = now()->setTimezone(StoreSetting::getValue('timezone', 'Asia/Tehran'))->startOfMonth()->utc();
 
         $todaySales = (float) Order::query()
             ->where('payment_status', 'paid')
-            ->where('created_at', '>=', $today)
+            ->where('paid_at', '>=', $today)
             ->sum('total_amount');
 
         $monthSales = (float) Order::query()
             ->where('payment_status', 'paid')
-            ->where('created_at', '>=', $month)
+            ->where('paid_at', '>=', $month)
             ->sum('total_amount');
 
         $lowStockProducts = DB::table('inventories')

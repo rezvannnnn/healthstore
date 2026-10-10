@@ -2,6 +2,17 @@
 
 namespace App\Providers;
 
+use App\Models\Article;
+use App\Models\ArticleCategory;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\ProductPrice;
+use App\Models\StoreSetting;
+use App\Models\User;
+use App\Observers\StoreObserver;
+use App\Services\Payment\DisabledGateway;
 use App\Services\Payment\PaymentGatewayInterface;
 use App\Services\Payment\ZarinPalGateway;
 use App\Services\Sms\FakeSmsProvider;
@@ -25,7 +36,9 @@ class AppServiceProvider extends ServiceProvider
          */
         $this->app->bind(
             PaymentGatewayInterface::class,
-            ZarinPalGateway::class
+            fn () => config('services.payment.provider') === 'zarinpal'
+                ? new ZarinPalGateway
+                : new DisabledGateway
         );
 
         /*
@@ -53,6 +66,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        foreach ([Product::class, Category::class, Brand::class, Article::class, ArticleCategory::class, ProductPrice::class, Order::class, User::class, StoreSetting::class] as $model) {
+            $model::observe(StoreObserver::class);
+        }
     }
 
     /**

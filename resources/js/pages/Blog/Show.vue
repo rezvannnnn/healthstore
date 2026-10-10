@@ -8,6 +8,7 @@ interface Article {
     slug: string;
     excerpt: string | null;
     content: string;
+    content_html: string;
     featured_image: string | null;
     featured_image_alt: string | null;
     seo_title: string | null;
@@ -90,7 +91,7 @@ defineProps<{
     >
         <StorefrontHeader active="blog" />
 
-        <main class="mx-auto max-w-5xl px-4 py-6 md:px-6 md:py-10">
+        <main class="mx-auto max-w-5xl px-4 py-6 md:px-6 md:py-8">
             <nav
                 aria-label="مسیر صفحه"
                 class="mb-6 flex flex-wrap items-center gap-2 text-sm text-dh-muted"
@@ -137,7 +138,7 @@ defineProps<{
                     </div>
                     <header>
                         <h1
-                            class="text-3xl leading-[1.45] font-black text-dh-800 md:text-5xl"
+                            class="text-3xl leading-[1.45] font-black text-dh-800 md:text-4xl"
                         >
                             {{ article.title }}
                         </h1>
@@ -162,10 +163,9 @@ defineProps<{
                         }}</strong>
                     </div>
                     <div
-                        class="prose prose-slate max-w-none text-base leading-9 whitespace-pre-wrap text-dh-800 md:text-lg"
-                    >
-                        {{ article.content }}
-                    </div>
+                        class="prose prose-slate max-w-none text-base leading-9 text-dh-800 md:text-lg"
+                        v-html="article.content_html"
+                    ></div>
                 </div>
             </article>
 
@@ -191,7 +191,7 @@ defineProps<{
                         v-for="related in relatedArticles"
                         :key="related.id"
                         :href="`/blog/${related.slug}`"
-                        class="group overflow-hidden rounded-3xl border border-dh-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                        class="group overflow-hidden rounded-2xl border border-dh-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                     >
                         <div class="overflow-hidden bg-dh-50">
                             <img

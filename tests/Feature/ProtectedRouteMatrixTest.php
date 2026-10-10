@@ -20,7 +20,6 @@ class ProtectedRouteMatrixTest extends TestCase
             'order cancel' => ['POST', '/orders/TEST-1/cancel'],
             'order payment start' => ['POST', '/orders/TEST-1/payment'],
             'cart page' => ['GET', '/cart'],
-            'cart item create' => ['POST', '/cart/items'],
             'cart item update' => ['PUT', '/cart/1/items/1'],
             'cart item delete' => ['DELETE', '/cart/1/items/1'],
             'account orders' => ['GET', '/account/orders'],

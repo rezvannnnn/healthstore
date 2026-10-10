@@ -139,6 +139,6 @@ class CatalogTestRollback extends Command
 
     protected function manifestPath(): string
     {
-        return storage_path('app/testing/catalog-test-import.json');
+        return (string) config('catalog.test_manifest', storage_path('app/testing/catalog-test-import.json'));
     }
 }

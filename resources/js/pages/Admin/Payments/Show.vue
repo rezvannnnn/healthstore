@@ -27,6 +27,7 @@ const statusLabel = (value: string) =>
     ({
         pending: 'در انتظار',
         paid: 'موفق',
+        requires_review: 'تأیید بانکی؛ نیازمند بررسی تأمین یا استرداد',
         failed: 'ناموفق',
         cancelled: 'لغو شده',
         refunded: 'برگشت خورده',
@@ -48,7 +49,7 @@ const responseText = (value: unknown) =>
         <div class="mx-auto max-w-4xl">
             <div class="mb-8 flex items-center justify-between gap-4">
                 <div>
-                    <p class="text-sm text-dh-muted">HealthStore / پرداخت</p>
+                    <p class="text-sm text-dh-muted">داروخونه / پرداخت</p>
                     <h1 class="text-3xl font-bold">
                         جزئیات پرداخت #{{ props.payment.id }}
                     </h1>

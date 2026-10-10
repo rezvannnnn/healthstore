@@ -51,7 +51,7 @@ function pageUrl(page: number): string {
     >
         <StorefrontHeader active="blog" />
 
-        <main class="mx-auto max-w-7xl space-y-8 px-4 py-6 md:px-6 md:py-10">
+        <main class="mx-auto max-w-7xl space-y-8 px-4 py-6 md:px-6 md:py-8">
             <nav
                 aria-label="مسیر صفحه"
                 class="flex flex-wrap items-center gap-2 text-sm text-dh-muted"
@@ -66,7 +66,7 @@ function pageUrl(page: number): string {
                 class="rounded-[2rem] bg-dh-800 p-7 text-white shadow-xl shadow-dh-900/10 md:p-10"
             >
                 <p class="text-xs font-bold text-dh-100">مجله سلامت داروخونه</p>
-                <h1 class="mt-3 text-3xl font-black md:text-5xl">
+                <h1 class="mt-3 text-3xl font-black md:text-4xl">
                     موضوع مورد علاقه‌تان را پیدا کنید.
                 </h1>
                 <p
@@ -85,7 +85,7 @@ function pageUrl(page: number): string {
                     v-for="(category, index) in categories"
                     :key="category.id"
                     :href="'/blog/category/' + category.slug"
-                    class="group rounded-3xl border border-dh-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                    class="group rounded-2xl border border-dh-100 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
                 >
                     <span
                         class="flex size-11 items-center justify-center rounded-2xl bg-dh-50 text-sm font-black text-dh-700"
@@ -118,7 +118,7 @@ function pageUrl(page: number): string {
             </section>
             <section
                 v-else
-                class="rounded-3xl border border-dashed border-dh-200 bg-white p-12 text-center text-dh-muted"
+                class="rounded-2xl border border-dashed border-dh-200 bg-white p-12 text-center text-dh-muted"
             >
                 هنوز دسته‌بندی فعالی برای مجله ثبت نشده است.
             </section>

@@ -29,6 +29,30 @@ function submit() {
             @submit.prevent="submit"
         >
             <section class="space-y-4">
+                <p class="text-sm">
+                    تمام مبالغ بر حسب ریال ذخیره و نمایش داده می‌شوند.
+                </p>
+                <label class="block"
+                    >شرایط ارسال<textarea
+                        v-model="form.shipping_policy"
+                        rows="4"
+                        class="block w-full rounded border p-3"
+                    />
+                </label>
+                <label class="block"
+                    >شرایط مرجوعی<textarea
+                        v-model="form.returns_policy"
+                        rows="4"
+                        class="block w-full rounded border p-3"
+                    />
+                </label>
+                <label class="block"
+                    >حریم خصوصی<textarea
+                        v-model="form.privacy_policy"
+                        rows="4"
+                        class="block w-full rounded border p-3"
+                    />
+                </label>
                 <h2 class="text-lg font-semibold">اطلاعات فروشگاه</h2>
                 <div class="grid gap-4 md:grid-cols-2">
                     <label class="space-y-1">
@@ -57,6 +81,7 @@ function submit() {
                         <span>واحد پول</span>
                         <input
                             v-model="form.currency"
+                            readonly
                             class="w-full rounded-lg border p-2"
                         />
                     </label>

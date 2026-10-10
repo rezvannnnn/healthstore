@@ -1,6 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
-
 @import 'tailwindcss';
+
+@font-face {
+    font-family: Vazirmatn;
+    src: url('/fonts/Vazirmatn.woff2') format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -38,6 +44,7 @@
 
 html {
     scroll-behavior: smooth;
+    font-size: 15px;
 }
 
 body {

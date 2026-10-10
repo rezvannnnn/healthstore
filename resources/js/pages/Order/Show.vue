@@ -55,6 +55,7 @@ interface Order {
 
 const props = defineProps<{
     order: Order;
+    paymentEnabled?: boolean;
     success?: string;
     error?: string;
     info?: string;
@@ -63,6 +64,11 @@ const props = defineProps<{
 const formatter = new Intl.NumberFormat('fa-IR');
 
 const isStartingPayment = ref(false);
+const requiresReview = computed(() =>
+    props.order.payments.some(
+        (payment) => payment.status === 'requires_review',
+    ),
+);
 const isCancelling = ref(false);
 
 function formatPrice(value: number | string): string {
@@ -256,7 +262,7 @@ function startPayment(): void {
     >
         <div class="mx-auto max-w-5xl">
             <header
-                class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
+                class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
             >
                 <Link
                     href="/"
@@ -281,7 +287,7 @@ function startPayment(): void {
             </header>
 
             <section
-                class="mb-6 rounded-3xl bg-dh-800 p-6 text-white shadow-sm sm:p-8"
+                class="mb-6 rounded-2xl bg-dh-800 p-6 text-white shadow-sm sm:p-8"
             >
                 <div class="flex flex-wrap items-start justify-between gap-5">
                     <div>
@@ -328,7 +334,7 @@ function startPayment(): void {
             <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
                 <div class="space-y-6">
                     <section
-                        class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
+                        class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
                     >
                         <h2 class="mb-5 text-lg font-black text-dh-900">
                             اقلام سفارش
@@ -373,7 +379,7 @@ function startPayment(): void {
                             order.recipient_phone ||
                             order.shipping_address
                         "
-                        class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
+                        class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
                     >
                         <h2 class="mb-5 text-lg font-black text-dh-900">
                             اطلاعات گیرنده
@@ -428,7 +434,7 @@ function startPayment(): void {
                     </section>
 
                     <section
-                        class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
+                        class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
                     >
                         <h2 class="mb-5 text-lg font-black text-dh-900">
                             روند سفارش
@@ -491,7 +497,7 @@ function startPayment(): void {
 
                     <section
                         v-if="latestPayment"
-                        class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
+                        class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
                     >
                         <div class="flex items-center justify-between gap-3">
                             <h2 class="text-lg font-black text-dh-900">
@@ -548,7 +554,7 @@ function startPayment(): void {
                     </section>
 
                     <section
-                        class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
+                        class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-6"
                     >
                         <h2 class="mb-5 text-lg font-black text-dh-900">
                             وضعیت سفارش
@@ -577,7 +583,7 @@ function startPayment(): void {
 
                 <aside class="h-fit space-y-6 lg:sticky lg:top-6">
                     <section
-                        class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100"
+                        class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-dh-100"
                     >
                         <h2 class="mb-5 text-lg font-black text-dh-900">
                             خلاصه مبلغ
@@ -617,9 +623,27 @@ function startPayment(): void {
                     </section>
 
                     <section
-                        class="rounded-3xl bg-dh-800 p-5 text-white shadow-sm"
+                        class="rounded-2xl bg-dh-800 p-5 text-white shadow-sm"
                     >
                         <h2 class="text-lg font-black">پرداخت سفارش</h2>
+                        <p
+                            v-if="
+                                !paymentEnabled &&
+                                order.payment_status !== 'paid'
+                            "
+                            class="mt-4 rounded-xl bg-white/10 p-3 text-sm leading-7"
+                        >
+                            درگاه پرداخت فعلاً فعال نیست. سفارش ثبت شده، اما
+                            پرداختی انجام نشده است.
+                        </p>
+                        <p
+                            v-if="requiresReview"
+                            role="alert"
+                            class="mt-4 rounded-xl bg-amber-100 p-3 text-sm leading-7 text-amber-900"
+                        >
+                            پرداخت بانکی تأیید شده و نیازمند بررسی پشتیبانی است.
+                            دوباره پرداخت نکنید.
+                        </p>
                         <div class="mt-4 rounded-2xl bg-white/10 p-4">
                             <span class="text-xs text-dh-100">وضعیت پرداخت</span
                             ><strong class="mt-1 block">{{
@@ -629,7 +653,11 @@ function startPayment(): void {
                         <button
                             v-if="canPay"
                             type="button"
-                            :disabled="isStartingPayment"
+                            :disabled="
+                                isStartingPayment ||
+                                !paymentEnabled ||
+                                requiresReview
+                            "
                             class="mt-4 w-full rounded-2xl bg-white px-4 py-3.5 font-black text-dh-800 transition hover:bg-dh-50 disabled:opacity-60"
                             @click="startPayment"
                         >

@@ -88,7 +88,7 @@ function removeItem(item: CartItem): void {
             </div>
         </header>
 
-        <main class="mx-auto max-w-6xl space-y-7 px-4 py-6 md:px-6 md:py-10">
+        <main class="mx-auto max-w-6xl space-y-7 px-4 py-6 md:px-6 md:py-8">
             <header>
                 <p class="text-xs font-bold text-dh-600">سفارش شما</p>
                 <h1 class="mt-1 text-3xl font-black text-dh-800 md:text-4xl">
@@ -130,7 +130,7 @@ function removeItem(item: CartItem): void {
                     <article
                         v-for="item in cart.items"
                         :key="item.id"
-                        class="relative rounded-3xl border border-dh-100 bg-white p-4 shadow-sm transition sm:p-5"
+                        class="relative rounded-2xl border border-dh-100 bg-white p-4 shadow-sm transition sm:p-5"
                         :class="busyItem === item.id ? 'opacity-80' : ''"
                         :aria-busy="busyItem === item.id"
                     >
@@ -276,7 +276,7 @@ function removeItem(item: CartItem): void {
                 </div>
 
                 <aside
-                    class="h-fit rounded-3xl border border-dh-100 bg-white p-6 shadow-sm lg:sticky lg:top-24"
+                    class="h-fit rounded-2xl border border-dh-100 bg-white p-6 shadow-sm lg:sticky lg:top-24"
                 >
                     <div class="flex items-center gap-3">
                         <span
@@ -342,7 +342,7 @@ function removeItem(item: CartItem): void {
                 class="rounded-[2rem] border border-dashed border-dh-200 bg-white p-10 text-center shadow-sm md:p-16"
             >
                 <div
-                    class="mx-auto flex size-16 items-center justify-center rounded-3xl bg-dh-50 text-dh-600"
+                    class="mx-auto flex size-16 items-center justify-center rounded-2xl bg-dh-50 text-dh-600"
                 >
                     <svg
                         viewBox="0 0 24 24"

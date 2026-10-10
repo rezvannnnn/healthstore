@@ -22,8 +22,11 @@ class SettingsController extends Controller
         'shipping_fee' => '0',
         'free_shipping_threshold' => '0',
         'min_order_amount' => '0',
-        'currency' => 'تومان',
+        'currency' => 'ریال',
         'timezone' => 'Asia/Tehran',
+        'shipping_policy' => '',
+        'returns_policy' => '',
+        'privacy_policy' => '',
     ];
 
     public function index(): Response
@@ -51,7 +54,10 @@ class SettingsController extends Controller
             'shipping_fee' => ['required', 'numeric', 'min:0'],
             'free_shipping_threshold' => ['required', 'numeric', 'min:0'],
             'min_order_amount' => ['required', 'numeric', 'min:0'],
-            'currency' => ['required', 'string', 'max:50'],
+            'currency' => ['required', Rule::in(['ریال', 'IRR'])],
+            'shipping_policy' => ['nullable', 'string', 'max:20000'],
+            'returns_policy' => ['nullable', 'string', 'max:20000'],
+            'privacy_policy' => ['nullable', 'string', 'max:20000'],
             'timezone' => [
                 'required',
                 'string',
