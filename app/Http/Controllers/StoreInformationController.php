@@ -10,13 +10,14 @@ class StoreInformationController extends Controller
 {
     public function __invoke(string $section): Response
     {
-        $titles = ['contact' => 'تماس و پشتیبانی', 'shipping' => 'شرایط ارسال', 'returns' => 'شرایط مرجوعی', 'privacy' => 'حریم خصوصی'];
+        $titles = ['contact' => 'تماس و پشتیبانی', 'shipping' => 'شرایط ارسال', 'returns' => 'شرایط مرجوعی', 'privacy' => 'حریم خصوصی', 'faq' => 'پرسش‌های متداول'];
         abort_unless(isset($titles[$section]), 404);
 
         return Inertia::render('StoreInformation', [
             'section' => $section, 'title' => $titles[$section], 'content' => StoreSetting::getValue($section.'_policy', ''),
             'supportPhone' => StoreSetting::getValue('support_phone', ''), 'supportEmail' => StoreSetting::getValue('support_email', ''),
             'storeAddress' => StoreSetting::getValue('store_address', ''),
+            'faqs' => $section === 'faq' ? StoreSetting::publicFaqs() : [],
         ]);
     }
 }

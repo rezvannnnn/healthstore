@@ -152,7 +152,7 @@ class CartService
                 && $price->min_quantity <= $quantity
                 && ($price->starts_at === null || $price->starts_at->lte($now))
                 && ($price->ends_at === null || $price->ends_at->gte($now)))
-                ->sortByDesc('min_quantity')->first();
+                ->sortBy([['min_quantity', 'desc'], ['id', 'desc']])->first();
         }
 
         return $product->prices()
@@ -167,6 +167,7 @@ class CartService
                     ->orWhere('ends_at', '>=', $now);
             })
             ->orderByDesc('min_quantity')
+            ->orderByDesc('id')
             ->first();
     }
 

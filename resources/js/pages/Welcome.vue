@@ -10,6 +10,7 @@ interface Category {
     id: number;
     name: string;
     slug: string;
+    products_count: number;
 }
 
 interface Seo {
@@ -132,8 +133,8 @@ function addToCart(product: FeaturedProduct): void {
                             <p
                                 class="mt-5 max-w-xl text-base leading-8 text-dh-muted sm:text-lg"
                             >
-                                دارو، مکمل و محصولات بهداشتی را با اطلاعات کامل
-                                پیدا کنید و خریدتان را با خیال راحت انجام دهید.
+                                مکمل و محصولات بهداشتی را با اطلاعات کامل پیدا
+                                کنید و خریدتان را با خیال راحت انجام دهید.
                             </p>
                             <form class="mt-8" @submit.prevent="searchProducts">
                                 <div
@@ -176,7 +177,9 @@ function addToCart(product: FeaturedProduct): void {
                             </div>
                         </div>
 
-                        <div class="relative mx-auto w-full max-w-xl">
+                        <div
+                            class="relative mx-auto hidden w-full max-w-xl lg:block"
+                        >
                             <div
                                 class="absolute top-8 -right-8 h-44 w-44 rounded-full bg-dh-100 blur-2xl"
                             ></div>
@@ -344,7 +347,7 @@ function addToCart(product: FeaturedProduct): void {
                             <h2
                                 class="mt-1 text-2xl font-extrabold text-dh-900 sm:text-3xl"
                             >
-                                دسته‌بندی‌های محبوب
+                                خرید بر اساس دسته‌بندی
                             </h2>
                         </div>
                         <Link
@@ -390,11 +393,16 @@ function addToCart(product: FeaturedProduct): void {
                             </span>
                             <span class="min-w-0">
                                 <span
-                                    class="block truncate font-extrabold text-dh-800 transition group-hover:text-dh-600"
+                                    class="block text-sm leading-6 font-extrabold text-dh-800 transition group-hover:text-dh-600"
                                     >{{ category.name }}</span
                                 >
                                 <span class="mt-1 block text-xs text-dh-muted"
-                                    >مشاهده محصولات</span
+                                    >{{
+                                        category.products_count.toLocaleString(
+                                            'fa-IR',
+                                        )
+                                    }}
+                                    محصول</span
                                 >
                             </span>
                             <svg
@@ -425,12 +433,12 @@ function addToCart(product: FeaturedProduct): void {
                         <div>
                             <span
                                 class="text-xs font-extrabold text-dh-green-600"
-                                >انتخاب‌شده برای شما</span
+                                >از کاتالوگ داروخونه</span
                             >
                             <h2
                                 class="mt-1 text-2xl font-extrabold text-dh-900 sm:text-3xl"
                             >
-                                محصولات منتخب
+                                محصولات برای بررسی
                             </h2>
                         </div>
                         <Link
@@ -675,6 +683,26 @@ function addToCart(product: FeaturedProduct): void {
                 </div>
             </section>
 
+            <section class="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
+                <div
+                    class="flex flex-col gap-5 rounded-2xl bg-dh-50 p-6 sm:flex-row sm:items-center sm:justify-between"
+                >
+                    <div>
+                        <h2 class="text-xl font-extrabold text-dh-900">
+                            پیش از خرید، پاسخ پرسش‌هایتان را پیدا کنید
+                        </h2>
+                        <p class="mt-2 text-sm leading-7 text-dh-muted">
+                            راهنمای قیمت، موجودی و تاریخ انقضا، همراه با شرایط
+                            ارسال و راه ارتباط با فروشگاه.
+                        </p>
+                    </div>
+                    <Link
+                        href="/information/faq"
+                        class="shrink-0 rounded-xl bg-dh-700 px-5 py-3 text-center text-sm font-bold text-white hover:bg-dh-800"
+                        >پرسش‌های متداول</Link
+                    >
+                </div>
+            </section>
             <StorefrontFooter />
         </main>
     </div>

@@ -8,6 +8,7 @@ use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductPrice;
 use App\Models\Warehouse;
+use App\Support\CatalogCategoryNames;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -208,12 +209,13 @@ class CatalogTestImport extends Command
             return null;
         }
 
-        $parent = Category::query()->whereNull('parent_id')->where('name', $categoryName)->first();
+        $displayName = CatalogCategoryNames::translate($categoryName);
+        $parent = Category::query()->whereNull('parent_id')->whereIn('name', [$categoryName, $displayName])->first();
 
         if (! $parent) {
             $parent = Category::create([
                 'parent_id' => null,
-                'name' => $categoryName,
+                'name' => $displayName,
                 'slug' => $this->uniqueSlug('category', $categoryName),
                 'description' => null,
                 'image' => null,

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class Product extends Model
 {
@@ -51,6 +52,18 @@ class Product extends Model
             'catalog_reserved' => InventoryReservation::query()->selectRaw('COALESCE(SUM(quantity), 0)')
                 ->whereColumn('product_id', 'products.id')->where('status', 'active')->where('expires_at', '>', now()),
         ]);
+    }
+
+    public function scopeAvailableForCatalog(Builder $query): void
+    {
+        $physical = fn (QueryBuilder $stock) => $stock->from('inventories')->selectRaw('COALESCE(SUM(quantity), 0)')
+            ->whereColumn('product_id', 'products.id')->where('is_active', true)->where('quantity', '>', 0)
+            ->where(fn ($q) => $q->whereNull('expiry_date')->orWhereDate('expiry_date', '>=', now()->toDateString()));
+        $reserved = fn (QueryBuilder $stock) => $stock->from('inventory_reservations')->selectRaw('COALESCE(SUM(quantity), 0)')
+            ->whereColumn('product_id', 'products.id')->where('status', 'active')->where('expires_at', '>', now());
+
+        $query->where('products.is_active', true);
+        $query->getQuery()->where($physical, '>', $reserved);
     }
 
     /** @return BelongsTo<Brand, $this> */

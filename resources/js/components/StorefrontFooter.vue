@@ -1,6 +1,16 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import BrandLogo from '@/components/BrandLogo.vue';
+const page = usePage();
+const store = computed(
+    () => (page.props.storefront ?? {}) as Record<string, string>,
+);
+const licenseUrl = computed(() =>
+    /^https:\/\//i.test(store.value.license_url ?? '')
+        ? store.value.license_url
+        : null,
+);
 </script>
 
 <template>
@@ -28,11 +38,51 @@ import BrandLogo from '@/components/BrandLogo.vue';
                     یک تجربه ساده و روشن برای پیدا کردن محصولات سلامت و مدیریت
                     سفارش‌های روزمره.
                 </p>
+                <address
+                    v-if="
+                        store.support_phone ||
+                        store.support_email ||
+                        store.store_address
+                    "
+                    class="mt-4 space-y-2 text-sm leading-7 text-dh-100 not-italic"
+                >
+                    <a
+                        v-if="store.support_phone"
+                        :href="'tel:' + encodeURIComponent(store.support_phone)"
+                        class="block"
+                        >تلفن پشتیبانی: <bdi>{{ store.support_phone }}</bdi></a
+                    >
+                    <a
+                        v-if="store.support_email"
+                        :href="
+                            'mailto:' + encodeURIComponent(store.support_email)
+                        "
+                        class="block"
+                        >{{ store.support_email }}</a
+                    >
+                    <p v-if="store.store_address">{{ store.store_address }}</p>
+                    <p v-if="store.support_hours">
+                        ساعت پاسخ‌گویی: {{ store.support_hours }}
+                    </p>
+                </address>
+                <a
+                    v-if="licenseUrl && store.license_title"
+                    :href="licenseUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="mt-4 inline-flex rounded-xl border border-white/20 px-4 py-2 text-sm hover:bg-white/10"
+                    >استعلام {{ store.license_title }} ↗</a
+                >
             </div>
             <div class="grid grid-cols-2 gap-6 text-sm">
                 <div>
                     <h3 class="font-extrabold text-white">دسترسی سریع</h3>
                     <div class="mt-3 space-y-2 text-dh-100">
+                        <Link
+                            href="/information/faq"
+                            class="block hover:text-white"
+                            >پرسش‌های متداول</Link
+                        >
                         <Link href="/information/contact" class="block"
                             >تماس و پشتیبانی</Link
                         >

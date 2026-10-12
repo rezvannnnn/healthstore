@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Cart;
+use App\Models\StoreSetting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -39,6 +40,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'storefront' => fn () => StoreSetting::query()->whereIn('key', ['support_phone', 'support_email', 'store_address', 'support_hours', 'license_title', 'license_url'])->pluck('value', 'key')->all(),
             'auth' => [
                 'user' => $request->user(),
             ],

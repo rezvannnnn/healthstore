@@ -37,7 +37,7 @@ use App\Http\Controllers\StoreInformationController;
 use App\Http\Controllers\ZarinPalCallbackController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/information/{section}', StoreInformationController::class)->whereIn('section', ['contact', 'shipping', 'returns', 'privacy'])->name('information');
+Route::get('/information/{section}', StoreInformationController::class)->whereIn('section', ['contact', 'shipping', 'returns', 'privacy', 'faq'])->name('information');
 Route::get('/', HomeController::class)->name('home');
 Route::inertia('/login', 'Auth/Login')->name('login');
 Route::inertia('/register', 'Auth/Register')->name('register.form');
