@@ -13,9 +13,15 @@ class CatalogTestImportCommandTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['catalog.test_manifest' => storage_path('app/testing/catalog-test-'.bin2hex(random_bytes(8)).'.json')]);
+    }
+
     protected function tearDown(): void
     {
-        @unlink(storage_path('app/testing/catalog-test-import.json'));
+        @unlink(config('catalog.test_manifest'));
 
         parent::tearDown();
     }

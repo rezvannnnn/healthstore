@@ -13,6 +13,12 @@ class PaymentControllerErrorExtraTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['services.payment.provider' => 'zarinpal']);
+    }
+
     public function test_gateway_failure_does_not_change_order_or_payment_to_paid(): void
     {
         Http::fake([

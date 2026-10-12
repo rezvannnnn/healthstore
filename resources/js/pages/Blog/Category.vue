@@ -63,7 +63,7 @@ function pageUrl(page: number): string {
     >
         <StorefrontHeader active="blog" />
 
-        <main class="mx-auto max-w-7xl space-y-8 px-4 py-6 md:px-6 md:py-10">
+        <main class="mx-auto max-w-7xl space-y-8 px-4 py-6 md:px-6 md:py-8">
             <nav
                 aria-label="مسیر صفحه"
                 class="flex flex-wrap items-center gap-2 text-sm text-dh-muted"
@@ -115,7 +115,7 @@ function pageUrl(page: number): string {
                 <article
                     v-for="article in articles"
                     :key="article.id"
-                    class="group overflow-hidden rounded-3xl border border-dh-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                    class="group overflow-hidden rounded-2xl border border-dh-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
                 >
                     <Link :href="'/blog/' + article.slug" class="block">
                         <div class="overflow-hidden bg-dh-50">
@@ -180,7 +180,7 @@ function pageUrl(page: number): string {
 
             <section
                 v-else
-                class="rounded-3xl border border-dashed border-dh-200 bg-white p-12 text-center text-dh-muted"
+                class="rounded-2xl border border-dashed border-dh-200 bg-white p-12 text-center text-dh-muted"
             >
                 هنوز مقاله‌ای در این دسته منتشر نشده است.
             </section>

@@ -20,6 +20,7 @@ class ZarinPalCallbackTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        config(['services.payment.provider' => 'zarinpal']);
 
         config([
             'services.zarinpal.merchant_id' => 'TEST-MERCHANT-ID',
@@ -121,6 +122,7 @@ class ZarinPalCallbackTest extends TestCase
             'is_active' => true,
         ]);
 
+        $order->items()->create(['product_id' => $product->id, 'product_name' => $product->name, 'quantity' => $quantity, 'unit_price' => 110000, 'total_amount' => 220000]);
         $reservation = InventoryReservation::create([
             'order_id' => $order->id,
             'product_id' => $product->id,
@@ -241,7 +243,7 @@ class ZarinPalCallbackTest extends TestCase
                 ($data['merchant_id'] ?? null) ===
                     'TEST-MERCHANT-ID'
                 &&
-                ($data['amount'] ?? null) === 2200000
+                ($data['amount'] ?? null) === 220000
                 &&
                 ($data['authority'] ?? null) === $authority;
         });

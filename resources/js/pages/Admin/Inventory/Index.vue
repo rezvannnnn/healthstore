@@ -87,7 +87,7 @@ const statusClasses = (value: Product['status']) =>
         <div class="mx-auto max-w-7xl">
             <div class="mb-8 flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-dh-muted">HealthStore / مدیریت</p>
+                    <p class="text-sm text-dh-muted">داروخونه / مدیریت</p>
                     <h1 class="text-3xl font-bold">موجودی</h1>
                 </div>
                 <Link

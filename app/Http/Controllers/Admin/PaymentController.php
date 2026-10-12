@@ -18,7 +18,7 @@ class PaymentController extends Controller
         $gateway = trim((string) $request->query('gateway', 'all'));
 
         $validatedFilters = $request->validate([
-            'status' => ['nullable', 'string', Rule::in(['all', 'pending', 'paid', 'failed', 'refunded'])],
+            'status' => ['nullable', 'string', Rule::in(['all', 'pending', 'paid', 'failed', 'refunded', 'cancelled', 'requires_review'])],
             'gateway' => ['nullable', 'string', 'max:100'],
         ]);
 

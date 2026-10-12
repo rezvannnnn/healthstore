@@ -167,7 +167,7 @@ class CheckoutService
                     'total_amount' => $subtotal + $shippingAmount,
                     'minimum_order_amount' => $minimumOrderAmount,
                     'minimum_order_met' => false,
-                    'message' => 'حداقل مبلغ سفارش '.number_format($minimumOrderAmount, 0, '.', ',').' تومان است.',
+                    'message' => 'حداقل مبلغ سفارش '.number_format($minimumOrderAmount, 0, '.', ',').' ریال است.',
                 ];
             }
 

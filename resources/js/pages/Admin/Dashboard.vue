@@ -59,6 +59,16 @@ const sections = [
         label: 'کدهای تخفیف',
         description: 'کوپن و محدودیت مصرف',
     },
+    {
+        href: '/admin/security',
+        label: 'امنیت حساب',
+        description: 'فعال‌سازی ورود دومرحله‌ای',
+    },
+    {
+        href: '/admin/audit',
+        label: 'تاریخچه تغییرات',
+        description: 'تغییرات مهم کاربران مدیریت',
+    },
     { href: '/admin/articles', label: 'مقالات', description: 'محتوای وبلاگ' },
     {
         href: '/admin/reports',

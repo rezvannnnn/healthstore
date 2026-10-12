@@ -186,6 +186,11 @@ class PaymentServiceTest extends TestCase
     {
         $user = User::factory()->create();
         $order = $this->createOrder($user, 360000);
+        $product = Product::factory()->create();
+        $warehouse = Warehouse::factory()->create();
+        Inventory::create(['product_id' => $product->id, 'warehouse_id' => $warehouse->id, 'quantity' => 10, 'is_active' => true]);
+        $order->items()->create(['product_id' => $product->id, 'product_name' => $product->name, 'quantity' => 1, 'unit_price' => 360000, 'total_amount' => 360000]);
+        (new InventoryReservationService)->reserve($order, $product, 1);
         $gateway = new class implements PaymentGatewayInterface
         {
             public int $requestCalls = 0;
@@ -253,6 +258,7 @@ class PaymentServiceTest extends TestCase
             'minimum_quantity' => 1, 'batch_number' => 'PAY-BATCH-'.uniqid(),
             'expiry_date' => null, 'is_active' => true,
         ]);
+        $order->items()->create(['product_id' => $product->id, 'product_name' => $product->name, 'quantity' => 3, 'unit_price' => 120000, 'total_amount' => 360000]);
         $reservation = InventoryReservation::create([
             'order_id' => $order->id, 'product_id' => $product->id, 'inventory_id' => $inventory->id,
             'quantity' => 3, 'status' => 'active', 'expires_at' => now()->addMinutes(20),
@@ -370,6 +376,11 @@ class PaymentServiceTest extends TestCase
     {
         $user = User::factory()->create();
         $order = $this->createOrder($user, 100000);
+        $product = Product::factory()->create();
+        $warehouse = Warehouse::factory()->create();
+        Inventory::create(['product_id' => $product->id, 'warehouse_id' => $warehouse->id, 'quantity' => 10, 'is_active' => true]);
+        $order->items()->create(['product_id' => $product->id, 'product_name' => $product->name, 'quantity' => 1, 'unit_price' => 100000, 'total_amount' => 100000]);
+        (new InventoryReservationService)->reserve($order, $product, 1);
         $paymentService = new PaymentService(new InventoryReservationService);
         $payment = $paymentService->create($order);
 

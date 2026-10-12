@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Link, router } from '@inertiajs/vue3';
+import ProductPlaceholder from '@/components/ProductPlaceholder.vue';
+import { Head, Link, router } from '@inertiajs/vue3';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
 import StorefrontFooter from '@/components/StorefrontFooter.vue';
 import { computed, ref } from 'vue';
@@ -38,6 +39,11 @@ interface Product {
     compare_at_price: number | null;
     available_quantity: number;
     available: boolean;
+    expiry: {
+        earliest: string | null;
+        latest: string | null;
+        incomplete: boolean;
+    } | null;
 }
 interface Seo {
     title: string;
@@ -73,6 +79,14 @@ function formatPrice(value: number | null): string {
         ? 'تماس بگیرید'
         : `${value.toLocaleString('fa-IR')} ریال`;
 }
+function formatExpiry(value: string): string {
+    return new Intl.DateTimeFormat('fa-IR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        timeZone: 'UTC',
+    }).format(new Date(value + 'T00:00:00Z'));
+}
 function addToCart(): void {
     if (
         addingToCart.value ||
@@ -103,6 +117,24 @@ function addToCart(): void {
 </script>
 
 <template>
+    <Head>
+        <title>{{ seo.title }}</title>
+        <meta name="description" :content="seo.description || ''" />
+        <link rel="canonical" :href="seo.canonical" />
+        <meta property="og:type" content="product" />
+        <meta property="og:title" :content="seo.title" />
+        <meta property="og:description" :content="seo.description || ''" />
+        <meta property="og:url" :content="seo.canonical" />
+        <meta
+            v-if="selectedImage"
+            property="og:image"
+            :content="selectedImage"
+        />
+        <meta
+            name="twitter:card"
+            :content="selectedImage ? 'summary_large_image' : 'summary'"
+        />
+    </Head>
     <div
         dir="rtl"
         class="min-h-screen bg-dh-surface pb-24 text-dh-ink lg:pb-10"
@@ -163,36 +195,7 @@ function addToCart(): void {
                                 :alt="product.name"
                                 class="h-full w-full object-contain p-8 sm:p-12"
                             />
-                            <div
-                                v-else
-                                class="flex h-full flex-col items-center justify-center gap-3 text-dh-muted"
-                            >
-                                <span
-                                    class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm"
-                                >
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        class="h-8 w-8"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="1.5"
-                                    >
-                                        <rect
-                                            x="3"
-                                            y="4"
-                                            width="18"
-                                            height="16"
-                                            rx="2"
-                                        />
-                                        <path
-                                            d="M7 15l3-3 3 3 2-2 3 3"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        />
-                                    </svg>
-                                </span>
-                                بدون تصویر
-                            </div>
+                            <ProductPlaceholder v-else />
                         </div>
 
                         <div
@@ -239,7 +242,7 @@ function addToCart(): void {
                         </div>
 
                         <h1
-                            class="mt-5 text-2xl leading-[1.35] font-extrabold text-dh-900 sm:text-3xl lg:text-[2.15rem]"
+                            class="mt-5 text-2xl leading-[1.35] font-extrabold text-dh-900 sm:text-3xl lg:text-3xl"
                         >
                             {{ product.name }}
                         </h1>
@@ -313,7 +316,9 @@ function addToCart(): void {
                                     </button>
                                     <span
                                         class="w-9 text-center text-sm font-bold"
-                                        >{{ quantity }}</span
+                                        >{{
+                                            quantity.toLocaleString('fa-IR')
+                                        }}</span
                                     >
                                     <button
                                         type="button"
@@ -406,6 +411,73 @@ function addToCart(): void {
                             </div>
                         </div>
 
+                        <div
+                            v-if="product.available"
+                            class="mt-5 rounded-2xl border border-dh-100 bg-dh-50 p-4 text-sm leading-7"
+                        >
+                            <h2 class="font-bold text-dh-900">
+                                تاریخ انقضای موجودی فعلی
+                            </h2>
+                            <template v-if="product.expiry?.earliest">
+                                <p>
+                                    نزدیک‌ترین انقضای ثبت‌شده:
+                                    <time :datetime="product.expiry.earliest">{{
+                                        formatExpiry(product.expiry.earliest)
+                                    }}</time>
+                                </p>
+                                <p
+                                    v-if="
+                                        product.expiry.latest &&
+                                        product.expiry.latest !==
+                                            product.expiry.earliest
+                                    "
+                                >
+                                    انقضای سری‌های موجود تا
+                                    <time :datetime="product.expiry.latest">{{
+                                        formatExpiry(product.expiry.latest)
+                                    }}</time>
+                                    متفاوت است.
+                                </p>
+                                <p
+                                    v-if="product.expiry.incomplete"
+                                    class="text-xs text-dh-muted"
+                                >
+                                    تاریخ بعضی سری‌ها ثبت نشده است؛ برای تأیید
+                                    تاریخ سری ارسالی با پشتیبانی هماهنگ کنید.
+                                </p>
+                            </template>
+                            <p v-else class="text-dh-muted">
+                                تاریخ انقضا هنوز ثبت نشده است؛ پیش از خرید با
+                                پشتیبانی هماهنگ کنید.
+                            </p>
+                        </div>
+                        <nav
+                            class="mt-5 flex flex-wrap gap-3 text-sm font-bold text-dh-700"
+                            aria-label="راهنمای خرید محصول"
+                        >
+                            <a
+                                v-if="product.description"
+                                href="#product-description"
+                                class="underline underline-offset-4"
+                                >معرفی محصول</a
+                            >
+                            <a
+                                v-if="specifications.length"
+                                href="#product-specifications"
+                                class="underline underline-offset-4"
+                                >مشخصات</a
+                            >
+                            <Link
+                                href="/information/shipping"
+                                class="underline underline-offset-4"
+                                >شرایط ارسال</Link
+                            >
+                            <Link
+                                href="/information/contact"
+                                class="underline underline-offset-4"
+                                >پرسش از پشتیبانی</Link
+                            >
+                        </nav>
                         <div class="mt-6 grid gap-2.5 sm:grid-cols-3">
                             <div
                                 class="rounded-2xl border border-dh-100 bg-white p-3"
@@ -492,6 +564,7 @@ function addToCart(): void {
 
                         <div
                             v-if="product.description"
+                            id="product-description"
                             class="mt-7 border-t border-dh-100 pt-6"
                         >
                             <h2 class="text-lg font-extrabold text-dh-900">
@@ -509,6 +582,7 @@ function addToCart(): void {
 
             <section
                 v-if="specifications.length"
+                id="product-specifications"
                 class="mt-6 rounded-[2rem] border border-dh-100 bg-white p-5 shadow-[0_12px_40px_rgba(20,108,114,0.05)] sm:p-7 lg:p-8"
             >
                 <div class="flex items-end justify-between gap-4">
@@ -591,7 +665,11 @@ function addToCart(): void {
                     >
                         <div class="text-xs text-dh-muted">تعداد در واحد</div>
                         <div class="mt-1 font-bold text-dh-800">
-                            {{ product.quantity_per_unit }}
+                            {{
+                                product.quantity_per_unit.toLocaleString(
+                                    'fa-IR',
+                                )
+                            }}
                         </div>
                     </div>
                 </div>
@@ -624,7 +702,7 @@ function addToCart(): void {
                         v-for="related in relatedProducts"
                         :key="related.id"
                         :href="`/products/${related.slug}`"
-                        class="group rounded-2xl border border-dh-100 bg-white p-3.5 transition hover:-translate-y-1 hover:border-dh-200 hover:shadow-lg hover:shadow-dh-700/5"
+                        class="group rounded-2xl border border-dh-100 bg-white p-3.5 transition hover:-translate-y-0.5 hover:border-dh-200 hover:shadow-lg hover:shadow-dh-700/5"
                     >
                         <div
                             class="aspect-square overflow-hidden rounded-xl bg-dh-surface"
@@ -635,12 +713,7 @@ function addToCart(): void {
                                 :alt="related.name"
                                 class="h-full w-full object-contain p-4 transition duration-300 group-hover:scale-105"
                             />
-                            <div
-                                v-else
-                                class="flex h-full items-center justify-center text-xs text-dh-muted"
-                            >
-                                بدون تصویر
-                            </div>
+                            <ProductPlaceholder v-else />
                         </div>
                         <h3
                             class="mt-3 line-clamp-2 text-sm leading-6 font-bold text-dh-800 transition group-hover:text-dh-700"
@@ -654,6 +727,15 @@ function addToCart(): void {
                 </div>
             </section>
         </main>
+        <p dir="rtl" class="mx-auto max-w-6xl px-4 py-4 text-sm">
+            برای محصولات بدون قیمت، از
+            <Link
+                href="/information/contact"
+                class="font-bold text-dh-700 underline"
+                >صفحه تماس و پشتیبانی</Link
+            >
+            اقدام کنید.
+        </p>
         <StorefrontFooter />
     </div>
 </template>

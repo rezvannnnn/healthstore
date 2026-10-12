@@ -58,6 +58,10 @@ class ZarinPalCallbackController extends Controller
                     ->with('success', 'پرداخت با موفقیت انجام شد.');
             }
 
+            if (($result['status'] ?? null) === 'requires_review') {
+                return redirect()->route('orders.show', ['orderNumber' => $orderNumber])
+                    ->with('info', 'پرداخت توسط بانک تأیید شد اما سفارش نیازمند بررسی پشتیبانی برای تأمین موجودی یا استرداد است. دوباره پرداخت نکنید.');
+            }
             if (($result['status'] ?? null) === 'failed') {
                 return redirect()->route('orders.show', ['orderNumber' => $orderNumber])
                     ->with('error', 'پرداخت انجام نشد یا توسط درگاه تأیید نشد.');

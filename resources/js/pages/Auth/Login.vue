@@ -36,10 +36,10 @@ function login(): void {
 
     <main
         dir="rtl"
-        class="flex min-h-[calc(100vh-8rem)] items-center justify-center bg-dh-surface px-4 py-10 pb-28 dark:bg-dh-surface"
+        class="flex min-h-[calc(100vh-8rem)] items-center justify-center bg-dh-surface px-4 py-8 pb-28 dark:bg-dh-surface"
     >
         <section
-            class="relative w-full max-w-md rounded-3xl bg-white p-7 shadow-sm ring-1 ring-dh-100 dark:bg-white dark:ring-dh-100"
+            class="relative w-full max-w-md rounded-2xl bg-white p-7 shadow-sm ring-1 ring-dh-100 dark:bg-white dark:ring-dh-100"
         >
             <h1 class="mt-4 text-2xl font-bold text-dh-ink dark:text-dh-ink">
                 ورود به حساب

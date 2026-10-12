@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Address;
+use App\Services\OtpService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -29,14 +30,23 @@ class AddressController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        try {
+            $phone = app(OtpService::class)->normalizePhone((string) $request->input('phone'));
+        } catch (\RuntimeException $exception) {
+            $phone = (string) $request->input('phone');
+        }
+        $request->merge([
+            'phone' => $phone,
+            'postal_code' => strtr((string) $request->input('postal_code'), ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9', '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9']),
+        ]);
         $validated = $request->validate([
             'title' => ['nullable', 'string', 'max:255'],
             'recipient_name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:20'],
-            'province' => ['nullable', 'string', 'max:255'],
-            'city' => ['nullable', 'string', 'max:255'],
+            'phone' => ['required', 'regex:/^09[0-9]{9}$/'],
+            'province' => ['required', 'string', 'max:255'],
+            'city' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string'],
-            'postal_code' => ['nullable', 'string', 'max:20'],
+            'postal_code' => ['required', 'regex:/^[0-9]{10}$/'],
             'is_default' => ['nullable', 'boolean'],
         ]);
 
@@ -79,14 +89,23 @@ class AddressController extends Controller
             ->where('user_id', $request->user()->id)
             ->findOrFail($address);
 
+        try {
+            $phone = app(OtpService::class)->normalizePhone((string) $request->input('phone'));
+        } catch (\RuntimeException $exception) {
+            $phone = (string) $request->input('phone');
+        }
+        $request->merge([
+            'phone' => $phone,
+            'postal_code' => strtr((string) $request->input('postal_code'), ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9', '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9']),
+        ]);
         $validated = $request->validate([
             'title' => ['nullable', 'string', 'max:255'],
             'recipient_name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:20'],
-            'province' => ['nullable', 'string', 'max:255'],
-            'city' => ['nullable', 'string', 'max:255'],
+            'phone' => ['required', 'regex:/^09[0-9]{9}$/'],
+            'province' => ['required', 'string', 'max:255'],
+            'city' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string'],
-            'postal_code' => ['nullable', 'string', 'max:20'],
+            'postal_code' => ['required', 'regex:/^[0-9]{10}$/'],
             'is_default' => ['nullable', 'boolean'],
         ]);
 

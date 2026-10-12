@@ -26,7 +26,10 @@ watchEffect(() => {
     }
 
     if (!scriptElement) {
-        scriptElement = document.createElement('script');
+        scriptElement =
+            document.querySelector<HTMLScriptElement>(
+                'script[data-darukhooneh-structured-data]',
+            ) ?? document.createElement('script');
         scriptElement.type = 'application/ld+json';
         scriptElement.dataset.darukhoonehStructuredData = 'true';
         document.head.appendChild(scriptElement);

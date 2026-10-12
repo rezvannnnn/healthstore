@@ -35,7 +35,7 @@ const pageUrl = (page: number) => `/admin/brands?page=${page}`;
                 class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
             >
                 <div>
-                    <p class="text-sm text-dh-muted">HealthStore / مدیریت</p>
+                    <p class="text-sm text-dh-muted">داروخونه / مدیریت</p>
                     <h1 class="text-3xl font-bold">برندها</h1>
                     <p class="mt-2 text-dh-700">مدیریت برندهای محصولات</p>
                 </div>

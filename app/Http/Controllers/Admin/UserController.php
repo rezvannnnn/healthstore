@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -105,6 +106,11 @@ class UserController extends Controller
 
         if (filled($data['password'] ?? null)) {
             $user->password = $data['password'];
+            $user->remember_token = Str::random(60);
+            if (config('session.driver') === 'database') {
+                DB::table(config('session.table', 'sessions'))
+                    ->where('user_id', $user->id)->delete();
+            }
         }
 
         $user->save();

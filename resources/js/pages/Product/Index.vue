@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import ProductPlaceholder from '@/components/ProductPlaceholder.vue';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
 import StorefrontFooter from '@/components/StorefrontFooter.vue';
-import { reactive, ref } from 'vue';
+import { reactive, ref, watch } from 'vue';
 
 interface Product {
     id: number;
@@ -43,6 +44,7 @@ interface Seo {
     title: string;
     description: string;
     canonical: string;
+    robots?: string;
 }
 
 const props = defineProps<{
@@ -55,14 +57,19 @@ const props = defineProps<{
         search: string;
         category: string;
         brand: string;
+        in_stock: boolean;
+        min_price: number | null;
+        max_price: number | null;
+        sort: string;
     };
 }>();
 
-const form = reactive({
-    search: props.filters.search,
-    category: props.filters.category,
-    brand: props.filters.brand,
-});
+const form = reactive({ ...props.filters });
+const page = usePage();
+watch(
+    () => props.filters,
+    (filters) => Object.assign(form, filters),
+);
 const filtering = ref(false);
 const addingProductId = ref<number | null>(null);
 const addedProductId = ref<number | null>(null);
@@ -96,22 +103,30 @@ function addToCart(product: Product): void {
 }
 
 function submit(): void {
-    router.get('/products', form, {
-        preserveState: true,
-        replace: true,
-        onStart: () => {
-            filtering.value = true;
+    router.get(
+        '/products',
+        { ...form, in_stock: form.in_stock ? 1 : undefined },
+        {
+            preserveState: true,
+            replace: true,
+            onStart: () => {
+                filtering.value = true;
+            },
+            onFinish: () => {
+                filtering.value = false;
+            },
         },
-        onFinish: () => {
-            filtering.value = false;
-        },
-    });
+    );
 }
 
 function clearFilters(): void {
     form.search = '';
     form.category = '';
     form.brand = '';
+    form.in_stock = false;
+    form.min_price = null;
+    form.max_price = null;
+    form.sort = 'recommended';
 
     router.get(
         '/products',
@@ -136,16 +151,15 @@ function pageUrl(page: number): string {
         params.set('page', String(page));
     }
 
-    if (form.search) {
-        params.set('search', form.search);
-    }
-
-    if (form.category) {
-        params.set('category', form.category);
-    }
-
-    if (form.brand) {
-        params.set('brand', form.brand);
+    for (const [key, value] of Object.entries(props.filters)) {
+        if (
+            value !== null &&
+            value !== '' &&
+            value !== false &&
+            !(key === 'sort' && value === 'recommended')
+        ) {
+            params.set(key, value === true ? '1' : String(value));
+        }
     }
 
     const query = params.toString();
@@ -161,6 +175,11 @@ function formatPrice(value: number | null): string {
 
 <template>
     <Head>
+        <meta
+            head-key="robots"
+            name="robots"
+            :content="seo.robots || 'index,follow'"
+        />
         <title>{{ seo.title }}</title>
         <meta name="description" :content="seo.description" />
         <link rel="canonical" :href="seo.canonical" />
@@ -180,10 +199,10 @@ function formatPrice(value: number | null): string {
         <StorefrontHeader active="products" />
 
         <main
-            class="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10"
+            class="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-8"
         >
             <section
-                class="flex flex-col gap-5 rounded-3xl border border-dh-100 bg-white p-6 shadow-[0_12px_35px_rgba(20,108,114,0.06)] sm:p-8 md:flex-row md:items-end md:justify-between"
+                class="flex flex-col gap-3 rounded-2xl border border-dh-100 bg-white p-4 shadow-[0_12px_35px_rgba(20,108,114,0.06)] sm:p-8 md:flex-row md:items-end md:justify-between"
             >
                 <div>
                     <span class="text-xs font-extrabold text-dh-500"
@@ -207,7 +226,7 @@ function formatPrice(value: number | null): string {
             </section>
 
             <section
-                class="rounded-3xl border border-dh-100 bg-white p-4 shadow-sm sm:p-5"
+                class="rounded-2xl border border-dh-100 bg-white p-4 shadow-sm sm:p-5"
             >
                 <form
                     @submit.prevent="submit"
@@ -319,13 +338,122 @@ function formatPrice(value: number | null): string {
                             حذف فیلتر
                         </button>
                     </div>
+                    <details
+                        class="rounded-xl border border-dh-100 p-3 md:col-span-4"
+                        :open="
+                            props.filters.in_stock ||
+                            props.filters.min_price !== null ||
+                            props.filters.max_price !== null ||
+                            props.filters.sort !== 'recommended' ||
+                            !!page.props.errors.max_price ||
+                            !!page.props.errors.min_price
+                        "
+                    >
+                        <summary
+                            class="cursor-pointer py-1 text-sm font-bold text-dh-700"
+                        >
+                            قیمت، موجودی و مرتب‌سازی
+                        </summary>
+                        <div class="mt-4 grid gap-3 md:grid-cols-4">
+                            <label
+                                class="space-y-1 text-xs font-bold text-dh-muted"
+                            >
+                                <span>حداقل قیمت (ریال)</span>
+                                <input
+                                    v-model="form.min_price"
+                                    type="number"
+                                    min="0"
+                                    max="999999999999"
+                                    inputmode="numeric"
+                                    placeholder="بدون محدودیت"
+                                    class="h-12 w-full rounded-xl border border-dh-100 px-3 text-sm text-dh-ink"
+                                />
+                            </label>
+                            <label
+                                class="space-y-1 text-xs font-bold text-dh-muted"
+                            >
+                                <span>حداکثر قیمت (ریال)</span>
+                                <input
+                                    v-model="form.max_price"
+                                    type="number"
+                                    min="0"
+                                    max="999999999999"
+                                    inputmode="numeric"
+                                    placeholder="بدون محدودیت"
+                                    class="h-12 w-full rounded-xl border border-dh-100 px-3 text-sm text-dh-ink"
+                                />
+                            </label>
+                            <label
+                                class="space-y-1 text-xs font-bold text-dh-muted"
+                            >
+                                <span>مرتب‌سازی</span>
+                                <select
+                                    v-model="form.sort"
+                                    class="h-12 w-full rounded-xl border border-dh-100 bg-white px-3 text-sm text-dh-ink"
+                                >
+                                    <option value="recommended">
+                                        پیشنهاد فروشگاه
+                                    </option>
+                                    <option value="newest">جدیدترین</option>
+                                    <option value="price_asc">
+                                        ارزان‌ترین
+                                    </option>
+                                    <option value="price_desc">
+                                        گران‌ترین
+                                    </option>
+                                </select>
+                            </label>
+                            <label
+                                class="flex min-h-12 items-center gap-3 rounded-xl bg-dh-50 px-4 text-sm font-bold text-dh-700 md:mt-5"
+                            >
+                                <input
+                                    v-model="form.in_stock"
+                                    type="checkbox"
+                                    class="size-4 accent-dh-700"
+                                />
+                                فقط کالاهای موجود
+                            </label>
+                        </div>
+                    </details>
+                    <p
+                        v-if="
+                            page.props.errors.min_price ||
+                            page.props.errors.max_price ||
+                            page.props.errors.sort
+                        "
+                        role="alert"
+                        class="text-sm text-red-700 md:col-span-4"
+                    >
+                        بازهٔ قیمت معتبر وارد کنید؛ حداکثر قیمت باید برابر یا
+                        بیشتر از حداقل باشد.
+                    </p>
                 </form>
 
                 <div
-                    v-if="form.search || form.category || form.brand"
+                    v-if="
+                        props.filters.search ||
+                        props.filters.category ||
+                        props.filters.brand ||
+                        props.filters.in_stock ||
+                        props.filters.min_price !== null ||
+                        props.filters.max_price !== null
+                    "
                     class="mt-4 flex flex-wrap items-center gap-2 text-xs font-bold text-dh-muted"
                 >
                     <span>فیلتر فعال:</span>
+                    <span
+                        v-if="props.filters.in_stock"
+                        class="rounded-full bg-dh-green-50 px-3 py-1.5 text-dh-green-700"
+                        >فقط موجود</span
+                    >
+                    <span
+                        v-if="
+                            props.filters.min_price !== null ||
+                            props.filters.max_price !== null
+                        "
+                        class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700"
+                        >بازهٔ قیمت انتخاب شده</span
+                    >
                     <span
                         v-if="form.search"
                         class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700"
@@ -367,11 +495,11 @@ function formatPrice(value: number | null): string {
                 <article
                     v-for="product in products"
                     :key="product.id"
-                    class="group overflow-hidden rounded-3xl border border-dh-100 bg-white transition duration-200 hover:-translate-y-1 hover:border-dh-200 hover:shadow-[0_18px_40px_rgba(20,108,114,0.09)]"
+                    class="group overflow-hidden rounded-2xl border border-dh-100 bg-white transition duration-200 hover:-translate-y-0.5 hover:border-dh-200 hover:shadow-[0_18px_40px_rgba(20,108,114,0.09)]"
                 >
                     <Link :href="`/products/${product.slug}`" class="block">
                         <div
-                            class="relative aspect-square overflow-hidden bg-dh-50/60"
+                            class="relative aspect-[4/3] overflow-hidden bg-dh-50/60"
                         >
                             <span
                                 v-if="
@@ -389,12 +517,7 @@ function formatPrice(value: number | null): string {
                                 loading="lazy"
                                 class="h-full w-full object-contain p-6 transition duration-300 group-hover:scale-[1.03]"
                             />
-                            <div
-                                v-else
-                                class="flex h-full items-center justify-center text-sm font-medium text-dh-muted"
-                            >
-                                بدون تصویر
-                            </div>
+                            <ProductPlaceholder v-else />
                         </div>
 
                         <div class="space-y-3 p-4">
@@ -501,7 +624,7 @@ function formatPrice(value: number | null): string {
 
             <section
                 v-else
-                class="rounded-3xl border border-dashed border-dh-200 bg-white p-12 text-center"
+                class="rounded-2xl border border-dashed border-dh-200 bg-white p-12 text-center"
             >
                 <div
                     class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-dh-50 text-dh-600"
@@ -587,6 +710,15 @@ function formatPrice(value: number | null): string {
                 </Link>
             </nav>
         </main>
+        <p dir="rtl" class="mx-auto max-w-6xl px-4 py-4 text-sm">
+            برای محصولات بدون قیمت، از
+            <Link
+                href="/information/contact"
+                class="font-bold text-dh-700 underline"
+                >صفحه تماس و پشتیبانی</Link
+            >
+            اقدام کنید.
+        </p>
         <StorefrontFooter />
     </div>
 </template>

@@ -20,6 +20,12 @@ class AtomicPaymentCallbackTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['services.payment.provider' => 'zarinpal']);
+    }
+
     private function createOrder(User $user): Order
     {
         return Order::create([
@@ -105,6 +111,7 @@ class AtomicPaymentCallbackTest extends TestCase
             'is_active' => true,
         ]);
 
+        $order->items()->create(['product_id' => $product->id, 'product_name' => $product->name, 'quantity' => 2, 'unit_price' => 110000, 'total_amount' => 220000]);
         $reservation = InventoryReservation::create([
             'order_id' => $order->id,
             'product_id' => $product->id,

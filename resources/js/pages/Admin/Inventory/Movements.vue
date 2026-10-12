@@ -32,7 +32,7 @@ const formatType = (type: string) => (type === 'increase' ? 'افزایش' : 'ک
         <div class="mx-auto max-w-5xl">
             <div class="mb-8 flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-dh-muted">HealthStore / موجودی</p>
+                    <p class="text-sm text-dh-muted">داروخونه / موجودی</p>
                     <h1 class="text-3xl font-bold">گردش موجودی</h1>
                     <p class="mt-2 text-dh-700">
                         {{ inventory.product }} — {{ inventory.warehouse }} —

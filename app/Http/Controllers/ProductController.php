@@ -8,7 +8,9 @@ use App\Models\Product;
 use App\Services\CartService;
 use App\Services\InventoryService;
 use App\Services\MediaService;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -26,23 +28,49 @@ class ProductController extends Controller
             'search' => ['nullable', 'string', 'max:200'],
             'category' => ['nullable', 'string', 'max:100'],
             'brand' => ['nullable', 'string', 'max:100'],
+            'in_stock' => ['nullable', 'boolean'],
+            'min_price' => ['nullable', 'numeric', 'min:0', 'max:999999999999'],
+            'max_price' => ['nullable', 'numeric', 'min:0', 'max:999999999999', ...($request->filled('min_price') ? ['gte:min_price'] : [])],
+            'sort' => ['nullable', Rule::in(['recommended', 'newest', 'price_asc', 'price_desc'])],
         ]);
 
-        $search = trim((string) ($validatedFilters['search'] ?? ''));
+        $search = strtr(trim((string) ($validatedFilters['search'] ?? '')), ['ي' => 'ی', 'ك' => 'ک', '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9']);
         $categorySlug = trim((string) ($validatedFilters['category'] ?? ''));
         $brandSlug = trim((string) ($validatedFilters['brand'] ?? ''));
+        $inStock = (bool) ($validatedFilters['in_stock'] ?? false);
+        $sort = $validatedFilters['sort'] ?? 'recommended';
+        $priceQuery = fn (QueryBuilder $price) => $price->from('product_prices')->select('price')
+            ->whereColumn('product_id', 'products.id')->where('is_active', true)->where('min_quantity', '<=', 1)
+            ->where(fn ($q) => $q->whereNull('starts_at')->orWhere('starts_at', '<=', now()))
+            ->where(fn ($q) => $q->whereNull('ends_at')->orWhere('ends_at', '>=', now()))
+            ->orderByDesc('min_quantity')->orderByDesc('id')->limit(1);
 
-        $query = Product::query()
+        $query = Product::query()->forCatalog()
             ->with(['brand', 'category', 'images'])
             ->where('is_active', true)
-            ->orderByDesc('is_featured')
-            ->orderBy('sort_order')
-            ->orderByDesc('id');
+            ->selectSub($priceQuery, 'catalog_price');
+
+        if ($inStock) {
+            $query->availableForCatalog();
+        }
+        foreach (['min_price' => '>=', 'max_price' => '<='] as $filter => $operator) {
+            if (isset($validatedFilters[$filter])) {
+                $query->getQuery()->where($priceQuery, $operator, $validatedFilters[$filter]);
+            }
+        }
+        if (in_array($sort, ['price_asc', 'price_desc'], true)) {
+            // Products without a current price belong at the end in either direction.
+            $query->orderByRaw('catalog_price IS NULL')->orderBy('catalog_price', $sort === 'price_asc' ? 'asc' : 'desc')->orderByDesc('id');
+        } elseif ($sort === 'newest') {
+            $query->orderByDesc('id');
+        } else {
+            $query->orderByDesc('is_featured')->orderBy('sort_order')->orderByDesc('id');
+        }
 
         if ($search !== '') {
             $query->where(function ($builder) use ($search) {
                 $builder
-                    ->where('name', 'like', "%{$search}%")
+                    ->whereRaw("REPLACE(REPLACE(name, 'ي', 'ی'), 'ك', 'ک') LIKE ?", ["%{$search}%"])
                     ->orWhere('sku', 'like', "%{$search}%")
                     ->orWhere('barcode', 'like', "%{$search}%")
                     ->orWhere('short_description', 'like', "%{$search}%");
@@ -100,7 +128,8 @@ class ProductController extends Controller
             'seo' => [
                 'title' => 'محصولات | فروشگاه سلامت',
                 'description' => 'خرید و بررسی محصولات بهداشتی و سلامت از فروشگاه آنلاین.',
-                'canonical' => url('/products'),
+                'canonical' => url('/products').($paginator->currentPage() > 1 ? '?page='.$paginator->currentPage() : ''),
+                'robots' => ($search !== '' || $categorySlug !== '' || $brandSlug !== '' || $inStock || isset($validatedFilters['min_price']) || isset($validatedFilters['max_price']) || $sort !== 'recommended') ? 'noindex,follow' : 'index,follow',
             ],
             'products' => $products,
             'pagination' => [
@@ -116,6 +145,10 @@ class ProductController extends Controller
                 'search' => $search,
                 'category' => $categorySlug,
                 'brand' => $brandSlug,
+                'in_stock' => $inStock,
+                'min_price' => $validatedFilters['min_price'] ?? null,
+                'max_price' => $validatedFilters['max_price'] ?? null,
+                'sort' => $sort,
             ],
         ]);
     }
@@ -127,7 +160,7 @@ class ProductController extends Controller
         $product->load(['brand', 'category', 'images', 'prices']);
         $price = $this->cartService->getCurrentPrice($product);
 
-        $relatedProducts = Product::query()
+        $relatedProducts = Product::query()->forCatalog()
             ->with(['brand', 'images'])
             ->where('is_active', true)
             ->when($product->category_id, fn ($query) => $query->where('category_id', $product->category_id))
@@ -230,6 +263,7 @@ class ProductController extends Controller
                 'compare_at_price' => $price?->compare_at_price !== null ? (float) $price->compare_at_price : null,
                 'available_quantity' => $this->inventoryService->getAvailableQuantity($product),
                 'available' => $this->inventoryService->isAvailable($product),
+                'expiry' => $this->inventoryService->getExpiryRange($product),
             ],
             'structuredData' => $structuredData,
             'relatedProducts' => $relatedProducts,

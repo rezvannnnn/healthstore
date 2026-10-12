@@ -207,9 +207,9 @@ class ZarinPalGateway implements PaymentGatewayInterface
      * Storefront prices are entered and displayed in toman.
      * ZarinPal's REST API expects the amount in rial.
      */
-    private function toGatewayAmount(float $tomanAmount): int
+    private function toGatewayAmount(float $rialAmount): int
     {
-        return (int) round($tomanAmount * 10);
+        return (int) round($rialAmount);
     }
 
     private function requestEndpoint(): string

@@ -30,7 +30,7 @@ class StorePricingService
 
         if ($minimumOrderAmount > 0 && $subtotal < $minimumOrderAmount) {
             throw new RuntimeException(
-                'حداقل مبلغ سفارش '.number_format($minimumOrderAmount, 0, '.', ',').' تومان است.'
+                'حداقل مبلغ سفارش '.number_format($minimumOrderAmount, 0, '.', ',').' ریال است.'
             );
         }
 

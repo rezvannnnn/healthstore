@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Address;
 use App\Services\CartService;
 use App\Services\CheckoutService;
+use App\Services\CouponService;
 use App\Services\OrderService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,20 +42,41 @@ class CheckoutController extends Controller
         }
 
         $result = $this->checkoutService->prepare($cart);
-        $selectedAddressId = $addresses->first()?->id;
+        $selectedAddressId = (int) ($request->old('address_id') ?? $request->session()->get('checkout.address_id') ?? $addresses->first()?->id);
+        $couponCode = trim((string) ($request->old('coupon_code') ?? $request->session()->get('checkout.coupon_code', '')));
+        $discountAmount = 0;
+        $appliedCoupon = null;
+        if ($couponCode !== '') {
+            try {
+                $coupon = app(CouponService::class)->prepareForOrder($couponCode, $user->id, (float) $result['subtotal']);
+                $discountAmount = $coupon['discount_amount'];
+                $appliedCoupon = $coupon['coupon']?->code;
+            } catch (RuntimeException $e) {
+                $request->session()->flash('error', $e->getMessage());
+            }
+        }
 
         return Inertia::render('Checkout', [
             'cart' => $result['cart'], 'addresses' => $addresses,
-            'selectedAddressId' => $selectedAddressId, 'couponCode' => null,
-            'appliedCoupon' => null, 'discountAmount' => 0,
+            'selectedAddressId' => $selectedAddressId, 'couponCode' => $couponCode,
+            'appliedCoupon' => $appliedCoupon, 'discountAmount' => $discountAmount,
             'changes' => $result['changes'], 'priceChanges' => $result['price_changes'],
             'availabilityChanges' => $result['availability_changes'],
             'requiresPriceConfirmation' => $result['requires_price_confirmation'],
             'subtotal' => $result['subtotal'], 'shippingAmount' => $result['shipping_amount'],
-            'totalAmount' => $result['total_amount'],
+            'totalAmount' => max(0, $result['total_amount'] - $discountAmount),
+            'minimumOrderAmount' => $result['minimum_order_amount'],
             'canProceedToPayment' => $result['can_proceed_to_payment'],
             'cartHasPayableItems' => $result['cart_has_payable_items'],
         ]);
+    }
+
+    public function preview(Request $request): RedirectResponse
+    {
+        $data = $request->validate(['address_id' => ['nullable', 'integer'], 'coupon_code' => ['nullable', 'string', 'max:64']]);
+        $request->session()->put('checkout', $data);
+
+        return to_route('checkout.show');
     }
 
     public function confirm(Request $request): RedirectResponse
@@ -65,6 +87,7 @@ class CheckoutController extends Controller
             'address_id' => ['required', 'integer'],
             'coupon_code' => ['nullable', 'string', 'max:64'],
         ]);
+        $request->session()->put('checkout', $validated);
         $addressId = (int) $validated['address_id'];
         $address = Address::query()->where('user_id', $user->id)->find($addressId);
 

@@ -41,7 +41,7 @@ function submit(): void {
     >
         <div class="mx-auto max-w-5xl">
             <header
-                class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
+                class="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
             >
                 <Link
                     href="/"
@@ -67,7 +67,7 @@ function submit(): void {
 
             <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
                 <section
-                    class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-7"
+                    class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-dh-100 sm:p-7"
                 >
                     <div class="mb-7">
                         <p class="mb-2 text-sm font-bold text-dh-green-600">
@@ -183,7 +183,7 @@ function submit(): void {
                 </section>
 
                 <aside
-                    class="h-fit rounded-3xl bg-dh-800 p-6 text-white shadow-sm"
+                    class="h-fit rounded-2xl bg-dh-800 p-6 text-white shadow-sm"
                 >
                     <p class="text-sm font-bold text-dh-green-100">
                         مدیریت حساب

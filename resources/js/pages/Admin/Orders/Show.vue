@@ -89,7 +89,7 @@ const changeStatus = (status: string) =>
         <div class="mx-auto max-w-5xl">
             <div class="mb-8 flex items-center justify-between gap-4">
                 <div>
-                    <p class="text-sm text-dh-muted">HealthStore / سفارش‌ها</p>
+                    <p class="text-sm text-dh-muted">داروخونه / سفارش‌ها</p>
                     <h1 class="text-2xl font-bold">{{ order.order_number }}</h1>
                 </div>
                 <Link

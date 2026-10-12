@@ -20,10 +20,11 @@ class HomeController extends Controller
 
     public function __invoke(): Response
     {
-        $featuredProducts = Product::query()
+        $featuredProducts = Product::query()->forCatalog()
             ->with(['brand', 'images'])
             ->where('is_active', true)
-            ->where('is_featured', true)
+            ->orderByRaw('(catalog_physical - catalog_reserved > 0) DESC')
+            ->orderByDesc('is_featured')
             ->orderBy('sort_order')
             ->orderByDesc('id')
             ->limit(8)
@@ -48,9 +49,12 @@ class HomeController extends Controller
             ->all();
 
         $categories = Category::query()
+            ->select(['id', 'name', 'slug'])
+            ->withCount(['products' => fn ($query) => $query->where('is_active', true)])
             ->where('is_active', true)
             ->whereNull('parent_id')
             ->orderBy('sort_order')
+            ->orderByDesc('products_count')
             ->orderBy('name')
             ->limit(8)
             ->get(['id', 'name', 'slug'])
@@ -58,6 +62,7 @@ class HomeController extends Controller
                 'id' => $category->id,
                 'name' => $category->name,
                 'slug' => $category->slug,
+                'products_count' => (int) $category->products_count,
             ])
             ->values()
             ->all();

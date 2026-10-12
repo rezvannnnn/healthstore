@@ -16,6 +16,7 @@ class PaymentControllerErrorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        config(['services.payment.provider' => 'zarinpal']);
 
         config([
             'services.zarinpal.merchant_id' => 'TEST-MERCHANT-ID',

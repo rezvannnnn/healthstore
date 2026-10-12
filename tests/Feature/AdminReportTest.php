@@ -57,6 +57,7 @@ class AdminReportTest extends TestCase
             'user_id' => $customer->id,
             'status' => 'paid',
             'payment_status' => 'paid',
+            'paid_at' => now(),
             'subtotal' => 200000,
             'discount_amount' => 0,
             'shipping_amount' => 0,

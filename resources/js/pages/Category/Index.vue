@@ -67,7 +67,7 @@ function pageUrl(page: number): string {
     >
         <StorefrontHeader active="categories" />
 
-        <main class="mx-auto max-w-7xl space-y-8 px-4 py-6 md:px-6 md:py-10">
+        <main class="mx-auto max-w-7xl space-y-8 px-4 py-6 md:px-6 md:py-8">
             <nav
                 aria-label="مسیر صفحه"
                 class="flex flex-wrap items-center gap-2 text-sm text-dh-muted"
@@ -81,7 +81,7 @@ function pageUrl(page: number): string {
                 class="rounded-[2rem] bg-dh-800 p-7 text-white shadow-xl shadow-dh-900/10 md:p-10"
             >
                 <p class="text-xs font-bold text-dh-100">انتخاب بر اساس نیاز</p>
-                <h1 class="mt-3 text-3xl font-black md:text-5xl">
+                <h1 class="mt-3 text-3xl font-black md:text-4xl">
                     محصولات را بر اساس دسته پیدا کنید.
                 </h1>
                 <p
@@ -105,7 +105,7 @@ function pageUrl(page: number): string {
                     v-for="category in categories"
                     :key="category.id"
                     :href="'/categories/' + category.slug"
-                    class="group overflow-hidden rounded-3xl border border-dh-100 bg-white shadow-sm transition hover:-translate-y-1 hover:border-dh-200 hover:shadow-lg"
+                    class="group overflow-hidden rounded-2xl border border-dh-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-dh-200 hover:shadow-lg"
                 >
                     <div class="aspect-[16/10] overflow-hidden bg-dh-50">
                         <img
@@ -174,7 +174,7 @@ function pageUrl(page: number): string {
 
             <section
                 v-else
-                class="rounded-3xl border border-dashed border-dh-200 bg-white p-12 text-center text-dh-muted"
+                class="rounded-2xl border border-dashed border-dh-200 bg-white p-12 text-center text-dh-muted"
             >
                 هنوز دسته‌بندی فعالی ثبت نشده است.
             </section>

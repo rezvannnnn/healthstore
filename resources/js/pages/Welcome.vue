@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ProductPlaceholder from '@/components/ProductPlaceholder.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import StorefrontHeader from '@/components/StorefrontHeader.vue';
 import BrandLogo from '@/components/BrandLogo.vue';
@@ -9,6 +10,7 @@ interface Category {
     id: number;
     name: string;
     slug: string;
+    products_count: number;
 }
 
 interface Seo {
@@ -40,7 +42,7 @@ const addingProductId = ref<number | null>(null);
 function formatPrice(value: number | null): string {
     return value === null
         ? 'تماس بگیرید'
-        : `${value.toLocaleString('fa-IR')} تومان`;
+        : `${value.toLocaleString('fa-IR')} ریال`;
 }
 
 function searchProducts(): void {
@@ -102,7 +104,7 @@ function addToCart(product: FeaturedProduct): void {
                     class="absolute inset-0 [background-image:radial-gradient(circle_at_12%_20%,rgba(29,166,169,0.14),transparent_28%),radial-gradient(circle_at_85%_70%,rgba(99,185,91,0.13),transparent_30%)] opacity-70"
                 ></div>
                 <div
-                    class="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20"
+                    class="relative mx-auto max-w-7xl px-4 py-9 sm:px-6 sm:py-16 lg:px-8 lg:py-20"
                 >
                     <div
                         class="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]"
@@ -120,10 +122,10 @@ function addToCart(product: FeaturedProduct): void {
                                 class="mt-5 flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-right"
                             >
                                 <BrandLogo
-                                    imageClass="h-20 w-20 shrink-0 sm:h-28 sm:w-28"
+                                    imageClass="h-16 w-16 shrink-0 sm:h-20 sm:w-20"
                                 />
                                 <h1
-                                    class="text-3xl leading-[1.35] font-extrabold tracking-tight text-dh-900 sm:text-4xl lg:text-5xl"
+                                    class="text-3xl leading-[1.35] font-extrabold tracking-tight text-dh-900 sm:text-4xl lg:text-4xl"
                                 >
                                     سلامت، ساده‌تر از چیزی که فکر می‌کنید.
                                 </h1>
@@ -131,8 +133,8 @@ function addToCart(product: FeaturedProduct): void {
                             <p
                                 class="mt-5 max-w-xl text-base leading-8 text-dh-muted sm:text-lg"
                             >
-                                دارو، مکمل و محصولات بهداشتی را با اطلاعات کامل
-                                پیدا کنید و خریدتان را با خیال راحت انجام دهید.
+                                مکمل و محصولات بهداشتی را با اطلاعات کامل پیدا
+                                کنید و خریدتان را با خیال راحت انجام دهید.
                             </p>
                             <form class="mt-8" @submit.prevent="searchProducts">
                                 <div
@@ -175,7 +177,9 @@ function addToCart(product: FeaturedProduct): void {
                             </div>
                         </div>
 
-                        <div class="relative mx-auto w-full max-w-xl">
+                        <div
+                            class="relative mx-auto hidden w-full max-w-xl lg:block"
+                        >
                             <div
                                 class="absolute top-8 -right-8 h-44 w-44 rounded-full bg-dh-100 blur-2xl"
                             ></div>
@@ -333,7 +337,7 @@ function addToCart(product: FeaturedProduct): void {
                 </div>
             </section>
 
-            <section v-if="props.categories.length" class="py-12 sm:py-14">
+            <section v-if="props.categories.length" class="py-9 sm:py-14">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="flex items-end justify-between gap-4">
                         <div>
@@ -343,7 +347,7 @@ function addToCart(product: FeaturedProduct): void {
                             <h2
                                 class="mt-1 text-2xl font-extrabold text-dh-900 sm:text-3xl"
                             >
-                                دسته‌بندی‌های محبوب
+                                خرید بر اساس دسته‌بندی
                             </h2>
                         </div>
                         <Link
@@ -389,11 +393,16 @@ function addToCart(product: FeaturedProduct): void {
                             </span>
                             <span class="min-w-0">
                                 <span
-                                    class="block truncate font-extrabold text-dh-800 transition group-hover:text-dh-600"
+                                    class="block text-sm leading-6 font-extrabold text-dh-800 transition group-hover:text-dh-600"
                                     >{{ category.name }}</span
                                 >
                                 <span class="mt-1 block text-xs text-dh-muted"
-                                    >مشاهده محصولات</span
+                                    >{{
+                                        category.products_count.toLocaleString(
+                                            'fa-IR',
+                                        )
+                                    }}
+                                    محصول</span
                                 >
                             </span>
                             <svg
@@ -417,19 +426,19 @@ function addToCart(product: FeaturedProduct): void {
 
             <section
                 v-if="props.featuredProducts.length"
-                class="border-y border-dh-100 bg-white py-12 sm:py-14"
+                class="border-y border-dh-100 bg-white py-9 sm:py-14"
             >
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="flex items-end justify-between gap-4">
                         <div>
                             <span
                                 class="text-xs font-extrabold text-dh-green-600"
-                                >انتخاب‌شده برای شما</span
+                                >از کاتالوگ داروخونه</span
                             >
                             <h2
                                 class="mt-1 text-2xl font-extrabold text-dh-900 sm:text-3xl"
                             >
-                                محصولات منتخب
+                                محصولات برای بررسی
                             </h2>
                         </div>
                         <Link
@@ -443,14 +452,14 @@ function addToCart(product: FeaturedProduct): void {
                         <article
                             v-for="product in props.featuredProducts"
                             :key="product.id"
-                            class="group overflow-hidden rounded-3xl border border-dh-100 bg-white transition duration-200 hover:-translate-y-1 hover:border-dh-200 hover:shadow-[0_18px_40px_rgba(20,108,114,0.10)]"
+                            class="group overflow-hidden rounded-2xl border border-dh-100 bg-white transition duration-200 hover:-translate-y-0.5 hover:border-dh-200 hover:shadow-[0_18px_40px_rgba(20,108,114,0.10)]"
                         >
                             <Link
                                 :href="`/products/${product.slug}`"
                                 class="block"
                             >
                                 <div
-                                    class="relative aspect-square overflow-hidden bg-dh-50/60"
+                                    class="relative aspect-[4/3] overflow-hidden bg-dh-50/60"
                                 >
                                     <span
                                         v-if="
@@ -469,12 +478,7 @@ function addToCart(product: FeaturedProduct): void {
                                         loading="lazy"
                                         class="h-full w-full object-contain p-6 transition duration-300 group-hover:scale-[1.03]"
                                     />
-                                    <div
-                                        v-else
-                                        class="flex h-full items-center justify-center text-sm font-medium text-dh-muted"
-                                    >
-                                        بدون تصویر
-                                    </div>
+                                    <ProductPlaceholder v-else />
                                 </div>
                                 <div class="p-4">
                                     <p
@@ -576,11 +580,11 @@ function addToCart(product: FeaturedProduct): void {
                 </div>
             </section>
 
-            <section class="py-12 sm:py-14">
+            <section class="py-9 sm:py-14">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="grid gap-4 sm:grid-cols-3">
                         <div
-                            class="rounded-3xl border border-dh-100 bg-white p-6"
+                            class="rounded-2xl border border-dh-100 bg-white p-6"
                         >
                             <span
                                 class="flex size-11 items-center justify-center rounded-2xl bg-dh-50 text-dh-600"
@@ -608,7 +612,7 @@ function addToCart(product: FeaturedProduct): void {
                             </p>
                         </div>
                         <div
-                            class="rounded-3xl border border-dh-100 bg-white p-6"
+                            class="rounded-2xl border border-dh-100 bg-white p-6"
                         >
                             <span
                                 class="flex size-11 items-center justify-center rounded-2xl bg-dh-green-50 text-dh-green-600"
@@ -643,7 +647,7 @@ function addToCart(product: FeaturedProduct): void {
                             </p>
                         </div>
                         <div
-                            class="rounded-3xl border border-dh-100 bg-white p-6"
+                            class="rounded-2xl border border-dh-100 bg-white p-6"
                         >
                             <span
                                 class="flex size-11 items-center justify-center rounded-2xl bg-dh-50 text-dh-600"
@@ -679,6 +683,26 @@ function addToCart(product: FeaturedProduct): void {
                 </div>
             </section>
 
+            <section class="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
+                <div
+                    class="flex flex-col gap-5 rounded-2xl bg-dh-50 p-6 sm:flex-row sm:items-center sm:justify-between"
+                >
+                    <div>
+                        <h2 class="text-xl font-extrabold text-dh-900">
+                            پیش از خرید، پاسخ پرسش‌هایتان را پیدا کنید
+                        </h2>
+                        <p class="mt-2 text-sm leading-7 text-dh-muted">
+                            راهنمای قیمت، موجودی و تاریخ انقضا، همراه با شرایط
+                            ارسال و راه ارتباط با فروشگاه.
+                        </p>
+                    </div>
+                    <Link
+                        href="/information/faq"
+                        class="shrink-0 rounded-xl bg-dh-700 px-5 py-3 text-center text-sm font-bold text-white hover:bg-dh-800"
+                        >پرسش‌های متداول</Link
+                    >
+                </div>
+            </section>
             <StorefrontFooter />
         </main>
     </div>

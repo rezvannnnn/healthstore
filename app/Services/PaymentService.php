@@ -40,6 +40,9 @@ class PaymentService
                 if ($lockedOrder->status !== 'pending') {
                     throw new RuntimeException('فقط سفارش‌های در انتظار می‌توانند وارد فرایند پرداخت شوند.');
                 }
+                if ($lockedOrder->payments()->where('status', 'requires_review')->exists()) {
+                    throw new RuntimeException('پرداخت بانکی این سفارش تأیید شده و در حال بررسی است. دوباره پرداخت نکنید.');
+                }
                 $amount = (float) $lockedOrder->total_amount;
                 if ($amount <= 0) {
                     throw new RuntimeException('مبلغ پرداخت باید بیشتر از صفر باشد.');
@@ -100,6 +103,12 @@ class PaymentService
                     throw new RuntimeException('فقط پرداخت‌های در انتظار می‌توانند به درگاه ارسال شوند.');
                 }
 
+                if ($lockedOrder->payments()->where('status', 'requires_review')->exists()) {
+                    throw new RuntimeException('پرداخت بانکی این سفارش تأیید شده و در حال بررسی است. دوباره پرداخت نکنید.');
+                }
+                if (! $this->reservationService->hasCompleteReservation($lockedOrder)) {
+                    throw new RuntimeException('رزرو موجودی این سفارش منقضی یا آزاد شده است. سفارش را لغو و دوباره ثبت کنید.');
+                }
                 $this->assertPaymentGatewayConsistency($lockedPayment, $gateway);
                 $lockedPayment->setRelation('order', $lockedOrder);
 
@@ -232,6 +241,7 @@ class PaymentService
         $result = $gateway->verify($payment, $callbackData);
 
         return DB::transaction(function () use ($payment, $authority, $result): array {
+            $order = Order::query()->whereKey($payment->order_id)->lockForUpdate()->first();
             $lockedPayment = Payment::query()->whereKey($payment->id)->lockForUpdate()->first();
             if (! $lockedPayment) {
                 throw new RuntimeException('پرداخت پیدا نشد.');
@@ -266,7 +276,7 @@ class PaymentService
 
             $verified = (bool) ($result['verified'] ?? false);
             $transactionId = $result['transaction_id'] ?? null;
-            $order = $lockedPayment->order()->lockForUpdate()->first();
+            $order ??= $lockedPayment->order()->lockForUpdate()->first();
             if (! $order) {
                 throw new RuntimeException('سفارش مربوط به این پرداخت پیدا نشد.');
             }
@@ -294,25 +304,23 @@ class PaymentService
                 ];
             }
 
-            if ($order->status === 'cancelled') {
-                $reservations = $order->inventoryReservations()->where('status', 'active')->get();
-                foreach ($reservations as $reservation) {
-                    if (! $this->reservationService->release($reservation)) {
-                        throw new RuntimeException('آزادسازی رزرو موجودی سفارش انجام نشد.');
-                    }
+            if ($order->status === 'cancelled' || ! $this->reservationService->hasCompleteReservation($order)) {
+                foreach ($order->inventoryReservations()->where('status', 'active')->get() as $reservation) {
+                    $this->reservationService->release($reservation);
                 }
                 $couponService->releaseForOrder($order);
                 $lockedPayment->update([
-                    'status' => 'cancelled',
+                    'status' => 'requires_review',
+                    'paid_at' => now(),
                     'transaction_id' => (string) $transactionId,
                     'reference_number' => $result['reference_number'] ?? null,
                 ]);
                 $lockedPayment->refresh();
 
                 return [
-                    'status' => 'cancelled',
-                    'success' => false,
-                    'verified' => false,
+                    'status' => 'requires_review',
+                    'success' => true,
+                    'verified' => true,
                     'payment' => $lockedPayment,
                     'transaction_id' => $transactionId,
                     'reference_number' => $result['reference_number'] ?? null,
@@ -320,13 +328,24 @@ class PaymentService
                 ];
             }
 
-            $reservations = $order->inventoryReservations()->where('status', 'active')->get();
-            foreach ($reservations as $reservation) {
-                if (! $this->reservationService->consume($reservation)) {
-                    throw new RuntimeException('مصرف رزرو موجودی سفارش انجام نشد.');
-                }
+            try {
+                DB::transaction(function () use ($order, $couponService): void {
+                    if (! $this->reservationService->hasCompleteReservation($order)) {
+                        throw new RuntimeException('رزرو سفارش کامل نیست.');
+                    }
+                    foreach ($order->inventoryReservations()->where('status', 'active')->get() as $reservation) {
+                        if (! $this->reservationService->consume($reservation)) {
+                            throw new RuntimeException('مصرف رزرو انجام نشد.');
+                        }
+                    }
+                    $couponService->consumeForOrder($order);
+                });
+            } catch (RuntimeException $exception) {
+                $lockedPayment->update(['status' => 'requires_review', 'transaction_id' => (string) $transactionId, 'reference_number' => $result['reference_number'] ?? null, 'paid_at' => now()]);
+                $lockedPayment->refresh();
+
+                return ['status' => 'requires_review', 'success' => true, 'verified' => true, 'payment' => $lockedPayment, 'transaction_id' => $transactionId, 'gateway_response' => $gatewayResponse];
             }
-            $couponService->consumeForOrder($order);
             $now = now();
             $lockedPayment->update([
                 'status' => 'paid',
@@ -379,6 +398,9 @@ class PaymentService
                 $payment->update(['status' => 'cancelled', 'transaction_id' => $transactionId]);
 
                 return false;
+            }
+            if (! $this->reservationService->hasCompleteReservation($order)) {
+                throw new RuntimeException('سفارش رزرو کامل و معتبر ندارد.');
             }
             $reservations = $order->inventoryReservations()->where('status', 'active')->get();
             foreach ($reservations as $reservation) {

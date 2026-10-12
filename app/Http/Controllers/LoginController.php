@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\CartService;
 use App\Services\OtpService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -72,7 +73,9 @@ class LoginController extends Controller
         }
 
         Auth::login($user);
+        $request->session()->forget('password_hash_'.Auth::getDefaultDriver());
         $request->session()->regenerate();
+        app(CartService::class)->restoreIntent($request, $user->id);
 
         return redirect()->intended(
             route('home')
@@ -103,9 +106,7 @@ class LoginController extends Controller
             ->exists();
 
         if (! $userExists) {
-            throw ValidationException::withMessages([
-                'phone' => 'حسابی با این شماره موبایل پیدا نشد.',
-            ]);
+            return back()->with('status', 'کد تأیید ارسال شد.');
         }
 
         try {

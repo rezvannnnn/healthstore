@@ -563,9 +563,7 @@ class RegistrationTest extends TestCase
             ]
         );
 
-        $response->assertSessionHasErrors([
-            'phone',
-        ]);
+        $response->assertSessionHas('status', 'کد تأیید ارسال شد.')->assertSessionHasNoErrors();
 
         $this->assertGuest();
 
@@ -719,9 +717,7 @@ class RegistrationTest extends TestCase
             ]
         );
 
-        $response->assertSessionHasErrors([
-            'phone',
-        ]);
+        $response->assertSessionHas('status', 'کد تأیید ارسال شد.')->assertSessionHasNoErrors();
 
         $provider = app(
             SmsProviderInterface::class

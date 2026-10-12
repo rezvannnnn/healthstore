@@ -2,9 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\Inventory;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Product;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Services\InventoryReservationService;
 use App\Services\Payment\PaymentGatewayInterface;
 use App\Services\Payment\ZarinPalGateway;
@@ -22,6 +25,7 @@ class PaymentGatewayIntegrationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        config(['services.payment.provider' => 'zarinpal']);
 
         config([
             'services.zarinpal.merchant_id' => 'TEST-MERCHANT-ID',
@@ -36,7 +40,7 @@ class PaymentGatewayIntegrationTest extends TestCase
         User $user,
         int $totalAmount = 220000
     ): Order {
-        return Order::create([
+        $order = Order::create([
             'order_number' => 'ORD-GW-'.now()->format('YmdHis').'-'.uniqid(),
             'user_id' => $user->id,
             'customer_type' => 'b2c',
@@ -62,6 +66,13 @@ class PaymentGatewayIntegrationTest extends TestCase
             'delivered_at' => null,
             'cancelled_at' => null,
         ]);
+        $product = Product::factory()->create();
+        $warehouse = Warehouse::factory()->create();
+        Inventory::create(['product_id' => $product->id, 'warehouse_id' => $warehouse->id, 'quantity' => 10, 'is_active' => true]);
+        $order->items()->create(['product_id' => $product->id, 'product_name' => $product->name, 'quantity' => 1, 'unit_price' => $totalAmount, 'total_amount' => $totalAmount]);
+        (new InventoryReservationService)->reserve($order, $product, 1);
+
+        return $order;
     }
 
     public function test_payment_service_resolves_configured_gateway(): void

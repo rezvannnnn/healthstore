@@ -42,7 +42,7 @@ class OrderService
             }
 
             foreach ($cart->items as $item) {
-                if (! $item->product) {
+                if (! $item->product || ! $item->product->is_active) {
                     throw new RuntimeException('یکی از محصولات سبد خرید دیگر وجود ندارد.');
                 }
 

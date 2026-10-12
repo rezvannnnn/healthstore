@@ -19,11 +19,17 @@ class SettingsController extends Controller
         'support_phone' => '',
         'support_email' => '',
         'store_address' => '',
+        'support_hours' => '',
+        'license_title' => '',
+        'license_url' => '',
         'shipping_fee' => '0',
         'free_shipping_threshold' => '0',
         'min_order_amount' => '0',
-        'currency' => 'تومان',
+        'currency' => 'ریال',
         'timezone' => 'Asia/Tehran',
+        'shipping_policy' => '',
+        'returns_policy' => '',
+        'privacy_policy' => '',
     ];
 
     public function index(): Response
@@ -38,6 +44,7 @@ class SettingsController extends Controller
 
         return Inertia::render('Admin/Settings/Index', [
             'settings' => $settings,
+            'faqs' => StoreSetting::publicFaqs(),
         ]);
     }
 
@@ -48,10 +55,19 @@ class SettingsController extends Controller
             'support_phone' => ['nullable', 'string', 'max:50'],
             'support_email' => ['nullable', 'email', 'max:255'],
             'store_address' => ['nullable', 'string', 'max:1000'],
+            'support_hours' => ['nullable', 'string', 'max:255'],
+            'license_title' => ['nullable', 'string', 'max:255'],
+            'license_url' => ['nullable', 'url:https', 'max:2000'],
+            'faqs' => ['sometimes', 'array', 'max:20'],
+            'faqs.*.question' => ['required', 'string', 'max:200'],
+            'faqs.*.answer' => ['required', 'string', 'max:2000'],
             'shipping_fee' => ['required', 'numeric', 'min:0'],
             'free_shipping_threshold' => ['required', 'numeric', 'min:0'],
             'min_order_amount' => ['required', 'numeric', 'min:0'],
-            'currency' => ['required', 'string', 'max:50'],
+            'currency' => ['required', Rule::in(['ریال', 'IRR'])],
+            'shipping_policy' => ['nullable', 'string', 'max:20000'],
+            'returns_policy' => ['nullable', 'string', 'max:20000'],
+            'privacy_policy' => ['nullable', 'string', 'max:20000'],
             'timezone' => [
                 'required',
                 'string',
@@ -62,7 +78,7 @@ class SettingsController extends Controller
 
         DB::transaction(function () use ($data): void {
             foreach ($data as $key => $value) {
-                StoreSetting::setValue($key, (string) $value);
+                StoreSetting::setValue($key === 'faqs' ? 'faq_items' : $key, $key === 'faqs' ? json_encode($value, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) : (string) $value);
             }
         });
 
