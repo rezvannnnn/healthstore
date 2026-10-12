@@ -13,6 +13,8 @@ type AuthUser = {
 type SharedPageProps = {
     auth: {
         user: AuthUser | null;
+        account_url: string;
+        account_label: string;
     };
     cart?: {
         items_count?: number;
@@ -109,7 +111,8 @@ function navClass(section: ActiveSection): string {
                 <div class="mr-auto flex items-center gap-1">
                     <template v-if="page.props.auth.user">
                         <Link
-                            href="/account/profile"
+                            :href="page.props.auth.account_url"
+                            :aria-label="page.props.auth.account_label"
                             class="rounded-xl px-3 py-2 text-sm font-semibold text-dh-700 transition hover:bg-dh-50 sm:block"
                         >
                             {{ page.props.auth.user.name || 'حساب کاربری' }}
@@ -130,12 +133,12 @@ function navClass(section: ActiveSection): string {
                         </Link>
                     </template>
                     <Link
-                        :href="
-                            page.props.auth.user ? '/account/profile' : '/login'
-                        "
+                        :href="page.props.auth.account_url"
                         class="flex size-11 items-center justify-center rounded-2xl border border-dh-100 bg-white text-dh-700 transition hover:border-dh-300 hover:bg-dh-50 sm:hidden"
                         :aria-label="
-                            page.props.auth.user ? 'حساب کاربری' : 'ورود'
+                            page.props.auth.user
+                                ? page.props.auth.account_label
+                                : 'ورود'
                         "
                     >
                         <svg

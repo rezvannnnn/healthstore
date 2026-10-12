@@ -43,6 +43,10 @@ class HandleInertiaRequests extends Middleware
             'storefront' => fn () => StoreSetting::query()->whereIn('key', ['support_phone', 'support_email', 'store_address', 'support_hours', 'license_title', 'license_url'])->pluck('value', 'key')->all(),
             'auth' => [
                 'user' => $request->user(),
+                'account_url' => $request->user()?->isAdminPanelUser()
+                    ? ($request->user()->adminLandingPath() ?? route('admin.login'))
+                    : route($request->user() ? 'account.profile.index' : 'login'),
+                'account_label' => $request->user()?->isAdminPanelUser() ? 'پنل مدیریت' : 'حساب کاربری',
             ],
             'cart' => fn () => $request->user() ? [
                 'items_count' => Cart::query()
