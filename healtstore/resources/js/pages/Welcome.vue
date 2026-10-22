@@ -1,0 +1,709 @@
+<script setup lang="ts">
+import ProductPlaceholder from '@/components/ProductPlaceholder.vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import StorefrontHeader from '@/components/StorefrontHeader.vue';
+import BrandLogo from '@/components/BrandLogo.vue';
+import StorefrontFooter from '@/components/StorefrontFooter.vue';
+import { ref } from 'vue';
+
+interface Category {
+    id: number;
+    name: string;
+    slug: string;
+    products_count: number;
+}
+
+interface Seo {
+    title: string;
+    description: string;
+    canonical: string;
+}
+
+interface FeaturedProduct {
+    id: number;
+    name: string;
+    slug: string;
+    brand: string | null;
+    image: string | null;
+    price: number | null;
+    compare_at_price: number | null;
+    available: boolean;
+}
+
+const props = defineProps<{
+    seo: Seo;
+    featuredProducts: FeaturedProduct[];
+    categories: Category[];
+}>();
+
+const searchQuery = ref('');
+const addingProductId = ref<number | null>(null);
+
+function formatPrice(value: number | null): string {
+    return value === null
+        ? 'تماس بگیرید'
+        : `${value.toLocaleString('fa-IR')} ریال`;
+}
+
+function searchProducts(): void {
+    const query = searchQuery.value.trim();
+
+    router.get('/products', query ? { search: query } : {}, {
+        preserveState: true,
+        replace: true,
+    });
+}
+
+function addToCart(product: FeaturedProduct): void {
+    if (
+        !product.available ||
+        product.price === null ||
+        addingProductId.value !== null
+    ) {
+        return;
+    }
+
+    router.post(
+        '/cart/items',
+        { product_id: product.id, quantity: 1 },
+        {
+            preserveScroll: true,
+            onStart: () => {
+                addingProductId.value = product.id;
+            },
+            onFinish: () => {
+                addingProductId.value = null;
+            },
+        },
+    );
+}
+</script>
+
+<template>
+    <Head>
+        <title>{{ seo.title }}</title>
+        <meta name="description" :content="seo.description" />
+        <link rel="canonical" :href="seo.canonical" />
+        <meta property="og:title" :content="seo.title" />
+        <meta property="og:description" :content="seo.description" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" :content="seo.canonical" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" :content="seo.title" />
+        <meta name="twitter:description" :content="seo.description" />
+    </Head>
+
+    <div dir="rtl" class="min-h-screen bg-dh-surface pb-24 text-dh-ink md:pb-0">
+        <StorefrontHeader active="home" />
+
+        <main>
+            <section
+                class="relative overflow-hidden border-b border-dh-100 bg-white"
+            >
+                <div
+                    class="absolute inset-0 [background-image:radial-gradient(circle_at_12%_20%,rgba(29,166,169,0.14),transparent_28%),radial-gradient(circle_at_85%_70%,rgba(99,185,91,0.13),transparent_30%)] opacity-70"
+                ></div>
+                <div
+                    class="relative mx-auto max-w-7xl px-4 py-9 sm:px-6 sm:py-16 lg:px-8 lg:py-20"
+                >
+                    <div
+                        class="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]"
+                    >
+                        <div class="max-w-2xl">
+                            <span
+                                class="inline-flex items-center gap-2 rounded-full border border-dh-100 bg-dh-50 px-3.5 py-2 text-xs font-bold text-dh-700"
+                            >
+                                <span
+                                    class="size-2 rounded-full bg-dh-green-500"
+                                ></span>
+                                فروشگاه آنلاین سلامت
+                            </span>
+                            <div
+                                class="mt-5 flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-right"
+                            >
+                                <BrandLogo
+                                    imageClass="h-16 w-16 shrink-0 sm:h-20 sm:w-20"
+                                />
+                                <h1
+                                    class="text-3xl leading-[1.35] font-extrabold tracking-tight text-dh-900 sm:text-4xl lg:text-4xl"
+                                >
+                                    سلامت، ساده‌تر از چیزی که فکر می‌کنید.
+                                </h1>
+                            </div>
+                            <p
+                                class="mt-5 max-w-xl text-base leading-8 text-dh-muted sm:text-lg"
+                            >
+                                مکمل و محصولات بهداشتی را با اطلاعات کامل پیدا
+                                کنید و خریدتان را با خیال راحت انجام دهید.
+                            </p>
+                            <form class="mt-8" @submit.prevent="searchProducts">
+                                <div
+                                    class="flex rounded-2xl border border-dh-200 bg-white p-1.5 shadow-[0_12px_35px_rgba(20,108,114,0.10)]"
+                                >
+                                    <input
+                                        v-model="searchQuery"
+                                        type="search"
+                                        placeholder="مثلاً: ویتامین D، ضدآفتاب، شامپو..."
+                                        class="min-w-0 flex-1 bg-transparent px-4 text-sm outline-none sm:text-base"
+                                        aria-label="جستجوی سریع محصولات"
+                                    />
+                                    <button
+                                        type="submit"
+                                        class="rounded-xl bg-dh-600 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-dh-700 sm:px-7"
+                                    >
+                                        جستجو
+                                    </button>
+                                </div>
+                            </form>
+                            <div
+                                class="mt-6 flex flex-wrap gap-2 text-xs font-medium text-dh-muted"
+                            >
+                                <span>جستجوهای محبوب:</span>
+                                <Link
+                                    href="/products?search=ویتامین%20D"
+                                    class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700 hover:bg-dh-100"
+                                    >ویتامین D</Link
+                                >
+                                <Link
+                                    href="/products?search=ضدآفتاب"
+                                    class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700 hover:bg-dh-100"
+                                    >ضدآفتاب</Link
+                                >
+                                <Link
+                                    href="/products?search=شامپو"
+                                    class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700 hover:bg-dh-100"
+                                    >شامپو</Link
+                                >
+                            </div>
+                        </div>
+
+                        <div
+                            class="relative mx-auto hidden w-full max-w-xl lg:block"
+                        >
+                            <div
+                                class="absolute top-8 -right-8 h-44 w-44 rounded-full bg-dh-100 blur-2xl"
+                            ></div>
+                            <div
+                                class="absolute -bottom-8 left-0 h-48 w-48 rounded-full bg-dh-green-100 blur-2xl"
+                            ></div>
+                            <div
+                                class="relative rounded-[2rem] border border-dh-100 bg-dh-50 p-5 shadow-[0_22px_55px_rgba(20,108,114,0.12)] sm:p-7"
+                            >
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p
+                                            class="text-xs font-bold text-dh-600"
+                                        >
+                                            انتخاب روزمره
+                                        </p>
+                                        <h2
+                                            class="mt-1 text-xl font-extrabold text-dh-900"
+                                        >
+                                            برای مراقبت بهتر
+                                        </h2>
+                                    </div>
+                                    <div
+                                        class="flex size-12 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-dh-100"
+                                    >
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            class="size-6 text-dh-green-600"
+                                            fill="none"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                d="M19 4.5c-5.6 0-10.1 2.7-10.8 7.4-.5 3.3 1.7 6.3 5.1 6.6 4.4.4 6.2-4.5 5.7-14Z"
+                                                stroke="currentColor"
+                                                stroke-width="1.6"
+                                            />
+                                            <path
+                                                d="M4 19.5c2.1-4.2 5.1-6.6 10.1-8.5"
+                                                stroke="currentColor"
+                                                stroke-width="1.6"
+                                                stroke-linecap="round"
+                                            />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="mt-6 grid grid-cols-2 gap-3">
+                                    <div
+                                        class="rounded-2xl bg-white p-4 ring-1 ring-dh-100"
+                                    >
+                                        <div
+                                            class="flex items-center gap-2 text-dh-600"
+                                        >
+                                            <span
+                                                class="flex size-9 items-center justify-center rounded-xl bg-dh-50"
+                                            >
+                                                <svg
+                                                    viewBox="0 0 24 24"
+                                                    class="size-5"
+                                                    fill="none"
+                                                    aria-hidden="true"
+                                                >
+                                                    <path
+                                                        d="M12 3v18M3 12h18"
+                                                        stroke="currentColor"
+                                                        stroke-width="2"
+                                                        stroke-linecap="round"
+                                                    />
+                                                </svg>
+                                            </span>
+                                            <span class="text-xs font-bold"
+                                                >سلامت و مکمل</span
+                                            >
+                                        </div>
+                                        <p
+                                            class="mt-3 text-sm leading-6 text-dh-muted"
+                                        >
+                                            انتخاب‌های روزمره
+                                        </p>
+                                    </div>
+                                    <div
+                                        class="rounded-2xl bg-white p-4 ring-1 ring-dh-100"
+                                    >
+                                        <div
+                                            class="flex items-center gap-2 text-dh-green-600"
+                                        >
+                                            <span
+                                                class="flex size-9 items-center justify-center rounded-xl bg-dh-green-50"
+                                            >
+                                                <svg
+                                                    viewBox="0 0 24 24"
+                                                    class="size-5"
+                                                    fill="none"
+                                                    aria-hidden="true"
+                                                >
+                                                    <path
+                                                        d="M7 13c-2.8-1.6-3.5-5.2-1.4-7.3C7.8 3.5 11.4 4.2 13 7c1.6-2.8 5.2-3.5 7.3-1.4 2.1 2.1 1.4 5.7-1.4 7.3"
+                                                        stroke="currentColor"
+                                                        stroke-width="1.6"
+                                                        stroke-linecap="round"
+                                                    />
+                                                    <path
+                                                        d="M12 20c-1.6-5 0-9.6 4.2-13"
+                                                        stroke="currentColor"
+                                                        stroke-width="1.6"
+                                                        stroke-linecap="round"
+                                                    />
+                                                </svg>
+                                            </span>
+                                            <span class="text-xs font-bold"
+                                                >مراقبت شخصی</span
+                                            >
+                                        </div>
+                                        <p
+                                            class="mt-3 text-sm leading-6 text-dh-muted"
+                                        >
+                                            پوست، مو و بهداشت
+                                        </p>
+                                    </div>
+                                </div>
+                                <div
+                                    class="mt-3 rounded-2xl bg-dh-900 px-5 py-4 text-white"
+                                >
+                                    <div
+                                        class="flex items-center justify-between gap-4"
+                                    >
+                                        <div>
+                                            <p
+                                                class="text-xs font-medium text-dh-200"
+                                            >
+                                                مسیر خرید
+                                            </p>
+                                            <p class="mt-1 text-sm font-bold">
+                                                انتخاب → بررسی → سفارش → پیگیری
+                                            </p>
+                                        </div>
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            class="size-6 text-dh-200"
+                                            fill="none"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                d="M5 12h14M13 6l6 6-6 6"
+                                                stroke="currentColor"
+                                                stroke-width="1.8"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                            />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section v-if="props.categories.length" class="py-9 sm:py-14">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-end justify-between gap-4">
+                        <div>
+                            <span class="text-xs font-extrabold text-dh-500"
+                                >دسترسی سریع</span
+                            >
+                            <h2
+                                class="mt-1 text-2xl font-extrabold text-dh-900 sm:text-3xl"
+                            >
+                                خرید بر اساس دسته‌بندی
+                            </h2>
+                        </div>
+                        <Link
+                            href="/categories"
+                            class="hidden rounded-xl px-3 py-2 text-sm font-bold text-dh-600 hover:bg-dh-50 sm:block"
+                            >همه دسته‌بندی‌ها</Link
+                        >
+                    </div>
+                    <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        <Link
+                            v-for="(category, index) in props.categories"
+                            :key="category.id"
+                            :href="'/categories/' + category.slug"
+                            class="group flex items-center gap-4 rounded-2xl border border-dh-100 bg-white p-4 transition duration-200 hover:-translate-y-0.5 hover:border-dh-300 hover:shadow-[0_10px_30px_rgba(20,108,114,0.08)]"
+                        >
+                            <span
+                                class="flex size-12 shrink-0 items-center justify-center rounded-2xl"
+                                :class="
+                                    index % 2 === 0
+                                        ? 'bg-dh-50 text-dh-600'
+                                        : 'bg-dh-green-50 text-dh-green-600'
+                                "
+                            >
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    class="size-6"
+                                    fill="none"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        d="M6 6.5A2.5 2.5 0 0 1 8.5 4H19v11.5A2.5 2.5 0 0 1 16.5 18h-8A2.5 2.5 0 0 1 6 15.5v-9Z"
+                                        stroke="currentColor"
+                                        stroke-width="1.7"
+                                        stroke-linejoin="round"
+                                    />
+                                    <path
+                                        d="M9 8h7M9 11h5"
+                                        stroke="currentColor"
+                                        stroke-width="1.7"
+                                        stroke-linecap="round"
+                                    />
+                                </svg>
+                            </span>
+                            <span class="min-w-0">
+                                <span
+                                    class="block text-sm leading-6 font-extrabold text-dh-800 transition group-hover:text-dh-600"
+                                    >{{ category.name }}</span
+                                >
+                                <span class="mt-1 block text-xs text-dh-muted"
+                                    >{{
+                                        category.products_count.toLocaleString(
+                                            'fa-IR',
+                                        )
+                                    }}
+                                    محصول</span
+                                >
+                            </span>
+                            <svg
+                                viewBox="0 0 24 24"
+                                class="mr-auto size-5 text-dh-300 transition group-hover:-translate-x-0.5 group-hover:text-dh-500"
+                                fill="none"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="m15 6-6 6 6 6"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                />
+                            </svg>
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
+            <section
+                v-if="props.featuredProducts.length"
+                class="border-y border-dh-100 bg-white py-9 sm:py-14"
+            >
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-end justify-between gap-4">
+                        <div>
+                            <span
+                                class="text-xs font-extrabold text-dh-green-600"
+                                >از کاتالوگ داروخونه</span
+                            >
+                            <h2
+                                class="mt-1 text-2xl font-extrabold text-dh-900 sm:text-3xl"
+                            >
+                                محصولات برای بررسی
+                            </h2>
+                        </div>
+                        <Link
+                            href="/products"
+                            class="hidden rounded-xl px-3 py-2 text-sm font-bold text-dh-600 hover:bg-dh-50 sm:block"
+                            >مشاهده همه</Link
+                        >
+                    </div>
+
+                    <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <article
+                            v-for="product in props.featuredProducts"
+                            :key="product.id"
+                            class="group overflow-hidden rounded-2xl border border-dh-100 bg-white transition duration-200 hover:-translate-y-0.5 hover:border-dh-200 hover:shadow-[0_18px_40px_rgba(20,108,114,0.10)]"
+                        >
+                            <Link
+                                :href="`/products/${product.slug}`"
+                                class="block"
+                            >
+                                <div
+                                    class="relative aspect-[4/3] overflow-hidden bg-dh-50/60"
+                                >
+                                    <span
+                                        v-if="
+                                            product.compare_at_price &&
+                                            product.compare_at_price >
+                                                (product.price ?? 0)
+                                        "
+                                        class="absolute top-3 right-3 z-10 rounded-full bg-dh-green-500 px-2.5 py-1 text-[11px] font-extrabold text-white"
+                                    >
+                                        تخفیف
+                                    </span>
+                                    <img
+                                        v-if="product.image"
+                                        :src="product.image"
+                                        :alt="product.name"
+                                        loading="lazy"
+                                        class="h-full w-full object-contain p-6 transition duration-300 group-hover:scale-[1.03]"
+                                    />
+                                    <ProductPlaceholder v-else />
+                                </div>
+                                <div class="p-4">
+                                    <p
+                                        v-if="product.brand"
+                                        class="text-xs font-semibold text-dh-muted"
+                                    >
+                                        {{ product.brand }}
+                                    </p>
+                                    <h3
+                                        class="mt-1 line-clamp-2 min-h-12 text-sm leading-6 font-extrabold text-dh-900"
+                                    >
+                                        {{ product.name }}
+                                    </h3>
+                                    <div
+                                        class="mt-4 flex items-end justify-between gap-3"
+                                    >
+                                        <div>
+                                            <div
+                                                class="font-extrabold text-dh-900"
+                                            >
+                                                {{ formatPrice(product.price) }}
+                                            </div>
+                                            <div
+                                                v-if="
+                                                    product.compare_at_price &&
+                                                    product.compare_at_price >
+                                                        (product.price ?? 0)
+                                                "
+                                                class="mt-1 text-xs text-dh-muted line-through"
+                                            >
+                                                {{
+                                                    formatPrice(
+                                                        product.compare_at_price,
+                                                    )
+                                                }}
+                                            </div>
+                                        </div>
+                                        <span
+                                            class="rounded-full px-2.5 py-1 text-[11px] font-bold"
+                                            :class="
+                                                product.available
+                                                    ? 'bg-dh-green-50 text-dh-green-700'
+                                                    : 'bg-dh-100 text-dh-muted'
+                                            "
+                                        >
+                                            {{
+                                                product.available
+                                                    ? 'موجود'
+                                                    : 'ناموجود'
+                                            }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </Link>
+                            <div class="px-4 pb-4">
+                                <button
+                                    type="button"
+                                    :disabled="
+                                        !product.available ||
+                                        product.price === null ||
+                                        addingProductId !== null
+                                    "
+                                    :aria-busy="addingProductId === product.id"
+                                    class="w-full rounded-xl bg-dh-600 px-4 py-3 text-sm font-extrabold text-white transition hover:bg-dh-700 disabled:cursor-not-allowed disabled:bg-dh-100 disabled:text-dh-muted"
+                                    @click="addToCart(product)"
+                                >
+                                    <span
+                                        v-if="addingProductId === product.id"
+                                        class="inline-flex items-center gap-2"
+                                    >
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            class="size-4 animate-spin"
+                                            fill="none"
+                                            aria-hidden="true"
+                                        >
+                                            <circle
+                                                cx="12"
+                                                cy="12"
+                                                r="9"
+                                                stroke="currentColor"
+                                                stroke-width="2"
+                                                opacity="0.25"
+                                            />
+                                            <path
+                                                d="M21 12a9 9 0 0 1-9 9"
+                                                stroke="currentColor"
+                                                stroke-width="2"
+                                                stroke-linecap="round"
+                                            />
+                                        </svg>
+                                        در حال افزودن…
+                                    </span>
+                                    <span v-else>افزودن به سبد خرید</span>
+                                </button>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="py-9 sm:py-14">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div class="grid gap-4 sm:grid-cols-3">
+                        <div
+                            class="rounded-2xl border border-dh-100 bg-white p-6"
+                        >
+                            <span
+                                class="flex size-11 items-center justify-center rounded-2xl bg-dh-50 text-dh-600"
+                            >
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    class="size-5"
+                                    fill="none"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        d="M5 7h14M5 12h14M5 17h9"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                        stroke-linecap="round"
+                                    />
+                                </svg>
+                            </span>
+                            <h3 class="mt-4 font-extrabold text-dh-900">
+                                اطلاعات روشن و کامل
+                            </h3>
+                            <p class="mt-2 text-sm leading-7 text-dh-muted">
+                                اطلاعات محصول، قیمت و موجودی در مسیر خرید بررسی
+                                می‌شود.
+                            </p>
+                        </div>
+                        <div
+                            class="rounded-2xl border border-dh-100 bg-white p-6"
+                        >
+                            <span
+                                class="flex size-11 items-center justify-center rounded-2xl bg-dh-green-50 text-dh-green-600"
+                            >
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    class="size-5"
+                                    fill="none"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        d="M12 3.5 18 6v5.4c0 4-2.4 7.2-6 9.1-3.6-1.9-6-5.1-6-9.1V6l6-2.5Z"
+                                        stroke="currentColor"
+                                        stroke-width="1.7"
+                                        stroke-linejoin="round"
+                                    />
+                                    <path
+                                        d="m9 12 2 2 4-4"
+                                        stroke="currentColor"
+                                        stroke-width="1.7"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    />
+                                </svg>
+                            </span>
+                            <h3 class="mt-4 font-extrabold text-dh-900">
+                                خرید با خیال راحت
+                            </h3>
+                            <p class="mt-2 text-sm leading-7 text-dh-muted">
+                                فرآیند سفارش و پرداخت با بررسی‌های لازم انجام
+                                می‌شود.
+                            </p>
+                        </div>
+                        <div
+                            class="rounded-2xl border border-dh-100 bg-white p-6"
+                        >
+                            <span
+                                class="flex size-11 items-center justify-center rounded-2xl bg-dh-50 text-dh-600"
+                            >
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    class="size-5"
+                                    fill="none"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        d="M5 12a7 7 0 1 0 14 0 7 7 0 0 0-14 0Z"
+                                        stroke="currentColor"
+                                        stroke-width="1.7"
+                                    />
+                                    <path
+                                        d="M12 8v4l2.7 1.8"
+                                        stroke="currentColor"
+                                        stroke-width="1.7"
+                                        stroke-linecap="round"
+                                    />
+                                </svg>
+                            </span>
+                            <h3 class="mt-4 font-extrabold text-dh-900">
+                                پیگیری سفارش
+                            </h3>
+                            <p class="mt-2 text-sm leading-7 text-dh-muted">
+                                وضعیت سفارش پس از ثبت از داخل حساب کاربری قابل
+                                پیگیری است.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
+                <div
+                    class="flex flex-col gap-5 rounded-2xl bg-dh-50 p-6 sm:flex-row sm:items-center sm:justify-between"
+                >
+                    <div>
+                        <h2 class="text-xl font-extrabold text-dh-900">
+                            پیش از خرید، پاسخ پرسش‌هایتان را پیدا کنید
+                        </h2>
+                        <p class="mt-2 text-sm leading-7 text-dh-muted">
+                            راهنمای قیمت، موجودی و تاریخ انقضا، همراه با شرایط
+                            ارسال و راه ارتباط با فروشگاه.
+                        </p>
+                    </div>
+                    <Link
+                        href="/information/faq"
+                        class="shrink-0 rounded-xl bg-dh-700 px-5 py-3 text-center text-sm font-bold text-white hover:bg-dh-800"
+                        >پرسش‌های متداول</Link
+                    >
+                </div>
+            </section>
+            <StorefrontFooter />
+        </main>
+    </div>
+</template>

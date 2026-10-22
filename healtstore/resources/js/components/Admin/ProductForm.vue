@@ -1,0 +1,638 @@
+<script setup lang="ts">
+import { useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
+
+type Option = { id: number; name: string };
+type ProductImage = {
+    id: number;
+    image_url: string | null;
+    alt_text: string | null;
+    is_primary: boolean;
+    sort_order: number;
+};
+type Product = {
+    id: number;
+    name: string;
+    slug: string | null;
+    sku: string | null;
+    barcode: string | null;
+    brand_id: number | null;
+    category_id: number | null;
+    product_type: string | null;
+    unit: string | null;
+    quantity_per_unit: number | null;
+    short_description: string | null;
+    description: string | null;
+    specifications?: Record<string, string> | null;
+    seo_title: string | null;
+    seo_description: string | null;
+    canonical_url: string | null;
+    expiry_date: string | null;
+    main_image: string | null;
+    main_image_url?: string | null;
+    images?: ProductImage[];
+    is_active: boolean;
+    is_featured: boolean;
+    sort_order: number;
+    price: number | null;
+    compare_at_price: number | null;
+};
+
+type FormData = {
+    name: string;
+    slug: string;
+    sku: string;
+    barcode: string;
+    brand_id: number | null;
+    category_id: number | null;
+    product_type: string;
+    unit: string;
+    quantity_per_unit: number | null;
+    short_description: string;
+    description: string;
+    specifications: Record<string, string>;
+    existing_images: {
+        id: number;
+        alt_text: string;
+        sort_order: number;
+        remove: boolean;
+    }[];
+    seo_title: string;
+    seo_description: string;
+    canonical_url: string;
+    expiry_date: string;
+    main_image: string;
+    main_image_file: File | null;
+    gallery_files: File[];
+    is_active: boolean;
+    is_featured: boolean;
+    sort_order: number;
+    price: number | null;
+    compare_at_price: number | null;
+};
+
+const props = defineProps<{
+    product: Product | null;
+    brands: Option[];
+    categories: Option[];
+    submitUrl: string;
+    method: 'post' | 'put';
+    title: string;
+}>();
+
+const form = useForm<FormData>({
+    name: props.product?.name ?? '',
+    slug: props.product?.slug ?? '',
+    sku: props.product?.sku ?? '',
+    barcode: props.product?.barcode ?? '',
+    brand_id: props.product?.brand_id ?? null,
+    category_id: props.product?.category_id ?? null,
+    product_type: props.product?.product_type ?? '',
+    unit: props.product?.unit ?? '',
+    quantity_per_unit: props.product?.quantity_per_unit ?? null,
+    short_description: props.product?.short_description ?? '',
+    description: props.product?.description ?? '',
+    specifications: props.product?.specifications ?? {},
+    existing_images: (props.product?.images ?? []).map((image) => ({
+        id: image.id,
+        alt_text: image.alt_text ?? '',
+        sort_order: image.sort_order,
+        remove: false,
+    })),
+    seo_title: props.product?.seo_title ?? '',
+    seo_description: props.product?.seo_description ?? '',
+    canonical_url: props.product?.canonical_url ?? '',
+    expiry_date: props.product?.expiry_date ?? '',
+    main_image: props.product?.main_image ?? '',
+    main_image_file: null,
+    gallery_files: [],
+    is_active: props.product?.is_active ?? true,
+    is_featured: props.product?.is_featured ?? false,
+    sort_order: props.product?.sort_order ?? 0,
+    price: props.product?.price ?? null,
+    compare_at_price: props.product?.compare_at_price ?? null,
+});
+
+function setGalleryFiles(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    form.gallery_files = Array.from(input.files ?? []);
+}
+
+const specificationText = ref(
+    Object.entries(props.product?.specifications ?? {})
+        .map(([key, value]) => `${key}: ${value}`)
+        .join('\n'),
+);
+const submit = () => {
+    form.specifications = Object.fromEntries(
+        specificationText.value
+            .split('\n')
+            .filter((line) => line.includes(':'))
+            .map((line) => {
+                const index = line.indexOf(':');
+
+                return [
+                    line.slice(0, index).trim(),
+                    line.slice(index + 1).trim(),
+                ];
+            }),
+    );
+
+    if (props.method === 'post') {
+        form.post(props.submitUrl, { forceFormData: true });
+
+        return;
+    }
+
+    form.transform((data) => ({ ...data, _method: 'put' })).post(
+        props.submitUrl,
+        {
+            forceFormData: true,
+            onFinish: () => form.transform((data) => data),
+        },
+    );
+};
+</script>
+
+<template>
+    <div
+        dir="rtl"
+        class="min-h-screen bg-dh-50 px-4 py-8 text-dh-900 sm:px-6 lg:px-8"
+    >
+        <div class="mx-auto max-w-5xl">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold">{{ title }}</h1>
+                <p class="mt-1 text-sm text-dh-muted">
+                    اطلاعات پایه، قیمت و تنظیمات سئو محصول
+                </p>
+            </div>
+
+            <form @submit.prevent="submit" class="space-y-6">
+                <section class="rounded-2xl bg-white p-6">
+                    <label for="specifications" class="font-bold"
+                        >مشخصات محصول (هر خط: عنوان: مقدار)</label
+                    >
+                    <textarea
+                        id="specifications"
+                        v-model="specificationText"
+                        rows="6"
+                        class="mt-3 w-full rounded-xl border p-3"
+                    />
+                    <div
+                        v-for="image in form.existing_images"
+                        :key="image.id"
+                        class="mt-3 flex flex-wrap gap-3"
+                    >
+                        <img
+                            :src="
+                                props.product?.images?.find(
+                                    (item) => item.id === image.id,
+                                )?.image_url || undefined
+                            "
+                            alt="تصویر گالری"
+                            class="size-16 object-contain"
+                        />
+                        <label
+                            >متن جایگزین<input
+                                v-model="image.alt_text"
+                                maxlength="255"
+                                class="block rounded border p-2"
+                        /></label>
+                        <label
+                            >ترتیب<input
+                                v-model.number="image.sort_order"
+                                type="number"
+                                min="0"
+                                class="block w-20 rounded border p-2"
+                        /></label>
+                        <label
+                            ><input v-model="image.remove" type="checkbox" />
+                            حذف در زمان ذخیره</label
+                        >
+                    </div>
+                </section>
+                <section
+                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
+                >
+                    <h2 class="mb-5 text-lg font-semibold">اطلاعات اصلی</h2>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <label class="block md:col-span-2">
+                            <span class="text-sm font-medium">نام محصول *</span>
+                            <input
+                                v-model="form.name"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                            />
+                            <span
+                                v-if="form.errors.name"
+                                class="text-sm text-red-600"
+                                >{{ form.errors.name }}</span
+                            >
+                        </label>
+
+                        <label class="block">
+                            <span class="text-sm font-medium">Slug</span>
+                            <input
+                                v-model="form.slug"
+                                dir="ltr"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                            />
+                            <span
+                                v-if="form.errors.slug"
+                                class="text-sm text-red-600"
+                                >{{ form.errors.slug }}</span
+                            >
+                        </label>
+
+                        <label class="block">
+                            <span class="text-sm font-medium">SKU</span>
+                            <input
+                                v-model="form.sku"
+                                dir="ltr"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                            />
+                            <span
+                                v-if="form.errors.sku"
+                                class="text-sm text-red-600"
+                                >{{ form.errors.sku }}</span
+                            >
+                        </label>
+
+                        <label class="block">
+                            <span class="text-sm font-medium">بارکد</span>
+                            <input
+                                v-model="form.barcode"
+                                dir="ltr"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                            />
+                        </label>
+
+                        <label class="block">
+                            <span class="text-sm font-medium">برند</span>
+                            <select
+                                v-model="form.brand_id"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                            >
+                                <option :value="null">بدون برند</option>
+                                <option
+                                    v-for="brand in brands"
+                                    :key="brand.id"
+                                    :value="brand.id"
+                                >
+                                    {{ brand.name }}
+                                </option>
+                            </select>
+                        </label>
+
+                        <label class="block">
+                            <span class="text-sm font-medium">دسته‌بندی</span>
+                            <select
+                                v-model="form.category_id"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                            >
+                                <option :value="null">بدون دسته‌بندی</option>
+                                <option
+                                    v-for="category in categories"
+                                    :key="category.id"
+                                    :value="category.id"
+                                >
+                                    {{ category.name }}
+                                </option>
+                            </select>
+                        </label>
+
+                        <label class="block">
+                            <span class="text-sm font-medium">نوع محصول</span>
+                            <input
+                                v-model="form.product_type"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                            />
+                        </label>
+
+                        <label class="block">
+                            <span class="text-sm font-medium">واحد</span>
+                            <input
+                                v-model="form.unit"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                                placeholder="عدد، بسته، میلی‌لیتر و ..."
+                            />
+                        </label>
+
+                        <label class="block">
+                            <span class="text-sm font-medium"
+                                >تعداد در واحد</span
+                            >
+                            <input
+                                v-model.number="form.quantity_per_unit"
+                                type="number"
+                                min="1"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                            />
+                        </label>
+                    </div>
+                </section>
+
+                <section
+                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
+                >
+                    <h2 class="mb-5 text-lg font-semibold">قیمت</h2>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <label class="block">
+                            <span class="text-sm font-medium"
+                                >قیمت فروش (ریال) *</span
+                            >
+                            <input
+                                v-model.number="form.price"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                            />
+                            <span
+                                v-if="form.errors.price"
+                                class="text-sm text-red-600"
+                                >{{ form.errors.price }}</span
+                            >
+                        </label>
+                        <label class="block">
+                            <span class="text-sm font-medium"
+                                >قیمت قبل از تخفیف (ریال)</span
+                            >
+                            <input
+                                v-model.number="form.compare_at_price"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                            />
+                            <span
+                                v-if="form.errors.compare_at_price"
+                                class="text-sm text-red-600"
+                                >{{ form.errors.compare_at_price }}</span
+                            >
+                        </label>
+                    </div>
+                </section>
+
+                <section
+                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
+                >
+                    <h2 class="mb-5 text-lg font-semibold">
+                        توضیحات و اطلاعات تکمیلی
+                    </h2>
+                    <div class="space-y-4">
+                        <label class="block">
+                            <span class="text-sm font-medium">توضیح کوتاه</span>
+                            <input
+                                v-model="form.short_description"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                            />
+                            <span
+                                v-if="form.errors.short_description"
+                                class="text-sm text-red-600"
+                                >{{ form.errors.short_description }}</span
+                            >
+                        </label>
+                        <label class="block">
+                            <span class="text-sm font-medium"
+                                >توضیحات کامل</span
+                            >
+                            <textarea
+                                v-model="form.description"
+                                rows="6"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                            />
+                        </label>
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <label class="block">
+                                <span class="text-sm font-medium"
+                                    >تاریخ انقضا</span
+                                >
+                                <input
+                                    v-model="form.expiry_date"
+                                    type="date"
+                                    class="mt-1 w-full rounded-lg border-dh-200"
+                                />
+                                <span
+                                    v-if="form.errors.expiry_date"
+                                    class="text-sm text-red-600"
+                                    >{{ form.errors.expiry_date }}</span
+                                >
+                            </label>
+                            <label class="block">
+                                <span class="text-sm font-medium"
+                                    >تصویر اصلی</span
+                                >
+                                <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    class="mt-1 block w-full rounded-lg border-dh-200 bg-white p-2"
+                                    @change="
+                                        form.main_image_file =
+                                            ($event.target as HTMLInputElement)
+                                                .files?.[0] ?? null
+                                    "
+                                />
+                                <span class="mt-1 block text-xs text-dh-muted">
+                                    JPG، PNG یا WebP — حداکثر ۵ مگابایت
+                                </span>
+                                <a
+                                    v-if="props.product?.main_image_url"
+                                    :href="props.product.main_image_url"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    class="mt-2 inline-block text-sm text-dh-700 underline"
+                                >
+                                    مشاهده تصویر فعلی
+                                </a>
+                                <span
+                                    v-if="form.errors.main_image_file"
+                                    class="text-sm text-red-600"
+                                    >{{ form.errors.main_image_file }}</span
+                                >
+                            </label>
+                        </div>
+
+                        <div
+                            class="rounded-xl border border-dh-100 bg-dh-50/60 p-4"
+                        >
+                            <label class="block">
+                                <span class="text-sm font-medium"
+                                    >تصاویر گالری</span
+                                >
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/jpeg,image/png,image/webp"
+                                    class="mt-1 block w-full rounded-lg border-dh-200 bg-white p-2"
+                                    @change="setGalleryFiles"
+                                />
+                                <span class="mt-1 block text-xs text-dh-muted">
+                                    حداکثر ۸ تصویر جدید، هرکدام تا ۵ مگابایت —
+                                    JPG، PNG یا WebP
+                                </span>
+                                <span
+                                    v-if="form.gallery_files.length"
+                                    class="mt-2 block text-xs font-bold text-dh-700"
+                                >
+                                    {{
+                                        form.gallery_files.length.toLocaleString(
+                                            'fa-IR',
+                                        )
+                                    }}
+                                    تصویر جدید انتخاب شده است.
+                                </span>
+                                <span
+                                    v-if="form.errors.gallery_files"
+                                    class="text-sm text-red-600"
+                                    >{{ form.errors.gallery_files }}</span
+                                >
+                                <span
+                                    v-if="form.errors['gallery_files.0']"
+                                    class="text-sm text-red-600"
+                                    >{{ form.errors['gallery_files.0'] }}</span
+                                >
+                            </label>
+
+                            <div
+                                v-if="props.product?.images?.length"
+                                class="mt-4"
+                            >
+                                <p class="text-xs font-bold text-dh-muted">
+                                    تصاویر فعلی
+                                </p>
+                                <div
+                                    class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4"
+                                >
+                                    <a
+                                        v-for="image in props.product.images"
+                                        :key="image.id"
+                                        :href="image.image_url ?? undefined"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        class="aspect-square overflow-hidden rounded-lg border border-dh-100 bg-white p-1"
+                                    >
+                                        <img
+                                            v-if="image.image_url"
+                                            :src="image.image_url"
+                                            :alt="
+                                                image.alt_text || 'تصویر محصول'
+                                            "
+                                            class="h-full w-full object-contain"
+                                        />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section
+                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
+                >
+                    <h2 class="mb-5 text-lg font-semibold">سئو</h2>
+                    <div class="space-y-4">
+                        <label class="block">
+                            <span class="text-sm font-medium">عنوان سئو</span>
+                            <input
+                                v-model="form.seo_title"
+                                maxlength="255"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                                placeholder="در صورت خالی بودن، نام محصول استفاده می‌شود"
+                            />
+                            <span
+                                v-if="form.errors.seo_title"
+                                class="text-sm text-red-600"
+                                >{{ form.errors.seo_title }}</span
+                            >
+                        </label>
+                        <label class="block">
+                            <span class="text-sm font-medium">توضیحات سئو</span>
+                            <textarea
+                                v-model="form.seo_description"
+                                maxlength="160"
+                                rows="4"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                                placeholder="حداکثر ۱۶۰ کاراکتر"
+                            />
+                            <span class="mt-1 block text-xs text-dh-muted">
+                                {{ form.seo_description.length }} / 160
+                            </span>
+                            <span
+                                v-if="form.errors.seo_description"
+                                class="text-sm text-red-600"
+                                >{{ form.errors.seo_description }}</span
+                            >
+                        </label>
+                        <label class="block">
+                            <span class="text-sm font-medium"
+                                >Canonical URL</span
+                            >
+                            <input
+                                v-model="form.canonical_url"
+                                dir="ltr"
+                                maxlength="2048"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                                placeholder="در صورت خالی بودن، آدرس استاندارد محصول تولید می‌شود"
+                            />
+                            <span
+                                v-if="form.errors.canonical_url"
+                                class="text-sm text-red-600"
+                                >{{ form.errors.canonical_url }}</span
+                            >
+                        </label>
+                    </div>
+                </section>
+
+                <section
+                    class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-dh-100"
+                >
+                    <h2 class="mb-5 text-lg font-semibold">وضعیت</h2>
+                    <div class="grid gap-4 md:grid-cols-3">
+                        <label class="flex items-center gap-2">
+                            <input
+                                v-model="form.is_active"
+                                type="checkbox"
+                                class="rounded border-dh-200"
+                            />
+                            <span>محصول فعال باشد</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input
+                                v-model="form.is_featured"
+                                type="checkbox"
+                                class="rounded border-dh-200"
+                            />
+                            <span>محصول ویژه باشد</span>
+                        </label>
+                        <label class="block">
+                            <span class="text-sm font-medium">ترتیب نمایش</span>
+                            <input
+                                v-model.number="form.sort_order"
+                                type="number"
+                                min="0"
+                                class="mt-1 w-full rounded-lg border-dh-200"
+                            />
+                        </label>
+                    </div>
+                </section>
+
+                <div class="flex items-center justify-between">
+                    <a
+                        href="/admin/products"
+                        class="rounded-lg border border-dh-200 bg-white px-5 py-2.5 text-sm font-medium hover:bg-dh-50"
+                        >انصراف</a
+                    >
+                    <button
+                        :disabled="form.processing"
+                        type="submit"
+                        class="rounded-lg bg-dh-700 px-6 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+                    >
+                        {{
+                            form.processing ? 'در حال ذخیره...' : 'ذخیره محصول'
+                        }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</template>

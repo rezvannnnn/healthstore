@@ -1,0 +1,385 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\ProductImage;
+use App\Models\ProductPrice;
+use App\Services\CartService;
+use App\Services\InventoryService;
+use App\Services\MediaService;
+use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
+use Throwable;
+
+class ProductController extends Controller
+{
+    public function __construct(
+        protected CartService $cartService,
+        protected InventoryService $inventoryService,
+        protected MediaService $mediaService
+    ) {}
+
+    public function index(Request $request): Response
+    {
+        $search = trim((string) $request->query('search', ''));
+        $status = trim((string) $request->query('status', 'all'));
+        $query = Product::query()->forCatalog()->with(['brand', 'category', 'images'])->orderByDesc('id');
+
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search) {
+                $builder
+                    ->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('barcode', 'like', "%{$search}%");
+            });
+        }
+
+        if ($status === 'active') {
+            $query->where('is_active', true);
+        } elseif ($status === 'inactive') {
+            $query->where('is_active', false);
+        }
+
+        $paginator = $query->paginate(15)->withQueryString();
+        $products = collect($paginator->items())->map(function (Product $product) {
+            $price = $this->cartService->getCurrentPrice($product);
+            $physical = $this->inventoryService->getPhysicalQuantity($product);
+            $reserved = $this->inventoryService->getReservedQuantity($product);
+
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'sku' => $product->sku,
+                'brand' => $product->brand?->name,
+                'category' => $product->category?->name,
+                'image' => $product->main_image
+    ?: $product->images->firstWhere('is_primary', true)?->image_path
+    ?: $product->images->first()?->image_path,
+                'price' => $price?->price !== null ? (float) $price->price : null,
+                'is_active' => $product->is_active,
+                'is_featured' => $product->is_featured,
+                'physical_quantity' => $physical,
+                'reserved_quantity' => $reserved,
+                'available_quantity' => max(0, $physical - $reserved),
+            ];
+        })->values()->all();
+
+        return Inertia::render('Admin/Products/Index', [
+            'products' => $products,
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'total' => $paginator->total(),
+            ],
+            'filters' => ['search' => $search, 'status' => $status],
+        ]);
+    }
+
+    public function create(): Response
+    {
+        return Inertia::render('Admin/Products/Create', [
+            ...$this->formOptions(),
+            'product' => null,
+        ]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $data = $this->validatedData($request);
+        $storedMedia = [];
+        $storedGallery = [];
+
+        try {
+            if ($request->hasFile('main_image_file')) {
+                $storedImage = $this->mediaService->storeImage($request->file('main_image_file'), 'products');
+                $data['main_image'] = $storedImage;
+                $storedMedia[] = $storedImage;
+            }
+
+            $galleryFiles = $request->file('gallery_files', []);
+            foreach (is_array($galleryFiles) ? $galleryFiles : [$galleryFiles] as $file) {
+                $path = $this->mediaService->storeImage($file, 'products');
+                $storedGallery[] = $path;
+                $storedMedia[] = $path;
+            }
+
+            DB::transaction(function () use ($data, $storedGallery): void {
+                $product = Product::create($this->productData($data));
+                $this->syncRetailPrice($product, $data);
+                $this->appendGalleryImages($product, $storedGallery);
+            });
+        } catch (Throwable $exception) {
+            foreach ($storedMedia as $path) {
+                $this->mediaService->deleteIfStored($path);
+            }
+
+            throw $exception;
+        }
+
+        return to_route('admin.products.index')->with('success', 'محصول با موفقیت ایجاد شد.');
+    }
+
+    public function edit(Product $product): Response
+    {
+        $product->load(['brand', 'category', 'prices', 'images']);
+        $price = $product->prices
+            ->where('price_type', 'retail')
+            ->where('min_quantity', 1)
+            ->sortByDesc('id')
+            ->first();
+
+        return Inertia::render('Admin/Products/Edit', [
+            ...$this->formOptions(),
+            'product' => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'sku' => $product->sku,
+                'barcode' => $product->barcode,
+                'brand_id' => $product->brand_id,
+                'category_id' => $product->category_id,
+                'product_type' => $product->product_type,
+                'unit' => $product->unit,
+                'quantity_per_unit' => $product->quantity_per_unit,
+                'short_description' => $product->short_description,
+                'description' => $product->description,
+                'specifications' => $product->specifications,
+                'seo_title' => $product->seo_title,
+                'seo_description' => $product->seo_description,
+                'canonical_url' => $product->canonical_url,
+                'expiry_date' => $product->expiry_date?->format('Y-m-d'),
+                'main_image' => $product->main_image,
+                'main_image_url' => $this->mediaService->url($product->main_image),
+                'images' => $product->images
+                    ->sortBy([['is_primary', 'desc'], ['sort_order', 'asc']])
+                    ->values()
+                    ->map(fn (ProductImage $image) => [
+                        'id' => $image->id,
+                        'image_url' => $this->mediaService->url($image->image_path),
+                        'alt_text' => $image->alt_text,
+                        'is_primary' => $image->is_primary,
+                        'sort_order' => $image->sort_order,
+                    ])
+                    ->all(),
+                'is_active' => $product->is_active,
+                'is_featured' => $product->is_featured,
+                'sort_order' => $product->sort_order,
+                'price' => $price?->price !== null ? (float) $price->price : null,
+                'compare_at_price' => $price?->compare_at_price !== null ? (float) $price->compare_at_price : null,
+            ],
+        ]);
+    }
+
+    public function update(Request $request, Product $product): RedirectResponse
+    {
+        $data = $this->validatedData($request, $product);
+
+        $oldImage = $product->main_image;
+        $storedImage = null;
+        $storedMedia = [];
+        $storedGallery = [];
+
+        try {
+            if ($request->hasFile('main_image_file')) {
+                $storedImage = $this->mediaService->storeImage($request->file('main_image_file'), 'products');
+                $data['main_image'] = $storedImage;
+                $storedMedia[] = $storedImage;
+            }
+
+            $galleryFiles = $request->file('gallery_files', []);
+            foreach (is_array($galleryFiles) ? $galleryFiles : [$galleryFiles] as $file) {
+                $path = $this->mediaService->storeImage($file, 'products');
+                $storedGallery[] = $path;
+                $storedMedia[] = $path;
+            }
+
+            DB::transaction(function () use ($data, $product, $storedGallery): void {
+                $product->update($this->productData($data));
+                foreach ($data['existing_images'] ?? [] as $imageData) {
+                    $image = $product->images()->whereKey((int) $imageData['id'])->firstOrFail();
+                    if ($imageData['remove'] ?? false) {
+                        $path = $image->image_path;
+                        $image->delete();
+                        DB::afterCommit(fn () => $this->mediaService->deleteIfStored($path));
+                    } else {
+                        $image->update(['alt_text' => $imageData['alt_text'] ?? null, 'sort_order' => $imageData['sort_order']]);
+                    }
+                }
+                $this->syncRetailPrice($product, $data);
+                $this->appendGalleryImages($product, $storedGallery);
+            });
+        } catch (Throwable $exception) {
+            foreach ($storedMedia as $path) {
+                $this->mediaService->deleteIfStored($path);
+            }
+
+            throw $exception;
+        }
+
+        if ($storedImage !== null && $storedImage !== $oldImage) {
+            $this->mediaService->deleteIfStored($oldImage);
+        }
+
+        return to_route('admin.products.index')->with('success', 'محصول با موفقیت ویرایش شد.');
+    }
+
+    protected function formOptions(): array
+    {
+        return [
+            'brands' => Brand::query()
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name']),
+            'categories' => Category::query()
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name']),
+        ];
+    }
+
+    protected function validatedData(Request $request, ?Product $product = null): array
+    {
+        $expiryRules = ['nullable', 'date'];
+
+        $expiryRules[] = function (string $attribute, mixed $value, \Closure $fail) use ($product): void {
+            if ($value === null || $value === '') {
+                return;
+            }
+
+            $date = Carbon::parse((string) $value)->startOfDay();
+            $today = Carbon::today();
+
+            if (! $date->lessThan($today)) {
+                return;
+            }
+
+            if (
+                $product !== null
+                && $product->expiry_date?->toDateString() === $date->toDateString()
+            ) {
+                return;
+            }
+
+            $fail('تاریخ انقضا نمی‌تواند در گذشته باشد.');
+        };
+
+        return $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', Rule::unique('products', 'slug')->ignore($product?->id)],
+            'sku' => ['nullable', 'string', 'max:255', Rule::unique('products', 'sku')->ignore($product?->id)],
+            'barcode' => ['nullable', 'string', 'max:255'],
+            'brand_id' => ['nullable', 'integer', Rule::exists('brands', 'id')->where('is_active', true)],
+            'category_id' => ['nullable', 'integer', Rule::exists('categories', 'id')->where('is_active', true)],
+            'product_type' => ['nullable', 'string', 'max:255'],
+            'unit' => ['nullable', 'string', 'max:255'],
+            'quantity_per_unit' => ['nullable', 'integer', 'min:1'],
+            'short_description' => ['nullable', 'string', 'max:1000'],
+            'description' => ['nullable', 'string'],
+            'specifications' => ['nullable', 'array', 'max:50'],
+            'specifications.*' => ['nullable', 'string', 'max:1000'],
+            'existing_images' => ['nullable', 'array', 'max:50'],
+            'existing_images.*.id' => ['required', 'integer', Rule::exists('product_images', 'id')->where('product_id', $product?->id)],
+            'existing_images.*.alt_text' => ['nullable', 'string', 'max:255'],
+            'existing_images.*.sort_order' => ['required', 'integer', 'min:0'],
+            'existing_images.*.remove' => ['boolean'],
+            'seo_title' => ['nullable', 'string', 'max:255'],
+            'seo_description' => ['nullable', 'string', 'max:160'],
+            'canonical_url' => ['nullable', 'url', 'max:2048'],
+            'expiry_date' => $expiryRules,
+            'main_image' => ['nullable', 'string', 'max:2048'],
+            'main_image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'gallery_files' => ['nullable', 'array', 'max:8'],
+            'gallery_files.*' => ['file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'is_active' => ['boolean'],
+            'is_featured' => ['boolean'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'compare_at_price' => ['nullable', 'numeric', 'gte:price'],
+        ]);
+    }
+
+    protected function productData(array $data): array
+    {
+        $slug = trim((string) ($data['slug'] ?? ''));
+        $name = trim((string) $data['name']);
+        $description = trim((string) ($data['short_description'] ?? ''));
+        $resolvedSlug = $slug !== '' ? $slug : (Str::slug($name) ?: 'product');
+        if ($slug === '') {
+            $base = $resolvedSlug;
+            $suffix = 2;
+            while (Product::query()->where('slug', $resolvedSlug)->exists()) {
+                $resolvedSlug = $base.'-'.$suffix++;
+            }
+        }
+
+        return [
+            'name' => $name,
+            'slug' => $resolvedSlug,
+            'sku' => $data['sku'] ?? null,
+            'barcode' => $data['barcode'] ?? null,
+            'brand_id' => $data['brand_id'] ?? null,
+            'category_id' => $data['category_id'] ?? null,
+            'product_type' => $data['product_type'] ?? null,
+            'unit' => $data['unit'] ?? null,
+            'quantity_per_unit' => $data['quantity_per_unit'] ?? null,
+            'short_description' => $data['short_description'] ?? null,
+            'description' => $data['description'] ?? null,
+            'specifications' => $data['specifications'] ?? null,
+            'seo_title' => trim((string) ($data['seo_title'] ?? '')) ?: $name,
+            'seo_description' => trim((string) ($data['seo_description'] ?? '')) ?: ($description !== '' ? Str::limit($description, 160, '') : null),
+            'canonical_url' => trim((string) ($data['canonical_url'] ?? '')) ?: url('/products/'.$resolvedSlug),
+            'expiry_date' => $data['expiry_date'] ?? null,
+            'main_image' => $data['main_image'] ?? null,
+            'is_active' => (bool) ($data['is_active'] ?? false),
+            'is_featured' => (bool) ($data['is_featured'] ?? false),
+            'sort_order' => $data['sort_order'] ?? 0,
+        ];
+    }
+
+    protected function appendGalleryImages(Product $product, array $storedPaths): void
+    {
+        if ($storedPaths === []) {
+            return;
+        }
+
+        $sortOrder = ((int) $product->images()->max('sort_order')) + 1;
+
+        foreach ($storedPaths as $path) {
+            ProductImage::create([
+                'product_id' => $product->id,
+                'image_path' => $path,
+                'alt_text' => $product->name,
+                'is_primary' => false,
+                'sort_order' => $sortOrder++,
+            ]);
+        }
+    }
+
+    protected function syncRetailPrice(Product $product, array $data): void
+    {
+        ProductPrice::updateOrCreate(
+            [
+                'product_id' => $product->id,
+                'price_type' => 'retail',
+                'min_quantity' => 1,
+            ],
+            [
+                'price' => $data['price'],
+                'compare_at_price' => $data['compare_at_price'] ?? null,
+                'is_active' => true,
+                'starts_at' => null,
+                'ends_at' => null,
+            ],
+        );
+    }
+}

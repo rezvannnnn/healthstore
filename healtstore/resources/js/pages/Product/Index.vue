@@ -1,0 +1,724 @@
+<script setup lang="ts">
+import ProductPlaceholder from '@/components/ProductPlaceholder.vue';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import StorefrontHeader from '@/components/StorefrontHeader.vue';
+import StorefrontFooter from '@/components/StorefrontFooter.vue';
+import { reactive, ref, watch } from 'vue';
+
+interface Product {
+    id: number;
+    name: string;
+    slug: string;
+    sku: string | null;
+    short_description: string | null;
+    brand: string | null;
+    brand_slug: string | null;
+    category: string | null;
+    image: string | null;
+    price: number | null;
+    compare_at_price: number | null;
+    available: boolean;
+}
+
+interface Category {
+    id: number;
+    name: string;
+    slug: string;
+}
+
+interface Brand {
+    id: number;
+    name: string;
+    slug: string;
+}
+
+interface Pagination {
+    current_page: number;
+    last_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+}
+
+interface Seo {
+    title: string;
+    description: string;
+    canonical: string;
+    robots?: string;
+}
+
+const props = defineProps<{
+    seo: Seo;
+    products: Product[];
+    categories: Category[];
+    brands: Brand[];
+    pagination: Pagination;
+    filters: {
+        search: string;
+        category: string;
+        brand: string;
+        in_stock: boolean;
+        min_price: number | null;
+        max_price: number | null;
+        sort: string;
+    };
+}>();
+
+const form = reactive({ ...props.filters });
+const page = usePage();
+watch(
+    () => props.filters,
+    (filters) => Object.assign(form, filters),
+);
+const filtering = ref(false);
+const addingProductId = ref<number | null>(null);
+const addedProductId = ref<number | null>(null);
+
+function addToCart(product: Product): void {
+    if (
+        addingProductId.value !== null ||
+        !product.available ||
+        product.price === null
+    ) {
+        return;
+    }
+
+    router.post(
+        '/cart/items',
+        { product_id: product.id, quantity: 1 },
+        {
+            preserveScroll: true,
+            onStart: () => {
+                addingProductId.value = product.id;
+                addedProductId.value = null;
+            },
+            onSuccess: () => {
+                addedProductId.value = product.id;
+            },
+            onFinish: () => {
+                addingProductId.value = null;
+            },
+        },
+    );
+}
+
+function submit(): void {
+    router.get(
+        '/products',
+        { ...form, in_stock: form.in_stock ? 1 : undefined },
+        {
+            preserveState: true,
+            replace: true,
+            onStart: () => {
+                filtering.value = true;
+            },
+            onFinish: () => {
+                filtering.value = false;
+            },
+        },
+    );
+}
+
+function clearFilters(): void {
+    form.search = '';
+    form.category = '';
+    form.brand = '';
+    form.in_stock = false;
+    form.min_price = null;
+    form.max_price = null;
+    form.sort = 'recommended';
+
+    router.get(
+        '/products',
+        {},
+        {
+            preserveState: true,
+            replace: true,
+            onStart: () => {
+                filtering.value = true;
+            },
+            onFinish: () => {
+                filtering.value = false;
+            },
+        },
+    );
+}
+
+function pageUrl(page: number): string {
+    const params = new URLSearchParams();
+
+    if (page > 1) {
+        params.set('page', String(page));
+    }
+
+    for (const [key, value] of Object.entries(props.filters)) {
+        if (
+            value !== null &&
+            value !== '' &&
+            value !== false &&
+            !(key === 'sort' && value === 'recommended')
+        ) {
+            params.set(key, value === true ? '1' : String(value));
+        }
+    }
+
+    const query = params.toString();
+    return query ? `/products?${query}` : '/products';
+}
+
+function formatPrice(value: number | null): string {
+    return value === null
+        ? 'تماس بگیرید'
+        : `${value.toLocaleString('fa-IR')} ریال`;
+}
+</script>
+
+<template>
+    <Head>
+        <meta
+            head-key="robots"
+            name="robots"
+            :content="seo.robots || 'index,follow'"
+        />
+        <title>{{ seo.title }}</title>
+        <meta name="description" :content="seo.description" />
+        <link rel="canonical" :href="seo.canonical" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" :content="seo.title" />
+        <meta property="og:description" :content="seo.description" />
+        <meta property="og:url" :content="seo.canonical" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" :content="seo.title" />
+        <meta name="twitter:description" :content="seo.description" />
+    </Head>
+
+    <div
+        dir="rtl"
+        class="min-h-screen bg-dh-surface pb-24 text-dh-ink lg:pb-10"
+    >
+        <StorefrontHeader active="products" />
+
+        <main
+            class="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-8"
+        >
+            <section
+                class="flex flex-col gap-3 rounded-2xl border border-dh-100 bg-white p-4 shadow-[0_12px_35px_rgba(20,108,114,0.06)] sm:p-8 md:flex-row md:items-end md:justify-between"
+            >
+                <div>
+                    <span class="text-xs font-extrabold text-dh-500"
+                        >کاتالوگ داروخونه</span
+                    >
+                    <h1
+                        class="mt-2 text-3xl font-extrabold tracking-tight text-dh-900 sm:text-4xl"
+                    >
+                        محصولات
+                    </h1>
+                    <p class="mt-2 max-w-2xl text-sm leading-7 text-dh-muted">
+                        محصول موردنظر را جستجو کنید یا از دسته‌بندی و برند کمک
+                        بگیرید.
+                    </p>
+                </div>
+                <div
+                    class="rounded-2xl bg-dh-50 px-4 py-3 text-sm font-bold text-dh-700"
+                >
+                    {{ pagination.total.toLocaleString('fa-IR') }} محصول
+                </div>
+            </section>
+
+            <section
+                class="rounded-2xl border border-dh-100 bg-white p-4 shadow-sm sm:p-5"
+            >
+                <form
+                    @submit.prevent="submit"
+                    class="grid gap-3 md:grid-cols-[1fr_210px_210px_auto]"
+                >
+                    <label class="relative block">
+                        <span class="sr-only">جستجوی محصول</span>
+                        <svg
+                            viewBox="0 0 24 24"
+                            class="pointer-events-none absolute top-1/2 right-4 size-5 -translate-y-1/2 text-dh-500"
+                            fill="none"
+                            aria-hidden="true"
+                        >
+                            <circle
+                                cx="11"
+                                cy="11"
+                                r="6.5"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                            />
+                            <path
+                                d="m16 16 4.5 4.5"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                            />
+                        </svg>
+                        <input
+                            v-model="form.search"
+                            type="search"
+                            enterkeyhint="search"
+                            placeholder="نام محصول، SKU یا بارکد..."
+                            class="h-12 w-full rounded-2xl border border-dh-100 bg-dh-50/60 pr-12 pl-4 text-sm transition outline-none placeholder:text-dh-muted focus:border-dh-300 focus:bg-white focus:ring-4 focus:ring-dh-100"
+                        />
+                    </label>
+
+                    <label>
+                        <span class="sr-only">دسته‌بندی</span>
+                        <select
+                            v-model="form.category"
+                            class="h-12 w-full rounded-2xl border border-dh-100 bg-white px-4 text-sm outline-none focus:border-dh-300 focus:ring-4 focus:ring-dh-100"
+                        >
+                            <option value="">همه دسته‌ها</option>
+                            <option
+                                v-for="category in categories"
+                                :key="category.id"
+                                :value="category.slug"
+                            >
+                                {{ category.name }}
+                            </option>
+                        </select>
+                    </label>
+
+                    <label>
+                        <span class="sr-only">برند</span>
+                        <select
+                            v-model="form.brand"
+                            class="h-12 w-full rounded-2xl border border-dh-100 bg-white px-4 text-sm outline-none focus:border-dh-300 focus:ring-4 focus:ring-dh-100"
+                        >
+                            <option value="">همه برندها</option>
+                            <option
+                                v-for="brand in brands"
+                                :key="brand.id"
+                                :value="brand.slug"
+                            >
+                                {{ brand.name }}
+                            </option>
+                        </select>
+                    </label>
+
+                    <div class="flex gap-2">
+                        <button
+                            type="submit"
+                            class="h-12 flex-1 rounded-2xl bg-dh-600 px-5 text-sm font-extrabold text-white transition hover:bg-dh-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            :disabled="filtering"
+                        >
+                            <span
+                                v-if="filtering"
+                                class="inline-flex items-center gap-2"
+                                ><svg
+                                    viewBox="0 0 24 24"
+                                    class="size-4 animate-spin"
+                                    fill="none"
+                                    aria-hidden="true"
+                                >
+                                    <circle
+                                        cx="12"
+                                        cy="12"
+                                        r="9"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        opacity="0.25"
+                                    />
+                                    <path
+                                        d="M21 12a9 9 0 0 1-9 9"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                    /></svg
+                                >در حال جستجو…</span
+                            ><span v-else>جستجو</span>
+                        </button>
+                        <button
+                            type="button"
+                            class="h-12 rounded-2xl border border-dh-100 px-4 text-sm font-bold text-dh-700 transition hover:bg-dh-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            :disabled="filtering"
+                            @click="clearFilters"
+                        >
+                            حذف فیلتر
+                        </button>
+                    </div>
+                    <details
+                        class="rounded-xl border border-dh-100 p-3 md:col-span-4"
+                        :open="
+                            props.filters.in_stock ||
+                            props.filters.min_price !== null ||
+                            props.filters.max_price !== null ||
+                            props.filters.sort !== 'recommended' ||
+                            !!page.props.errors.max_price ||
+                            !!page.props.errors.min_price
+                        "
+                    >
+                        <summary
+                            class="cursor-pointer py-1 text-sm font-bold text-dh-700"
+                        >
+                            قیمت، موجودی و مرتب‌سازی
+                        </summary>
+                        <div class="mt-4 grid gap-3 md:grid-cols-4">
+                            <label
+                                class="space-y-1 text-xs font-bold text-dh-muted"
+                            >
+                                <span>حداقل قیمت (ریال)</span>
+                                <input
+                                    v-model="form.min_price"
+                                    type="number"
+                                    min="0"
+                                    max="999999999999"
+                                    inputmode="numeric"
+                                    placeholder="بدون محدودیت"
+                                    class="h-12 w-full rounded-xl border border-dh-100 px-3 text-sm text-dh-ink"
+                                />
+                            </label>
+                            <label
+                                class="space-y-1 text-xs font-bold text-dh-muted"
+                            >
+                                <span>حداکثر قیمت (ریال)</span>
+                                <input
+                                    v-model="form.max_price"
+                                    type="number"
+                                    min="0"
+                                    max="999999999999"
+                                    inputmode="numeric"
+                                    placeholder="بدون محدودیت"
+                                    class="h-12 w-full rounded-xl border border-dh-100 px-3 text-sm text-dh-ink"
+                                />
+                            </label>
+                            <label
+                                class="space-y-1 text-xs font-bold text-dh-muted"
+                            >
+                                <span>مرتب‌سازی</span>
+                                <select
+                                    v-model="form.sort"
+                                    class="h-12 w-full rounded-xl border border-dh-100 bg-white px-3 text-sm text-dh-ink"
+                                >
+                                    <option value="recommended">
+                                        پیشنهاد فروشگاه
+                                    </option>
+                                    <option value="newest">جدیدترین</option>
+                                    <option value="price_asc">
+                                        ارزان‌ترین
+                                    </option>
+                                    <option value="price_desc">
+                                        گران‌ترین
+                                    </option>
+                                </select>
+                            </label>
+                            <label
+                                class="flex min-h-12 items-center gap-3 rounded-xl bg-dh-50 px-4 text-sm font-bold text-dh-700 md:mt-5"
+                            >
+                                <input
+                                    v-model="form.in_stock"
+                                    type="checkbox"
+                                    class="size-4 accent-dh-700"
+                                />
+                                فقط کالاهای موجود
+                            </label>
+                        </div>
+                    </details>
+                    <p
+                        v-if="
+                            page.props.errors.min_price ||
+                            page.props.errors.max_price ||
+                            page.props.errors.sort
+                        "
+                        role="alert"
+                        class="text-sm text-red-700 md:col-span-4"
+                    >
+                        بازهٔ قیمت معتبر وارد کنید؛ حداکثر قیمت باید برابر یا
+                        بیشتر از حداقل باشد.
+                    </p>
+                </form>
+
+                <div
+                    v-if="
+                        props.filters.search ||
+                        props.filters.category ||
+                        props.filters.brand ||
+                        props.filters.in_stock ||
+                        props.filters.min_price !== null ||
+                        props.filters.max_price !== null
+                    "
+                    class="mt-4 flex flex-wrap items-center gap-2 text-xs font-bold text-dh-muted"
+                >
+                    <span>فیلتر فعال:</span>
+                    <span
+                        v-if="props.filters.in_stock"
+                        class="rounded-full bg-dh-green-50 px-3 py-1.5 text-dh-green-700"
+                        >فقط موجود</span
+                    >
+                    <span
+                        v-if="
+                            props.filters.min_price !== null ||
+                            props.filters.max_price !== null
+                        "
+                        class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700"
+                        >بازهٔ قیمت انتخاب شده</span
+                    >
+                    <span
+                        v-if="form.search"
+                        class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700"
+                        >جستجو: {{ form.search }}</span
+                    >
+                    <span
+                        v-if="form.category"
+                        class="rounded-full bg-dh-green-50 px-3 py-1.5 text-dh-green-700"
+                        >دسته‌بندی انتخاب شده</span
+                    >
+                    <span
+                        v-if="form.brand"
+                        class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700"
+                        >برند انتخاب شده</span
+                    >
+                </div>
+            </section>
+
+            <div
+                v-if="products.length"
+                class="flex flex-wrap items-center justify-between gap-3 text-xs font-bold text-dh-muted"
+            >
+                <span
+                    >{{ pagination.from?.toLocaleString('fa-IR') }} تا
+                    {{ pagination.to?.toLocaleString('fa-IR') }} از
+                    {{ pagination.total.toLocaleString('fa-IR') }} محصول</span
+                >
+                <span
+                    v-if="form.search || form.category || form.brand"
+                    class="rounded-full bg-dh-50 px-3 py-1.5 text-dh-700"
+                    >نتایج فیلترشده</span
+                >
+            </div>
+
+            <section
+                v-if="products.length"
+                class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            >
+                <article
+                    v-for="product in products"
+                    :key="product.id"
+                    class="group overflow-hidden rounded-2xl border border-dh-100 bg-white transition duration-200 hover:-translate-y-0.5 hover:border-dh-200 hover:shadow-[0_18px_40px_rgba(20,108,114,0.09)]"
+                >
+                    <Link :href="`/products/${product.slug}`" class="block">
+                        <div
+                            class="relative aspect-[4/3] overflow-hidden bg-dh-50/60"
+                        >
+                            <span
+                                v-if="
+                                    product.compare_at_price &&
+                                    product.compare_at_price >
+                                        (product.price ?? 0)
+                                "
+                                class="absolute top-3 right-3 rounded-full bg-dh-green-500 px-2.5 py-1 text-[11px] font-extrabold text-white"
+                                >تخفیف</span
+                            >
+                            <img
+                                v-if="product.image"
+                                :src="product.image"
+                                :alt="product.name"
+                                loading="lazy"
+                                class="h-full w-full object-contain p-6 transition duration-300 group-hover:scale-[1.03]"
+                            />
+                            <ProductPlaceholder v-else />
+                        </div>
+
+                        <div class="space-y-3 p-4">
+                            <div
+                                class="flex items-center justify-between gap-2 text-xs"
+                            >
+                                <span
+                                    v-if="product.brand"
+                                    class="font-bold text-dh-600"
+                                    >{{ product.brand }}</span
+                                >
+                                <span
+                                    v-if="product.category"
+                                    class="text-dh-muted"
+                                    >{{ product.category }}</span
+                                >
+                            </div>
+                            <h2
+                                class="line-clamp-2 min-h-12 text-sm leading-6 font-extrabold text-dh-900"
+                            >
+                                {{ product.name }}
+                            </h2>
+                            <p
+                                v-if="product.short_description"
+                                class="line-clamp-2 text-xs leading-6 text-dh-muted"
+                            >
+                                {{ product.short_description }}
+                            </p>
+                        </div>
+                    </Link>
+
+                    <div class="border-t border-dh-50 p-4">
+                        <div class="flex items-end justify-between gap-3">
+                            <div>
+                                <div class="font-extrabold text-dh-900">
+                                    {{ formatPrice(product.price) }}
+                                </div>
+                                <div
+                                    v-if="
+                                        product.compare_at_price &&
+                                        product.compare_at_price >
+                                            (product.price ?? 0)
+                                    "
+                                    class="mt-1 text-xs text-dh-muted line-through"
+                                >
+                                    {{ formatPrice(product.compare_at_price) }}
+                                </div>
+                            </div>
+                            <span
+                                class="rounded-full px-2.5 py-1 text-[11px] font-bold"
+                                :class="
+                                    product.available
+                                        ? 'bg-dh-green-50 text-dh-green-700'
+                                        : 'bg-dh-100 text-dh-muted'
+                                "
+                            >
+                                {{ product.available ? 'موجود' : 'ناموجود' }}
+                            </span>
+                        </div>
+                        <button
+                            v-if="product.available && product.price !== null"
+                            type="button"
+                            class="mt-4 w-full rounded-xl bg-dh-600 px-4 py-3 text-sm font-extrabold text-white transition hover:bg-dh-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            :disabled="addingProductId !== null"
+                            :aria-busy="addingProductId === product.id"
+                            @click="addToCart(product)"
+                        >
+                            <span
+                                v-if="addingProductId === product.id"
+                                class="inline-flex items-center gap-2"
+                                ><svg
+                                    viewBox="0 0 24 24"
+                                    class="size-4 animate-spin"
+                                    fill="none"
+                                    aria-hidden="true"
+                                >
+                                    <circle
+                                        cx="12"
+                                        cy="12"
+                                        r="9"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        opacity="0.25"
+                                    />
+                                    <path
+                                        d="M21 12a9 9 0 0 1-9 9"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                    /></svg
+                                >در حال افزودن…</span
+                            ><span v-else>افزودن به سبد خرید</span>
+                        </button>
+                        <div
+                            v-if="addedProductId === product.id"
+                            class="mt-2 rounded-xl bg-dh-green-50 px-3 py-2 text-center text-xs font-bold text-dh-green-700"
+                            role="status"
+                        >
+                            به سبد خرید اضافه شد.
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section
+                v-else
+                class="rounded-2xl border border-dashed border-dh-200 bg-white p-12 text-center"
+            >
+                <div
+                    class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-dh-50 text-dh-600"
+                >
+                    <svg
+                        viewBox="0 0 24 24"
+                        class="size-7"
+                        fill="none"
+                        aria-hidden="true"
+                    >
+                        <circle
+                            cx="11"
+                            cy="11"
+                            r="6.5"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                        />
+                        <path
+                            d="m16 16 4.5 4.5"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linecap="round"
+                        />
+                    </svg>
+                </div>
+                <h2 class="mt-4 text-xl font-extrabold text-dh-900">
+                    محصولی پیدا نشد
+                </h2>
+                <p class="mt-2 text-sm leading-7 text-dh-muted">
+                    عبارت جستجو یا فیلترهای انتخابی را تغییر دهید.
+                </p>
+                <button
+                    type="button"
+                    class="mt-5 rounded-xl bg-dh-600 px-5 py-3 text-sm font-extrabold text-white hover:bg-dh-700"
+                    @click="clearFilters"
+                >
+                    نمایش همه محصولات
+                </button>
+            </section>
+
+            <nav
+                v-if="pagination.last_page > 1"
+                aria-label="صفحات محصولات"
+                class="flex flex-wrap items-center justify-center gap-2 pb-8"
+            >
+                <Link
+                    v-if="pagination.current_page > 1"
+                    :href="pageUrl(pagination.current_page - 1)"
+                    preserve-scroll
+                    aria-label="صفحه قبلی"
+                    class="rounded-xl bg-white px-4 py-2 text-sm font-bold text-dh-700 ring-1 ring-dh-100 hover:bg-dh-50"
+                >
+                    قبلی
+                </Link>
+
+                <Link
+                    v-for="page in pagination.last_page"
+                    :key="page"
+                    :href="pageUrl(page)"
+                    preserve-scroll
+                    :aria-current="
+                        page === pagination.current_page ? 'page' : undefined
+                    "
+                    :aria-label="`صفحه ${page.toLocaleString('fa-IR')}`"
+                    class="min-w-10 rounded-xl px-3 py-2 text-center text-sm font-bold"
+                    :class="
+                        page === pagination.current_page
+                            ? 'bg-dh-600 text-white'
+                            : 'bg-white text-dh-700 ring-1 ring-dh-100 hover:bg-dh-50'
+                    "
+                >
+                    {{ page.toLocaleString('fa-IR') }}
+                </Link>
+
+                <Link
+                    v-if="pagination.current_page < pagination.last_page"
+                    :href="pageUrl(pagination.current_page + 1)"
+                    preserve-scroll
+                    aria-label="صفحه بعدی"
+                    class="rounded-xl bg-white px-4 py-2 text-sm font-bold text-dh-700 ring-1 ring-dh-100 hover:bg-dh-50"
+                >
+                    بعدی
+                </Link>
+            </nav>
+        </main>
+        <p dir="rtl" class="mx-auto max-w-6xl px-4 py-4 text-sm">
+            برای محصولات بدون قیمت، از
+            <Link
+                href="/information/contact"
+                class="font-bold text-dh-700 underline"
+                >صفحه تماس و پشتیبانی</Link
+            >
+            اقدام کنید.
+        </p>
+        <StorefrontFooter />
+    </div>
+</template>

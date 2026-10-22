@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use App\Models\Cart;
+use App\Models\StoreSetting;
+use Illuminate\Http\Request;
+use Inertia\Middleware;
+
+class HandleInertiaRequests extends Middleware
+{
+    /**
+     * The root template that's loaded on the first page visit.
+     *
+     * @see https://inertiajs.com/server-side-setup#root-template
+     *
+     * @var string
+     */
+    protected $rootView = 'app';
+
+    /**
+     * Determines the current asset version.
+     *
+     * @see https://inertiajs.com/asset-versioning
+     */
+    public function version(Request $request): ?string
+    {
+        return parent::version($request);
+    }
+
+    /**
+     * Define the props that are shared by default.
+     *
+     * @see https://inertiajs.com/shared-data
+     *
+     * @return array<string, mixed>
+     */
+    public function share(Request $request): array
+    {
+        return [
+            ...parent::share($request),
+            'name' => config('app.name'),
+            'storefront' => fn () => StoreSetting::query()->whereIn('key', ['support_phone', 'support_email', 'store_address', 'support_hours', 'license_title', 'license_url'])->pluck('value', 'key')->all(),
+            'auth' => [
+                'user' => $request->user(),
+                'account_url' => $request->user()?->isAdminPanelUser()
+                    ? ($request->user()->adminLandingPath() ?? route('admin.login'))
+                    : route($request->user() ? 'account.profile.index' : 'login'),
+                'account_label' => $request->user()?->isAdminPanelUser() ? 'پنل مدیریت' : 'حساب کاربری',
+            ],
+            'cart' => fn () => $request->user() ? [
+                'items_count' => Cart::query()
+                    ->where('user_id', $request->user()->id)
+                    ->where('status', 'active')
+                    ->withCount('items')
+                    ->value('items_count') ?? 0,
+            ] : ['items_count' => 0],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+                'info' => fn () => $request->session()->get('info'),
+                'status' => fn () => $request->session()->get('status'),
+            ],
+        ];
+    }
+}

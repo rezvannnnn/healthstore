@@ -1,0 +1,16 @@
+{
+    "counts": {
+        "migrations": 44,
+        "brands": 50,
+        "categories": 299,
+        "products": 12894,
+        "product_images": 0,
+        "product_prices": 109,
+        "warehouses": 1,
+        "inventories": 12785,
+        "catalog_import_sources": 13927
+    },
+    "integrity": "ok",
+    "private_tables": "empty",
+    "sha256": "a78c7b983c0ca8979d6b2db220d1f7105c69fa17b0c407801c36603da0769656"
+}

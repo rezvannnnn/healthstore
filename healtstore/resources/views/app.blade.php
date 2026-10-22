@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="{{ 'fa' }}" dir="rtl" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" href="/images/darukhooneh-logo.webp?v=3" type="image/webp">
+        <link rel="apple-touch-icon" href="/images/darukhooneh-logo.webp?v=2">
+
+
+        @if (!empty($page['props']['structuredData']))
+            <script type="application/ld+json" data-darukhooneh-structured-data="true">{!! json_encode($page['props']['structuredData'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+        @endif
+        @vite(['resources/css/app.css', 'resources/js/app.ts'])
+
+        <x-inertia::head>
+            <title>{{ config('app.name', 'داروخونه') }}</title>
+        </x-inertia::head>
+    </head>
+
+    <body class="font-sans antialiased">
+        <x-inertia::app />
+    </body>
+</html>

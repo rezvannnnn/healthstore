@@ -1,0 +1,323 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Inventory;
+use App\Models\Order;
+use App\Models\Payment;
+use App\Models\Product;
+use App\Models\User;
+use App\Models\Warehouse;
+use App\Services\InventoryReservationService;
+use App\Services\Payment\PaymentGatewayInterface;
+use App\Services\Payment\ZarinPalGateway;
+use App\Services\PaymentService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
+
+class PaymentGatewayIntegrationTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['services.payment.provider' => 'zarinpal']);
+
+        config([
+            'services.zarinpal.merchant_id' => 'TEST-MERCHANT-ID',
+            'services.zarinpal.request_endpoint' => 'https://api.zarinpal.com/pg/v4/payment/request.json',
+            'services.zarinpal.verify_endpoint' => 'https://api.zarinpal.com/pg/v4/payment/verify.json',
+            'services.zarinpal.payment_base_url' => 'https://www.zarinpal.com',
+            'services.zarinpal.callback_url' => 'http://127.0.0.1:8000/payment/zarinpal/callback',
+        ]);
+    }
+
+    private function createOrder(
+        User $user,
+        int $totalAmount = 220000
+    ): Order {
+        $order = Order::create([
+            'order_number' => 'ORD-GW-'.now()->format('YmdHis').'-'.uniqid(),
+            'user_id' => $user->id,
+            'customer_type' => 'b2c',
+            'business_profile_id' => null,
+            'status' => 'pending',
+            'payment_status' => 'pending',
+            'subtotal' => $totalAmount,
+            'discount_amount' => 0,
+            'shipping_amount' => 0,
+            'total_amount' => $totalAmount,
+            'currency' => 'IRR',
+            'recipient_name' => null,
+            'recipient_phone' => null,
+            'province' => null,
+            'city' => null,
+            'shipping_address' => null,
+            'postal_code' => null,
+            'customer_note' => null,
+            'admin_note' => null,
+            'confirmed_at' => null,
+            'paid_at' => null,
+            'shipped_at' => null,
+            'delivered_at' => null,
+            'cancelled_at' => null,
+        ]);
+        $product = Product::factory()->create();
+        $warehouse = Warehouse::factory()->create();
+        Inventory::create(['product_id' => $product->id, 'warehouse_id' => $warehouse->id, 'quantity' => 10, 'is_active' => true]);
+        $order->items()->create(['product_id' => $product->id, 'product_name' => $product->name, 'quantity' => 1, 'unit_price' => $totalAmount, 'total_amount' => $totalAmount]);
+        (new InventoryReservationService)->reserve($order, $product, 1);
+
+        return $order;
+    }
+
+    public function test_payment_service_resolves_configured_gateway(): void
+    {
+        $gateway = app(
+            PaymentGatewayInterface::class
+        );
+
+        $this->assertInstanceOf(
+            ZarinPalGateway::class,
+            $gateway
+        );
+    }
+
+    public function test_payment_service_can_request_gateway_payment(): void
+    {
+        Http::fake([
+            'https://api.zarinpal.com/pg/v4/payment/request.json' => Http::response([
+                'data' => [
+                    'code' => 100,
+                    'message' => 'Success',
+                    'authority' => 'S000000000000000000000000000009999',
+                ],
+                'errors' => [],
+            ], 200),
+        ]);
+
+        $user = User::factory()->create();
+
+        $order = $this->createOrder(
+            $user,
+            220000
+        );
+
+        $service = app(PaymentService::class);
+
+        $payment = $service->create($order);
+
+        $result = $service->requestGatewayPayment(
+            $payment
+        );
+
+        $payment->refresh();
+
+        $this->assertEquals(
+            'zarinpal',
+            $payment->gateway
+        );
+
+        $this->assertEquals(
+            'S000000000000000000000000000009999',
+            $payment->authority
+        );
+
+        $this->assertEquals(
+            'https://www.zarinpal.com/pg/StartPay/S000000000000000000000000000009999',
+            $result['payment_url']
+        );
+
+        $this->assertNotNull(
+            $payment->gateway_response
+        );
+
+        $this->assertEquals(
+            220000,
+            (float) $payment->amount
+        );
+    }
+
+    public function test_payment_service_does_not_create_second_gateway_request_for_existing_authority(): void
+    {
+        Http::fake([
+            'https://api.zarinpal.com/pg/v4/payment/request.json' => Http::response([
+                'data' => [
+                    'code' => 100,
+                    'authority' => 'S000000000000000000000000000008888',
+                ],
+                'errors' => [],
+            ], 200),
+        ]);
+
+        $user = User::factory()->create();
+
+        $order = $this->createOrder(
+            $user,
+            220000
+        );
+
+        $service = app(PaymentService::class);
+
+        $payment = $service->create($order);
+
+        $firstResult = $service->requestGatewayPayment(
+            $payment
+        );
+
+        $secondResult = $service->requestGatewayPayment(
+            $payment
+        );
+
+        $this->assertEquals(
+            $firstResult['authority'],
+            $secondResult['authority']
+        );
+
+        $this->assertEquals(
+            $firstResult['payment_url'],
+            $secondResult['payment_url']
+        );
+
+        Http::assertSentCount(1);
+    }
+
+    public function test_payment_service_calls_gateway_request_outside_database_transaction(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->createOrder($user, 220000);
+        $gateway = new class implements PaymentGatewayInterface
+        {
+            public int $transactionLevel = -1;
+
+            public function request(Payment $payment): array
+            {
+                $this->transactionLevel = DB::transactionLevel();
+
+                return [
+                    'authority' => 'AUTH-OUTSIDE-TX',
+                    'payment_url' => 'https://gateway.test/pay/AUTH-OUTSIDE-TX',
+                    'response' => ['code' => 100],
+                ];
+            }
+
+            public function verify(Payment $payment, array $callbackData): array
+            {
+                return [];
+            }
+
+            public function paymentUrl(array $gatewayData): string
+            {
+                return 'https://gateway.test/pay/'.($gatewayData['authority'] ?? '');
+            }
+        };
+
+        $payment = (new PaymentService(new InventoryReservationService))->create($order);
+        $baselineTransactionLevel = DB::transactionLevel();
+
+        $service = new PaymentService(new InventoryReservationService, $gateway);
+        $service->requestGatewayPayment($payment);
+
+        $this->assertSame($baselineTransactionLevel, $gateway->transactionLevel);
+    }
+
+    public function test_payment_request_lock_rejects_parallel_gateway_request(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->createOrder($user, 220000);
+        $gateway = new class implements PaymentGatewayInterface
+        {
+            public int $requestCalls = 0;
+
+            public function request(Payment $payment): array
+            {
+                $this->requestCalls++;
+
+                return [
+                    'authority' => 'AUTH-LOCK',
+                    'payment_url' => 'https://gateway.test/pay/AUTH-LOCK',
+                    'response' => ['code' => 100],
+                ];
+            }
+
+            public function verify(Payment $payment, array $callbackData): array
+            {
+                return [];
+            }
+
+            public function paymentUrl(array $gatewayData): string
+            {
+                return 'https://gateway.test/pay/'.($gatewayData['authority'] ?? '');
+            }
+        };
+
+        $payment = (new PaymentService(new InventoryReservationService))->create($order);
+        $lock = Cache::lock("payment:gateway-request:{$payment->id}", 30);
+        $this->assertTrue($lock->get());
+
+        try {
+            $service = new PaymentService(new InventoryReservationService, $gateway);
+
+            try {
+                $service->requestGatewayPayment($payment);
+                $this->fail('Expected the gateway request lock to reject a parallel request.');
+            } catch (\RuntimeException $e) {
+                $this->assertSame('درخواست پرداخت دیگری برای این تراکنش در حال انجام است.', $e->getMessage());
+            }
+        } finally {
+            $lock->release();
+        }
+
+        $this->assertSame(0, $gateway->requestCalls);
+    }
+
+    public function test_gateway_payment_request_keeps_payment_pending(): void
+    {
+        Http::fake([
+            'https://api.zarinpal.com/pg/v4/payment/request.json' => Http::response([
+                'data' => [
+                    'code' => 100,
+                    'authority' => 'S000000000000000000000000000007777',
+                ],
+                'errors' => [],
+            ], 200),
+        ]);
+
+        $user = User::factory()->create();
+
+        $order = $this->createOrder(
+            $user,
+            180000
+        );
+
+        $service = app(PaymentService::class);
+
+        $payment = $service->create($order);
+
+        $service->requestGatewayPayment(
+            $payment
+        );
+
+        $payment->refresh();
+        $order->refresh();
+
+        $this->assertEquals(
+            'pending',
+            $payment->status
+        );
+
+        $this->assertEquals(
+            'pending',
+            $order->status
+        );
+
+        $this->assertEquals(
+            'pending',
+            $order->payment_status
+        );
+    }
+}

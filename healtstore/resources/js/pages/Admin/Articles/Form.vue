@@ -1,0 +1,312 @@
+<script setup lang="ts">
+import { ref } from 'vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+
+interface Category {
+    id: number;
+    name: string;
+}
+interface ArticleData {
+    id?: number;
+    category_id: number | null;
+    title: string;
+    slug: string;
+    excerpt: string | null;
+    content: string;
+    featured_image: string | null;
+    featured_image_alt: string | null;
+    featured_image_url?: string | null;
+    seo_title: string | null;
+    seo_description: string | null;
+    canonical_url: string | null;
+    is_active: boolean;
+    is_featured: boolean;
+    published_at: string | null;
+}
+
+interface Props {
+    article?: ArticleData;
+    categories: Category[];
+}
+const props = defineProps<Props>();
+const editing = Boolean(props.article?.id);
+
+const form = useForm({
+    category_id: props.article?.category_id ?? null,
+    title: props.article?.title ?? '',
+    slug: props.article?.slug ?? '',
+    excerpt: props.article?.excerpt ?? '',
+    content: props.article?.content ?? '',
+    featured_image: props.article?.featured_image ?? '',
+    featured_image_file: null as File | null,
+    featured_image_alt: props.article?.featured_image_alt ?? '',
+    seo_title: props.article?.seo_title ?? '',
+    seo_description: props.article?.seo_description ?? '',
+    canonical_url: props.article?.canonical_url ?? '',
+    is_active: props.article?.is_active ?? true,
+    is_featured: props.article?.is_featured ?? false,
+    published_at: props.article?.published_at
+        ? props.article.published_at.slice(0, 16)
+        : '',
+});
+
+function handleFeaturedImageChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    form.featured_image_file = input.files?.[0] ?? null;
+}
+
+const previewHtml = ref('');
+const previewError = ref('');
+async function preview() {
+    previewError.value = '';
+    try {
+        const token = decodeURIComponent(
+            document.cookie
+                .split('; ')
+                .find((cookie) => cookie.startsWith('XSRF-TOKEN='))
+                ?.slice(11) || '',
+        );
+        const result = await fetch('/admin/articles/preview', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                'X-XSRF-TOKEN': token,
+            },
+            body: JSON.stringify({ content: form.content }),
+        });
+        if (!result.ok) {
+            throw new Error('پیش‌نمایش بارگیری نشد.');
+        }
+        previewHtml.value = (await result.json()).html;
+    } catch {
+        previewError.value = 'پیش‌نمایش بارگیری نشد؛ دوباره تلاش کنید.';
+    }
+}
+function insertText(text: string) {
+    form.content += text;
+}
+function submit() {
+    if (props.article?.id) {
+        form.transform((data) => ({ ...data, _method: 'put' })).post(
+            `/admin/articles/${props.article.id}`,
+            {
+                forceFormData: true,
+                onFinish: () => form.transform((data) => data),
+            },
+        );
+    } else {
+        form.post('/admin/articles', { forceFormData: true });
+    }
+}
+</script>
+
+<template>
+    <Head :title="editing ? 'ویرایش مقاله' : 'مقاله جدید'" />
+    <div class="mx-auto max-w-5xl space-y-6 p-6" dir="rtl">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold">
+                    {{ editing ? 'ویرایش مقاله' : 'مقاله جدید' }}
+                </h1>
+                <p class="mt-1 text-sm text-dh-muted">
+                    محتوای مقاله و تنظیمات سئو
+                </p>
+            </div>
+            <Link
+                href="/admin/articles"
+                class="rounded-lg border px-4 py-2 text-sm"
+            >
+                بازگشت
+            </Link>
+        </div>
+
+        <form
+            class="space-y-5 rounded-xl border bg-white p-5 shadow-sm"
+            @submit.prevent="submit"
+        >
+            <section class="space-y-3 rounded-xl border p-4">
+                <p>
+                    متن مقاله از Markdown پشتیبانی می‌کند؛ HTML خام نمایش داده
+                    نمی‌شود.
+                </p>
+                <div class="flex flex-wrap gap-3">
+                    <button
+                        type="button"
+                        @click="insertText('\n## عنوان بخش\n')"
+                    >
+                        افزودن عنوان
+                    </button>
+                    <button
+                        type="button"
+                        @click="insertText('\n[متن لینک](/products)\n')"
+                    >
+                        افزودن لینک داخلی
+                    </button>
+                    <button
+                        type="button"
+                        @click="
+                            insertText(
+                                '\n| عنوان | مقدار |\n| --- | --- |\n| مورد | توضیح |\n',
+                            )
+                        "
+                    >
+                        افزودن جدول
+                    </button>
+                    <button type="button" @click="preview">پیش‌نمایش</button>
+                </div>
+                <p v-if="previewError" role="alert">{{ previewError }}</p>
+                <div
+                    v-if="previewHtml"
+                    class="prose max-w-none"
+                    v-html="previewHtml"
+                ></div>
+            </section>
+            <div class="grid gap-4 md:grid-cols-2">
+                <label class="space-y-1">
+                    <span>عنوان</span>
+                    <input
+                        v-model="form.title"
+                        class="w-full rounded-lg border p-2"
+                    />
+                </label>
+                <label class="space-y-1">
+                    <span>اسلاگ</span>
+                    <input
+                        v-model="form.slug"
+                        class="w-full rounded-lg border p-2"
+                        placeholder="health-guide"
+                    />
+                </label>
+                <label class="space-y-1">
+                    <span>دسته</span>
+                    <select
+                        v-model="form.category_id"
+                        class="w-full rounded-lg border p-2"
+                    >
+                        <option :value="null">بدون دسته</option>
+                        <option
+                            v-for="category in props.categories"
+                            :key="category.id"
+                            :value="category.id"
+                        >
+                            {{ category.name }}
+                        </option>
+                    </select>
+                </label>
+                <label class="space-y-1">
+                    <span>تاریخ انتشار</span>
+                    <input
+                        v-model="form.published_at"
+                        type="datetime-local"
+                        class="w-full rounded-lg border p-2"
+                    />
+                </label>
+            </div>
+
+            <label class="block space-y-1">
+                <span>خلاصه</span>
+                <textarea
+                    v-model="form.excerpt"
+                    rows="3"
+                    class="w-full rounded-lg border p-2"
+                />
+            </label>
+            <label class="block space-y-1">
+                <span>متن مقاله</span>
+                <textarea
+                    v-model="form.content"
+                    rows="14"
+                    class="w-full rounded-lg border p-2 font-sans"
+                />
+            </label>
+
+            <div class="grid gap-4 md:grid-cols-2">
+                <label class="space-y-1">
+                    <span>تصویر شاخص</span>
+                    <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        class="w-full rounded-lg border p-2"
+                        @change="handleFeaturedImageChange"
+                    />
+                    <a
+                        v-if="props.article?.featured_image_url"
+                        :href="props.article.featured_image_url"
+                        target="_blank"
+                        rel="noreferrer"
+                        class="mt-1 inline-block text-sm text-dh-700 underline"
+                    >
+                        مشاهده تصویر فعلی
+                    </a>
+                    <span class="text-xs text-dh-muted">
+                        JPG، PNG یا WebP — حداکثر ۵ مگابایت
+                    </span>
+                </label>
+                <label class="space-y-1">
+                    <span>Alt تصویر</span>
+                    <input
+                        v-model="form.featured_image_alt"
+                        class="w-full rounded-lg border p-2"
+                    />
+                </label>
+            </div>
+
+            <div class="border-t pt-5">
+                <h2 class="mb-3 text-lg font-semibold">SEO</h2>
+                <div class="grid gap-4 md:grid-cols-2">
+                    <label class="space-y-1">
+                        <span>SEO Title</span>
+                        <input
+                            v-model="form.seo_title"
+                            class="w-full rounded-lg border p-2"
+                            maxlength="255"
+                        />
+                    </label>
+                    <label class="space-y-1">
+                        <span>Canonical URL</span>
+                        <input
+                            v-model="form.canonical_url"
+                            class="w-full rounded-lg border p-2"
+                        />
+                    </label>
+                    <label class="space-y-1 md:col-span-2">
+                        <span>Meta Description</span>
+                        <textarea
+                            v-model="form.seo_description"
+                            rows="3"
+                            class="w-full rounded-lg border p-2"
+                            maxlength="320"
+                        />
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-6 border-t pt-5">
+                <label class="flex items-center gap-2">
+                    <input v-model="form.is_active" type="checkbox" />
+                    فعال
+                </label>
+                <label class="flex items-center gap-2">
+                    <input v-model="form.is_featured" type="checkbox" />
+                    ویژه
+                </label>
+            </div>
+
+            <div
+                v-if="Object.keys(form.errors).length"
+                class="space-y-1 text-sm text-red-600"
+            >
+                <div v-for="(message, field) in form.errors" :key="field">
+                    {{ message }}
+                </div>
+            </div>
+            <button
+                :disabled="form.processing"
+                class="rounded-lg bg-black px-5 py-2 text-white disabled:opacity-50"
+            >
+                {{ form.processing ? 'در حال ذخیره...' : 'ذخیره مقاله' }}
+            </button>
+        </form>
+    </div>
+</template>

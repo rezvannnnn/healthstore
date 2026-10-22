@@ -1,0 +1,53 @@
+<?php
+
+use App\Http\Middleware\AddSecurityHeaders;
+use App\Http\Middleware\EnsureCustomerUser;
+use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RedirectOldSlugs;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Http\Request;
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__.'/../routes/web.php',
+        commands: __DIR__.'/../routes/console.php',
+        health: '/up',
+    )
+    ->withSchedule(function (Schedule $schedule): void {
+        $schedule->command('inventory:release-expired-reservations')
+            ->everyMinute()
+            ->withoutOverlapping(2);
+        $schedule->command('coupon:release-expired-reservations')
+            ->everyMinute()
+            ->withoutOverlapping(2);
+    })
+    ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->redirectGuestsTo(
+            fn (Request $request) => $request->is('admin') || $request->is('admin/*')
+                ? route('admin.dashboard')
+                : route('login'),
+        );
+
+        $middleware->alias([
+            'admin' => EnsureUserIsAdmin::class,
+            'customer' => EnsureCustomerUser::class,
+        ]);
+
+        $middleware->prependToGroup('web', RedirectOldSlugs::class);
+
+        $middleware->web(append: [
+            HandleInertiaRequests::class,
+            AddLinkHeadersForPreloadedAssets::class,
+            AddSecurityHeaders::class,
+        ]);
+    })
+    ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->shouldRenderJsonWhen(
+            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
+        );
+    })->create();

@@ -1,0 +1,272 @@
+<script setup lang="ts">
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
+
+type Product = {
+    id: number;
+    name: string;
+    sku: string | null;
+    brand: string | null;
+    category: string | null;
+    image: string | null;
+    price: number | null;
+    is_active: boolean;
+    is_featured: boolean;
+    physical_quantity: number;
+    reserved_quantity: number;
+    available_quantity: number;
+};
+
+type Pagination = {
+    current_page: number;
+    last_page: number;
+    total: number;
+};
+
+type Filters = {
+    search: string;
+    status: string;
+};
+
+const props = defineProps<{
+    products: Product[];
+    pagination: Pagination;
+    filters: Filters;
+}>();
+
+const search = ref(props.filters.search);
+const status = ref(props.filters.status || 'all');
+
+const submitFilters = () => {
+    router.get(
+        '/admin/products',
+        { search: search.value, status: status.value },
+        { preserveState: true, replace: true },
+    );
+};
+
+const resetFilters = () => {
+    search.value = '';
+    status.value = 'all';
+    router.get('/admin/products', {}, { preserveState: true, replace: true });
+};
+
+const pageUrl = (page: number) => {
+    const params = new URLSearchParams({ page: String(page) });
+
+    if (props.filters.search) {
+        params.set('search', props.filters.search);
+    }
+
+    if (props.filters.status) {
+        params.set('status', props.filters.status);
+    }
+
+    return `/admin/products?${params.toString()}`;
+};
+
+const formatAmount = (amount: number | null) =>
+    amount === null ? '—' : new Intl.NumberFormat('fa-IR').format(amount);
+</script>
+
+<template>
+    <Head title="مدیریت محصولات" />
+
+    <div
+        dir="rtl"
+        class="min-h-screen bg-dh-50 px-4 py-8 text-dh-900 sm:px-6 lg:px-8"
+    >
+        <div class="mx-auto max-w-7xl">
+            <div
+                class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+                <div>
+                    <p class="text-sm text-dh-muted">داروخونه / مدیریت</p>
+                    <h1 class="text-3xl font-bold">محصولات</h1>
+                    <p class="mt-2 text-dh-700">
+                        مدیریت و بررسی موجودی محصولات فروشگاه
+                    </p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <Link
+                        href="/admin"
+                        class="rounded-lg border border-dh-200 bg-white px-4 py-2 text-sm font-medium hover:bg-dh-50"
+                    >
+                        داشبورد
+                    </Link>
+                    <Link
+                        href="/admin/products/create"
+                        class="rounded-lg bg-dh-700 px-4 py-2 text-sm font-medium text-white hover:bg-dh-800"
+                    >
+                        محصول جدید
+                    </Link>
+                </div>
+            </div>
+
+            <div
+                class="mb-6 rounded-xl bg-white p-4 shadow-sm ring-1 ring-dh-100"
+            >
+                <form
+                    class="flex flex-col gap-3 md:flex-row"
+                    @submit.prevent="submitFilters"
+                >
+                    <input
+                        v-model="search"
+                        type="search"
+                        placeholder="نام، SKU یا بارکد..."
+                        class="min-w-0 flex-1 rounded-lg border border-dh-200 px-4 py-2 text-sm outline-none focus:border-gray-500"
+                    />
+                    <select
+                        v-model="status"
+                        class="rounded-lg border border-dh-200 px-4 py-2 text-sm"
+                    >
+                        <option value="all">همه محصولات</option>
+                        <option value="active">فعال</option>
+                        <option value="inactive">غیرفعال</option>
+                    </select>
+                    <div class="flex gap-2">
+                        <button
+                            type="submit"
+                            class="rounded-lg bg-dh-700 px-5 py-2 text-sm font-medium text-white hover:bg-dh-800"
+                        >
+                            جستجو
+                        </button>
+                        <button
+                            v-if="search || status !== 'all'"
+                            type="button"
+                            class="rounded-lg border border-dh-200 bg-white px-5 py-2 text-sm font-medium hover:bg-dh-50"
+                            @click="resetFilters"
+                        >
+                            پاک کردن
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div
+                class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-dh-100"
+            >
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-right text-sm">
+                        <thead class="border-b bg-dh-50 text-dh-700">
+                            <tr>
+                                <th class="px-4 py-3 font-medium">محصول</th>
+                                <th class="px-4 py-3 font-medium">
+                                    دسته / برند
+                                </th>
+                                <th class="px-4 py-3 font-medium">قیمت</th>
+                                <th class="px-4 py-3 font-medium">
+                                    موجودی فیزیکی
+                                </th>
+                                <th class="px-4 py-3 font-medium">رزرو شده</th>
+                                <th class="px-4 py-3 font-medium">قابل فروش</th>
+                                <th class="px-4 py-3 font-medium">وضعیت</th>
+                                <th class="px-4 py-3 font-medium">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-dh-100">
+                            <tr
+                                v-for="product in products"
+                                :key="product.id"
+                                class="hover:bg-dh-50"
+                            >
+                                <td class="px-4 py-4">
+                                    <div class="font-semibold">
+                                        {{ product.name }}
+                                    </div>
+                                    <div class="mt-1 text-xs text-dh-muted">
+                                        SKU: {{ product.sku || '—' }}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div>
+                                        {{ product.category || 'بدون دسته' }}
+                                    </div>
+                                    <div class="mt-1 text-xs text-dh-muted">
+                                        {{ product.brand || 'بدون برند' }}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 font-medium">
+                                    {{ formatAmount(product.price) }}
+                                </td>
+                                <td class="px-4 py-4">
+                                    {{ product.physical_quantity }}
+                                </td>
+                                <td class="px-4 py-4">
+                                    {{ product.reserved_quantity }}
+                                </td>
+                                <td class="px-4 py-4 font-semibold">
+                                    {{ product.available_quantity }}
+                                </td>
+                                <td class="px-4 py-4">
+                                    <span
+                                        class="rounded-full px-2.5 py-1 text-xs font-medium"
+                                        :class="
+                                            product.is_active
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-dh-50 text-dh-700'
+                                        "
+                                    >
+                                        {{
+                                            product.is_active
+                                                ? 'فعال'
+                                                : 'غیرفعال'
+                                        }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <Link
+                                        :href="`/admin/products/${product.id}/edit`"
+                                        class="font-medium text-dh-700 hover:underline"
+                                    >
+                                        ویرایش
+                                    </Link>
+                                </td>
+                            </tr>
+                            <tr v-if="products.length === 0">
+                                <td
+                                    colspan="8"
+                                    class="px-4 py-12 text-center text-dh-muted"
+                                >
+                                    محصولی پیدا نشد.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div
+                    class="flex flex-col gap-3 border-t px-4 py-4 text-sm text-dh-700 sm:flex-row sm:items-center sm:justify-between"
+                >
+                    <span>مجموع: {{ pagination.total }} محصول</span>
+                    <div class="flex items-center gap-2">
+                        <Link
+                            v-if="pagination.current_page > 1"
+                            :href="pageUrl(pagination.current_page - 1)"
+                            class="rounded-lg border border-dh-200 bg-white px-3 py-1.5 hover:bg-dh-50"
+                            preserve-scroll
+                            preserve-state
+                        >
+                            قبلی
+                        </Link>
+                        <span>
+                            صفحه {{ pagination.current_page }} از
+                            {{ pagination.last_page }}
+                        </span>
+                        <Link
+                            v-if="
+                                pagination.current_page < pagination.last_page
+                            "
+                            :href="pageUrl(pagination.current_page + 1)"
+                            class="rounded-lg border border-dh-200 bg-white px-3 py-1.5 hover:bg-dh-50"
+                            preserve-scroll
+                            preserve-state
+                        >
+                            بعدی
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

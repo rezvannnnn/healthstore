@@ -1,0 +1,256 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Cart;
+use App\Models\CartItem;
+use App\Models\Product;
+use App\Models\ProductPrice;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use RuntimeException;
+
+class CartService
+{
+    protected InventoryService $inventoryService;
+
+    public function __construct(?InventoryService $inventoryService = null)
+    {
+        $this->inventoryService = $inventoryService ?? app(InventoryService::class);
+    }
+
+    public function restoreIntent(Request $request, int $userId): void
+    {
+        $intent = $request->session()->pull('cart_intent');
+        if (! is_array($intent)) {
+            return;
+        }
+        try {
+            $this->addItem($userId, (int) $intent['product_id'], (int) ($intent['quantity'] ?? 1));
+        } catch (RuntimeException $exception) {
+            $request->session()->flash('error', $exception->getMessage());
+        }
+    }
+
+    /**
+     * Get or create the active cart for the user.
+     */
+    public function getCartForUser(int $userId): Cart
+    {
+        return Cart::firstOrCreate(
+            [
+                'user_id' => $userId,
+                'status' => 'active',
+            ],
+            [
+                'session_id' => null,
+            ]
+        );
+    }
+
+    /**
+     * Add a product to the cart.
+     *
+     * The effective price for the resulting quantity is stored in unit_price.
+     */
+    public function addItem(
+        int $userId,
+        int $productId,
+        int $quantity = 1
+    ): CartItem {
+        if ($quantity < 1 || $quantity > 100) {
+            throw new RuntimeException(
+                'تعداد محصول باید بین ۱ تا ۱۰۰ باشد.'
+            );
+        }
+
+        $lock = Cache::lock("cart:user:{$userId}", 30);
+
+        if (! $lock->get()) {
+            throw new RuntimeException(
+                'عملیات دیگری روی سبد خرید شما در حال انجام است. لطفاً چند لحظه صبر کنید.'
+            );
+        }
+
+        try {
+            return DB::transaction(function () use (
+                $userId,
+                $productId,
+                $quantity
+            ) {
+                $product = Product::query()
+                    ->where('id', $productId)
+                    ->where('is_active', true)
+                    ->first();
+
+                if (! $product) {
+                    throw new RuntimeException(
+                        'محصول مورد نظر موجود نیست یا غیرفعال شده است.'
+                    );
+                }
+
+                $cart = $this->getCartForUser($userId);
+                $item = $cart->items()
+                    ->where('product_id', $productId)
+                    ->first();
+                $newQuantity = ($item === null ? 0 : $item->quantity) + $quantity;
+
+                if ($newQuantity > 100) {
+                    throw new RuntimeException(
+                        'حداکثر تعداد مجاز هر محصول در سبد خرید ۱۰۰ عدد است.'
+                    );
+                }
+
+                $availableQuantity = $this->inventoryService->getAvailableQuantity($product);
+
+                if ($newQuantity > $availableQuantity) {
+                    throw new RuntimeException(
+                        "موجودی این محصول کافی نیست. حداکثر تعداد قابل افزودن: {$availableQuantity}."
+                    );
+                }
+
+                $price = $this->getCurrentPrice($product, $newQuantity);
+
+                if (! $price) {
+                    throw new RuntimeException(
+                        'برای این محصول و تعداد انتخاب‌شده قیمت فعالی ثبت نشده است.'
+                    );
+                }
+
+                if ($item) {
+                    $item->quantity = $newQuantity;
+                    $item->unit_price = $price->price;
+                    $item->save();
+
+                    return $item;
+                }
+
+                return $cart->items()->create([
+                    'product_id' => $productId,
+                    'quantity' => $quantity,
+                    'unit_price' => $price->price,
+                ]);
+            });
+        } finally {
+            $lock->release();
+        }
+    }
+
+    /**
+     * Get the current active price for the requested quantity.
+     */
+    public function getCurrentPrice(
+        Product $product,
+        int $quantity = 1
+    ): ?ProductPrice {
+        $now = now();
+        $quantity = max(1, $quantity);
+
+        if ($product->relationLoaded('prices')) {
+            return $product->prices->filter(fn (ProductPrice $price) => $price->is_active
+                && $price->min_quantity <= $quantity
+                && ($price->starts_at === null || $price->starts_at->lte($now))
+                && ($price->ends_at === null || $price->ends_at->gte($now)))
+                ->sortBy([['min_quantity', 'desc'], ['id', 'desc']])->first();
+        }
+
+        return $product->prices()
+            ->where('is_active', true)
+            ->where('min_quantity', '<=', $quantity)
+            ->where(function ($query) use ($now) {
+                $query->whereNull('starts_at')
+                    ->orWhere('starts_at', '<=', $now);
+            })
+            ->where(function ($query) use ($now) {
+                $query->whereNull('ends_at')
+                    ->orWhere('ends_at', '>=', $now);
+            })
+            ->orderByDesc('min_quantity')
+            ->orderByDesc('id')
+            ->first();
+    }
+
+    /**
+     * Check cart prices and immediately update changed prices.
+     *
+     * Returns the items whose prices have changed.
+     */
+    public function checkPriceChanges(Cart $cart): array
+    {
+        $cart->load('items.product.prices');
+
+        $changes = [];
+
+        foreach ($cart->items as $item) {
+            $currentPrice = $this->getCurrentPrice($item->product, $item->quantity);
+
+            if (! $currentPrice) {
+                $changes[] = [
+                    'item_id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'product_name' => $item->product->name,
+                    'old_price' => (float) $item->unit_price,
+                    'new_price' => null,
+                    'type' => 'unavailable',
+                ];
+
+                continue;
+            }
+
+            $oldPrice = (float) $item->unit_price;
+            $newPrice = (float) $currentPrice->price;
+
+            if ($oldPrice !== $newPrice) {
+                $item->update([
+                    'unit_price' => $currentPrice->price,
+                ]);
+
+                $changes[] = [
+                    'item_id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'product_name' => $item->product->name,
+                    'old_price' => $oldPrice,
+                    'new_price' => $newPrice,
+                    'type' => 'price_changed',
+                ];
+            }
+        }
+
+        return $changes;
+    }
+
+    /**
+     * Apply the current database prices to the cart.
+     */
+    public function updateCartPrices(Cart $cart): void
+    {
+        DB::transaction(function () use ($cart) {
+            $cart->load('items.product');
+
+            foreach ($cart->items as $item) {
+                $currentPrice = $this->getCurrentPrice($item->product, $item->quantity);
+
+                if ($currentPrice) {
+                    $item->update([
+                        'unit_price' => $currentPrice->price,
+                    ]);
+                }
+            }
+        });
+    }
+
+    /**
+     * Calculate the cart subtotal using the currently loaded items.
+     */
+    public function calculateSubtotal(Cart $cart): float
+    {
+        if (! $cart->relationLoaded('items')) {
+            $cart->load('items');
+        }
+
+        return $cart->items->sum(function (CartItem $item) {
+            return (float) $item->unit_price * $item->quantity;
+        });
+    }
+}

@@ -1,0 +1,87 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\StoreSetting;
+use DateTimeZone;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class SettingsController extends Controller
+{
+    private const DEFAULTS = [
+        'store_name' => 'داروخونه',
+        'support_phone' => '',
+        'support_email' => '',
+        'store_address' => '',
+        'support_hours' => '',
+        'license_title' => '',
+        'license_url' => '',
+        'shipping_fee' => '0',
+        'free_shipping_threshold' => '0',
+        'min_order_amount' => '0',
+        'currency' => 'ریال',
+        'timezone' => 'Asia/Tehran',
+        'shipping_policy' => '',
+        'returns_policy' => '',
+        'privacy_policy' => '',
+    ];
+
+    public function index(): Response
+    {
+        $settings = self::DEFAULTS;
+
+        foreach (StoreSetting::query()->get(['key', 'value']) as $setting) {
+            if (array_key_exists($setting->key, $settings)) {
+                $settings[$setting->key] = $setting->value ?? '';
+            }
+        }
+
+        return Inertia::render('Admin/Settings/Index', [
+            'settings' => $settings,
+            'faqs' => StoreSetting::publicFaqs(),
+        ]);
+    }
+
+    public function update(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'store_name' => ['required', 'string', 'max:255'],
+            'support_phone' => ['nullable', 'string', 'max:50'],
+            'support_email' => ['nullable', 'email', 'max:255'],
+            'store_address' => ['nullable', 'string', 'max:1000'],
+            'support_hours' => ['nullable', 'string', 'max:255'],
+            'license_title' => ['nullable', 'string', 'max:255'],
+            'license_url' => ['nullable', 'url:https', 'max:2000'],
+            'faqs' => ['sometimes', 'array', 'max:20'],
+            'faqs.*.question' => ['required', 'string', 'max:200'],
+            'faqs.*.answer' => ['required', 'string', 'max:2000'],
+            'shipping_fee' => ['required', 'numeric', 'min:0'],
+            'free_shipping_threshold' => ['required', 'numeric', 'min:0'],
+            'min_order_amount' => ['required', 'numeric', 'min:0'],
+            'currency' => ['required', Rule::in(['ریال', 'IRR'])],
+            'shipping_policy' => ['nullable', 'string', 'max:20000'],
+            'returns_policy' => ['nullable', 'string', 'max:20000'],
+            'privacy_policy' => ['nullable', 'string', 'max:20000'],
+            'timezone' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::in(DateTimeZone::listIdentifiers()),
+            ],
+        ]);
+
+        DB::transaction(function () use ($data): void {
+            foreach ($data as $key => $value) {
+                StoreSetting::setValue($key === 'faqs' ? 'faq_items' : $key, $key === 'faqs' ? json_encode($value, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) : (string) $value);
+            }
+        });
+
+        return to_route('admin.settings.index')->with('success', 'تنظیمات فروشگاه ذخیره شد.');
+    }
+}
