@@ -1,0 +1,63 @@
+name: Complete verified catalog snapshot
+on:
+  push:
+    branches: [codex/catalog-cloud-images-2026-10-22]
+    paths:
+      - .github/workflows/catalog-snapshot-assets.yml
+      - healtstore/CATALOG-IMAGE-SOURCES.json
+      - healtstore/tools/restore-catalog-images.mjs
+permissions:
+  contents: write
+concurrency:
+  group: catalog-snapshot-2026-10-22
+  cancel-in-progress: false
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore identical catalog images
+        run: node healtstore/tools/restore-catalog-images.mjs
+      - name: Validate database and referenced images
+        run: |
+          python3 - <<'PY'
+          import sqlite3, pathlib
+          db = sqlite3.connect('healtstore/catalog-snapshot.sqlite')
+          assert db.execute('pragma integrity_check').fetchone()[0] == 'ok'
+          assert db.execute('pragma foreign_key_check').fetchall() == []
+          assert db.execute('select count(*) from products').fetchone()[0] == 12894
+          assert db.execute('select count(*) from categories').fetchone()[0] == 299
+          for (image,) in db.execute('select main_image from products where main_image is not null'):
+              assert pathlib.Path('healtstore/storage/app/public', image).is_file(), image
+          for table in ['users', 'orders', 'payments', 'sessions', 'otp_verifications', 'audit_logs', 'store_settings']:
+              assert db.execute('select count(*) from '+table).fetchone()[0] == 0
+          print('Catalog database, privacy and image references verified')
+          PY
+      - name: Publish complete snapshot
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python3 - <<'PY'
+          import json, pathlib, subprocess
+          images=json.loads(pathlib.Path('healtstore/CATALOG-IMAGES.json').read_text())['images']
+          batches=[]; batch=[]; size=0
+          for image in images:
+              if size+image['bytes'] > 180*1024*1024 and batch:
+                  batches.append(batch); batch=[]; size=0
+              batch.append(image['path']); size+=image['bytes']
+          if batch: batches.append(batch)
+          for i, batch in enumerate(batches, 1):
+              pathlib.Path('/tmp/catalog-paths').write_bytes(('\0'.join(batch)+'\0').encode())
+              subprocess.run(['git','add','-f','--pathspec-from-file=/tmp/catalog-paths','--pathspec-file-nul'],check=True)
+              subprocess.run(['git','commit','-q','-m',f'Include verified catalog images {i}/{len(batches)}'],check=True)
+              subprocess.run(['git','push','origin','HEAD:codex/catalog-cloud-images-2026-10-22'],check=True)
+          PY
+          git rm .github/workflows/catalog-snapshot-assets.yml
+          git commit -m 'Finish validated catalog snapshot and remove temporary transfer workflow'
+          git push origin HEAD:codex/catalog-cloud-images-2026-10-22
+          git fetch origin main
+          git merge --no-edit origin/main
+          git push origin HEAD:main
